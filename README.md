@@ -4,5 +4,5 @@
 
 ## Contributors
 - Lucia (lead)
-
+- Gabriel
 
