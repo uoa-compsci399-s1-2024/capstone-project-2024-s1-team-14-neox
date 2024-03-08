@@ -2,6 +2,7 @@
 
 # Cloud Connected Light Monitor by Neox
 
-## Contributers
+## Contributors
+- Lucia (lead)
 - Gabriel
 
