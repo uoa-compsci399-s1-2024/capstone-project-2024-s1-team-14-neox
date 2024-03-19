@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/capstone_project_2024_s1_team_14_neox.iml" filepath="$PROJECT_DIR$/capstone_project_2024_s1_team_14_neox.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/capstone_project_2024_s1_team_14_neox_android.iml" filepath="$PROJECT_DIR$/android/capstone_project_2024_s1_team_14_neox_android.iml" />
+    </modules>
+  </component>
+</project>
