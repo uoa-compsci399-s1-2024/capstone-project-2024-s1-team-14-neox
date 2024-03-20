@@ -1,1 +1,0 @@
-Directory for app related code
