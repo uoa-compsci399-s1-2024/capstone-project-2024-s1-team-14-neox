@@ -3,19 +3,72 @@
 Our API will be RESTful and JSON-based.  It should be forwards- and
 backwards-compatible, so it will include a version number.
 
+## Note on Rest Principle: HATEOAS
+
+Link: <https://restfulapi.net/hateoas/>
+
+This may be overkill.
+
 ## Note on POST vs PUT
 
 PUT is defined as idempotent but POST is not, so doing the same PUT
 request multiple times has the same effect (ie, there is no side
 effect).
 
+## Open Questions
+
+- Does the phone app first need to register devices before giving
+  samples for them?  Or maybe it should be registered if the server
+  receives a sample from a device whose ID it doesn't recognise?
+- Should individual fields in a user's personal information be
+  identified in the URI?  I ask so that we can easily do an HTTP
+  DELETE on `/users/userID/email` for example.
+- Should the `/devices/{deviceID}` resource allow access to samples
+  from the device whose ID is `deviceID` (say, as
+  `/devices/{deviceID}/samples`)?  It definitely makes for a more
+  intuitive API.  If we want that, it would be a good idea to match
+  the filtering API of the `/samples` resource (of course, restricted
+  to the device identified by `deviceID`).
+
+## User Roles
+
+- Parent:
+  - Can view only their own children's data.
+  - Can view their own personal info.
+  - Can view their children's personal info.
+- Clinician:
+  - Can only view data of children they work with.
+  - Can view their own personal info.
+  - Can view the personal info of the children they work with.
+- Researcher: Can only view anonymised data of children.
+- Admin:
+  - Can register and delete users.
+  - Can add, delete, and modify a user's personal information.
+
 ## Actions
 
-### Sign up (POST) (one of `signup`)
+### Sign up (POST) (one of `/signup` or `/register`)
 
-I'm not sure how this should work yet since I don't know if we're
-using AWS Cognito or some other provider, and I don't know how to use
-any of them yet.
+AWS Cognito allows using third party identity providers like Google
+and Facebook, so we will use it even if we don't use third party
+identity providers.
+
+LOW PRIORITY: MAYBE: Session token is OPTIONAL.  If the session token
+given to the server is an admin's token, then allow registering other
+accounts?  This is to allow site admins to register clinicians since
+the admins would need to set which child devices they can monitor.
+Only the admins should be allowed to see the list of child devices.
+
+### LOW PRIORITY: Search for users (GET) (`/users`)
+
+Should be able to search by name, number of children, device IDs, etc.
+
+### LOW PRIORITY: Get/Update personal info of a specific user (GET / PUT?) (`/users/{userID}`)
+### LOW PRIORITY: Delete a specific user (DELETE) (`/users/{userID}`)
+
+Should this delete their children and the data of their children too?
+
+### LOW PRIORITY: Get/Update personal info associated with a specific child device (GET / PUT?) (one of `/devices/{deviceID}`, `/children/{childID}`)
 
 ### Authenticate (POST) (one of `/auth`, `/authenticate`, `/login`)
 
@@ -27,10 +80,8 @@ any of them yet.
 #### Details
 
 - This will just be an interface to AWS Cognito.
-- NOTE: Every other action will take a session token to identify the
-  user:
-    - Each parent will be able to view their children.
-    - Each clinician will be able to view children they work with.
+- NOTE: Every other action (except registration) will take a session
+  token to identify the user.
 
 ### Send samples (POST) (`/samples`)
 
@@ -82,6 +133,8 @@ database rows anyway.
 - TODO: Maybe the results should be returned in "pages" (AKA
   "pagination").
 - TODO: Maybe allow sorting the results (by a given field?).
+- TODO: Maybe we should instead ONLY allow filter fields in the query
+  string?
 
 \* NOTE: The clients want child names anonymised on backend or
 encrypted (they said "hashed" but the way they used it implied
