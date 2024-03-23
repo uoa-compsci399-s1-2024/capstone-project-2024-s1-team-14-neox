@@ -80,7 +80,7 @@ void eepromWrite(EEPROMAddress address, const uint8_t* buffer, uint32_t len)
   {
     uint16_t blockLen = len > 0xFFFF ? 0xFFFF : len;
     eeprom.write(address, buffer, blockLen);
-    buffer += len;
+    buffer += blockLen;
     len -= blockLen;
   }
 }
@@ -96,7 +96,7 @@ void eepromRead(EEPROMAddress address, uint8_t* buffer, uint32_t len)
   {
     uint16_t blockLen = len > 0xFFFF ? 0xFFFF : len;
     eeprom.read(address, buffer, blockLen);
-    buffer += len;
+    buffer += blockLen;
     len -= blockLen;
   }
 }
