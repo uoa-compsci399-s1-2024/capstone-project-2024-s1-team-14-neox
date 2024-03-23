@@ -214,8 +214,8 @@ static void flushTempSamples()
 {
   while (tempSampleBuffer.len > 0)
   {
-    eepromPushSample(&tempSampleBuffer.samples[tempSampleBuffer.len]);
     tempSampleBuffer.len--;
+    eepromPushSample(&tempSampleBuffer.samples[tempSampleBuffer.len]);
   }
 }
 
