@@ -40,7 +40,8 @@ static void resumeAtomicTransaction();
 static void pushTempSample(const SensorSample* sample);
 // Push all samples in the temporary sample buffer into the EEPROM.
 static void flushTempSamples();
-
+// Run an infinite loop doing nothing.
+static void freeze();
 
 static uint32_t allocatedLen;
 static ExternalEEPROM eeprom;
@@ -79,7 +80,14 @@ void eepromWrite(EEPROMAddress address, const uint8_t* buffer, uint32_t len)
   while (len > 0)
   {
     uint16_t blockLen = len > 0xFFFF ? 0xFFFF : len;
-    eeprom.write(address, buffer, blockLen);
+    int error = eeprom.write(address, buffer, blockLen);
+    if (error)
+    {
+      // Error code from https://www.arduino.cc/reference/en/language/functions/communication/wire/endtransmission/
+      Serial.print("eeprom.write() failed with error ");
+      Serial.println(error);
+      freeze();
+    }
     buffer += blockLen;
     len -= blockLen;
   }
@@ -95,7 +103,14 @@ void eepromRead(EEPROMAddress address, uint8_t* buffer, uint32_t len)
   while (len > 0)
   {
     uint16_t blockLen = len > 0xFFFF ? 0xFFFF : len;
-    eeprom.read(address, buffer, blockLen);
+    int error = eeprom.read(address, buffer, blockLen);
+    if (error)
+    {
+      // Error code from https://www.arduino.cc/reference/en/language/functions/communication/wire/endtransmission/
+      Serial.print("eeprom.read() failed with error ");
+      Serial.println(error);
+      freeze();
+    }
     buffer += blockLen;
     len -= blockLen;
   }
@@ -139,10 +154,7 @@ EEPROMAddress eepromAllocate(uint32_t len)
     Serial.print(" free, ");
     Serial.print(len);
     Serial.println(" requested.");
-    while (true)
-    {
-      delay(1000);
-    }
+    freeze();
   }
 
   uint32_t address = allocatedLen;
@@ -226,5 +238,13 @@ static void resumeAtomicTransaction()
     uint32_t value = eepromReadUint32(atomicTransaction.value);
     eepromWriteUint32(address, value);
     eepromWriteUint32(atomicTransaction.pending, false);
+  }
+}
+
+static void freeze()
+{
+  while (true)
+  {
+    delay(1000);
   }
 }
