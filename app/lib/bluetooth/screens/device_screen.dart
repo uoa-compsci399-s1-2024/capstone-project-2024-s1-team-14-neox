@@ -6,6 +6,8 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import '../widgets/service_tile.dart';
 import '../widgets/characteristic_tile.dart';
 import '../widgets/descriptor_tile.dart';
+import '../utils/extra.dart';
+import '../utils/snackbar.dart';
 
 
 
@@ -22,8 +24,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
   int? _mtuSize;
 
   // Data types cannot be made final
-  BluetoothConnectionState _connectionState =
-      BluetoothConnectionState.disconnected;
+  BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
   // BluetoothService type defined in Flutter Blue Plus
   List<BluetoothService> _services = [];
   bool _isDiscoveringServices = false;
@@ -63,13 +64,8 @@ class _DeviceScreenState extends State<DeviceScreen> {
       }
     });
 
-    /*
-    2024-03-24 Error 
-    isConnecting and isDisconnecting type is not defined in bluetooth_device.dart
-    Does not exist in GitHub Repo
-
-
-     _isConnectingSubscription = widget.device.isConnecting.listen((value) {
+    
+    _isConnectingSubscription = widget.device.isConnecting.listen((value) {
       _isConnecting = value;
       if (mounted) {
         setState(() {});
@@ -81,7 +77,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
       if (mounted) {
         setState(() {});
       }
-    }); */
+    }); 
   }
 
   @override
@@ -100,36 +96,35 @@ class _DeviceScreenState extends State<DeviceScreen> {
 // Snackbar not implemented in utils
   Future onConnectPressed() async {
     try {
-      // connectAndUpdateStream not defined in type BluetoothDevice
+      // connectAndUpdateStream defined in extra.dart which extends BluetoothDevice
       await widget.device.connectAndUpdateStream();
-      // Snackbar.show(ABC.c, "Connect: Success", success: true);
+      SnackbarBluetooth.show(ABC.c, "Connect: Success", success: true);
     } catch (e) {
       if (e is FlutterBluePlusException &&
           e.code == FbpErrorCode.connectionCanceled.index) {
         // ignore connections canceled by the user
       } else {
-        // Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
+        SnackbarBluetooth.show(ABC.c, prettyException("Connect Error:", e), success: false);
       }
     }
   }
 
   Future onCancelPressed() async {
     try {
-      // disconnectAndUpdateStream not defined in type BluetoothDevice
+      // disconnectAndUpdateStream defined in utls.dart which extends BluetoothDevice
       await widget.device.disconnectAndUpdateStream(queue: false);
-      // Snackbar.show(ABC.c, "Cancel: Success", success: true);
+      SnackbarBluetooth.show(ABC.c, "Cancel: Success", success: true);
     } catch (e) {
-      // Snackbar.show(ABC.c, prettyException("Cancel Error:", e), success: false);
+      SnackbarBluetooth.show(ABC.c, prettyException("Cancel Error:", e), success: false);
     }
   }
 
   Future onDisconnectPressed() async {
     try {
-      // disconnectAndUpdateStream not defined in type BluetoothDevice
       await widget.device.disconnectAndUpdateStream();
-      // Snackbar.show(ABC.c, "Disconnect: Success", success: true);
+      SnackbarBluetooth.show(ABC.c, "Disconnect: Success", success: true);
     } catch (e) {
-      // Snackbar.show(ABC.c, prettyException("Disconnect Error:", e), success: false);
+      SnackbarBluetooth.show(ABC.c, prettyException("Disconnect Error:", e), success: false);
     }
   }
 
@@ -142,9 +137,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
     }
     try {
       _services = await widget.device.discoverServices();
-      // Snackbar.show(ABC.c, "Discover Services: Success", success: true);
+      SnackbarBluetooth.show(ABC.c, "Discover Services: Success", success: true);
     } catch (e) {
-      // Snackbar.show(ABC.c, prettyException("Discover Services Error:", e), success: false);
+      SnackbarBluetooth.show(ABC.c, prettyException("Discover Services Error:", e), success: false);
     }
     if (mounted) {
       setState(() {
@@ -157,9 +152,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
   Future onRequestMtuPressed() async {
     try {
       await widget.device.requestMtu(223, predelay: 0);
-      //Snackbar.show(ABC.c, "Request Mtu: Success", success: true);
+      SnackbarBluetooth.show(ABC.c, "Request Mtu: Success", success: true);
     } catch (e) {
-      //Snackbar.show(ABC.c, prettyException("Change Mtu Error:", e), success: false);
+      SnackbarBluetooth.show(ABC.c, prettyException("Change Mtu Error:", e), success: false);
     }
   }
 
@@ -279,7 +274,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-      // key: Snackbar.snackBarKeyC,
+      key: SnackbarBluetooth.snackBarKeyC,
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.device.platformName),

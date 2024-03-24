@@ -10,7 +10,7 @@ enum ABC {
   c,
 }
 
-class Snackbar {
+class SnackbarBluetooth {
   static final snackBarKeyA = GlobalKey<ScaffoldMessengerState>();
   static final snackBarKeyB = GlobalKey<ScaffoldMessengerState>();
   static final snackBarKeyC = GlobalKey<ScaffoldMessengerState>();

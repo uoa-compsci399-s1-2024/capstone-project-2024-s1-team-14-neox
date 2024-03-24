@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'dart:io'; // Library used to check platform of device
+
+import '../utils/snackbar.dart';
+
 /*
 Screen displayed when Bluetooth is off
 */
@@ -31,6 +34,7 @@ class BluetoothOffScreen extends StatelessWidget {
     );
   }
 
+  // Turn of if Androd, use SnackbarBluetooth from snackbar.dart
   Widget buildTurnOnButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
@@ -41,11 +45,7 @@ class BluetoothOffScreen extends StatelessWidget {
               await FlutterBluePlus.turnOn();
             }
           } catch (e) {
-            // Have not implement Snakcboar in /utils
-            // SnackBar.show(ABC.a, prettyException("Error Turning On:", e), success: false);
-            const SnackBar(
-              content: Text("Error Turning On"),
-            );
+            SnackbarBluetooth.show(ABC.a, prettyException("Error Turning On:", e), success: false);
           }
         },
         child: const Text('TURN ON'),
@@ -57,8 +57,7 @@ class BluetoothOffScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-      // Did not implement Snackbar uitls
-      // key: Snackbar.snackBarKeyA,
+      key: SnackbarBluetooth.snackBarKeyA,
       child: Scaffold(
         backgroundColor: Colors.lightBlue,
         body: Center(
