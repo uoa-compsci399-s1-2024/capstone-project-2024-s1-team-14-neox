@@ -110,7 +110,7 @@ database rows anyway.
 
 #### Flow
 
-1. User sends JSON object with query options:
+1. User sends GET request with query parameters for:
     - Filter by:
         - min/max timestamp
         - parent ID
@@ -122,19 +122,20 @@ database rows anyway.
         - both of the above
         - include parent ID
         - include child name\*
+2. Upon success: user receives a JSON array where each element of the
+   array is a JSON object containing the sample fields.  Each sample
+   will contain the child device ID and parent ID.
 
 #### Details
 
+- Filters are given in the query string.
 - FOR NOW: filters will be a simple AND, but it could be extended to
   allow arbitrary nesting of logical expressions (up to a limit).
-- The samples will be given in a JSON array where each element of the
-  array is a JSON object containing the sample fields.  Each sample
-  will contain the child device ID and parent ID.
+  Maybe by having just one query parameter with special syntax like
+  those of search engines.
 - TODO: Maybe the results should be returned in "pages" (AKA
   "pagination").
-- TODO: Maybe allow sorting the results (by a given field?).
-- TODO: Maybe we should instead ONLY allow filter fields in the query
-  string?
+- Automatically sort results by date.
 
 \* NOTE: The clients want child names anonymised on backend or
 encrypted (they said "hashed" but the way they used it implied
