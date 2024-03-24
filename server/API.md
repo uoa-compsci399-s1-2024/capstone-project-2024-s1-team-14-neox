@@ -45,6 +45,15 @@ effect).
   - Can register and delete users.
   - Can add, delete, and modify a user's personal information.
 
+## Authentication
+
+Use HTTP authentication: use the `Authorization` header.
+
+For OAuth, we use `Authorization: Bearer <TOKEN>`
+(<https://stackoverflow.com/questions/17334276/oauth2-0-how-to-pass-access-token>).
+
+Otherwise, use HTTP cookies.
+
 ## Actions
 
 ### Sign up (POST) (one of `/signup` or `/register`)
