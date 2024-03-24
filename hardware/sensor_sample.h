@@ -3,6 +3,6 @@
 
 struct SensorSample {
   // data...
-};
+} __attribute__((packed));
 
 #endif
