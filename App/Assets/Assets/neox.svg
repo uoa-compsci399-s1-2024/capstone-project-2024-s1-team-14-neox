@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="597px" height="168px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <path d="M8,159.2L8,8L116,159.2L116,8" style="fill:none;stroke:black;stroke-width:16px;"/>
+    <ellipse cx="374.9" cy="83.6" rx="62.4" ry="75.6" style="fill:none;stroke:black;stroke-width:16px;"/>
+    <path d="M164.96,10.16L258.56,10.16" style="fill:none;stroke:black;stroke-width:16px;"/>
+    <path d="M164.96,83.6L258.56,83.6" style="fill:none;stroke:black;stroke-width:16px;"/>
+    <path d="M164.96,159.2L258.56,159.2" style="fill:none;stroke:black;stroke-width:16px;"/>
+    <path d="M8,159.2L8,8L116,159.2L116,8" style="fill:none;stroke:black;stroke-width:16px;"/>
+    <ellipse cx="374.9" cy="83.6" rx="62.4" ry="75.6" style="fill:none;stroke:black;stroke-width:16px;"/>
+    <path d="M164.96,10.16L258.56,10.16" style="fill:none;stroke:black;stroke-width:16px;"/>
+    <path d="M164.96,83.6L258.56,83.6" style="fill:none;stroke:black;stroke-width:16px;"/>
+    <path d="M164.96,159.2L258.56,159.2" style="fill:none;stroke:black;stroke-width:16px;"/>
+    <g>
+        <path d="M480.8,8L588.8,159.2" style="fill:none;stroke:black;stroke-width:16px;"/>
+        <path d="M480.8,159.2L588.8,8" style="fill:none;stroke:black;stroke-width:16px;"/>
+    </g>
+</svg>
