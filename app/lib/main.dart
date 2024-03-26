@@ -1,7 +1,7 @@
 import 'package:capstone_project_2024_s1_team_14_neox/stats.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
+import 'package:fl_chart/fl_chart.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,9 +28,19 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatelessWidget {
+
+ // Amount of light exposure in a day
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(204, 181, 81, 255),
+      ),
 
       body: Column(
 
