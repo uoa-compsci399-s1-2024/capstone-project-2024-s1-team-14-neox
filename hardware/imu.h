@@ -13,13 +13,17 @@ void initializeIMU() {
 
 uint8_t readIMU() {
     float x, y, z;
-    float sum;
+    uint8_t sum = 0;
     
     if (IMU.accelerationAvailable())
     {
         IMU.readAcceleration(x, y, z);
         sum = abs(x) + abs(y) + abs(z);
     }
-    uint8_t acceleration = sum;
-    return acceleration;
+    else
+    {
+        Serial.println("Acceleration unavailable");
+    }
+    
+    return sum;
 }
