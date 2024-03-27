@@ -1,3 +1,6 @@
+/* Code to initialise and read the onboard inertial measurment unit. Initialising prints to serial if IMU fails to start. readIMU returns a uint8_t
+   representing the overall acceleration, using the sum of the absolute values of each axis. */
+
 #include <cmath>
 #include <stdint.h>
 #include <Arduino_LSM6DS3.h>
