@@ -1,15 +1,18 @@
-/* Code to initialise and read the onboard real-time clock. Initialising takes a starting hour and minute to set the RTC time. ReadRTC returns a byte array
-   with byte[0] representing hour and byte[1] representing minute of timestamp */
+#ifndef _RTC_H_
+#define _RTC_H_
+#include <stdint.h>
 
-void initializeRTC(RTCZero rtc, int hour, int minute) {
-    rtc.begin();
-    rtc.setHours(hour);
-    rtc.setMinutes(minute);
-}
 
-byte* readRTC(RTCZero rtc) {
-    byte time[2]; 
-    time[0] = rtc.getHours();
-    time[1] = rtc.getMinutes();
-    return time;
-}
+/*Struct to hold hour and minutes values returned by readRTC() function*/
+struct time {
+    uint8_t hour;
+    uint8_t minute;
+};
+
+/*Initialises the RTC with parameters hour and minute*/
+void initializeRTC(int hour, int minute);
+
+/*Returns time struct with current values of time and hour. Used to keep timestamps for other sensor readings*/
+time readRTC();
+
+#endif
