@@ -1,32 +1,10 @@
-/* Code to initialise and read the onboard inertial measurment unit. Initialising prints to serial if IMU fails to start. readIMU returns a uint8_t
-   representing the overall acceleration, using the sum of the absolute values of each axis. */
+#ifndef _IMU_H_
+#define _IMU_H_
 
-#include <cmath>
-#include <stdint.h>
-#include <Arduino_LSM6DS3.h>
+/*Initialise the IMU. Prints an error message to serial if failed to initialise.*/
+void initializeIMU();
 
-void initializeIMU() {
-    if (!IMU.begin())
-    {
-        Serial.println("IMU failed to initialise");
-        delay(500);
-        while(1);
-    }
-}
+/*Returns the sum of all three axis' acceleration from IMU. Used to determine if user is wearing the device*/
+uint8_t readIMU();
 
-uint8_t readIMU() {
-    float x, y, z;
-    uint8_t sum = 0;
-    
-    if (IMU.accelerationAvailable())
-    {
-        IMU.readAcceleration(x, y, z);
-        sum = abs(x) + abs(y) + abs(z);
-    }
-    else
-    {
-        Serial.println("Acceleration unavailable");
-    }
-    
-    return sum;
-}
+#endif
