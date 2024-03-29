@@ -14,13 +14,17 @@ void initializeIMU() {
 
 uint8_t readIMU() {
     float x, y, z;
-    uint8_t sum = 0;
+    float sum;
+    uint8_t scaled_sum = 0;
     
     if (IMU.accelerationAvailable())
     {
         IMU.readAcceleration(x, y, z);
         sum = abs(x) + abs(y) + abs(z);
     }
-    
-    return sum;
+    Serial.print(String(x) + " ");
+    Serial.print(String(y) + " ");
+    Serial.println(String(z));
+    scaled_sum = 255 * (sum / 12);
+    return scaled_sum;
 }
