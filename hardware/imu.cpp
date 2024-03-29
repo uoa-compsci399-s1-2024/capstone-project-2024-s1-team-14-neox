@@ -22,9 +22,6 @@ uint8_t readIMU() {
         IMU.readAcceleration(x, y, z);
         sum = abs(x) + abs(y) + abs(z);
     }
-    Serial.print(String(x) + " ");
-    Serial.print(String(y) + " ");
-    Serial.println(String(z));
     scaled_sum = 255 * (sum / 12);
     return scaled_sum;
 }
