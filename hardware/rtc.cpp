@@ -1,7 +1,7 @@
 #include <RTCZero.h>
 #include "rtc.h"
 
-RTCZero rtc;
+static RTCZero rtc;
 
 void initializeRTC(int hour, int minute) {
     rtc.begin();
