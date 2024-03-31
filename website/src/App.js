@@ -3,14 +3,10 @@ import date from './data/date.png';
 import button from './data/button.png';
 import testfile from './data/test.csv';
 import './App.css';
-import React from "react";
-import { Bar} from "react-chartjs-2";
-import { Chart } from 'chart.js/auto';
-import exposureData from "./data/collectedData.json";
-
-
-
-
+import React from 'react';
+import {Bar} from 'react-chartjs-2';
+import 'chart.js/auto';
+import exposureData from './data/collectedData.json';
 
 function App() {
 
@@ -22,7 +18,6 @@ function App() {
       <div className="logoCard">
       <img src={logo} className="App-logo" alt="logo" />
       </div>
-
 
 
       <div className="dataCard clientCard">
@@ -41,7 +36,6 @@ function App() {
       </div>
 
 
-
       <div className="dataCard downloadCard">
 
         <div className="downloadCardLeft">
@@ -56,7 +50,6 @@ function App() {
 
       </div>
       
-
 
       <div className="dataCard chartCard">
 
@@ -158,6 +151,7 @@ function App() {
       
         
       </div>
+
 
     </div>
   );
