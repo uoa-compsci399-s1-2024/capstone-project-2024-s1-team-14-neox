@@ -50,12 +50,13 @@ static TempSampleBuffer tempSampleBuffer;
 static AtomicTransaction atomicTransaction;
 
 
-bool eepromBegin()
+void eepromBegin()
 {
   eeprom.setMemoryType(EEPROM_SIZE_KBIT);
   if (!eeprom.begin(0b1010000, Wire, 255))
   {
-    return false;
+    Serial.println("eepromBegin() failed. Check EEPROM connection.");
+    freeze();
   }
 
   allocatedLen = 0;
@@ -71,8 +72,6 @@ bool eepromBegin()
   atomicTransaction.pending = eepromAllocateUint32();
 
   resumeAtomicTransaction();
-
-  return true;
 }
 
 void eepromWrite(EEPROMAddress address, const uint8_t* buffer, uint32_t len)

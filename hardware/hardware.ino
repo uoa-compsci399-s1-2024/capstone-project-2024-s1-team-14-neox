@@ -9,8 +9,6 @@ static const uint32_t POLL_INTERVAL_MS = (uint32_t)60 * 1000; // 1 minute
 static const uint8_t UV_SENSOR_PIN = A0;
 static const uint8_t LIGHT_SENSOR_PIN = A1;
 
-// Print error and freeze
-static void error(const char* message);
 // Read all sensors and save them to the EEPROM
 static void readSample();
 
@@ -21,11 +19,7 @@ void setup()
 
   initializeIMU();
   initializeRTC(0, 0);
-  
-  if (!eepromBegin())
-  {
-    error("eepromBegin() failed. Check EEPROM connection.");
-  }
+  eepromBegin();
 }
 
 void loop()
@@ -38,15 +32,6 @@ void loop()
     lastSampleReadTime += POLL_INTERVAL_MS;
     readSample();
   }
-}
-
-static void error(const char* message)
-{
-    Serial.println(message);
-    while (true)
-    {
-      delay(1000);
-    }
 }
 
 static void readSample()

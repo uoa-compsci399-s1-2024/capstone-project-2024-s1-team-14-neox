@@ -43,10 +43,11 @@ Atomic Writes
 typedef uint32_t EEPROMAddress;
 
 /*
- * Initialise the EEPROM and return whether it succeeded.
+ * Initialise the EEPROM. If initialisation fails,
+ * an error message is printed and the program freezes.
  * Call Wire.begin() before calling this.
  */
-bool eepromBegin();
+void eepromBegin();
 
 /*
  * Direct read/write functions.
