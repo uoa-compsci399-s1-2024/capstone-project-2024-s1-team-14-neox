@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'bluetooth/bluetooth_main.dart';
 
+
+
 void main() {
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true); // Used to log BLE
   runApp(const MyApp());
@@ -92,5 +94,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ],  
     ),
    );
+
+
+
   }
 }
