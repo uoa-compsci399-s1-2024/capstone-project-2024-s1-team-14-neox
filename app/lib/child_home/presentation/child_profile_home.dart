@@ -45,31 +45,39 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
             );
           }
           return Container(
-            height: 500,
             child: PageView(
               scrollDirection: Axis.horizontal,
               children: [
                 ...state.profiles.map(
                   (profile) => BlocProvider(
-                    create: (_) => BluetoothBloc(context.read<ChildRepository>()),
+                    create: (_) =>
+                        BluetoothBloc(context.read<ChildRepository>()),
                     child: ChildProfileTile(
                       profile: profile,
                     ),
                   ),
-                )
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CreateChildProfileScreen()),
+                  ),
+                  child: const Icon(Icons.add),
+                ),
               ],
             ),
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const CreateChildProfileScreen()),
-        ),
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () => Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //         builder: (context) => const CreateChildProfileScreen()),
+      //   ),
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 }
