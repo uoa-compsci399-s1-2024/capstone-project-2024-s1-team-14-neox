@@ -6,16 +6,14 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 // Import bottom navigation screens
 import 'analysis/analysis_home.dart';
-import 'child_profile/cubit/child_profile_cubit.dart';
 import 'child_profile/presentation/child_profile_home.dart';
 import 'cloud/cloud_home.dart';
-import 'bluetooth/bluetooth_test_screen.dart';
 
 
 // Import blocs and repositories
-import 'bluetooth/bloc/device_pair_bloc.dart';
 import 'data/child_repository.dart';
-
+import 'bluetooth/bloc/bluetooth_bloc.dart';
+import 'child_profile/cubit/child_profile_cubit.dart';
 
 void main() {
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true); // Used to log BLE
@@ -32,10 +30,10 @@ class MyApp extends StatelessWidget {
     return RepositoryProvider(
       create: (context) => ChildRepository(),
       child: MultiBlocProvider(
-        // Alows Cubits and Blocks to be accessible anywhere in MyApp
+        // Alows Cubits and Blocs to be accessible anywhere in MyApp
         providers: [
           BlocProvider(
-            create: (context) => DevicePairBloc(context.read<ChildRepository>()),
+            create: (context) => BluetoothBloc(context.read<ChildRepository>()),
           ),
            BlocProvider(
             create: (context) => ChildProfileCubit(context.read<ChildRepository>()),
@@ -43,12 +41,12 @@ class MyApp extends StatelessWidget {
         ],
         // Creates MaterialApp
         child: MaterialApp(
-          title: 'Flutter Demo',
+          title: 'Neox',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
             useMaterial3: true,
           ),
-          home: const MyHomePage(title: 'Flutter Demo Home Page'),
+          home: const MyHomePage(title: 'Neox'),
         ),
       ),
     );
@@ -68,10 +66,10 @@ class _MyHomePageState extends State<MyHomePage> {
   int currentPageIndex = 0;
 
   // The bottom navigation bar loads the Widget for the curretPageIndex
-  // Pages to navigate to
+
+  // Screens to navigate to
   List<Widget> body = [
     const ChildHomeScreen(),
-    const BluetoothSyncScreen(),
     const AnalysisHomeScreen(),
     const CloudHomeScreen(),
 
@@ -91,11 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
         destinations: const <Widget>[
           NavigationDestination(
             icon: Icon(Icons.face),
-            label: "Profiles",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bluetooth),
-            label: "Bluetooth",
+            label: "Home",
           ),
           NavigationDestination(
             icon: Icon(Icons.sunny),
