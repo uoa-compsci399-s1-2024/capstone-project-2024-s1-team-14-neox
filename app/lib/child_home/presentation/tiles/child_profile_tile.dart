@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../data/child_model.dart';
+
 class ChildProfileTile extends StatefulWidget {
-  const ChildProfileTile({super.key});
+  final ChildModel profile;
+  const ChildProfileTile({super.key, required this.profile});
 
   @override
   State<ChildProfileTile> createState() => _ChildProfileTileState();

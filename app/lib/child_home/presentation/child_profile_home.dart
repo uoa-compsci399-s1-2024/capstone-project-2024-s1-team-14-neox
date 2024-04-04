@@ -1,8 +1,10 @@
-import 'package:ble_skeleton/child_profile/cubit/child_profile_cubit.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../cubit/child_profile_cubit.dart';
 import 'screens/create_child_profile_screen.dart';
+import 'tiles/child_profile_tile.dart';
 
 class ChildHomeScreen extends StatefulWidget {
   const ChildHomeScreen({super.key});
@@ -17,6 +19,7 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
     context.read<ChildProfileCubit>().fetchChildProfiles();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,10 +45,14 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
               child: CircularProgressIndicator(),
             );
           }
-          return Column(
-            children: [
-              Text(state.profiles.toString()),
-            ],
+          return Container(
+            height: 500,
+            child: PageView(
+              scrollDirection: Axis.horizontal,
+              children: [...state.profiles.map((profile) => ChildProfileTile(
+                profile: profile,
+              ),)],
+            ),
           );
         },
       ),

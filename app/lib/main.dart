@@ -6,14 +6,14 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 // Import bottom navigation screens
 import 'analysis/analysis_home.dart';
-import 'child_profile/presentation/child_profile_home.dart';
+import 'child_home/presentation/child_profile_home.dart';
 import 'cloud/cloud_home.dart';
 
 
 // Import blocs and repositories
 import 'data/child_repository.dart';
 import 'bluetooth/bloc/bluetooth_bloc.dart';
-import 'child_profile/cubit/child_profile_cubit.dart';
+import 'child_home/cubit/child_profile_cubit.dart';
 
 void main() {
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true); // Used to log BLE
