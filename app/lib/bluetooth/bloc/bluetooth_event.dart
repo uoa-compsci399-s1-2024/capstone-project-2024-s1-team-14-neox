@@ -1,8 +1,11 @@
 part of 'bluetooth_bloc.dart';
 
-sealed class BluetoothEvent extends Equatable {
-  const BluetoothEvent();
+sealed class BluetoothEvent{}
 
-  @override
-  List<Object> get props => [];
-}
+
+class BluetoothScanStartPressed extends BluetoothEvent {} 
+class BluetoothScanStopPressed extends BluetoothEvent {} 
+class BluetoothPairPressed extends BluetoothEvent {} 
+class BluetoothUnpairPressed extends BluetoothEvent {}
+class BluetoothConnectPressed extends BluetoothEvent {}
+class BluetoothSyncPressed extends BluetoothEvent {} 
