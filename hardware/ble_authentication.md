@@ -18,12 +18,14 @@ character array padded with 22 zero bytes at the end to give a 256 bit key.
 - The central is authenticated:
   - The peripheral writes a random 256 bit number to characteristic `R1`.
   - The central reads characteristic `R1` and writes `SHA256(R1 xor key)` to characteristic `H1`.
-  - The peripheral checks whether characteristic `H1` is correct and authenticates the central.
-- The Peripheral is authenticated:
+  - The peripheral checks whether characteristic `H1` is correct and writes a boolean (true=1, false=0)
+    into characteristic `A` to indicate whether authentication succeeded.
+- The peripheral is authenticated:
   - The central writes zero to characteristic `H2`.
   - The central writes a random 256 bit number to characteristic `R2`.
   - The peripheral reads characteristic `R2` and writes `SHA256(R2 xor key)` to characteristic `H2`.
   - The central polls characteristic `H2` until it is nonzero.
+  - At this point, the central can read characteristic `A` to see if the central itself is authenticated.
   - The central checks whether characteristic `H2` is correct and authenticates the peripheral.
 
 The central must be authenticated before the peripheral so that the peripheral
@@ -40,6 +42,7 @@ This method concentrates the complexity in the initial handshake and requires BL
 | H1 | 32 Bytes | a90aa9a2-b186-4717-bc8d-f169eead75da | Hash response from central. |
 | R2 | 32 Bytes | c03b7267-dcfa-4525-8521-1bc31c08c312 | Random challenge from central. |
 | H2 | 32 Bytes | 750d5d43-96c4-4f5c-8ce1-fdb44a150336 | Hash response from peripheral. |
+| A  | 1 Byte   | 776edbca-a020-4d86-a5e8-25eb87e82554 | Central authenticated flag. |
 
 # Method 2 - Implicit Authentication via Encryption
 
@@ -72,8 +75,9 @@ The process to decrypt the sensor data stream from characteristic `A` is:
 - Unpad the data by removing bytes from the end until you have a multiple of sizeof(SensorSample) bytes.
 - Check for the sentinal. There may be multiple sentinals due to the padding so use the earliest
   sentinal to find the end of the data.
-- Repeat until the sentinal is found. If no sentinal is found after some MAX_SAMPLES_PER_TRANSFER,
-  reject the peripheral as malicious.
+- Repeat until the sentinal is found. If no sentinal is found after some MAX_SAMPLES_PER_TRANSFER
+  samples, it means that the encryption key did not match the decryption key. We cannot know whether
+  the central or peripheral is at fault.
 
 This method does not require an initial handshake but adds complexity to the data transfer.
 It also does not use the encryption from BLE since we have our own layer of encryption.
