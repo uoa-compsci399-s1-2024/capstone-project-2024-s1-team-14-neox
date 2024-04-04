@@ -4,7 +4,7 @@ part of 'database.dart';
 
 // ignore_for_file: type=lint
 class $ArduinoDatasTable extends ArduinoDatas
-    with TableInfo<$ArduinoDatasTable, ArduinoData> {
+    with TableInfo<$ArduinoDatasTable, ArduinoDataEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -24,21 +24,21 @@ class $ArduinoDatasTable extends ArduinoDatas
   late final GeneratedColumn<int> light = GeneratedColumn<int>(
       'light', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _dataTimeMeta =
-      const VerificationMeta('dataTime');
+  static const VerificationMeta _datetimeMeta =
+      const VerificationMeta('datetime');
   @override
-  late final GeneratedColumn<DateTime> dataTime = GeneratedColumn<DateTime>(
-      'data_time', aliasedName, false,
+  late final GeneratedColumn<DateTime> datetime = GeneratedColumn<DateTime>(
+      'datetime', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [name, uv, light, dataTime];
+  List<GeneratedColumn> get $columns => [name, uv, light, datetime];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'arduino_datas';
   @override
-  VerificationContext validateIntegrity(Insertable<ArduinoData> instance,
+  VerificationContext validateIntegrity(Insertable<ArduinoDataEntity> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -59,11 +59,11 @@ class $ArduinoDatasTable extends ArduinoDatas
     } else if (isInserting) {
       context.missing(_lightMeta);
     }
-    if (data.containsKey('data_time')) {
-      context.handle(_dataTimeMeta,
-          dataTime.isAcceptableOrUnknown(data['data_time']!, _dataTimeMeta));
+    if (data.containsKey('datetime')) {
+      context.handle(_datetimeMeta,
+          datetime.isAcceptableOrUnknown(data['datetime']!, _datetimeMeta));
     } else if (isInserting) {
-      context.missing(_dataTimeMeta);
+      context.missing(_datetimeMeta);
     }
     return context;
   }
@@ -71,17 +71,17 @@ class $ArduinoDatasTable extends ArduinoDatas
   @override
   Set<GeneratedColumn> get $primaryKey => const {};
   @override
-  ArduinoData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  ArduinoDataEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ArduinoData(
-      name: attachedDatabase.typeMapping
+    return ArduinoDataEntity(
+      attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      uv: attachedDatabase.typeMapping
+      attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}uv'])!,
-      light: attachedDatabase.typeMapping
+      attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}light'])!,
-      dataTime: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}data_time'])!,
+      attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}datetime'])!,
     );
   }
 
@@ -91,122 +91,41 @@ class $ArduinoDatasTable extends ArduinoDatas
   }
 }
 
-class ArduinoData extends DataClass implements Insertable<ArduinoData> {
-  final String name;
-  final int uv;
-  final int light;
-  final DateTime dataTime;
-  const ArduinoData(
-      {required this.name,
-      required this.uv,
-      required this.light,
-      required this.dataTime});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['name'] = Variable<String>(name);
-    map['uv'] = Variable<int>(uv);
-    map['light'] = Variable<int>(light);
-    map['data_time'] = Variable<DateTime>(dataTime);
-    return map;
-  }
-
-  ArduinoDatasCompanion toCompanion(bool nullToAbsent) {
-    return ArduinoDatasCompanion(
-      name: Value(name),
-      uv: Value(uv),
-      light: Value(light),
-      dataTime: Value(dataTime),
-    );
-  }
-
-  factory ArduinoData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ArduinoData(
-      name: serializer.fromJson<String>(json['name']),
-      uv: serializer.fromJson<int>(json['uv']),
-      light: serializer.fromJson<int>(json['light']),
-      dataTime: serializer.fromJson<DateTime>(json['dataTime']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'name': serializer.toJson<String>(name),
-      'uv': serializer.toJson<int>(uv),
-      'light': serializer.toJson<int>(light),
-      'dataTime': serializer.toJson<DateTime>(dataTime),
-    };
-  }
-
-  ArduinoData copyWith(
-          {String? name, int? uv, int? light, DateTime? dataTime}) =>
-      ArduinoData(
-        name: name ?? this.name,
-        uv: uv ?? this.uv,
-        light: light ?? this.light,
-        dataTime: dataTime ?? this.dataTime,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('ArduinoData(')
-          ..write('name: $name, ')
-          ..write('uv: $uv, ')
-          ..write('light: $light, ')
-          ..write('dataTime: $dataTime')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(name, uv, light, dataTime);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ArduinoData &&
-          other.name == this.name &&
-          other.uv == this.uv &&
-          other.light == this.light &&
-          other.dataTime == this.dataTime);
-}
-
-class ArduinoDatasCompanion extends UpdateCompanion<ArduinoData> {
+class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
   final Value<String> name;
   final Value<int> uv;
   final Value<int> light;
-  final Value<DateTime> dataTime;
+  final Value<DateTime> datetime;
   final Value<int> rowid;
   const ArduinoDatasCompanion({
     this.name = const Value.absent(),
     this.uv = const Value.absent(),
     this.light = const Value.absent(),
-    this.dataTime = const Value.absent(),
+    this.datetime = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ArduinoDatasCompanion.insert({
     required String name,
     required int uv,
     required int light,
-    required DateTime dataTime,
+    required DateTime datetime,
     this.rowid = const Value.absent(),
   })  : name = Value(name),
         uv = Value(uv),
         light = Value(light),
-        dataTime = Value(dataTime);
-  static Insertable<ArduinoData> custom({
+        datetime = Value(datetime);
+  static Insertable<ArduinoDataEntity> custom({
     Expression<String>? name,
     Expression<int>? uv,
     Expression<int>? light,
-    Expression<DateTime>? dataTime,
+    Expression<DateTime>? datetime,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (name != null) 'name': name,
       if (uv != null) 'uv': uv,
       if (light != null) 'light': light,
-      if (dataTime != null) 'data_time': dataTime,
+      if (datetime != null) 'datetime': datetime,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -215,13 +134,13 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoData> {
       {Value<String>? name,
       Value<int>? uv,
       Value<int>? light,
-      Value<DateTime>? dataTime,
+      Value<DateTime>? datetime,
       Value<int>? rowid}) {
     return ArduinoDatasCompanion(
       name: name ?? this.name,
       uv: uv ?? this.uv,
       light: light ?? this.light,
-      dataTime: dataTime ?? this.dataTime,
+      datetime: datetime ?? this.datetime,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -238,8 +157,8 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoData> {
     if (light.present) {
       map['light'] = Variable<int>(light.value);
     }
-    if (dataTime.present) {
-      map['data_time'] = Variable<DateTime>(dataTime.value);
+    if (datetime.present) {
+      map['datetime'] = Variable<DateTime>(datetime.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -253,7 +172,7 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoData> {
           ..write('name: $name, ')
           ..write('uv: $uv, ')
           ..write('light: $light, ')
-          ..write('dataTime: $dataTime, ')
+          ..write('datetime: $datetime, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();

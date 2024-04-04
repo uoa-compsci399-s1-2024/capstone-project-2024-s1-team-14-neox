@@ -9,6 +9,9 @@ class ChildModels extends Table {
   TextColumn get name => text().references(ArduinoDatas, #name)();
   IntColumn get age => integer()();
   TextColumn get uuid => text().references(ArduinoDevices, #uuid)();
+
+  @override
+  Set<Column> get primaryKey => {id};
 }
 
 class ChildModelEntity {
