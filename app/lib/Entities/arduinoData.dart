@@ -30,14 +30,14 @@ class ArduinoDataEntity{
     };
   }
 
-  factory ArduinoDataEntity.fromJson(Map<String, dynamic> json) {
-    return ArduinoDataEntity(
-      name: json['name'],
-      uv: json['uv'],
-      light: json['light'],
-      datetime: DateTime.tryParse(json['datetime'] ?? ''),
-    );
-  }
+//  factory ArduinoDataEntity.fromJson(Map<String, dynamic> json) {
+  //  return ArduinoDataEntity(
+   //   name: json['name'],
+  //    uv: json['uv'],
+  //    light: json['light'],
+ //     datetime: DateTime.tryParse(json['datetime'] ?? ''),
+ //   );
+//  }
 
 
   ArduinoDatasCompanion toCompanion() {
