@@ -32,7 +32,7 @@ class ArduinoDataEntity{
 
 
   static Future<void> saveSingleArduinoDataEntity(ArduinoDataEntity arduinoDataEntity) async {
-    AppDb db = AppDb();
+    AppDb db = AppDb.instance();
     await db
         .into(db.arduinoDatas)
         .insertOnConflictUpdate(arduinoDataEntity.toCompanion());
@@ -46,13 +46,13 @@ class ArduinoDataEntity{
   }
 
   static Future<List<ArduinoDataEntity>> queryAllArduinoData() async {
-    AppDb db = AppDb();
+    AppDb db = AppDb.instance();
     List<ArduinoDataEntity> arduinoDataEntityList = await db.select(db.arduinoDatas).get();
     return arduinoDataEntityList;
   }
 
   static Future<ArduinoDataEntity?> queryArduinoDataByName(String name) async {
-    AppDb db = AppDb();
+    AppDb db = AppDb.instance();
     ArduinoDataEntity? arduinoDataEntity = await (db.select(db.arduinoDatas)
       ..where((tbl) => tbl.name.equals(name)))
         .getSingleOrNull();
@@ -61,7 +61,7 @@ class ArduinoDataEntity{
 
 // Example method for querying Arduino data by UV level
   static Future<List<ArduinoDataEntity>> queryListOfArduinoDataByUVLevel(int uvLevel) async {
-    AppDb db = AppDb();
+    AppDb db = AppDb.instance();
     List<ArduinoDataEntity> arduinoDataEntityList = await (db.select(db.arduinoDatas)
       ..where((tbl) => tbl.uv.equals(uvLevel)))
         .get();

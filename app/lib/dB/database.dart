@@ -24,6 +24,9 @@ LazyDatabase _openConnection() {
 
 @DriftDatabase(tables: [ChildModels, ArduinoDevices, ArduinoDatas])
 class AppDb extends _$AppDb {
+  static final AppDb _instance = AppDb();
+
+  static AppDb instance() => _instance;
   AppDb() : super(_openConnection());
 
   @override
