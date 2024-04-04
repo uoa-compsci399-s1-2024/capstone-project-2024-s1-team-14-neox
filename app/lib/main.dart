@@ -32,9 +32,6 @@ class MyApp extends StatelessWidget {
       child: MultiBlocProvider(
         // Alows Cubits and Blocs to be accessible anywhere in MyApp
         providers: [
-          BlocProvider(
-            create: (context) => BluetoothBloc(context.read<ChildRepository>()),
-          ),
            BlocProvider(
             create: (context) => ChildProfileCubit(context.read<ChildRepository>()),
           ),

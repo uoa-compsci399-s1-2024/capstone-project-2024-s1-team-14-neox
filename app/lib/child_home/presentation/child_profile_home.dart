@@ -1,7 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../bluetooth/bloc/bluetooth_bloc.dart';
+import '../../data/child_repository.dart';
 import '../cubit/child_profile_cubit.dart';
 import 'screens/create_child_profile_screen.dart';
 import 'tiles/child_profile_tile.dart';
@@ -29,10 +30,8 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
       body: BlocConsumer<ChildProfileCubit, ChildProfileState>(
         listener: (context, state) {
           if (state.status.isAddSuccess) {
-            print(state.message);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                
                 content: Text(state.message),
                 backgroundColor: Colors.lightBlue,
               ),
@@ -49,9 +48,16 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
             height: 500,
             child: PageView(
               scrollDirection: Axis.horizontal,
-              children: [...state.profiles.map((profile) => ChildProfileTile(
-                profile: profile,
-              ),)],
+              children: [
+                ...state.profiles.map(
+                  (profile) => BlocProvider(
+                    create: (_) => BluetoothBloc(context.read<ChildRepository>()),
+                    child: ChildProfileTile(
+                      profile: profile,
+                    ),
+                  ),
+                )
+              ],
             ),
           );
         },
