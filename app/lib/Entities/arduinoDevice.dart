@@ -25,7 +25,7 @@ class ArduinoDeviceEntity {
 
   static Future<void> saveSingleArduinoDeviceEntity(
       ArduinoDeviceEntity arduinoDeviceEntity) async {
-    AppDb db = AppDb();
+    AppDb db = AppDb.instance();
     await db
         .into(db.arduinoDevices)
         .insertOnConflictUpdate(arduinoDeviceEntity.toCompanion());
@@ -33,13 +33,13 @@ class ArduinoDeviceEntity {
 
 
   static Future<List<ArduinoDeviceEntity>> queryAllArduinoDevices() async {
-    AppDb db = AppDb();
+    AppDb db = AppDb.instance();
     List<ArduinoDeviceEntity> arduinoDeviceEntityList = await db.select(db.arduinoDevices).get();
     return arduinoDeviceEntityList;
   }
 
   static Future<ArduinoDeviceEntity?> queryArduinoDeviceById(String deviceId) async {
-    AppDb db = AppDb();
+    AppDb db = AppDb.instance();
     ArduinoDeviceEntity? arduinoDeviceEntity = await (db.select(db.arduinoDevices)
       ..where((tbl) => tbl.uuid.equals(deviceId)))
         .getSingleOrNull();

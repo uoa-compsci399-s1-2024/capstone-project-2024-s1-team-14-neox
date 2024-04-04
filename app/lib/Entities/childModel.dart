@@ -34,7 +34,7 @@ class ChildModelEntity {
 
   static Future<void> saveSingleChildModelEntity(
       ChildModelEntity childModelEntity) async {
-    AppDb db = AppDb();
+    AppDb db = AppDb.instance();
     await db
         .into(db.childModels)
         .insertOnConflictUpdate(childModelEntity.toCompanion());
@@ -48,7 +48,7 @@ class ChildModelEntity {
   }
 
   static Future<List<ChildModelEntity>> queryAllChildModels() async {
-    AppDb db = AppDb();
+    AppDb db = AppDb.instance();
     List<ChildModelEntity> childModelEntityList = await db.select(db.childModels).get();
     await Future.forEach(childModelEntityList, (childModelEntity) async {
       childModelEntity.arduinoDeviceEntity =
@@ -58,7 +58,7 @@ class ChildModelEntity {
   }
 
   static Future<ChildModelEntity?> queryChildModelByName(String name) async {
-    AppDb db = AppDb();
+    AppDb db = AppDb.instance();
     ChildModelEntity? childModelEntity = await (db.select(db.childModels)
       ..where((tbl) => tbl.name.equals(name)))
         .getSingleOrNull();
