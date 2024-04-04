@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bluetooth/bloc/bluetooth_bloc.dart';
 import '../../data/child_repository.dart';
 import '../cubit/child_profile_cubit.dart';
+import '../cubit/device_pair_cubit.dart';
 import 'screens/create_child_profile_screen.dart';
 import 'tiles/child_profile_tile.dart';
 
@@ -51,7 +52,7 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
                 ...state.profiles.map(
                   (profile) => BlocProvider(
                     create: (_) =>
-                        BluetoothBloc(context.read<ChildRepository>()),
+                        DevicePairCubit(context.read<ChildRepository>(), profile),
                     child: ChildProfileTile(
                       profile: profile,
                     ),
