@@ -16,6 +16,22 @@ class ArduinoDeviceEntity {
     this.gatt,
   });
 
+  // JSON serialization
+  Map<String, dynamic> toJson() {
+    return {
+      'uuid': uuid,
+      'gatt': gatt,
+    };
+  }
+
+  // JSON deserialization
+  factory ArduinoDeviceEntity.fromJson(Map<String, dynamic> json) {
+    return ArduinoDeviceEntity(
+      uuid: json['uuid'],
+      gatt: json['gatt'],
+    );
+  }
+
   ArduinoDevicesCompanion toCompanion() {
     return ArduinoDevicesCompanion(
       uuid: Value(uuid ?? ''),
