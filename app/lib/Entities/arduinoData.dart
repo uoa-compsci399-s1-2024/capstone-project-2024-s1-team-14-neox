@@ -21,6 +21,25 @@ class ArduinoDataEntity{
       this.name, this.uv, this.light, this.datetime
       );
 
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'uv': uv,
+      'light': light,
+      'datetime': datetime.toIso8601String(),
+    };
+  }
+
+  factory ArduinoDataEntity.fromJson(Map<String, dynamic> json) {
+    return ArduinoDataEntity(
+      name: json['name'],
+      uv: json['uv'],
+      light: json['light'],
+      datetime: DateTime.tryParse(json['datetime'] ?? ''),
+    );
+  }
+
+
   ArduinoDatasCompanion toCompanion() {
     return ArduinoDatasCompanion(
       name: Value(name ?? ''),

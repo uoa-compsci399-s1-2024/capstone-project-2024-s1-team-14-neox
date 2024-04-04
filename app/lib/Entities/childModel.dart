@@ -23,6 +23,26 @@ class ChildModelEntity {
 
   ChildModelEntity({this.id, this.name, this.age, this.uuid});
 
+  // JSON serialization
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'age': age,
+      'uuid': uuid,
+    };
+  }
+
+  // JSON deserialization
+  factory ChildModelEntity.fromJson(Map<String, dynamic> json) {
+    return ChildModelEntity(
+      id: json['id'],
+      name: json['name'],
+      age: json['age'],
+      uuid: json['uuid'],
+    );
+  }
+
   ChildModelsCompanion toCompanion() {
     return ChildModelsCompanion(
       id: Value(id ?? -1),
