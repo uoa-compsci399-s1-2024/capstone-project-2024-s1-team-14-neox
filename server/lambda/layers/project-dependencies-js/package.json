@@ -1,0 +1,12 @@
+{
+  "name": "project-dependencies-js",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dependencies for cloud backend server (for use in AWS Lambda layers)",
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity": "^3.540.0",
+    "@aws-sdk/client-lambda": "^3.548.0",
+    "@aws-sdk/client-secrets-manager": "^3.543.0",
+    "pg": "^8.11.5"
+  }
+}
