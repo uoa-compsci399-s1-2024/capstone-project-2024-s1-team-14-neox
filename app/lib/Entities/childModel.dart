@@ -21,7 +21,7 @@ class ChildModelEntity {
   String? uuid;
   ArduinoDeviceEntity? arduinoDeviceEntity;
 
-  ChildModelEntity({this.id, this.name, this.age, this.uuid});
+  ChildModelEntity({this.name, this.age, this.uuid});
 
   // JSON serialization
   Map<String, dynamic> toJson() {
@@ -34,30 +34,32 @@ class ChildModelEntity {
   }
 
   // JSON deserialization
+// JSON deserialization
   factory ChildModelEntity.fromJson(Map<String, dynamic> json) {
     return ChildModelEntity(
-      id: json['id'],
       name: json['name'],
       age: json['age'],
       uuid: json['uuid'],
     );
   }
 
+
   ChildModelsCompanion toCompanion() {
     return ChildModelsCompanion(
-      id: Value(id ?? -1),
       name: Value(name ?? ''),
       age: Value(age ?? -1),
       uuid: Value(uuid ?? ''),
     );
   }
 
+
   static Future<void> saveSingleChildModelEntity(
       ChildModelEntity childModelEntity) async {
     AppDb db = AppDb.instance();
     await db
         .into(db.childModels)
-        .insertOnConflictUpdate(childModelEntity.toCompanion());
+        .insert(childModelEntity.toCompanion(), mode: InsertMode.insert);
+    print(childModelEntity.name);
   }
 
   static Future<void> saveListOfChildModels(
