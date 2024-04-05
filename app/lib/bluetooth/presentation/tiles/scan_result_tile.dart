@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class ScanResultTile extends StatefulWidget {
-  const ScanResultTile({super.key, required this.result, this.onConnect, this.onDisconnect});
+  const ScanResultTile(
+      {super.key, required this.result, this.onConnect, this.onDisconnect});
 
   final ScanResult result;
   final VoidCallback? onConnect;
@@ -15,15 +16,18 @@ class ScanResultTile extends StatefulWidget {
 }
 
 class _ScanResultTileState extends State<ScanResultTile> {
-  BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
+  BluetoothConnectionState _connectionState =
+      BluetoothConnectionState.disconnected;
 
-  late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
+  late StreamSubscription<BluetoothConnectionState>
+      _connectionStateSubscription;
 
   @override
   void initState() {
     super.initState();
 
-    _connectionStateSubscription = widget.result.device.connectionState.listen((state) {
+    _connectionStateSubscription =
+        widget.result.device.connectionState.listen((state) {
       _connectionState = state;
       if (mounted) {
         setState(() {});
@@ -42,11 +46,17 @@ class _ScanResultTileState extends State<ScanResultTile> {
   }
 
   String getNiceManufacturerData(List<List<int>> data) {
-    return data.map((val) => '${getNiceHexArray(val)}').join(', ').toUpperCase();
+    return data
+        .map((val) => '${getNiceHexArray(val)}')
+        .join(', ')
+        .toUpperCase();
   }
 
   String getNiceServiceData(Map<Guid, List<int>> data) {
-    return data.entries.map((v) => '${v.key}: ${getNiceHexArray(v.value)}').join(', ').toUpperCase();
+    return data.entries
+        .map((v) => '${v.key}: ${getNiceHexArray(v.value)}')
+        .join(', ')
+        .toUpperCase();
   }
 
   String getNiceServiceUuids(List<Guid> serviceUuids) {
@@ -85,8 +95,10 @@ class _ScanResultTileState extends State<ScanResultTile> {
         foregroundColor: Colors.white,
       ),
       onPressed: isConnected // Check is connected
-      ? widget.onDisconnect 
-      :  (widget.result.advertisementData.connectable) ? widget.onConnect : null,
+          ? widget.onDisconnect
+          : (widget.result.advertisementData.connectable)
+              ? widget.onConnect
+              : null,
       child: isConnected ? const Text('DISCONNECT') : const Text('CONNECT'),
     );
   }
@@ -104,7 +116,10 @@ class _ScanResultTileState extends State<ScanResultTile> {
           Expanded(
             child: Text(
               value,
-              style: Theme.of(context).textTheme.bodySmall?.apply(color: Colors.black),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.apply(color: Colors.black),
               softWrap: true,
             ),
           ),
