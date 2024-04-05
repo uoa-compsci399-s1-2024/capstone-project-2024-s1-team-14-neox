@@ -11,7 +11,7 @@ class DevicePairCubit extends Cubit<DevicePairState> {
   final ChildRepository _childRepository;
   final ChildModel profile;
   DevicePairCubit(this._childRepository, this.profile) : super(
-    profile.device != null
+    profile.deviceRemoteId != null
     ? DevicePaired()
     : DevicePairUnknown()
   );
