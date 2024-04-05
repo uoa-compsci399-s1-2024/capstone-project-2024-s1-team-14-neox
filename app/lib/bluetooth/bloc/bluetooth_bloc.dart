@@ -78,32 +78,46 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     emit(state.copyWith(status: BluetoothStatus.scanStopped));
   }
 
-  FutureOr<void> _onBluetoothConnectPressed(
-      BluetoothConnectPressed event, Emitter<BluetoothState> emit) {
+  Future<FutureOr<void>> _onBluetoothConnectPressed(
+      BluetoothConnectPressed event, Emitter<BluetoothState> emit) async {
     if (FlutterBluePlus.isScanningNow) {
       FlutterBluePlus.stopScan();
     }
 
     emit(state.copyWith(status: BluetoothStatus.connectLoading));
     BluetoothDevice device = BluetoothDevice.fromId(event.deviceRemoteId);
-    var subscription = device.connectionState
-        .listen((BluetoothConnectionState connectionState) async {
-      if (connectionState == BluetoothConnectionState.disconnected) {
-        await device.connect(mtu: 23);
-        print(
-            "${device.disconnectReason?.code} ${device.disconnectReason?.description}");
-      }
-    });
-    if (device.isConnected) {
-      print("Connected: ${event.deviceRemoteId}");
-      emit(state.copyWith(status: BluetoothStatus.connectSuccess));
-    } else {
-      emit(
-        state.copyWith(
-            status: BluetoothStatus.error, message: "Failed to conenct device"),
-      );
+
+    if (device.isDisconnected) {
+      await device.connect(mtu: 23).then((value) => {
+            if (device.isConnected)
+              {
+                print("Connected: ${event.deviceRemoteId}"),
+                emit(state.copyWith(
+                    status: BluetoothStatus.connectSuccess,
+                    message: "Successfully paired device")),
+              }
+            else
+              {
+                emit(
+                  state.copyWith(
+                      status: BluetoothStatus.error,
+                      message: "Failed to pair device"),
+                ),
+              }
+          });
     }
-    subscription.cancel();
+
+    // var subscription = device.connectionState
+    //     .listen((BluetoothConnectionState connectionState) async {
+    //   print("Device conenction state: $connectionState");
+    //   if (connectionState == BluetoothConnectionState.disconnected) {
+    //     await device.connect(mtu: 23);
+    //     print(
+    //         "${device.disconnectReason?.code} ${device.disconnectReason?.description}");
+    //   }
+    // });
+
+    // subscription.cancel();
   }
 
   Future<FutureOr<void>> _onBluetoothSyncPressed(
@@ -120,7 +134,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     if (_deviceRemoteId == null) {
       emit(
         state.copyWith(
-            status: BluetoothStatus.error, message: "No device registered"),
+            status: BluetoothStatus.error, message: "No device paired"),
       );
     } else {
       BluetoothDevice device = BluetoothDevice.fromId(_deviceRemoteId);
@@ -134,9 +148,6 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
       // Resources
       // https://github.com/boskokg/flutter_blue_plus/issues/274
       // https://pub.dev/packages/flutter_blue_plus#subscribe-to-a-characteristic
-
-
-
     }
 
     // var subscription = event.device.connectionState
@@ -156,9 +167,22 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
 
   Future<FutureOr<void>> _onBluetoothDisconnectPressed(
       BluetoothDisconnectPressed event, Emitter<BluetoothState> emit) async {
-    if (_deviceRemoteId != null) {
-      BluetoothDevice device = BluetoothDevice.fromId(_deviceRemoteId);
-      await device.disconnect();
+    print("disconnect pressed");
+    emit(state.copyWith(status: BluetoothStatus.disconnectLoading));
+    BluetoothDevice device = BluetoothDevice.fromId(event.deviceRemoteId);
+    await device.disconnect();
+
+    if (!device.isConnected) {
+      print("Disconnected: ${event.deviceRemoteId}");
+      emit(state.copyWith(
+          status: BluetoothStatus.disconnectSuccess,
+          message: "Successfully disconnected device"));
+    } else {
+      emit(
+        state.copyWith(
+            status: BluetoothStatus.error,
+            message: "Failed to disconnect device"),
+      );
     }
   }
 }

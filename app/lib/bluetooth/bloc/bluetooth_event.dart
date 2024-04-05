@@ -13,7 +13,6 @@ class BluetoothConnectPressed extends BluetoothEvent {
 }
 class BluetoothDisconnectPressed extends BluetoothEvent {
   final String deviceRemoteId;
-
   BluetoothDisconnectPressed({required this.deviceRemoteId});
 
 }
