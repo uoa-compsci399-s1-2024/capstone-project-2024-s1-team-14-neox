@@ -55,11 +55,16 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
       // withNames:["Bluno"],
       timeout: const Duration(seconds: 15),
     );
-    await Future.delayed(const Duration(seconds: 15)).then((value) => {
-          _isScanningSubscription.cancel(),
-          _scanResultsSubscription.cancel,
-          emit(state.copyWith(status: BluetoothStatus.scanStopped)),
-        });
+    await Future.delayed(const Duration(seconds: 15))
+        .then((value) => {
+              _isScanningSubscription.cancel(),
+              _scanResultsSubscription.cancel(),
+            })
+        .whenComplete(
+          () => emit(
+            state.copyWith(status: BluetoothStatus.scanStopped),
+          ),
+        );
   }
 
   FutureOr<void> _onBluetoothScanStopPressed(
@@ -75,8 +80,39 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
       BluetoothUnpairPressed event, Emitter<BluetoothState> emit) {}
 
   FutureOr<void> _onBluetoothConnectPressed(
-      BluetoothConnectPressed event, Emitter<BluetoothState> emit) {}
+      BluetoothConnectPressed event, Emitter<BluetoothState> emit) {
+        FlutterBluePlus.stopScan();
+        emit(state.copyWith(status: BluetoothStatus.pairLoading));
+        print(event.device);
+    var subscription = event.device.connectionState
+        .listen((BluetoothConnectionState connectionState) async {
+      if (connectionState == BluetoothConnectionState.disconnected) {
+        await event.device.connect(autoConnect: true, mtu: null);
+        print(
+            "${event.device.disconnectReason?.code} ${event.device.disconnectReason?.description}");
+        
+      }
+    });
+    print("not connected");
+    if (event.device.isConnected) {
+      print("connected");
+      emit(state.copyWith(status: BluetoothStatus.pairComplete));
+    }
+    subscription.cancel();
+  }
 
   FutureOr<void> _onBluetoothSyncPressed(
-      BluetoothSyncPressed event, Emitter<BluetoothState> emit) {}
+      BluetoothSyncPressed event, Emitter<BluetoothState> emit) {
+    var subscription = event.device.connectionState
+        .listen((BluetoothConnectionState connectionState) async {
+      if (connectionState == BluetoothConnectionState.disconnected) {
+        await event.device.connect(autoConnect: true, mtu: null);
+        print(
+            "${event.device.disconnectReason?.code} ${event.device.disconnectReason?.description}");
+      }
+    });
+
+
+    subscription.cancel();
+  }
 }
