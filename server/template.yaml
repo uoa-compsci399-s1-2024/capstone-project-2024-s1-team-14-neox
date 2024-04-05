@@ -317,6 +317,10 @@ Resources:
         - !Ref LayerCACertificates
       Environment:
         Variables:
+          PGHOST: !GetAtt Database.Endpoint.Address
+          # Default PGDATABASE is the user which we will get from the SecretsManager Secret
+          PGPORT: !GetAtt Database.Endpoint.Port
+          DB_SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
           SSL_CERT_FILE: /opt/global-bundle.pem
       Role: !GetAtt LambdaRole.Arn
       VpcConfig:
