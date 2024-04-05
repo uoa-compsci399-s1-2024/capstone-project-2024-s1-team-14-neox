@@ -69,20 +69,8 @@ void checkConnection() {
 }
 
 void addSample(byte arr[512], uint32_t& index, SensorSample sample) {
-    arr[index] = sample.timestamp.hour;
-    index++;
-    arr[index] = sample.timestamp.minute;
-    index++;
-    arr[index] = (sample.uv & 0x00ff);
-    index++;
-    arr[index] = (sample.uv & 0xff00) >> 8;
-    index++;
-    arr[index] = (sample.light & 0x00ff);
-    index++;
-    arr[index] = (sample.light & 0xff00) >> 8;
-    index++;
-    arr[index] = sample.acceleration;
-    index++;
+    memcpy(&arr[index], &sample, sizeof(SensorSample));
+    index += sizeof(SensorSample);
 }
 
 void emptyBuffers() {
