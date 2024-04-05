@@ -175,6 +175,65 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
 
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ProjectLambdaRole
+      Description: "Role to allow lambda functions to do everything in the set of things our backend needs to do (ie, it's not minimal)"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        # If we want it later:
+        # - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
+      Policies:
+        - PolicyName: AllowReadSecretValue
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !GetAtt Database.MasterUserSecret.SecretArn
+
+  SecretsManagerVPCEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.secretsmanager
+      VpcId: !Ref VPC
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref SecretsManagerSecurityGroup
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+  SecretsManagerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: secretsmanager-sg
+      GroupDescription: Allow inbound HTTP traffic from authorised applications for Secrets Manager
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          SourceSecurityGroupId:
+            Ref: SecretsAccessSecurityGroup
+  SecretsAccessSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: secretsmanager-access-sg
+      GroupDescription: Security group for applications allowed to access Secrets Manager
+      VpcId: !Ref VPC
+      # no in/egress rules since none needed
+
   NoIngressSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -211,12 +270,13 @@ Resources:
   Database:
     Type: AWS::RDS::DBInstance
     Properties:
-      DBInstanceIdentifier: cloud-db
+      DBInstanceIdentifier: cloud-db-TEMP
       Engine: postgres
-      DBName: clouddb
       StorageType: gp2
       AllocatedStorage: 20  # GiB
       DBInstanceClass: db.t3.micro  # free-tier acceptable
+      # Use Default DBName of `postgres` for PostgreSQL
+      DBName: postgres
       MasterUsername: postgres
       ManageMasterUserPassword: true  # in AWS Secrets Manager
       DBSubnetGroupName: !Ref DBSubnetGroup
@@ -243,6 +303,14 @@ Resources:
       Runtime: nodejs20.x
       Layers:
         - !Ref LayerDepsJS
+      Role: !GetAtt LambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref DBAccessSecurityGroup
+          - !Ref SecretsAccessSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
   FuncMetaSetupDB:
     Type: AWS::Serverless::Function
     Properties:
@@ -252,6 +320,20 @@ Resources:
       Runtime: nodejs20.x
       Layers:
         - !Ref LayerDepsJS
+      Environment:
+        Variables:
+          PGHOST: !GetAtt Database.Endpoint.Address
+          # Default PGDATABASE is the user which we will get from the SecretsManager Secret
+          PGPORT: !GetAtt Database.Endpoint.Port
+          SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
+      Role: !GetAtt LambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref DBAccessSecurityGroup
+          - !Ref SecretsAccessSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
   LayerDepsJS:
     Type: AWS::Serverless::LayerVersion
     Properties:
