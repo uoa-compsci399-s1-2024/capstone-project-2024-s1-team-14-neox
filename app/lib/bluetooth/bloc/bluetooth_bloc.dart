@@ -24,6 +24,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     on<BluetoothPairPressed>(_onBluetoothPairPressed);
     on<BluetoothUnpairPressed>(_onBluetoothUnpairPressed);
     on<BluetoothConnectPressed>(_onBluetoothConnectPressed);
+    on<BluetoothDisconnectPressed>(_onBluetoothDisconnectPressed);
     on<BluetoothSyncPressed>(_onBluetoothSyncPressed);
   }
 
@@ -38,13 +39,19 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
       }
     }
 
+    _systemDevices = await FlutterBluePlus.systemDevices;
+    emit(
+      state.copyWith(
+        status: BluetoothStatus.scanLoading,
+        systemDevices: _systemDevices,
+      ),
+    );
     // TODO: implement permission checking
 
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
       print(results);
       _scanResults = results;
-      emit(state.copyWith(
-          status: BluetoothStatus.scanLoading, scanResults: results));
+      emit(state.copyWith(scanResults: results));
     });
     _isScanningSubscription = FlutterBluePlus.isScanning.listen((result) {
       print("${DateTime.timestamp()} : ${result} ");
@@ -81,16 +88,15 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
 
   FutureOr<void> _onBluetoothConnectPressed(
       BluetoothConnectPressed event, Emitter<BluetoothState> emit) {
-        FlutterBluePlus.stopScan();
-        emit(state.copyWith(status: BluetoothStatus.pairLoading));
-        print(event.device);
+    FlutterBluePlus.stopScan();
+    emit(state.copyWith(status: BluetoothStatus.pairLoading));
+    print(event.device);
     var subscription = event.device.connectionState
         .listen((BluetoothConnectionState connectionState) async {
       if (connectionState == BluetoothConnectionState.disconnected) {
         await event.device.connect(autoConnect: true, mtu: null);
         print(
             "${event.device.disconnectReason?.code} ${event.device.disconnectReason?.description}");
-        
       }
     });
     print("not connected");
@@ -112,7 +118,10 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
       }
     });
 
-
     subscription.cancel();
+  }
+
+  Future<FutureOr<void>> _onBluetoothDisconnectPressed(BluetoothDisconnectPressed event, Emitter<BluetoothState> emit) async {
+    await event.device.disconnect();
   }
 }
