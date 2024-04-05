@@ -4,25 +4,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class SystemDeviceTile extends StatefulWidget {
-  const SystemDeviceTile({super.key, required this.device, this.onTap});
+  const SystemDeviceTile(
+      {super.key, required this.device, this.onConnect, this.onDisconnect});
 
   final BluetoothDevice device;
-  final VoidCallback? onTap;
+  final VoidCallback? onConnect;
+  final VoidCallback? onDisconnect;
 
   @override
   State<SystemDeviceTile> createState() => _SystemDeviceTileState();
 }
 
 class _SystemDeviceTileState extends State<SystemDeviceTile> {
-  BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
+  BluetoothConnectionState _connectionState =
+      BluetoothConnectionState.disconnected;
 
-  late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
+  late StreamSubscription<BluetoothConnectionState>
+      _connectionStateSubscription;
 
   @override
   void initState() {
     super.initState();
 
-    _connectionStateSubscription = widget.device.connectionState.listen((state) {
+    _connectionStateSubscription =
+        widget.device.connectionState.listen((state) {
       _connectionState = state;
       if (mounted) {
         setState(() {});
@@ -41,11 +46,17 @@ class _SystemDeviceTileState extends State<SystemDeviceTile> {
   }
 
   String getNiceManufacturerData(List<List<int>> data) {
-    return data.map((val) => '${getNiceHexArray(val)}').join(', ').toUpperCase();
+    return data
+        .map((val) => '${getNiceHexArray(val)}')
+        .join(', ')
+        .toUpperCase();
   }
 
   String getNiceServiceData(Map<Guid, List<int>> data) {
-    return data.entries.map((v) => '${v.key}: ${getNiceHexArray(v.value)}').join(', ').toUpperCase();
+    return data.entries
+        .map((v) => '${v.key}: ${getNiceHexArray(v.value)}')
+        .join(', ')
+        .toUpperCase();
   }
 
   String getNiceServiceUuids(List<Guid> serviceUuids) {
@@ -83,8 +94,10 @@ class _SystemDeviceTileState extends State<SystemDeviceTile> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
-      onPressed: widget.onTap,
-      child: isConnected ? const Text('OPEN') : const Text('CONNECT'),
+      onPressed: isConnected // Check is connected
+          ? widget.onDisconnect
+          : widget.onConnect,
+      child: isConnected ? const Text('DISCONNECT') : const Text('CONNECT'),
     );
   }
 
@@ -101,7 +114,10 @@ class _SystemDeviceTileState extends State<SystemDeviceTile> {
           Expanded(
             child: Text(
               value,
-              style: Theme.of(context).textTheme.bodySmall?.apply(color: Colors.black),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.apply(color: Colors.black),
               softWrap: true,
             ),
           ),

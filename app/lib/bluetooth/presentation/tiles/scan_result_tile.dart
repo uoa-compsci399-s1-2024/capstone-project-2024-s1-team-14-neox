@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class ScanResultTile extends StatefulWidget {
-  const ScanResultTile({super.key, required this.result, this.onTap});
+  const ScanResultTile({super.key, required this.result, this.onConnect, this.onDisconnect});
 
   final ScanResult result;
-  final VoidCallback? onTap;
+  final VoidCallback? onConnect;
+  final VoidCallback? onDisconnect;
 
   @override
   State<ScanResultTile> createState() => _ScanResultTileState();
@@ -83,8 +84,10 @@ class _ScanResultTileState extends State<ScanResultTile> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
-      onPressed: (widget.result.advertisementData.connectable) ? widget.onTap : null,
-      child: isConnected ? const Text('OPEN') : const Text('CONNECT'),
+      onPressed: isConnected // Check is connected
+      ? widget.onDisconnect 
+      :  (widget.result.advertisementData.connectable) ? widget.onConnect : null,
+      child: isConnected ? const Text('DISCONNECT') : const Text('CONNECT'),
     );
   }
 
