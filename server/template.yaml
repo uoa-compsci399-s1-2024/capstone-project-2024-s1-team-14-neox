@@ -341,7 +341,7 @@ Resources:
           PGHOST: !GetAtt Database.Endpoint.Address
           # Default PGDATABASE is the user which we will get from the SecretsManager Secret
           PGPORT: !GetAtt Database.Endpoint.Port
-          SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
+          DB_SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
           SSL_CERT_FILE: /opt/global-bundle.pem
       Role: !GetAtt LambdaRole.Arn
       VpcConfig:
@@ -354,10 +354,10 @@ Resources:
   LayerDepsJS:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: layer-dependencies-js
-      Description: Common dependencies for API lambda functions
+      LayerName: layer-lib-js
+      Description: Common code and dependencies for JS lambda functions
       # ContentUri: s3://proj-deploy-artifacts/layer-deps-js.zip
-      ContentUri: lambda/layers/project-dependencies-js/
+      ContentUri: lambda/layers/project-lib-js/
       CompatibleRuntimes:
         - nodejs20.x
     Metadata:

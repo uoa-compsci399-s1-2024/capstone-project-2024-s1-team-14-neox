@@ -1,49 +1,9 @@
-// Use this code snippet in your app.
-// If you need more information about configurations or implementing the sample code, visit the AWS docs:
-// https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/getting-started.html
-
 import {
-  SecretsManagerClient,
-  GetSecretValueCommand,
-} from "@aws-sdk/client-secrets-manager";
-import fs from "node:fs";
-import process from "node:process";
+  setupDB,
+} from "/opt/nodejs/lib.mjs";
 
-const client = new SecretsManagerClient({
-  region: process.env.AWS_REGION
-});
+let db = await setupDB();
 
-let response;
-
-try {
-  response = await client.send(
-    new GetSecretValueCommand({
-      SecretId: process.env.SECRET_ARN,
-      VersionStage: "AWSCURRENT", // VersionStage defaults to AWSCURRENT if unspecified
-    })
-  );
-} catch (error) {
-  // For a list of exceptions thrown, see
-  // https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-  throw error;
-}
-
-const secret = JSON.parse(response.SecretString);
-
-// Your code goes here
-import pg from 'pg';
-const { Client } = pg;
-
-const db = new Client({
-  host: process.env.PGHOST,
-  port: process.env.PGPORT,
-  database: secret.username,
-  user: secret.username,
-  password: secret.password,
-  ssl: {
-    ca: [fs.readFileSync(process.env.SSL_CERT_FILE)]
-  },
-})
 console.log("connecting");
 await db.connect();
 console.log("connection success")
