@@ -5,22 +5,20 @@ sealed class BluetoothEvent{}
 
 class BluetoothScanStartPressed extends BluetoothEvent {} 
 class BluetoothScanStopPressed extends BluetoothEvent {} 
-class BluetoothPairPressed extends BluetoothEvent {} 
-class BluetoothUnpairPressed extends BluetoothEvent {}
 class BluetoothConnectPressed extends BluetoothEvent {
-  final BluetoothDevice device;
+  final String deviceRemoteId;
 
-  BluetoothConnectPressed({required this.device});
+  BluetoothConnectPressed({required this.deviceRemoteId});
 
 }
 class BluetoothDisconnectPressed extends BluetoothEvent {
-  final BluetoothDevice device;
+  final String deviceRemoteId;
 
-  BluetoothDisconnectPressed({required this.device});
+  BluetoothDisconnectPressed({required this.deviceRemoteId});
 
 }
 class BluetoothSyncPressed extends BluetoothEvent {
-    final BluetoothDevice device;
+    final String deviceRemoteId;
 
-  BluetoothSyncPressed({required this.device});
+  BluetoothSyncPressed({required this.deviceRemoteId});
 } 
