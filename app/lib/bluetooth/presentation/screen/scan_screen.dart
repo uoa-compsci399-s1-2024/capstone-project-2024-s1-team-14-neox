@@ -58,7 +58,7 @@ class ScanScreen extends StatelessWidget {
                 .map((r) => ScanResultTile(
                       result: r,
                       onTap: () => context.read<BluetoothBloc>().add(
-                            BluetoothConnectPressed(),
+                            BluetoothConnectPressed(device: r.device),
                           ),
                     ))
                 .toList(),
