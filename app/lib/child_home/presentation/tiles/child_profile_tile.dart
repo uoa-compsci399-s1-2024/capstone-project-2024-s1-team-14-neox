@@ -1,8 +1,12 @@
 import 'package:age_calculator/age_calculator.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/data/child_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bluetooth/bloc/bluetooth_bloc.dart';
+import '../../../bluetooth/presentation/bluetooth_panel.dart';
 import '../../../data/child_model.dart';
+import '../../cubit/device_pair_cubit.dart';
 
 class ChildProfileTile extends StatefulWidget {
   final ChildModel profile;
@@ -13,14 +17,11 @@ class ChildProfileTile extends StatefulWidget {
 }
 
 class _ChildProfileTileState extends State<ChildProfileTile> {
-
   String calculateAge(DateTime dateOfBirth) {
     DateDuration duration = AgeCalculator.age(dateOfBirth);
     return "${duration.years} years, ${duration.months} months";
   }
 
-
-  
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -45,7 +46,39 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
               fontSize: 30,
             ),
           ),
-          
+          BlocConsumer<DevicePairCubit, DevicePairState>(
+              listener: (context, state) {
+            if (state is DevicePairSuccess) {
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                  ),
+                );
+            } else if (state is DeviceUnpairSuccess) {
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                  ),
+                );
+            } else if (state is DevicePairFailure) {
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                  ),
+                );
+            }
+          }, builder: (context, state) {
+            return BlocProvider(
+              create: (_) => BluetoothBloc(context.read<ChildRepository>()),
+              child: const BluetoothPanel(),
+            );
+          }),
         ],
       ),
     );
