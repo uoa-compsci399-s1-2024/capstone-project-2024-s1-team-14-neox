@@ -396,3 +396,16 @@ Outputs:
   DBAccessSecurityGroup:
     Description: Security group for services allowed to access database
     Value: !Ref DBAccessSecurityGroup
+  SecretsManagerVPCEndpoint:
+    Description: Endpoint for hosts inside VPC to access Secrets Manager
+    Value: !Ref SecretsManagerVPCEndpoint
+  SecretsManagerSecurityGroup:
+    Description: Security group for Secrets Manager
+    Value: !Ref SecretsManagerSecurityGroup
+  SecretsAccessSecurityGroup:
+    Description: Security group for applications allowed to access Secrets Manager
+    Value: !Ref SecretsAccessSecurityGroup
+
+  Database:
+    Description: Database for samples, etc
+    Value: !Ref Database
