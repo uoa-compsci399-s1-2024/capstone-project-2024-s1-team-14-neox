@@ -10,7 +10,7 @@ part 'bluetooth_state.dart';
 
 class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
   // Refer to data repository
-  final ChildRepository _childRepository;
+  final String? _deviceRemoteId;
 
   List<BluetoothDevice> _systemDevices = [];
   List<ScanResult> _scanResults = [];
@@ -18,11 +18,9 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
   late StreamSubscription<bool> _isScanningSubscription;
 
-  BluetoothBloc(this._childRepository) : super(BluetoothState()) {
+  BluetoothBloc(this._deviceRemoteId) : super(BluetoothState()) {
     on<BluetoothScanStartPressed>(_onBluetoothScanStartPressed);
     on<BluetoothScanStopPressed>(_onBluetoothScanStopPressed);
-    on<BluetoothPairPressed>(_onBluetoothPairPressed);
-    on<BluetoothUnpairPressed>(_onBluetoothUnpairPressed);
     on<BluetoothConnectPressed>(_onBluetoothConnectPressed);
     on<BluetoothDisconnectPressed>(_onBluetoothDisconnectPressed);
     on<BluetoothSyncPressed>(_onBluetoothSyncPressed);
@@ -46,10 +44,8 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
         systemDevices: _systemDevices,
       ),
     );
-    // TODO: implement permission checking
 
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
-      print(results);
       _scanResults = results;
       emit(state.copyWith(scanResults: results));
     });
@@ -76,52 +72,93 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
 
   FutureOr<void> _onBluetoothScanStopPressed(
       BluetoothScanStopPressed event, Emitter<BluetoothState> emit) {
-    FlutterBluePlus.stopScan();
+    if (FlutterBluePlus.isScanningNow) {
+      FlutterBluePlus.stopScan();
+    }
     emit(state.copyWith(status: BluetoothStatus.scanStopped));
   }
 
-  FutureOr<void> _onBluetoothPairPressed(
-      BluetoothPairPressed event, Emitter<BluetoothState> emit) {}
-
-  FutureOr<void> _onBluetoothUnpairPressed(
-      BluetoothUnpairPressed event, Emitter<BluetoothState> emit) {}
-
   FutureOr<void> _onBluetoothConnectPressed(
       BluetoothConnectPressed event, Emitter<BluetoothState> emit) {
-    FlutterBluePlus.stopScan();
-    emit(state.copyWith(status: BluetoothStatus.pairLoading));
-    print(event.device);
-    var subscription = event.device.connectionState
+    if (FlutterBluePlus.isScanningNow) {
+      FlutterBluePlus.stopScan();
+    }
+
+    emit(state.copyWith(status: BluetoothStatus.connectLoading));
+    BluetoothDevice device = BluetoothDevice.fromId(event.deviceRemoteId);
+    var subscription = device.connectionState
         .listen((BluetoothConnectionState connectionState) async {
       if (connectionState == BluetoothConnectionState.disconnected) {
-        await event.device.connect(autoConnect: true, mtu: null);
+        await device.connect(mtu: 23);
         print(
-            "${event.device.disconnectReason?.code} ${event.device.disconnectReason?.description}");
+            "${device.disconnectReason?.code} ${device.disconnectReason?.description}");
       }
     });
-    print("not connected");
-    if (event.device.isConnected) {
-      print("connected");
-      emit(state.copyWith(status: BluetoothStatus.pairComplete));
+    if (device.isConnected) {
+      print("Connected: ${event.deviceRemoteId}");
+      emit(state.copyWith(status: BluetoothStatus.connectSuccess));
+    } else {
+      emit(
+        state.copyWith(
+            status: BluetoothStatus.error, message: "Failed to conenct device"),
+      );
     }
     subscription.cancel();
   }
 
-  FutureOr<void> _onBluetoothSyncPressed(
-      BluetoothSyncPressed event, Emitter<BluetoothState> emit) {
-    var subscription = event.device.connectionState
-        .listen((BluetoothConnectionState connectionState) async {
-      if (connectionState == BluetoothConnectionState.disconnected) {
-        await event.device.connect(autoConnect: true, mtu: null);
+  Future<FutureOr<void>> _onBluetoothSyncPressed(
+      BluetoothSyncPressed event, Emitter<BluetoothState> emit) async {
+    // // Test to check connection
+    // for (ScanResult result in _scanResults) {
+    //   BluetoothDevice device = result.device;
+    //   print(device.remoteId.toString());
+    //   if (device.remoteId.toString() == "38:8A:06:8A:D4:37") {
+    //     await device.connect(mtu: 512);
+    //     print("Checking is connected: ${device.isConnected}");
+    //   }
+    // }
+    if (_deviceRemoteId == null) {
+      emit(
+        state.copyWith(
+            status: BluetoothStatus.error, message: "No device registered"),
+      );
+    } else {
+      BluetoothDevice device = BluetoothDevice.fromId(_deviceRemoteId);
+      if (device.isDisconnected) {
+        await device.connect(mtu: 23);
         print(
-            "${event.device.disconnectReason?.code} ${event.device.disconnectReason?.description}");
+            "${device.disconnectReason?.code} $device.disconnectReason?.description}");
       }
-    });
 
-    subscription.cancel();
+      //TODO @Kevin
+      // Resources
+      // https://github.com/boskokg/flutter_blue_plus/issues/274
+      // https://pub.dev/packages/flutter_blue_plus#subscribe-to-a-characteristic
+
+
+
+    }
+
+    // var subscription = event.device.connectionState
+    //     .listen((BluetoothConnectionState connectionState) async {
+    //   //TODO: scan again before syncing
+    //   //if disconnected discover services again
+    //   // Try connecting with device remote id stored in the child repository
+    //   if (connectionState == BluetoothConnectionState.disconnected) {
+    //     await event.device.connect(mtu: 23);
+    //     print(
+    //         "${event.device.disconnectReason?.code} ${event.device.disconnectReason?.description}");
+    //   }
+    // });
+
+    // subscription.cancel();
   }
 
-  Future<FutureOr<void>> _onBluetoothDisconnectPressed(BluetoothDisconnectPressed event, Emitter<BluetoothState> emit) async {
-    await event.device.disconnect();
+  Future<FutureOr<void>> _onBluetoothDisconnectPressed(
+      BluetoothDisconnectPressed event, Emitter<BluetoothState> emit) async {
+    if (_deviceRemoteId != null) {
+      BluetoothDevice device = BluetoothDevice.fromId(_deviceRemoteId);
+      await device.disconnect();
+    }
   }
 }

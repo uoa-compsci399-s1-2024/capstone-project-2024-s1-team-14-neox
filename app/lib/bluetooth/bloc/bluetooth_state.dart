@@ -4,8 +4,8 @@ enum BluetoothStatus {
   unknown,
   scanLoading,
   scanStopped,
-  pairLoading,
-  pairComplete,
+  connectLoading,
+  connectSuccess,
   syncLoading,
   syncComplete,
   error,
@@ -17,8 +17,8 @@ extension BluetoothStatusX on BluetoothStatus {
   bool get isUnknown => this == BluetoothStatus.unknown;
   bool get isScanLoading => this == BluetoothStatus.scanLoading;
   bool get isScanStopped => this == BluetoothStatus.scanStopped;
-  bool get isPairLoading => this == BluetoothStatus.pairLoading;
-  bool get isPairComplete => this == BluetoothStatus.pairComplete;
+  bool get isConnectLoading => this == BluetoothStatus.connectLoading;
+  bool get isConnectSuccess => this == BluetoothStatus.connectSuccess;
   bool get isSyncLoading => this == BluetoothStatus.syncLoading;
   bool get isSyncComplete => this == BluetoothStatus.syncComplete;
   bool get isError => this == BluetoothStatus.error;

@@ -55,23 +55,24 @@ class ScanScreen extends StatelessWidget {
       body: BlocBuilder<BluetoothBloc, BluetoothState>(
         builder: (context, state) {
           return ListView(children: [
-            Text("Discoverd devices"),
+            Text("Discovered devices"),
             ...state.systemDevices
                 .map(
                   (d) => SystemDeviceTile(
                     device: d,
                     onTap: () => context.read<BluetoothBloc>().add(
-                          BluetoothDisconnectPressed(device: d),
+                          BluetoothDisconnectPressed(deviceRemoteId: d.remoteId.str),
                         ),
                   ),
                 )
                 .toList(),
+                Text("New devices"),
             ...state.scanResults
                 .map(
                   (r) => ScanResultTile(
                     result: r,
                     onTap: () => context.read<BluetoothBloc>().add(
-                          BluetoothConnectPressed(device: r.device),
+                          BluetoothConnectPressed(deviceRemoteId: r.device.remoteId.str),
                         ),
                   ),
                 )

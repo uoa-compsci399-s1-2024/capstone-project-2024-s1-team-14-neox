@@ -75,7 +75,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
             }
           }, builder: (context, state) {
             return BlocProvider(
-              create: (_) => BluetoothBloc(context.read<ChildRepository>()),
+              create: (_) => BluetoothBloc(widget.profile.deviceRemoteId),
               child: BluetoothPanel(name: widget.profile.name),
             );
           }),
