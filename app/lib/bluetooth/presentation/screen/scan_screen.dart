@@ -9,22 +9,28 @@ class ScanScreen extends StatelessWidget {
   final String name;
   const ScanScreen({super.key, required this.name});
 
-  //  List<Widget> _buildSystemDeviceTiles(BuildContext context) {
-  //   return _systemDevices
-  //       .map(
-  //         (d) => SystemDeviceTile(
-  //           device: d,
-  //           onOpen: () => Navigator.of(context).push(
-  //             MaterialPageRoute(
-  //               builder: (context) => DeviceScreen(device: d),
-  //               settings: const RouteSettings(name: '/DeviceScreen'),
-  //             ),
-  //           ),
-  //           onConnect: () => onConnectPressed(d),
-  //         ),
-  //       )
-  //       .toList();
-  // }
+  //TODO might need to dispose BlocProvider.value bloc?
+
+  void showSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: const Text(
+            'Pair Success',
+          ),
+          actions: [
+            ElevatedButton(
+              child: const Text('Return to Home'),
+              onPressed: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Widget buildScanButton(BuildContext context) {
     return BlocBuilder<BluetoothBloc, BluetoothState>(
@@ -52,7 +58,13 @@ class ScanScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Find Devices for $name'),
       ),
-      body: BlocBuilder<BluetoothBloc, BluetoothState>(
+      body: BlocConsumer<BluetoothBloc, BluetoothState>(
+        listener: (context, state) {
+          if (state.status.isConnectSuccess) {
+            
+            showSuccessDialog(context);
+          }
+        },
         builder: (context, state) {
           return ListView(children: [
             Text("Discovered devices"),
