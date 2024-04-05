@@ -15,7 +15,7 @@ void checkConnection();
 /*
  * Adds a sample to one of the five buffers which will be written to a characteristic.
  */
-void addSample(byte arr[512], int& index, SensorSample sample);
+void addSample(byte arr[512], uint32_t& index, SensorSample sample);
 
 /*
  * Empties all 5  buffers.
