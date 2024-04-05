@@ -30,6 +30,7 @@ class BluetoothState extends Equatable {
   final List<ScanResult> scanResults;
   final String childId;
   final String message;
+  //TODO add double to represent syncing process
 
   const BluetoothState({
     this.status = BluetoothStatus.unknown,
