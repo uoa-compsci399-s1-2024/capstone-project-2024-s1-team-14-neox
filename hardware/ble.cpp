@@ -34,8 +34,8 @@ byte buffer_3[512];
 byte buffer_4[512];
 byte buffer_5[512];
 
-const uint32_t dataPerCharacateristic = 511;
-const uint32_t maxData = dataPerCharacateristic * 5;
+const uint32_t dataPerCharacteristic = 511;
+const uint32_t maxData = dataPerCharacteristic * 5;
 
 void initializeBLE() {
     if (!BLE.begin()) 
@@ -86,11 +86,11 @@ void addSample(byte arr[512], uint32_t& index, SensorSample sample) {
 }
 
 void emptyBuffers() {
-    std::fill(buffer_1, buffer_1 + dataPerCharacateristic, 0);
-    std::fill(buffer_2, buffer_2 + dataPerCharacateristic, 0);
-    std::fill(buffer_3, buffer_3 + dataPerCharacateristic, 0);
-    std::fill(buffer_4, buffer_4 + dataPerCharacateristic, 0);
-    std::fill(buffer_5, buffer_5 + dataPerCharacateristic, 0);
+    std::fill(buffer_1, buffer_1 + dataPerCharacteristic, 0);
+    std::fill(buffer_2, buffer_2 + dataPerCharacteristic, 0);
+    std::fill(buffer_3, buffer_3 + dataPerCharacteristic, 0);
+    std::fill(buffer_4, buffer_4 + dataPerCharacteristic, 0);
+    std::fill(buffer_5, buffer_5 + dataPerCharacteristic, 0);
 }
 
 void fillCharacteristics() {
@@ -126,27 +126,27 @@ void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
         eepromReadSample(bufferIndex, &sample);
         
         
-        if (index == dataPerCharacateristic) 
+        if (index == dataPerCharacteristic) 
         {
             index = 0;
         }
 
-        if (bytesInBuffers < dataPerCharacateristic)
+        if (bytesInBuffers < dataPerCharacteristic)
         {
             addSample(buffer_1, index, sample);
         }
 
-        else if (bytesInBuffers >= dataPerCharacateristic && bytesInBuffers < dataPerCharacateristic * 2 )
+        else if (bytesInBuffers >= dataPerCharacteristic && bytesInBuffers < dataPerCharacteristic * 2 )
         {
             addSample(buffer_2, index, sample);
         }
 
-        else if (bytesInBuffers >= dataPerCharacateristic * 2 && bytesInBuffers < dataPerCharacateristic * 3 )
+        else if (bytesInBuffers >= dataPerCharacteristic * 2 && bytesInBuffers < dataPerCharacteristic * 3 )
         {
             addSample(buffer_3, index, sample);
         }
 
-        else if (bytesInBuffers >= dataPerCharacateristic * 3 && bytesInBuffers < dataPerCharacateristic * 4 )
+        else if (bytesInBuffers >= dataPerCharacteristic * 3 && bytesInBuffers < dataPerCharacteristic * 4 )
         {
             addSample(buffer_4, index, sample);
         }
