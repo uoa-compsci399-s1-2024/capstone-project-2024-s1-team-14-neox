@@ -16,38 +16,32 @@ DROP TABLE IF EXISTS parents;
 
 CREATE TABLE parents (
        -- id INTEGER NOT NULL PRIMARY KEY,
-       ext_id VARCHAR(50) NOT NULL PRIMARY KEY,
+       id VARCHAR(50) NOT NULL PRIMARY KEY,
        fname VARCHAR(100) NOT NULL,
        lname VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE children (
-       -- id INTEGER NOT NULL PRIMARY KEY,
-       ext_id VARCHAR(50) NOT NULL PRIMARY KEY,
-       -- parent_id INTEGER NOT NULL,
-       parent_ext_id VARCHAR(50) NOT NULL,
+       id VARCHAR(50) NOT NULL PRIMARY KEY,
+       parent_id VARCHAR(50) NOT NULL,
        fname VARCHAR(100),
        lname VARCHAR(100),
-       -- FOREIGN KEY (parent_id) REFERENCES parents (id)
-       FOREIGN KEY (parent_ext_id) REFERENCES parents (ext_id)
+       FOREIGN KEY (parent_id) REFERENCES parents (id)
 );
 
 CREATE TABLE samples (
        -- id INTEGER NOT NULL PRIMARY KEY,
-       -- ts TIMESTAMP WITH TIMEZONE NOT NULL PRIMARY KEY,
        -- Use timestamptz alias for TIMESTAMP WITH TIMEZONE because there were syntax errors when I sent the query to the DB in RDS
-       ts TIMESTAMPTZ NOT NULL PRIMARY KEY,
-       -- child_id INTEGER NOT NULL,
-       child_ext_id VARCHAR(50) NOT NULL,
+       tstamp TIMESTAMPTZ NOT NULL PRIMARY KEY,
+       child_id VARCHAR(50) NOT NULL,
        uv_index INTEGER,
        lux INTEGER,
-       -- FOREIGN KEY (child_id) REFERENCES children (id)
-       FOREIGN KEY (child_ext_id) REFERENCES children (ext_id)
+       FOREIGN KEY (child_id) REFERENCES children (id)
 );
 
-INSERT INTO parents (ext_id, fname, lname) VALUES ('1', 'John', 'Cena');
-INSERT INTO children (ext_id, parent_ext_id, fname) VALUES ('22', '1', 'Bobby');
-INSERT INTO samples (child_ext_id, ts, uv_index, lux) VALUES ('22', '2024-02-01+12', 2, 1500);
+INSERT INTO parents (id, fname, lname) VALUES ('1', 'John', 'Cena');
+INSERT INTO children (id, parent_id, fname) VALUES ('22', '1', 'Bobby');
+INSERT INTO samples (child_id, tstamp, uv_index, lux) VALUES ('22', '2024-02-01+12', 2, 1500);
 `;
 export const handler = async (event) => {
   await db.query(CREATE_TABLES_TEXT);
