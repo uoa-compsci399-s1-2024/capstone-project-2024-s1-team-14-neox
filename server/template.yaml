@@ -290,6 +290,17 @@ Resources:
       StorageEncrypted: true
     DeletionPolicy: Snapshot
     UpdateReplacePolicy: Snapshot
+  # TODO: Use parameter store for location of cert layer?
+  # See https://dev.to/leading-edje/aws-lambda-layer-for-private-certificates-465j
+  LayerCACertificates:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: layer-ca-certs
+      Description: Certificates to connect to DB via TLS
+      ContentUri: lambda/layers/certs/
+      CompatibleRuntimes:
+        - nodejs20.x
+      # RetentionPolicy: Retain
 
   # API Gateway
 
@@ -303,6 +314,10 @@ Resources:
       Runtime: nodejs20.x
       Layers:
         - !Ref LayerDepsJS
+        - !Ref LayerCACertificates
+      Environment:
+        Variables:
+          SSL_CERT_FILE: /opt/global-bundle.pem
       Role: !GetAtt LambdaRole.Arn
       VpcConfig:
         SecurityGroupIds:
@@ -320,12 +335,14 @@ Resources:
       Runtime: nodejs20.x
       Layers:
         - !Ref LayerDepsJS
+        - !Ref LayerCACertificates
       Environment:
         Variables:
           PGHOST: !GetAtt Database.Endpoint.Address
           # Default PGDATABASE is the user which we will get from the SecretsManager Secret
           PGPORT: !GetAtt Database.Endpoint.Port
           SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
+          SSL_CERT_FILE: /opt/global-bundle.pem
       Role: !GetAtt LambdaRole.Arn
       VpcConfig:
         SecurityGroupIds:
