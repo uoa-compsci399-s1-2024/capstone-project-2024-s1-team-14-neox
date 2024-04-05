@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'dart:async';
 import 'dart:io';
+import '../../data/child_model.dart';
 import '../../data/child_repository.dart';
 
 part 'bluetooth_event.dart';
