@@ -1,5 +1,7 @@
 import 'package:capstone_project_2024_s1_team_14_neox/dB/database.dart';
 import 'package:drift/drift.dart';
+import 'dart:convert';
+
 
 @UseRowClass(ArduinoDataEntity)
 class ArduinoDatas extends Table {
@@ -17,9 +19,7 @@ class ArduinoDataEntity{
   DateTime datetime;
 
 
-  ArduinoDataEntity(
-      this.name, this.uv, this.light, this.datetime
-      );
+  ArduinoDataEntity({this.name, this.uv, this.light, required this.datetime});
 
   Map<String, dynamic> toJson() {
     return {
@@ -30,14 +30,17 @@ class ArduinoDataEntity{
     };
   }
 
-//  factory ArduinoDataEntity.fromJson(Map<String, dynamic> json) {
-  //  return ArduinoDataEntity(
-   //   name: json['name'],
-  //    uv: json['uv'],
-  //    light: json['light'],
- //     datetime: DateTime.tryParse(json['datetime'] ?? ''),
- //   );
-//  }
+
+
+  factory ArduinoDataEntity.fromJson(Map<String, dynamic> json) {
+    return ArduinoDataEntity(
+      name: json['name'],
+      uv: json['uv'],
+      light: json['light'],
+      datetime: DateTime.parse(json['datetime']),
+    );
+  }
+
 
 
   ArduinoDatasCompanion toCompanion() {
