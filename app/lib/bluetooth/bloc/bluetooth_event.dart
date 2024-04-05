@@ -13,6 +13,12 @@ class BluetoothConnectPressed extends BluetoothEvent {
   BluetoothConnectPressed({required this.device});
 
 }
+class BluetoothDisconnectPressed extends BluetoothEvent {
+  final BluetoothDevice device;
+
+  BluetoothDisconnectPressed({required this.device});
+
+}
 class BluetoothSyncPressed extends BluetoothEvent {
     final BluetoothDevice device;
 

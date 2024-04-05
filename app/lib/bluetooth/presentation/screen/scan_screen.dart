@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/bluetooth_bloc.dart';
 import '../tiles/scan_result_tile.dart';
+import '../tiles/system_device_tile.dart';
 
 class ScanScreen extends StatelessWidget {
   final String name;
@@ -53,16 +54,29 @@ class ScanScreen extends StatelessWidget {
       ),
       body: BlocBuilder<BluetoothBloc, BluetoothState>(
         builder: (context, state) {
-          return ListView(
-            children: state.scanResults
-                .map((r) => ScanResultTile(
-                      result: r,
-                      onTap: () => context.read<BluetoothBloc>().add(
-                            BluetoothConnectPressed(device: r.device),
-                          ),
-                    ))
+          return ListView(children: [
+            Text("Discoverd devices"),
+            ...state.systemDevices
+                .map(
+                  (d) => SystemDeviceTile(
+                    device: d,
+                    onTap: () => context.read<BluetoothBloc>().add(
+                          BluetoothDisconnectPressed(device: d),
+                        ),
+                  ),
+                )
                 .toList(),
-          );
+            ...state.scanResults
+                .map(
+                  (r) => ScanResultTile(
+                    result: r,
+                    onTap: () => context.read<BluetoothBloc>().add(
+                          BluetoothConnectPressed(device: r.device),
+                        ),
+                  ),
+                )
+                .toList(),
+          ]);
         },
       ),
       floatingActionButton: buildScanButton(context),
