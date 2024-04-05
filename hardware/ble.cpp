@@ -34,7 +34,7 @@ byte buffer_3[512];
 byte buffer_4[512];
 byte buffer_5[512];
 
-const uint32_t dataPerCharacteristic = 511;
+const uint32_t dataPerCharacteristic = 512 / sizeof(SensorSample) * sizeof(SensorSample);
 const uint32_t maxData = dataPerCharacteristic * 5;
 
 void initializeBLE() {
@@ -104,7 +104,7 @@ void fillCharacteristics() {
 void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
     uint32_t bufferIndex = currentSampleBufferIndex;
     uint32_t sent = sentData;
-    uint32_t bytesToSend = eepromGetSampleBufferLength() * 7 - sent;
+    uint32_t bytesToSend = eepromGetSampleBufferLength() * sizeof(SensorSample) - sent;
     uint32_t bytesInBuffers = 0;
     uint32_t index = 0;
 
@@ -118,7 +118,7 @@ void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
     {
         bytesToSend = maxData;
     }
-    uint32_t samplesToSend = bytesToSend / 7;
+    uint32_t samplesToSend = bytesToSend / sizeof(SensorSample);
     eepromLockSampleBuffer();
 
     for (uint32_t i = 0; i < samplesToSend; i++) {
@@ -156,13 +156,8 @@ void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
             addSample(buffer_5, index, sample);
         }
 
-        sent += 7;
-        bytesInBuffers += 7;
-        bufferIndex++;
-        if (bufferIndex == 0x4000 / sizeof(SensorSample))
-        {
-            bufferIndex = 0;
-        }
+        sent += sizeof(SensorSample);
+        bytesInBuffers += sizeof(SensorSample);
     }
     
     eepromUnlockSampleBuffer();
