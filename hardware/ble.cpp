@@ -6,16 +6,21 @@
 #include "ble.h"
 #include "sensor_sample.h"
 
+
+const uint32_t maxDataPerCharacteristic = 512;
+const uint32_t dataPerCharacteristic = maxDataPerCharacteristic / sizeof(SensorSample) * sizeof(SensorSample);
+const uint32_t maxData = dataPerCharacteristic * 5;
+
 BLEService sensorSamplesService("ba5c0000-243e-4f78-ac25-69688a1669b4");
 
 /*
  * Data will be sent 5 BLE characteristics at a time. These characteristics will be updated dynamically (depending on how much data must be sent).
  */
-BLECharacteristic samples_1("42b25f8f-0000-43de-92b8-47891c706106", BLERead, 512);
-BLECharacteristic samples_2("5c5ef115-0001-431d-8c23-52ff6ad1e467", BLERead, 512);
-BLECharacteristic samples_3("1fc0372f-0002-43f3-8cfc-1a5611b88062", BLERead, 512);
-BLECharacteristic samples_4("ff3d9730-0003-4aac-84e2-0861c1d000a6", BLERead, 512);
-BLECharacteristic samples_5("6eea8c3b-0004-4ec0-a842-6ed292e598dd", BLERead, 512);
+BLECharacteristic samples_1("42b25f8f-0000-43de-92b8-47891c706106", BLERead, maxDataPerCharacteristic);
+BLECharacteristic samples_2("5c5ef115-0001-431d-8c23-52ff6ad1e467", BLERead, maxDataPerCharacteristic);
+BLECharacteristic samples_3("1fc0372f-0002-43f3-8cfc-1a5611b88062", BLERead, maxDataPerCharacteristic);
+BLECharacteristic samples_4("ff3d9730-0003-4aac-84e2-0861c1d000a6", BLERead, maxDataPerCharacteristic);
+BLECharacteristic samples_5("6eea8c3b-0004-4ec0-a842-6ed292e598dd", BLERead, maxDataPerCharacteristic);
 
 /*
  *   BLE Characteristic for receiving acknowledgement from app that data has been processed and sample characteristics can be updated
@@ -27,15 +32,11 @@ BLEStringCharacteristic update("f06c06bb-0005-4f4c-b6b4-a146eff5ab15", BLEWrite,
  * and values will be placed in a numbered buffer. Once the numbered buffer is full, its value will be written to the corresponding numbered
  * characteristic. Buffers are only added to if there are enough timestamps. If there are not enough, they remain empty.
  */
-byte initial[512];
-byte buffer_1[512];
-byte buffer_2[512];
-byte buffer_3[512];
-byte buffer_4[512];
-byte buffer_5[512];
-
-const uint32_t dataPerCharacteristic = 512 / sizeof(SensorSample) * sizeof(SensorSample);
-const uint32_t maxData = dataPerCharacteristic * 5;
+byte buffer_1[maxDataPerCharacteristic];
+byte buffer_2[maxDataPerCharacteristic];
+byte buffer_3[maxDataPerCharacteristic];
+byte buffer_4[maxDataPerCharacteristic];
+byte buffer_5[maxDataPerCharacteristic];
 
 void initializeBLE() {
     if (!BLE.begin()) 
@@ -68,7 +69,7 @@ void checkConnection() {
     }
 }
 
-void addSample(byte arr[512], uint32_t& index, SensorSample sample) {
+void addSample(byte arr[maxDataPerCharacteristic], uint32_t& index, SensorSample sample) {
     memcpy(&arr[index], &sample, sizeof(SensorSample));
     index += sizeof(SensorSample);
 }
@@ -82,11 +83,11 @@ void emptyBuffers() {
 }
 
 void fillCharacteristics() {
-    samples_1.writeValue(buffer_1, 512);
-    samples_2.writeValue(buffer_2, 512);
-    samples_3.writeValue(buffer_3, 512);
-    samples_4.writeValue(buffer_4, 512);
-    samples_5.writeValue(buffer_5, 512);
+    samples_1.writeValue(buffer_1, maxDataPerCharacteristic);
+    samples_2.writeValue(buffer_2, maxDataPerCharacteristic);
+    samples_3.writeValue(buffer_3, maxDataPerCharacteristic);
+    samples_4.writeValue(buffer_4, maxDataPerCharacteristic);
+    samples_5.writeValue(buffer_5, maxDataPerCharacteristic);
 }
 
 void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
