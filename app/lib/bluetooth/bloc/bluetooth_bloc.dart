@@ -3,19 +3,41 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'dart:async';
 import 'dart:io';
-import '../../data/child_repository.dart';
 
 part 'bluetooth_event.dart';
 part 'bluetooth_state.dart';
 
 class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
-  // Refer to data repository
-
   List<BluetoothDevice> _systemDevices = [];
   List<ScanResult> _scanResults = [];
+
   bool _isScanning = false;
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
   late StreamSubscription<bool> _isScanningSubscription;
+
+  /*
+   * TODO: Hard coded Arduino uuid: need to replace with values in the arduino repository
+  */
+
+  String uuidSerivce = "ba5c0000-243e-4f78-ac25-69688a1669b4";
+  String uuidSample1 = "42b25f8f-0000-43de-92b8-47891c706106";
+  String uuidSample2 = "5c5ef115-0001-431d-8c23-52ff6ad1e467";
+  String uuidSample3 = "1fc0372f-0002-43f3-8cfc-1a5611b88062";
+  String uuidSample4 = "ff3d9730-0003-4aac-84e2-0861c1d000a6";
+  String uuidSample5 = "6eea8c3b-0004-4ec0-a842-6ed292e598dd";
+  String uuidAcknowledgement = "f06c06bb-0005-4f4c-b6b4-a146eff5ab15";
+
+  // Subscriptions
+
+  // late StreamSubscription<List<int>> sample1StreamSubscription;
+  // late StreamSubscription<List<int>> sample2StreamSubscription;
+  // late StreamSubscription<List<int>> sample3StreamSubscription;
+  // late StreamSubscription<List<int>> sample4StreamSubscription;
+  // late StreamSubscription<List<int>> sample5StreamSubscription;
+
+  
+
+  late BluetoothCharacteristic acknowledgementCharacteristic;
 
   BluetoothBloc() : super(BluetoothState()) {
     on<BluetoothScanStartPressed>(_onBluetoothScanStartPressed);
@@ -122,15 +144,10 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
 
   Future<FutureOr<void>> _onBluetoothSyncPressed(
       BluetoothSyncPressed event, Emitter<BluetoothState> emit) async {
-    // // Test to check connection
-    // for (ScanResult result in _scanResults) {
-    //   BluetoothDevice device = result.device;
-    //   print(device.remoteId.toString());
-    //   if (device.remoteId.toString() == "38:8A:06:8A:D4:37") {
-    //     await device.connect(mtu: 512);
-    //     print("Checking is connected: ${device.isConnected}");
-    //   }
-    // }
+
+          List<StreamSubscription<List<int>>> sampleDataSubscriptions = [];
+
+
 
     if (event.deviceRemoteId == "") {
       emit(
@@ -145,25 +162,80 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
             "${device.disconnectReason?.code} $device.disconnectReason?.description}");
       }
 
-      //TODO @Kevin
-      // Resources
-      // https://github.com/boskokg/flutter_blue_plus/issues/274
-      // https://pub.dev/packages/flutter_blue_plus#subscribe-to-a-characteristic
+      List<BluetoothService> services = await device.discoverServices();
+      for (BluetoothService service in services) {
+        if (service.uuid.toString().toLowerCase() == uuidSerivce) {
+          List<BluetoothCharacteristic> characteristics =
+              service.characteristics;
+          for (BluetoothCharacteristic characteristic in characteristics) {
+            String uuidFound =
+                characteristic.characteristicUuid.toString().toLowerCase();
+
+            //Sample 1
+            if (uuidFound == uuidSample1) {
+               StreamSubscription<List<int>> sample1StreamSubscription =
+                  characteristic.onValueReceived.listen((byteArray) {
+                print("Sample1: $byteArray");
+              });
+              if (!characteristic.isNotifying) {
+                await characteristic.setNotifyValue(true);
+                sampleDataSubscriptions.add(sample1StreamSubscription);
+              }
+              //Sample 2
+            } else if (uuidFound == uuidSample2) {
+               StreamSubscription<List<int>> sample2StreamSubscription =
+                  characteristic.onValueReceived.listen((byteArray) {
+                print("Sample2: $byteArray");
+              });
+              if (!characteristic.isNotifying) {
+                await characteristic.setNotifyValue(true);
+                sampleDataSubscriptions.add(sample2StreamSubscription);
+              }
+              //Sample 3
+            } else if (uuidFound == uuidSample3) {
+               StreamSubscription<List<int>> sample3StreamSubscription =
+                  characteristic.onValueReceived.listen((byteArray) {
+                print("Sample3: $byteArray");
+              });
+              if (!characteristic.isNotifying) {
+                await characteristic.setNotifyValue(true);
+                sampleDataSubscriptions.add(sample3StreamSubscription);
+              }
+              //Sample 4
+            } else if (uuidFound == uuidSample4) {
+               StreamSubscription<List<int>> sample4StreamSubscription =
+                  characteristic.onValueReceived.listen((byteArray) {
+                print("Sample4: $byteArray");
+              });
+              if (!characteristic.isNotifying) {
+                await characteristic.setNotifyValue(true);
+                sampleDataSubscriptions.add(sample4StreamSubscription);
+              }
+              //Sample 5
+            } else if (uuidFound == uuidSample5) {
+               StreamSubscription<List<int>> sample5StreamSubscription =
+                  characteristic.onValueReceived.listen((byteArray) {
+                print("Sample5: $byteArray");
+              });
+              if (!characteristic.isNotifying) {
+                await characteristic.setNotifyValue(true);
+                sampleDataSubscriptions.add(sample5StreamSubscription);
+              }
+            } else if (uuidFound == uuidAcknowledgement) {
+              acknowledgementCharacteristic = characteristic;
+            }
+          }
+        }
+      }
+      for (StreamSubscription<List<int>> subscription in sampleDataSubscriptions) {
+        device.cancelWhenDisconnected(subscription);
+      }
     }
 
-    // var subscription = event.device.connectionState
-    //     .listen((BluetoothConnectionState connectionState) async {
-    //   //TODO: scan again before syncing
-    //   //if disconnected discover services again
-    //   // Try connecting with device remote id stored in the child repository
-    //   if (connectionState == BluetoothConnectionState.disconnected) {
-    //     await event.device.connect(mtu: 23);
-    //     print(
-    //         "${event.device.disconnectReason?.code} ${event.device.disconnectReason?.description}");
-    //   }
-    // });
-
-    // subscription.cancel();
+    //TODO Call function to send byteArray to repository
+    // Resources
+    // https://github.com/boskokg/flutter_blue_plus/issues/274
+    // https://pub.dev/packages/flutter_blue_plus#subscribe-to-a-characteristic
   }
 
   Future<FutureOr<void>> _onBluetoothDisconnectPressed(
