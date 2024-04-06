@@ -3,6 +3,7 @@
 #include "eeprom.h"
 #include "imu.h"
 #include "rtc.h"
+#include "ble.h"
 
 static const unsigned int SERIAL_BAUD_RATE = 9600;
 static const uint32_t POLL_INTERVAL_MS = (uint32_t)60 * 1000; // 1 minute
@@ -16,7 +17,7 @@ void setup()
 {
   Serial.begin(SERIAL_BAUD_RATE);
   Wire.begin();
-
+  initializeBLE();
   initializeIMU();
   initializeRTC(0, 0);
   eepromBegin();
@@ -32,6 +33,7 @@ void loop()
     lastSampleReadTime += POLL_INTERVAL_MS;
     readSample();
   }
+  checkConnection();
 }
 
 static void readSample()
