@@ -14,13 +14,13 @@ void initializeIMU() {
 
 uint8_t readIMU() {
     float x, y, z;
-    float sum;
-    uint8_t scaled_sum = 0;
+    float magnitude;
+    uint8_t scaledMagnitude = 0;
     if (IMU.accelerationAvailable())
     {
         IMU.readAcceleration(x, y, z);
-        sum = abs(x) + abs(y) + abs(z);
+        magnitude = sqrt(x*x + y*y + z*z);
     }
-    scaled_sum = 255 * (sum / 12);
-    return scaled_sum;
+    scaledMagnitude = 255 * (magnitude / 12);
+    return scaledMagnitude;
 }
