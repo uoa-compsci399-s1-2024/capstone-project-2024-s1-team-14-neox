@@ -56,7 +56,7 @@ class ChildProfileCubit extends Cubit<ChildProfileState> {
   }
 
   Future<void> updateDeviceRemoteId(
-      {required String name, required String deviceRemoteId}) async {
+      {required String name, required String? deviceRemoteId}) async {
     emit(state.copyWith(status: ChildProfileStatus.loading));
 
     final childProfiles =
@@ -64,6 +64,7 @@ class ChildProfileCubit extends Cubit<ChildProfileState> {
     emit(state.copyWith(
         status: ChildProfileStatus.updateSuccess,
         profiles: childProfiles,
-        message: "Successfully paired device"));
+        message: "Successfully updated device"));
   }
+
 }
