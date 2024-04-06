@@ -58,13 +58,22 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
                     ),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const CreateChildProfileScreen()),
-                  ),
-                  child: const Icon(Icons.add),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Add a new child"),
+                    ElevatedButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const CreateChildProfileScreen()),
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        size: 100,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
