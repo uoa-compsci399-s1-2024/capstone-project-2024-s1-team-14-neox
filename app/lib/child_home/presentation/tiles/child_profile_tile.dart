@@ -48,15 +48,15 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
           ),
           BlocConsumer<DevicePairCubit, DevicePairState>(
               listener: (context, state) {
-            if (state.status.isPairSuccess) {
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                  ),
-                );
-            } else if (state.status.isUnpairSuccess) {
+            // if (state.status.isPairSuccess) {
+            //   ScaffoldMessenger.of(context)
+            //     ..hideCurrentSnackBar()
+            //     ..showSnackBar(
+            //       SnackBar(
+            //         content: Text(state.message),
+            //       ),
+            //     );
+            /*} else*/ if (state.status.isUnpairSuccess) {
               ScaffoldMessenger.of(context)
                 ..hideCurrentSnackBar()
                 ..showSnackBar(
@@ -75,7 +75,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
             }
           }, builder: (context, state) {
             return BlocProvider(
-              create: (_) => BluetoothBloc(widget.profile.deviceRemoteId),
+              create: (_) => BluetoothBloc(),
               child: BluetoothPanel(name: widget.profile.name),
             );
           }),

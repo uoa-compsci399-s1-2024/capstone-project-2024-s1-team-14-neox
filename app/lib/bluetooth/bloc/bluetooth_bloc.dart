@@ -10,7 +10,6 @@ part 'bluetooth_state.dart';
 
 class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
   // Refer to data repository
-  final String? _deviceRemoteId;
 
   List<BluetoothDevice> _systemDevices = [];
   List<ScanResult> _scanResults = [];
@@ -18,7 +17,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
   late StreamSubscription<bool> _isScanningSubscription;
 
-  BluetoothBloc(this._deviceRemoteId) : super(BluetoothState()) {
+  BluetoothBloc() : super(BluetoothState()) {
     on<BluetoothScanStartPressed>(_onBluetoothScanStartPressed);
     on<BluetoothScanStopPressed>(_onBluetoothScanStopPressed);
     on<BluetoothConnectPressed>(_onBluetoothConnectPressed);
@@ -132,13 +131,14 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     //     print("Checking is connected: ${device.isConnected}");
     //   }
     // }
-    if (_deviceRemoteId == null) {
+
+    if (event.deviceRemoteId == "") {
       emit(
         state.copyWith(
             status: BluetoothStatus.error, message: "No device paired"),
       );
     } else {
-      BluetoothDevice device = BluetoothDevice.fromId(_deviceRemoteId);
+      BluetoothDevice device = BluetoothDevice.fromId(event.deviceRemoteId);
       if (device.isDisconnected) {
         await device.connect(mtu: 23);
         print(

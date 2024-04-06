@@ -42,6 +42,12 @@ class ScanScreen extends StatelessWidget {
             backgroundColor: Colors.red,
             child: const Icon(Icons.stop),
           );
+        } else if (state.status.isConnectLoading || state.status.isDisconnectLoading) {
+          return FloatingActionButton(
+          onPressed: () =>
+              context.read<BluetoothBloc>().add(BluetoothScanStartPressed()),
+          child: const CircularProgressIndicator(),
+        );
         }
         return FloatingActionButton(
           onPressed: () =>
@@ -66,7 +72,7 @@ class ScanScreen extends StatelessWidget {
         },
         builder: (context, state) {
           return ListView(children: [
-            Text("Discovered devices"),
+            Text(state.systemDevices.isEmpty ? "" : "Discovered devices"),
             ...state.systemDevices
                 .map(
                   (d) => SystemDeviceTile(
@@ -82,7 +88,7 @@ class ScanScreen extends StatelessWidget {
                   ),
                 )
                 .toList(),
-            Text("New devices"),
+            Text(state.scanResults.isEmpty ? "" : "New devices"),
             ...state.scanResults
                 .map(
                   (r) => ScanResultTile(
@@ -102,6 +108,7 @@ class ScanScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: buildScanButton(context),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
