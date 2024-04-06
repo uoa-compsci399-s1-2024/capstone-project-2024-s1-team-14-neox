@@ -1,5 +1,5 @@
 import 'package:age_calculator/age_calculator.dart';
-import 'package:capstone_project_2024_s1_team_14_neox/data/child_repository.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -48,7 +48,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
           ),
           BlocConsumer<DevicePairCubit, DevicePairState>(
               listener: (context, state) {
-            if (state is DevicePairSuccess) {
+            if (state.status.isPairSuccess) {
               ScaffoldMessenger.of(context)
                 ..hideCurrentSnackBar()
                 ..showSnackBar(
@@ -56,7 +56,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                     content: Text(state.message),
                   ),
                 );
-            } else if (state is DeviceUnpairSuccess) {
+            } else if (state.status.isUnpairSuccess) {
               ScaffoldMessenger.of(context)
                 ..hideCurrentSnackBar()
                 ..showSnackBar(
@@ -64,7 +64,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                     content: Text(state.message),
                   ),
                 );
-            } else if (state is DevicePairFailure) {
+            } else if (state.status.isFailure) {
               ScaffoldMessenger.of(context)
                 ..hideCurrentSnackBar()
                 ..showSnackBar(
