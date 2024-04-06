@@ -28,7 +28,7 @@ BLECharacteristic samples_5("6eea8c3b-0004-4ec0-a842-6ed292e598dd", BLERead, max
 BLEStringCharacteristic update("f06c06bb-0005-4f4c-b6b4-a146eff5ab15", BLEWrite, 8);
 
 /*
- * Byte arrays for initial value set to each characteristic and buffers that will be used to update characteristic values. Eeprom will be read
+ * Byte arrays for buffers that will be used to update characteristic values. Eeprom will be read
  * and values will be placed in a numbered buffer. Once the numbered buffer is full, its value will be written to the corresponding numbered
  * characteristic. Buffers are only added to if there are enough timestamps. If there are not enough, they remain empty.
  */
