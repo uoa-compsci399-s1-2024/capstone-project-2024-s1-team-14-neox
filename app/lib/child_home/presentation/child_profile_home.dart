@@ -52,7 +52,7 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
                 ...state.profiles.map(
                   (profile) => BlocProvider(
                     create: (_) =>
-                        DevicePairCubit(context.read<ChildRepository>(), profile),
+                        DevicePairCubit(profile.name, profile.deviceRemoteId),
                     child: ChildProfileTile(
                       profile: profile,
                     ),

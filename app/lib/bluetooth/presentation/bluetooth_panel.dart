@@ -1,7 +1,7 @@
-import 'package:capstone_project_2024_s1_team_14_neox/child_home/cubit/child_profile_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../child_home/cubit/child_profile_cubit.dart';
 import '../../child_home/cubit/device_pair_cubit.dart';
 import '../bloc/bluetooth_bloc.dart';
 import 'screen/scan_screen.dart';
@@ -15,7 +15,14 @@ class BluetoothPanel extends StatelessWidget {
     return BlocListener<BluetoothBloc, BluetoothState>(
       listener: (context, state) {
         if (state.status.isConnectSuccess) {
-          context.read<DevicePairCubit>().onDevicePairSuccess();
+          // TODO: Change repository function to update remote ID
+          // TODO: may need to change the chain of updating deviceRemoteID, currently calling two functions
+          context.read<ChildProfileCubit>().updateDeviceRemoteId(
+              name: name, deviceRemoteId: state.newDeviceRemoteId);
+
+          context
+              .read<DevicePairCubit>()
+              .onDevicePairSuccess(state.newDeviceRemoteId);
         }
       },
       child: BlocBuilder<DevicePairCubit, DevicePairState>(
@@ -61,11 +68,11 @@ class BluetoothPanel extends StatelessWidget {
                 child: Text("Unpair device"),
               ),
               ElevatedButton(
-                  onPressed: () {
-                    print(context.read<ChildProfileCubit>().state.profiles);
-                  },
-                  child: Text("Test"),
-                )
+                onPressed: () {
+                  print(context.read<ChildProfileCubit>().state.profiles);
+                },
+                child: Text("Test"),
+              )
             ],
           );
         },

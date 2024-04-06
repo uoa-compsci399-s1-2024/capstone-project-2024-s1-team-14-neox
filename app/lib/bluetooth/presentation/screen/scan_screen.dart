@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../child_home/cubit/child_profile_cubit.dart';
-import '../../../child_home/cubit/device_pair_cubit.dart';
 import '../../bloc/bluetooth_bloc.dart';
 import '../tiles/scan_result_tile.dart';
 import '../tiles/system_device_tile.dart';
@@ -63,8 +61,6 @@ class ScanScreen extends StatelessWidget {
       body: BlocConsumer<BluetoothBloc, BluetoothState>(
         listener: (context, state) {
           if (state.status.isConnectSuccess) {
-            context.read<ChildProfileCubit>().updateDeviceRemoteId(
-                name: name, deviceRemoteId: state.newDeviceRemoteId);
             showSuccessDialog(context);
           }
         },
