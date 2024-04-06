@@ -32,7 +32,7 @@ class BluetoothState extends Equatable {
   final BluetoothStatus status;
   final List<BluetoothDevice> systemDevices;
   final List<ScanResult> scanResults;
-  final String childId;
+  final String newDeviceRemoteId;
   final String message;
   //TODO add double to represent syncing process
 
@@ -40,26 +40,26 @@ class BluetoothState extends Equatable {
     this.status = BluetoothStatus.unknown,
     this.systemDevices = const <BluetoothDevice>[],
     this.scanResults = const <ScanResult>[],
-    this.childId = "",
+    this.newDeviceRemoteId = "",
     this.message = "",
   });
   BluetoothState copyWith({
     BluetoothStatus? status,
     List<BluetoothDevice>? systemDevices,
     List<ScanResult>? scanResults,
-    String? childId,
+    String? newDeviceRemoteId,
     String? message,
   }) {
     return BluetoothState(
       status: status ?? this.status,
       systemDevices: systemDevices ?? this.systemDevices,
       scanResults: scanResults ?? this.scanResults,
-      childId: childId ?? "",
+      newDeviceRemoteId: newDeviceRemoteId ?? "",
       message: message ?? "",
     );
   }
 
   @override
   List<Object?> get props =>
-      [status, systemDevices, scanResults, childId, message];
+      [status, systemDevices, scanResults, newDeviceRemoteId, message];
 }
