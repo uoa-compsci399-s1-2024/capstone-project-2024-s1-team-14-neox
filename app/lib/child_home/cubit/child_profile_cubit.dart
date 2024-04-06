@@ -12,9 +12,9 @@ class ChildProfileCubit extends Cubit<ChildProfileState> {
 
   Future<void> fetchChildProfiles() async {
     try {
-      final childProflies = _childRepository.fetchChildProfiles();
+      final childProfiles = _childRepository.fetchChildProfiles();
       emit(state.copyWith(
-          status: ChildProfileStatus.fetchSuccess, profiles: childProflies));
+          status: ChildProfileStatus.fetchSuccess, profiles: childProfiles));
     } on Exception {
       emit(state.copyWith(
           status: ChildProfileStatus.failure,
@@ -25,11 +25,11 @@ class ChildProfileCubit extends Cubit<ChildProfileState> {
   Future<void> createChildProfile(String name, DateTime dateOfBirth) async {
     emit(state.copyWith(status: ChildProfileStatus.loading));
     try {
-      final childProflies =
+      final childProfiles =
           await _childRepository.createChildProfile(name, dateOfBirth);
       emit(state.copyWith(
         status: ChildProfileStatus.addSuccess,
-        profiles: childProflies,
+        profiles: childProfiles,
         message: "The child profile has been added",
       ));
     } on Exception {
@@ -42,10 +42,10 @@ class ChildProfileCubit extends Cubit<ChildProfileState> {
   Future<void> deleteChildProfile(int index) async {
     emit(state.copyWith(status: ChildProfileStatus.loading));
     try {
-      final childProflies = await _childRepository.deleteChildProfile(index);
+      final childProfiles = await _childRepository.deleteChildProfile(index);
       emit(state.copyWith(
         status: ChildProfileStatus.deleteSuccess,
-        profiles: childProflies,
+        profiles: childProfiles,
         message: "The child profile has been deleted",
       ));
     } on Exception {
@@ -53,5 +53,17 @@ class ChildProfileCubit extends Cubit<ChildProfileState> {
           status: ChildProfileStatus.failure,
           message: "The child profile cannot be deleted."));
     }
+  }
+
+  Future<void> updateDeviceRemoteId(
+      {required String name, required String deviceRemoteId}) async {
+    emit(state.copyWith(status: ChildProfileStatus.loading));
+
+    final childProfiles =
+        await _childRepository.updateChildDeviceRemoteID(name, deviceRemoteId);
+    emit(state.copyWith(
+        status: ChildProfileStatus.updateSuccess,
+        profiles: childProfiles,
+        message: "Successfully paired device"));
   }
 }

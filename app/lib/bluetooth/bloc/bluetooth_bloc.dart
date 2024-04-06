@@ -94,6 +94,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
                 print("Connected: ${event.deviceRemoteId}"),
                 emit(state.copyWith(
                     status: BluetoothStatus.connectSuccess,
+                    newDeviceRemoteId: device.remoteId.str,
                     message: "Successfully paired device")),
               }
             else

@@ -1,12 +1,19 @@
 part of 'child_profile_cubit.dart';
 
-enum ChildProfileStatus { loading, fetchSuccess, addSuccess, deleteSuccess, failure }
-
+enum ChildProfileStatus {
+  loading,
+  fetchSuccess,
+  addSuccess,
+  deleteSuccess,
+  updateSuccess,
+  failure
+}
 
 // Extension so that we can check status using if (state.status.isLoading) in the BlocBuilder/BlocListener
 extension ChildProfileStatusX on ChildProfileStatus {
   bool get isLoading => this == ChildProfileStatus.loading;
   bool get isAddSuccess => this == ChildProfileStatus.addSuccess;
+  bool get isUpdateSuccess => this == ChildProfileStatus.updateSuccess;
   bool get isDeleteSuccess => this == ChildProfileStatus.deleteSuccess;
   bool get isFailure => this == ChildProfileStatus.failure;
 }
