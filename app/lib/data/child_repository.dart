@@ -16,7 +16,7 @@ class ChildRepository {
     return childProflieList;
   }
 
-  Future<List<ChildModel>> updateChildDeviceRemoteID(String name, String deviceRemoteId) async{
+  Future<List<ChildModel>> updateChildDeviceRemoteID(String name, String? deviceRemoteId) async{
     childProflieList[childProflieList
             .indexWhere((element) => element.name == name)]
         .updateDeviceRemoteId(deviceRemoteId);

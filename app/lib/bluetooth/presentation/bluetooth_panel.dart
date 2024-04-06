@@ -61,12 +61,23 @@ class BluetoothPanel extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () => context.read<BluetoothBloc>().add(
-                          BluetoothConnectPressed(
-                              deviceRemoteId: state.deviceRemoteId ?? "")),
+                    BluetoothConnectPressed(
+                        deviceRemoteId: state.deviceRemoteId ?? "")),
                 child: Text("Sync device"),
               ),
               ElevatedButton(
-                onPressed: null,
+                // Unpair means to remove deviceRemoteId from child repository
+                onPressed: () {
+                  // Disconnect bluetooth
+                  context.read<BluetoothBloc>().add(BluetoothDisconnectPressed(
+                      deviceRemoteId: state.deviceRemoteId ?? ""));
+                  // Change deviceRemoteId to null in DevicePairCubit
+                  context.read<DevicePairCubit>().onDeviceUnpairSuccess();
+                  // Update in child repository
+                  context
+                      .read<ChildProfileCubit>()
+                      .updateDeviceRemoteId(name: name, deviceRemoteId: null);
+                },
                 child: Text("Unpair device"),
               ),
               ElevatedButton(

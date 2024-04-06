@@ -10,7 +10,7 @@ class ChildModel {
   @override
   String toString() => "$name, $dateOfBirth, $deviceRemoteId";
 
-  void updateDeviceRemoteId(String deviceRemoteId) {
+  void updateDeviceRemoteId(String? deviceRemoteId) {
     this.deviceRemoteId = deviceRemoteId;
   }
   
