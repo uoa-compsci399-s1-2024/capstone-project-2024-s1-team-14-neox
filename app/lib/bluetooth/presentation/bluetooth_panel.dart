@@ -27,10 +27,10 @@ class BluetoothPanel extends StatelessWidget {
       },
       child: BlocBuilder<DevicePairCubit, DevicePairState>(
         builder: (context, state) {
-          if (state is DevicePairLoading) {
+          if (state.status.isLoading) {
             return CircularProgressIndicator();
           }
-          if (state is DevicePairUnknown || state is DeviceUnpairSuccess) {
+          if (state.status.isUnknown || state.status.isUnpairSuccess) {
             return Column(
               children: [
                 ElevatedButton(
@@ -60,7 +60,9 @@ class BluetoothPanel extends StatelessWidget {
           return Column(
             children: [
               ElevatedButton(
-                onPressed: null,
+                onPressed: () => context.read<BluetoothBloc>().add(
+                          BluetoothConnectPressed(
+                              deviceRemoteId: state.deviceRemoteId ?? "")),
                 child: Text("Sync device"),
               ),
               ElevatedButton(
