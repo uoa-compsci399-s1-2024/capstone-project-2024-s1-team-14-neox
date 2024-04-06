@@ -61,7 +61,7 @@ class BluetoothPanel extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () => context.read<BluetoothBloc>().add(
-                    BluetoothConnectPressed(
+                    BluetoothSyncPressed(
                         deviceRemoteId: state.deviceRemoteId ?? "")),
                 child: Text("Sync device"),
               ),
