@@ -306,6 +306,7 @@ Resources:
     Type: AWS::Serverless::Api
     DependsOn: APICloudWatchRoleArn
     Properties:
+      AlwaysDeploy: true
       StageName: dev
       # TODO: more restrictive?
       Cors: "'*'"
