@@ -20,18 +20,18 @@ extension ChildProfileStatusX on ChildProfileStatus {
 
 class ChildProfileState extends Equatable {
   final ChildProfileStatus status;
-  final List<ChildDeviceModel> profiles;
+  final List<ChildModel> profiles;
   final String message;
 
   const ChildProfileState({
     this.status = ChildProfileStatus.loading,
-    this.profiles = const <ChildDeviceModel>[],
+    this.profiles = const <ChildModel>[],
     this.message = "",
   });
 
   ChildProfileState copyWith({
     ChildProfileStatus? status,
-    List<ChildDeviceModel>? profiles,
+    List<ChildModel>? profiles,
     String? message,
   }) {
     return ChildProfileState(

@@ -1,22 +1,20 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../domain/child_device_model.dart';
-import '../domain/child_device_repository.dart';
-
-
+import '../../data/child_model.dart';
+import '../../data/child_repository.dart';
 
 part 'child_profile_state.dart';
 
 class ChildProfileCubit extends Cubit<ChildProfileState> {
-  final ChildDeviceRepository _childDeviceRepository;
-  ChildProfileCubit(this._childDeviceRepository) : super(ChildProfileState());
+  final ChildRepository _childRepository;
+  ChildProfileCubit(this._childRepository) : super(ChildProfileState());
 
   Future<void> fetchChildProfiles() async {
     try {
-      final List<ChildDeviceModel> profiles = await _childDeviceRepository.fetchChildProfiles();
+      final childProfiles = _childRepository.fetchChildProfiles();
       emit(state.copyWith(
-          status: ChildProfileStatus.fetchSuccess, profiles: profiles));
+          status: ChildProfileStatus.fetchSuccess, profiles: childProfiles));
     } on Exception {
       emit(state.copyWith(
           status: ChildProfileStatus.failure,
@@ -24,14 +22,14 @@ class ChildProfileCubit extends Cubit<ChildProfileState> {
     }
   }
 
-  Future<void> createChildProfile(String name, DateTime birthDate) async {
+  Future<void> createChildProfile(String name, DateTime dateOfBirth) async {
     emit(state.copyWith(status: ChildProfileStatus.loading));
     try {
-      final List<ChildDeviceModel>  childDeviceProfiles =
-          await _childDeviceRepository.createChildProfile(name, birthDate);
+      final childProfiles =
+          await _childRepository.createChildProfile(name, dateOfBirth);
       emit(state.copyWith(
         status: ChildProfileStatus.addSuccess,
-        profiles: childDeviceProfiles,
+        profiles: childProfiles,
         message: "The child profile has been added",
       ));
     } on Exception {
@@ -41,13 +39,13 @@ class ChildProfileCubit extends Cubit<ChildProfileState> {
     }
   }
 
-  Future<void> deleteChildProfile(int childId) async {
+  Future<void> deleteChildProfile(int index) async {
     emit(state.copyWith(status: ChildProfileStatus.loading));
     try {
-      final childDeviceProfiles = await _childDeviceRepository.deleteChildProfile(childId);
+      final childProfiles = await _childRepository.deleteChildProfile(index);
       emit(state.copyWith(
         status: ChildProfileStatus.deleteSuccess,
-        profiles: childDeviceProfiles,
+        profiles: childProfiles,
         message: "The child profile has been deleted",
       ));
     } on Exception {
@@ -58,14 +56,14 @@ class ChildProfileCubit extends Cubit<ChildProfileState> {
   }
 
   Future<void> updateDeviceRemoteId(
-      {required int childId, required String? deviceRemoteId}) async {
+      {required String name, required String? deviceRemoteId}) async {
     emit(state.copyWith(status: ChildProfileStatus.loading));
 
-    final childDeviceProfiles =
-        await _childDeviceRepository.updateChildDeviceRemoteID(childId, deviceRemoteId ?? "");
+    final childProfiles =
+        await _childRepository.updateChildDeviceRemoteID(name, deviceRemoteId);
     emit(state.copyWith(
         status: ChildProfileStatus.updateSuccess,
-        profiles: childDeviceProfiles,
+        profiles: childProfiles,
         message: "Successfully updated device"));
   }
 

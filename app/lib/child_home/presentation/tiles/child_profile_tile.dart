@@ -5,11 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bluetooth/bloc/bluetooth_bloc.dart';
 import '../../../bluetooth/presentation/bluetooth_panel.dart';
+import '../../../data/child_model.dart';
 import '../../cubit/device_pair_cubit.dart';
-import '../../domain/child_device_model.dart';
 
 class ChildProfileTile extends StatefulWidget {
-  final ChildDeviceModel profile;
+  final ChildModel profile;
   const ChildProfileTile({super.key, required this.profile});
 
   @override
@@ -17,8 +17,8 @@ class ChildProfileTile extends StatefulWidget {
 }
 
 class _ChildProfileTileState extends State<ChildProfileTile> {
-  String calculateAge(DateTime birthDate) {
-    DateDuration duration = AgeCalculator.age(birthDate);
+  String calculateAge(DateTime dateOfBirth) {
+    DateDuration duration = AgeCalculator.age(dateOfBirth);
     return "${duration.years} years, ${duration.months} months";
   }
 
@@ -41,7 +41,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
           ),
           const Text("Age"),
           Text(
-            calculateAge(widget.profile.birthDate),
+            calculateAge(widget.profile.dateOfBirth),
             style: const TextStyle(
               fontSize: 30,
             ),
@@ -76,7 +76,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
           }, builder: (context, state) {
             return BlocProvider(
               create: (_) => BluetoothBloc(),
-              child: BluetoothPanel(name: widget.profile.name, childId: widget.profile.id ?? -1,),
+              child: BluetoothPanel(name: widget.profile.name),
             );
           }),
         ],

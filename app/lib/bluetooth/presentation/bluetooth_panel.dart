@@ -8,8 +8,7 @@ import 'screen/scan_screen.dart';
 
 class BluetoothPanel extends StatelessWidget {
   final String name;
-  final int childId;
-  const BluetoothPanel({super.key, required this.name, required this.childId});
+  const BluetoothPanel({super.key, required this.name});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +18,7 @@ class BluetoothPanel extends StatelessWidget {
           // TODO: Change repository function to update remote ID
           // TODO: may need to change the chain of updating deviceRemoteID, currently calling two functions
           context.read<ChildProfileCubit>().updateDeviceRemoteId(
-              childId: childId, deviceRemoteId: state.newDeviceRemoteId);
+              name: name, deviceRemoteId: state.newDeviceRemoteId);
 
           context
               .read<DevicePairCubit>()
@@ -77,7 +76,7 @@ class BluetoothPanel extends StatelessWidget {
                   // Update in child repository
                   context
                       .read<ChildProfileCubit>()
-                      .updateDeviceRemoteId(childId: childId, deviceRemoteId: null);
+                      .updateDeviceRemoteId(name: name, deviceRemoteId: null);
                 },
                 child: Text("Unpair device"),
               ),

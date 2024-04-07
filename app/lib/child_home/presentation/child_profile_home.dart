@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
+import '../../bluetooth/bloc/bluetooth_bloc.dart';
+import '../../data/child_repository.dart';
 import '../cubit/child_profile_cubit.dart';
 import '../cubit/device_pair_cubit.dart';
 import 'screens/create_child_profile_screen.dart';
