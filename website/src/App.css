@@ -1,4 +1,18 @@
 .App {
+  min-width: 960px;
+  max-width: 960px;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 2vw;
+  flex-wrap: wrap;
+  background-color: #EEF2FA;
+}
+
+.Background{
   height: 100vh;
   width: 100%;
   display: flex;
@@ -12,11 +26,10 @@
 
 
 .App-logo {
-  height: 5vmin;
+  width:170px;
 }
 
 .logoCard {
-
   width: 100%;
   height: 5%;
   margin-top : 2%;
@@ -27,7 +40,6 @@
 
 
 .dataCard {
-  
   background-color: white;
   border-radius: 0.5em;
 
@@ -39,7 +51,7 @@
 
 .chartCard {
   border-radius: 25px;
-  width: 85%;
+  width: 86%;
   height: 50%;
   margin-left: 5%;
   margin-right: 5%;
@@ -50,8 +62,8 @@
 }
 
 .clientCard pre { 
-            white-space: pre-wrap; /* break long lines */
-            font-size: 16px;  
+  white-space: pre-wrap; /* break long lines */
+  font-size: 16px;  
 }
 
 .clientCard b { 
@@ -81,12 +93,29 @@
 }
 
 .downloadCardLeft{
-  width: 55%;
-  height: 80%;
+  width: 70%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.downloadCardLeftTop{
+  width: 100%;
+  height: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+.downloadCardLeftBottom{
+  width: 100%;
+  height: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 
 .downloadCardRight{
   width: 30%;
@@ -95,4 +124,15 @@
   align-items: center;
   justify-content: center;
   
+}
+
+
+button {
+  background-color: white;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  outline: none;
 }
