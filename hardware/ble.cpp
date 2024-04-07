@@ -147,6 +147,7 @@ void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
 
         sent += sizeof(SensorSample);
         bytesInBuffers += sizeof(SensorSample);
+        bufferIndex++;
     }
     
     eepromUnlockSampleBuffer();
