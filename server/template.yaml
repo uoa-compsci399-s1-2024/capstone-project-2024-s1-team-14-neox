@@ -270,7 +270,6 @@ Resources:
   Database:
     Type: AWS::RDS::DBInstance
     Properties:
-      DBInstanceIdentifier: cloud-db-TEMP
       Engine: postgres
       StorageType: gp2
       AllocatedStorage: 20  # GiB
