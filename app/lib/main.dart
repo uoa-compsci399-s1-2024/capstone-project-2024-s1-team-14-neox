@@ -5,13 +5,12 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 // Import bottom navigation screens
 import 'analysis/analysis_home.dart';
+import 'child_home/domain/child_device_repository.dart';
 import 'child_home/presentation/child_profile_home.dart';
 import 'cloud/cloud_home.dart';
 
 
 // Import blocs and repositories
-import 'data/child_repository.dart';
-import 'bluetooth/bloc/bluetooth_bloc.dart';
 import 'child_home/cubit/child_profile_cubit.dart';
 
 void main() {
@@ -27,12 +26,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Allows ChildRepository to be accessed anywhere in MyApp
     return RepositoryProvider(
-      create: (context) => ChildRepository(),
+      create: (context) => ChildDeviceRepository(),
       child: MultiBlocProvider(
         // Alows Cubits and Blocs to be accessible anywhere in MyApp
         providers: [
            BlocProvider(
-            create: (context) => ChildProfileCubit(context.read<ChildRepository>()),
+            create: (context) => ChildProfileCubit(context.read<ChildDeviceRepository>()),
           ),
         ],
         // Creates MaterialApp

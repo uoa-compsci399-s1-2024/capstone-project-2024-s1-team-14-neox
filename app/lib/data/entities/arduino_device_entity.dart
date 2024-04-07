@@ -1,41 +1,41 @@
 import 'package:drift/drift.dart';
-import 'package:capstone_project_2024_s1_team_14_neox/dB/database.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 
 @UseRowClass(ArduinoDeviceEntity)
 class ArduinoDevices extends Table {
-  TextColumn get uuid => text()();
-  TextColumn get gatt => text()();
+  TextColumn get remoteDeviceId => text()();
+  TextColumn get authorisationCode => text()();
 }
 
 class ArduinoDeviceEntity {
-  String? uuid;
-  String? gatt;
+  String? remoteDeviceId;
+  String? authorisationCode;
 
   ArduinoDeviceEntity({
-    this.uuid,
-    this.gatt,
+    this.remoteDeviceId,
+    this.authorisationCode,
   });
 
   // JSON serialization
   Map<String, dynamic> toJson() {
     return {
-      'uuid': uuid,
-      'gatt': gatt,
+      'remoteDeviceId': remoteDeviceId,
+      'authorisationCode': authorisationCode,
     };
   }
 
   // JSON deserialization
   factory ArduinoDeviceEntity.fromJson(Map<String, dynamic> json) {
     return ArduinoDeviceEntity(
-      uuid: json['uuid'],
-      gatt: json['gatt'],
+      remoteDeviceId: json['remoteDeviceId'],
+      authorisationCode: json['authorisationCode'],
     );
   }
 
   ArduinoDevicesCompanion toCompanion() {
     return ArduinoDevicesCompanion(
-      uuid: Value(uuid ?? ''),
-      gatt: Value(gatt ?? ''),
+      remoteDeviceId: Value(remoteDeviceId ?? ''),
+      authorisationCode: Value(authorisationCode ?? ''),
     );
   }
 
@@ -57,7 +57,7 @@ class ArduinoDeviceEntity {
   static Future<ArduinoDeviceEntity?> queryArduinoDeviceById(String deviceId) async {
     AppDb db = AppDb.instance();
     ArduinoDeviceEntity? arduinoDeviceEntity = await (db.select(db.arduinoDevices)
-      ..where((tbl) => tbl.uuid.equals(deviceId)))
+      ..where((tbl) => tbl.remoteDeviceId.equals(deviceId)))
         .getSingleOrNull();
     return arduinoDeviceEntity;
   }
