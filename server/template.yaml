@@ -200,7 +200,11 @@ Resources:
             Statement:
               - Effect: Allow
                 Action: secretsmanager:GetSecretValue
-                Resource: !GetAtt Database.MasterUserSecret.SecretArn
+                # This is OK because roles are global to the account
+                # AND any random lambda having this role isn't enough
+                # to access protected database instances since they
+                # need to be in the same VPC.
+                Resource: '*'
 
   SecretsManagerVPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
