@@ -17,6 +17,8 @@ struct SensorSample {
   uint16_t uv;
   uint16_t light;
   Acceleration acceleration;
-} __attribute__((packed));
+};
+
+static_assert(sizeof(SensorSample) == 12, "SensorSample struct layout assertion failed.");
 
 #endif
