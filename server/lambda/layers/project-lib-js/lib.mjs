@@ -10,14 +10,11 @@ import fs from "node:fs";
 import process from "node:process";
 import pg from 'pg';
 
-export function createSecretsManagerClient()
-{
-  return new SecretsManagerClient({
-    region: process.env.AWS_REGION
-  });
-}
+export const SECRETS_MANAGER_CLIENT = new SecretsManagerClient({
+  region: process.env.AWS_REGION,
+});
 
-export async function getDBCredentials(smClient)
+async function getDBCredentials(smClient)
 {
   let response;
 
@@ -31,30 +28,35 @@ export async function getDBCredentials(smClient)
   } catch (error) {
     // For a list of exceptions thrown, see
     // https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
+    // If this fails, the caller code can't do anything with the DB so
+    // it's better to just crash.
     throw error;
   }
 
   return JSON.parse(response.SecretString);
 }
 
-export function createDBClient(credentials)
+
+export async function connectToDB()
 {
-  return new pg.Client({
+  const creds = await getDBCredentials(SECRETS_MANAGER_CLIENT);
+  const config = {
     host: process.env.PGHOST,
     port: process.env.PGPORT,
-    database: credentials.username,
-    user: credentials.username,
-    password: credentials.password,
+    database: creds.username,
+    user: creds.username,
+    password: creds.password,
     ssl: {
       ca: [fs.readFileSync(process.env.SSL_CERT_FILE)]
     },
-  })
-}
-
-export async function setupDB()
-{
-  let smClient = createSecretsManagerClient();
-  let creds = await getDBCredentials(smClient);
-  let db = createDBClient(creds);
+  };
+  const db = new pg.Client(config);
+  console.log(`connecting to database at ${config.host} on port ${config.port}`);
+  try {
+    await db.connect();
+  } catch (e) {
+    throw e;
+  }
+  console.log("connection success");
   return db;
 }

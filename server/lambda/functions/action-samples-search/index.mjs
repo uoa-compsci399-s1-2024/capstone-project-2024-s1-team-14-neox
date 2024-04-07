@@ -1,12 +1,8 @@
 import {
-  setupDB,
+  connectToDB,
 } from "/opt/nodejs/lib.mjs";
 
-let db = await setupDB();
-
-console.log("connecting");
-await db.connect();
-console.log("connection success")
+let db = await connectToDB();
 
 export const handler = async (event) => {
   let res = await db.query("SELECT * FROM samples");

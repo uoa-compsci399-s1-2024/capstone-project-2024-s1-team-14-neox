@@ -1,12 +1,9 @@
 import {
-  setupDB,
+  connectToDB,
 } from "/opt/nodejs/lib.mjs";
 
-let db = await setupDB();
+let db = await connectToDB();
 
-console.log("connecting");
-await db.connect();
-console.log("connection success")
 const CREATE_TABLES_TEXT = `
 -- NOTE: THERE SHOULD BE EXTERNAL AND INTERNAL IDs
 
