@@ -12,15 +12,18 @@ void initializeIMU() {
     }
 }
 
-uint8_t readIMU() {
-    float x, y, z;
-    float sum;
-    uint8_t scaled_sum = 0;
+Acceleration readIMU() {
+    float x = 0.0f;
+    float y = 0.0f;
+    float z = -1.0f;
     if (IMU.accelerationAvailable())
     {
         IMU.readAcceleration(x, y, z);
-        sum = abs(x) + abs(y) + abs(z);
     }
-    scaled_sum = 255 * (sum / 12);
-    return scaled_sum;
+
+    Acceleration acc;
+    acc.x = (int16_t)(x / 4.0f * 0x7FFF);
+    acc.y = (int16_t)(y / 4.0f * 0x7FFF);
+    acc.z = (int16_t)(z / 4.0f * 0x7FFF);
+    return acc;
 }
