@@ -6,9 +6,13 @@ import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 @UseRowClass(ChildEntity)
 class Children extends Table {
   IntColumn get id => integer().autoIncrement()();
+
   TextColumn get name => text().references(ArduinoDatas, #name)();
-  DateTimeColumn get birthDate => dateTime()(); 
-  TextColumn get deviceRemoteId => text().references(ArduinoDevices, #deviceRemoteId)();
+
+  DateTimeColumn get birthDate => dateTime()();
+
+  TextColumn get deviceRemoteId =>
+      text().references(ArduinoDevices, #deviceRemoteId)();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -44,7 +48,6 @@ class ChildEntity {
     );
   }
 
-
   ChildrenCompanion toCompanion() {
     return ChildrenCompanion(
       name: Value(name),
@@ -71,8 +74,8 @@ class ChildEntity {
     });
   }
 
-  static Future<void> saveSingleChildEntityFromParameters(String name,
-      DateTime birthDate) async {
+  static Future<void> saveSingleChildEntityFromParameters(
+      String name, DateTime birthDate) async {
     ChildEntity childEntity = ChildEntity(name: name, birthDate: birthDate);
     AppDb db = AppDb.instance();
     await db
@@ -84,8 +87,8 @@ class ChildEntity {
   // READ
   static Future<ChildEntity?> queryChildById(int id) async {
     AppDb db = AppDb.instance();
-    return await (db.select(db.children)
-      ..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    return await (db.select(db.children)..where((tbl) => tbl.id.equals(id)))
+        .getSingleOrNull();
   }
 
   static Future<List<ChildEntity>> queryAllChildren() async {
@@ -101,12 +104,12 @@ class ChildEntity {
   static Future<ChildEntity?> queryChildByName(String name) async {
     AppDb db = AppDb.instance();
     ChildEntity? childEntity = await (db.select(db.children)
-      ..where((tbl) => tbl.name.equals(name)))
+          ..where((tbl) => tbl.name.equals(name)))
         .getSingleOrNull();
     if (childEntity != null) {
       childEntity.arduinoDeviceEntity =
-      await queryArduinoDeviceBydeviceRemoteId(
-          childEntity.deviceRemoteId ?? '');
+          await queryArduinoDeviceBydeviceRemoteId(
+              childEntity.deviceRemoteId ?? '');
     }
     return childEntity;
   }
@@ -117,35 +120,29 @@ class ChildEntity {
   }
 
   // UPDATE
-  static Future<void> updateRemoteDeviceId(int id,
-      String remoteDeviceId) async {
+  static Future<void> updateRemoteDeviceId(
+      int id, String remoteDeviceId) async {
     AppDb db = AppDb.instance();
 
     ChildEntity? child = await queryChildById(id);
 
     if (child != null) {
-      await db
-          .update(db.children)
-          .replace(ChildrenCompanion(
+      await db.update(db.children).replace(ChildrenCompanion(
           id: Value(id), deviceRemoteId: Value(remoteDeviceId)));
     } else {
       throw Exception('Child with ID $id not found');
     }
   }
 
-    // DELETE
+  // DELETE
   static Future<void> deleteDeviceForChild(int childId) async {
     AppDb db = AppDb.instance();
-
 
     ChildEntity? child = await queryChildById(childId);
     if (child != null) {
       child.deviceRemoteId = null; // or ''
 
-
-      await db
-          .update(db.children)
-          .replace(child.toCompanion());
+      await db.update(db.children).replace(child.toCompanion());
     }
   }
 
@@ -153,10 +150,7 @@ class ChildEntity {
     AppDb db = AppDb.instance();
 
     // Delete the child entity from the database based on its ID
-    await db
-        .delete(db.children)..where((tbl) => tbl.id.equals(childId));
+    await db.delete(db.children)
+      ..where((tbl) => tbl.id.equals(childId));
   }
-
-
-
 }
