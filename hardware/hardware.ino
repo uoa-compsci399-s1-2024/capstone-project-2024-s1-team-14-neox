@@ -16,10 +16,11 @@ static void readSample();
 void setup()
 {
   Serial.begin(SERIAL_BAUD_RATE);
+  while (!Serial);
   Wire.begin();
   initializeBLE();
   initializeIMU();
-  initializeRTC(0, 0);
+  initializeRTC();
   eepromBegin();
 }
 
