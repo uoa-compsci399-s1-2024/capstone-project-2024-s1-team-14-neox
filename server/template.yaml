@@ -33,7 +33,6 @@ Parameters:
 # Mappings:
 
 Resources:
-  # VPC
   VPC:
     Type: AWS::EC2::VPC
     Properties:
