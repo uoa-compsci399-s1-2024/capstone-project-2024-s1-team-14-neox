@@ -476,9 +476,15 @@ Outputs:
     Description: Security group for applications allowed to access Secrets Manager
     Value: !Ref SecretsAccessSecurityGroup
 
-  Database:
+  DatabaseInstanceName:
     Description: Database for samples, etc
     Value: !Ref Database
+  DatabaseEndpointAddress:
+    Description: "Address for the endpoint to DB (should be unreachable from public Internet)"
+    Value: !GetAtt Database.Endpoint.Address
+  DatabaseEndpointPort:
+    Description: "Port for the endpoint to DB (should be unreachable from public Internet)"
+    Value: !GetAtt Database.Endpoint.Port
 
   # TODO: Once different environments are set up, STOP hardcoding "/dev"
   APIEndpoint:
