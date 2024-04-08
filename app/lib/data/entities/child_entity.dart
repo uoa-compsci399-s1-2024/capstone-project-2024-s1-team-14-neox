@@ -121,10 +121,11 @@ class ChildEntity {
 
   // UPDATE
   static Future<void> updateRemoteDeviceId(
-      int id, String remoteDeviceId) async {
+      int? id, String remoteDeviceId) async {
+  if (id == null) throw Exception("Child ID cannot be null");
+    ChildEntity? child = await queryChildById(id);
     AppDb db = AppDb.instance();
 
-    ChildEntity? child = await queryChildById(id);
 
     if (child != null) {
       await db.update(db.children).replace(ChildrenCompanion(
@@ -135,7 +136,9 @@ class ChildEntity {
   }
 
   // DELETE
-  static Future<void> deleteDeviceForChild(int childId) async {
+  static Future<void> deleteDeviceForChild(int? childId) async {
+      if (childId == null) throw Exception("Child ID cannot be null");
+    
     AppDb db = AppDb.instance();
 
     ChildEntity? child = await queryChildById(childId);

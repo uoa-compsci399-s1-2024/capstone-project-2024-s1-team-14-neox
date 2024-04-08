@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../cubit/child_profile_cubit.dart';
+import '../../cubit/all_child_profile_cubit.dart';
 
 class CreateChildProfileScreen extends StatefulWidget {
   const CreateChildProfileScreen({super.key});
@@ -49,7 +49,7 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              context.read<ChildProfileCubit>().createChildProfile(
+              context.read<AllChildProfileCubit>().createChildProfile(
                     nameController.text.trim(),
                     DateTime.parse(dobController.text.trim()),
                   );

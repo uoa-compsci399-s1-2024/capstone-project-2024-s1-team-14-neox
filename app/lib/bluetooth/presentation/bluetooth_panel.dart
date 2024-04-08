@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../child_home/cubit/child_profile_cubit.dart';
-import '../../child_home/cubit/device_pair_cubit.dart';
+import '../../child_home/cubit/all_child_profile_cubit.dart';
+import '../../child_home/cubit/child_device_cubit.dart';
 import '../bloc/bluetooth_bloc.dart';
 import 'screen/scan_screen.dart';
 
 class BluetoothPanel extends StatelessWidget {
-  final String name;
-  final int childId;
-  const BluetoothPanel({super.key, required this.name, required this.childId});
+
+  const BluetoothPanel({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,15 +17,15 @@ class BluetoothPanel extends StatelessWidget {
         if (state.status.isConnectSuccess) {
           // TODO: Change repository function to update remote ID
           // TODO: may need to change the chain of updating deviceRemoteID, currently calling two functions
-          context.read<ChildProfileCubit>().updateDeviceRemoteId(
-              childId: childId, deviceRemoteId: state.newDeviceRemoteId);
+          context.read<AllChildProfileCubit>().updateDeviceRemoteId(
+              childId: context.read<ChildDeviceCubit>().state.childId, deviceRemoteId: state.newDeviceRemoteId);
 
           context
-              .read<DevicePairCubit>()
-              .onDevicePairSuccess(state.newDeviceRemoteId);
+              .read<ChildDeviceCubit>()
+              .onChildDevicePairSuccess(state.newDeviceRemoteId);
         }
       },
-      child: BlocBuilder<DevicePairCubit, DevicePairState>(
+      child: BlocBuilder<ChildDeviceCubit, ChildDeviceState>(
         builder: (context, state) {
           if (state.status.isLoading) {
             return CircularProgressIndicator();
@@ -42,7 +41,7 @@ class BluetoothPanel extends StatelessWidget {
                       MaterialPageRoute(builder: (_) {
                         return BlocProvider.value(
                           value: BlocProvider.of<BluetoothBloc>(context),
-                          child: ScanScreen(name: name),
+                          child: ScanScreen(name: context.read<ChildDeviceCubit>().state.childName),
                         );
                       }),
                     );
@@ -51,7 +50,7 @@ class BluetoothPanel extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    print(context.read<ChildProfileCubit>().state.profiles);
+                    print(context.read<AllChildProfileCubit>().state.profiles);
                   },
                   child: Text("Test"),
                 )
@@ -73,18 +72,17 @@ class BluetoothPanel extends StatelessWidget {
                   // Disconnect bluetooth
                   context.read<BluetoothBloc>().add(BluetoothDisconnectPressed(
                       deviceRemoteId: state.deviceRemoteId ?? ""));
-                  // Change deviceRemoteId to null in DevicePairCubit
-                  context.read<DevicePairCubit>().onDeviceUnpairSuccess();
+                  context.read<ChildDeviceCubit>().onChildDeviceUnpairSuccess();
                   // Update in child repository
                   context
-                      .read<ChildProfileCubit>()
-                      .updateDeviceRemoteId(childId: childId, deviceRemoteId: null);
+                      .read<AllChildProfileCubit>()
+                      .deleteDeviceRemoteId(childId: context.read<ChildDeviceCubit>().state.childId);
                 },
                 child: Text("Unpair device"),
               ),
               ElevatedButton(
                 onPressed: () {
-                  print(context.read<ChildProfileCubit>().state.profiles);
+                  print(context.read<AllChildProfileCubit>().state.profiles);
                 },
                 child: Text("Test"),
               )

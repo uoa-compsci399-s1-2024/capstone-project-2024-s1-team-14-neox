@@ -11,7 +11,7 @@ import 'cloud/cloud_home.dart';
 
 
 // Import blocs and repositories
-import 'child_home/cubit/child_profile_cubit.dart';
+import 'child_home/cubit/all_child_profile_cubit.dart';
 
 void main() {
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true); // Used to log BLE
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         // Alows Cubits and Blocs to be accessible anywhere in MyApp
         providers: [
            BlocProvider(
-            create: (context) => ChildProfileCubit(context.read<ChildDeviceRepository>()),
+            create: (context) => AllChildProfileCubit(context.read<ChildDeviceRepository>()),
           ),
         ],
         // Creates MaterialApp

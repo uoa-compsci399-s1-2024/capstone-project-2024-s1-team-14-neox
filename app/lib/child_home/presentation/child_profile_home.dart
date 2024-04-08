@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
-import '../cubit/child_profile_cubit.dart';
-import '../cubit/device_pair_cubit.dart';
+import '../cubit/all_child_profile_cubit.dart';
+import '../cubit/child_device_cubit.dart';
 import 'screens/create_child_profile_screen.dart';
 import 'tiles/child_profile_tile.dart';
 
@@ -17,7 +16,7 @@ class ChildHomeScreen extends StatefulWidget {
 class ChildHomeScreenState extends State<ChildHomeScreen> {
   @override
   void initState() {
-    context.read<ChildProfileCubit>().fetchChildProfiles();
+    context.read<AllChildProfileCubit>().fetchChildProfiles();
     super.initState();
   }
 
@@ -27,7 +26,7 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
       appBar: AppBar(
         title: const Text("Your profiles"),
       ),
-      body: BlocConsumer<ChildProfileCubit, ChildProfileState>(
+      body: BlocConsumer<AllChildProfileCubit, AllChildProfileState>(
         listener: (context, state) {
           if (state.status.isAddSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -50,11 +49,13 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
               children: [
                 ...state.profiles.map(
                   (profile) => BlocProvider(
-                    create: (_) =>
-                        DevicePairCubit(profile.name, profile.deviceRemoteId),
-                    child: ChildProfileTile(
-                      profile: profile,
+                    create: (_) => ChildDeviceCubit(
+                      childId: profile.childId,
+                      childName: profile.childName,
+                      birthDate: profile.birthDate,
+                      deviceRemoteId: profile.deviceRemoteId,
                     ),
+                    child: ChildProfileTile(),
                   ),
                 ),
                 Column(
@@ -65,7 +66,8 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
                       onPressed: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const CreateChildProfileScreen()),
+                            builder: (context) =>
+                                const CreateChildProfileScreen()),
                       ),
                       child: const Icon(
                         Icons.add,
