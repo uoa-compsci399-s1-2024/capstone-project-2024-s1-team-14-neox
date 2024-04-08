@@ -87,12 +87,10 @@ class ArduinoDataEntity {
     return arduinoDataEntityList;
   }
 
-  static Future<ArduinoDataEntity?> queryArduinoDataByName(String name) async {
-    AppDb db = AppDb.instance();
-    ArduinoDataEntity? arduinoDataEntity = await (db.select(db.arduinoDatas)
-          ..where((tbl) => tbl.name.equals(name)))
-        .getSingleOrNull();
-    return arduinoDataEntity;
+  static Future<List<ArduinoDataEntity>> queryArduinoDataByName(String name) async {
+    final db = AppDb.instance();
+    final query = db.select(db.arduinoDatas)..where((tbl) => tbl.name.equals(name));
+    return query.get();
   }
 
 
@@ -106,3 +104,4 @@ class ArduinoDataEntity {
     return arduinoDataEntityList;
   }
 }
+
