@@ -479,3 +479,11 @@ Outputs:
   Database:
     Description: Database for samples, etc
     Value: !Ref Database
+
+  # TODO: Once different environments are set up, STOP hardcoding "/dev"
+  APIEndpoint:
+    Description: Base URL of API
+    Value: !Sub
+      - "https://${ApiID}.execute-api.${Region}.amazonaws.com/dev"
+      - ApiID: !Ref API
+        Region: !Ref AWS::Region
