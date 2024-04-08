@@ -4,6 +4,7 @@ import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 @UseRowClass(ArduinoDeviceEntity)
 class ArduinoDevices extends Table {
   TextColumn get remoteDeviceId => text()();
+
   TextColumn get authorisationCode => text()();
 }
 
@@ -47,20 +48,20 @@ class ArduinoDeviceEntity {
         .insertOnConflictUpdate(arduinoDeviceEntity.toCompanion());
   }
 
-
   static Future<List<ArduinoDeviceEntity>> queryAllArduinoDevices() async {
     AppDb db = AppDb.instance();
-    List<ArduinoDeviceEntity> arduinoDeviceEntityList = await db.select(db.arduinoDevices).get();
+    List<ArduinoDeviceEntity> arduinoDeviceEntityList =
+        await db.select(db.arduinoDevices).get();
     return arduinoDeviceEntityList;
   }
 
-  static Future<ArduinoDeviceEntity?> queryArduinoDeviceById(String deviceId) async {
+  static Future<ArduinoDeviceEntity?> queryArduinoDeviceById(
+      String deviceId) async {
     AppDb db = AppDb.instance();
-    ArduinoDeviceEntity? arduinoDeviceEntity = await (db.select(db.arduinoDevices)
-      ..where((tbl) => tbl.remoteDeviceId.equals(deviceId)))
-        .getSingleOrNull();
+    ArduinoDeviceEntity? arduinoDeviceEntity =
+        await (db.select(db.arduinoDevices)
+              ..where((tbl) => tbl.remoteDeviceId.equals(deviceId)))
+            .getSingleOrNull();
     return arduinoDeviceEntity;
   }
-
-
 }

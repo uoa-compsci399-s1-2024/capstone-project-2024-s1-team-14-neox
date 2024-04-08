@@ -30,8 +30,24 @@ class $ArduinoDatasTable extends ArduinoDatas
   late final GeneratedColumn<DateTime> datetime = GeneratedColumn<DateTime>(
       'datetime', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _accelXMeta = const VerificationMeta('accelX');
   @override
-  List<GeneratedColumn> get $columns => [name, uv, light, datetime];
+  late final GeneratedColumn<int> accelX = GeneratedColumn<int>(
+      'accel_x', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _accelYMeta = const VerificationMeta('accelY');
+  @override
+  late final GeneratedColumn<int> accelY = GeneratedColumn<int>(
+      'accel_y', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _accelZMeta = const VerificationMeta('accelZ');
+  @override
+  late final GeneratedColumn<int> accelZ = GeneratedColumn<int>(
+      'accel_z', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [name, uv, light, datetime, accelX, accelY, accelZ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -65,6 +81,24 @@ class $ArduinoDatasTable extends ArduinoDatas
     } else if (isInserting) {
       context.missing(_datetimeMeta);
     }
+    if (data.containsKey('accel_x')) {
+      context.handle(_accelXMeta,
+          accelX.isAcceptableOrUnknown(data['accel_x']!, _accelXMeta));
+    } else if (isInserting) {
+      context.missing(_accelXMeta);
+    }
+    if (data.containsKey('accel_y')) {
+      context.handle(_accelYMeta,
+          accelY.isAcceptableOrUnknown(data['accel_y']!, _accelYMeta));
+    } else if (isInserting) {
+      context.missing(_accelYMeta);
+    }
+    if (data.containsKey('accel_z')) {
+      context.handle(_accelZMeta,
+          accelZ.isAcceptableOrUnknown(data['accel_z']!, _accelZMeta));
+    } else if (isInserting) {
+      context.missing(_accelZMeta);
+    }
     return context;
   }
 
@@ -96,12 +130,18 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
   final Value<int> uv;
   final Value<int> light;
   final Value<DateTime> datetime;
+  final Value<int> accelX;
+  final Value<int> accelY;
+  final Value<int> accelZ;
   final Value<int> rowid;
   const ArduinoDatasCompanion({
     this.name = const Value.absent(),
     this.uv = const Value.absent(),
     this.light = const Value.absent(),
     this.datetime = const Value.absent(),
+    this.accelX = const Value.absent(),
+    this.accelY = const Value.absent(),
+    this.accelZ = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ArduinoDatasCompanion.insert({
@@ -109,16 +149,25 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     required int uv,
     required int light,
     required DateTime datetime,
+    required int accelX,
+    required int accelY,
+    required int accelZ,
     this.rowid = const Value.absent(),
   })  : name = Value(name),
         uv = Value(uv),
         light = Value(light),
-        datetime = Value(datetime);
+        datetime = Value(datetime),
+        accelX = Value(accelX),
+        accelY = Value(accelY),
+        accelZ = Value(accelZ);
   static Insertable<ArduinoDataEntity> custom({
     Expression<String>? name,
     Expression<int>? uv,
     Expression<int>? light,
     Expression<DateTime>? datetime,
+    Expression<int>? accelX,
+    Expression<int>? accelY,
+    Expression<int>? accelZ,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -126,6 +175,9 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
       if (uv != null) 'uv': uv,
       if (light != null) 'light': light,
       if (datetime != null) 'datetime': datetime,
+      if (accelX != null) 'accel_x': accelX,
+      if (accelY != null) 'accel_y': accelY,
+      if (accelZ != null) 'accel_z': accelZ,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -135,12 +187,18 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
       Value<int>? uv,
       Value<int>? light,
       Value<DateTime>? datetime,
+      Value<int>? accelX,
+      Value<int>? accelY,
+      Value<int>? accelZ,
       Value<int>? rowid}) {
     return ArduinoDatasCompanion(
       name: name ?? this.name,
       uv: uv ?? this.uv,
       light: light ?? this.light,
       datetime: datetime ?? this.datetime,
+      accelX: accelX ?? this.accelX,
+      accelY: accelY ?? this.accelY,
+      accelZ: accelZ ?? this.accelZ,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -160,6 +218,15 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     if (datetime.present) {
       map['datetime'] = Variable<DateTime>(datetime.value);
     }
+    if (accelX.present) {
+      map['accel_x'] = Variable<int>(accelX.value);
+    }
+    if (accelY.present) {
+      map['accel_y'] = Variable<int>(accelY.value);
+    }
+    if (accelZ.present) {
+      map['accel_z'] = Variable<int>(accelZ.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -173,6 +240,9 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
           ..write('uv: $uv, ')
           ..write('light: $light, ')
           ..write('datetime: $datetime, ')
+          ..write('accelX: $accelX, ')
+          ..write('accelY: $accelY, ')
+          ..write('accelZ: $accelZ, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();

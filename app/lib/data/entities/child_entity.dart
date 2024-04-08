@@ -6,9 +6,13 @@ import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 @UseRowClass(ChildEntity)
 class Children extends Table {
   IntColumn get id => integer().autoIncrement()();
+
   TextColumn get name => text().references(ArduinoDatas, #name)();
-  DateTimeColumn get birthDate => dateTime()(); 
-  TextColumn get deviceRemoteId => text().references(ArduinoDevices, #deviceRemoteId)();
+
+  DateTimeColumn get birthDate => dateTime()();
+
+  TextColumn get deviceRemoteId =>
+      text().references(ArduinoDevices, #deviceRemoteId)();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -21,7 +25,8 @@ class ChildEntity {
   String? deviceRemoteId;
   ArduinoDeviceEntity? arduinoDeviceEntity;
 
-  ChildEntity({required this.name, required this.birthDate, this.deviceRemoteId});
+  ChildEntity(
+      {required this.name, required this.birthDate, this.deviceRemoteId});
 
   // JSON serialization
   Map<String, dynamic> toJson() {
@@ -43,7 +48,6 @@ class ChildEntity {
     );
   }
 
-
   ChildrenCompanion toCompanion() {
     return ChildrenCompanion(
       name: Value(name),
@@ -55,8 +59,7 @@ class ChildEntity {
   }
 
   // CREATE
-  static Future<void> saveSingleChildEntity(
-      ChildEntity childEntity) async {
+  static Future<void> saveSingleChildEntity(ChildEntity childEntity) async {
     AppDb db = AppDb.instance();
     await db
         .into(db.children)
@@ -71,9 +74,9 @@ class ChildEntity {
     });
   }
 
-    static Future<void> saveSingleChildEntityFromParameters(
+  static Future<void> saveSingleChildEntityFromParameters(
       String name, DateTime birthDate) async {
-        ChildEntity childEntity = ChildEntity(name: name, birthDate: birthDate);
+    ChildEntity childEntity = ChildEntity(name: name, birthDate: birthDate);
     AppDb db = AppDb.instance();
     await db
         .into(db.children)
@@ -82,6 +85,12 @@ class ChildEntity {
   }
 
   // READ
+  static Future<ChildEntity?> queryChildById(int id) async {
+    AppDb db = AppDb.instance();
+    return await (db.select(db.children)..where((tbl) => tbl.id.equals(id)))
+        .getSingleOrNull();
+  }
+
   static Future<List<ChildEntity>> queryAllChildren() async {
     AppDb db = AppDb.instance();
     List<ChildEntity> childEntityList = await db.select(db.children).get();
@@ -95,23 +104,53 @@ class ChildEntity {
   static Future<ChildEntity?> queryChildByName(String name) async {
     AppDb db = AppDb.instance();
     ChildEntity? childEntity = await (db.select(db.children)
-      ..where((tbl) => tbl.name.equals(name)))
+          ..where((tbl) => tbl.name.equals(name)))
         .getSingleOrNull();
     if (childEntity != null) {
       childEntity.arduinoDeviceEntity =
-      await queryArduinoDeviceBydeviceRemoteId(childEntity.deviceRemoteId ?? '');
+          await queryArduinoDeviceBydeviceRemoteId(
+              childEntity.deviceRemoteId ?? '');
     }
     return childEntity;
   }
 
-  static Future<ArduinoDeviceEntity?> queryArduinoDeviceBydeviceRemoteId(String deviceRemoteId) async {
-    // Assuming ArduinoDeviceEntity has a method similar to queryDeviceByChildModelId
+  static Future<ArduinoDeviceEntity?> queryArduinoDeviceBydeviceRemoteId(
+      String deviceRemoteId) async {
     return await ArduinoDeviceEntity.queryArduinoDeviceById(deviceRemoteId);
   }
-    // UPDATE
 
+  // UPDATE
+  static Future<void> updateRemoteDeviceId(
+      int id, String remoteDeviceId) async {
+    AppDb db = AppDb.instance();
 
-    // DELETE
+    ChildEntity? child = await queryChildById(id);
 
-  // TODO update remoteDeviceID for a child with ID number;
+    if (child != null) {
+      await db.update(db.children).replace(ChildrenCompanion(
+          id: Value(id), deviceRemoteId: Value(remoteDeviceId)));
+    } else {
+      throw Exception('Child with ID $id not found');
+    }
+  }
+
+  // DELETE
+  static Future<void> deleteDeviceForChild(int childId) async {
+    AppDb db = AppDb.instance();
+
+    ChildEntity? child = await queryChildById(childId);
+    if (child != null) {
+      child.deviceRemoteId = null; // or ''
+
+      await db.update(db.children).replace(child.toCompanion());
+    }
+  }
+
+  static Future<void> deleteChild(int childId) async {
+    AppDb db = AppDb.instance();
+
+    // Delete the child entity from the database based on its ID
+    await db.delete(db.children)
+      ..where((tbl) => tbl.id.equals(childId));
+  }
 }

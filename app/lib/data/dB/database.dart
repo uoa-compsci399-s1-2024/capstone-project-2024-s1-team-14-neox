@@ -8,8 +8,6 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
-
-
 part 'database.g.dart';
 
 LazyDatabase _openConnection() {
@@ -21,18 +19,17 @@ LazyDatabase _openConnection() {
   });
 }
 
-
 @DriftDatabase(tables: [Children, ArduinoDevices, ArduinoDatas])
 class AppDb extends _$AppDb {
   static final AppDb _instance = AppDb();
 
   static AppDb instance() => _instance;
+
   AppDb() : super(_openConnection());
 
   @override
   int get schemaVersion => 1;
 
-  //Basic CRUD queries
-  // insert new data Entities
-
+//Basic CRUD queries
+// insert new data Entities
 }

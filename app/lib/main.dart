@@ -16,6 +16,7 @@ import 'child_home/cubit/child_profile_cubit.dart';
 void main() {
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true); // Used to log BLE
   runApp(const MyApp());
+
 }
 
 
