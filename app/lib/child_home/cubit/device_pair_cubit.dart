@@ -9,9 +9,12 @@ class DevicePairCubit extends Cubit<DevicePairState> {
   DevicePairCubit(this.name, this.deviceRemoteId)
       : super(deviceRemoteId != null
             ? DevicePairState(
-                status: DevicePairStatus.paired, deviceRemoteId: deviceRemoteId)
+                status: DevicePairStatus.paired,
+                childName: name,
+                deviceRemoteId: deviceRemoteId)
             : DevicePairState(
                 status: DevicePairStatus.unknown,
+                childName: name,
                 deviceRemoteId: deviceRemoteId));
 
   void onDevicePairSuccess(String id) {

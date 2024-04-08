@@ -22,20 +22,24 @@ class DevicePairState extends Equatable {
   final DevicePairStatus status;
   final String? deviceRemoteId;
   final String message;
+  final String childName;
 
   const DevicePairState({
     required this.status,
+    required this.childName,
     required this.deviceRemoteId,
     this.message = "",
   });
 
   DevicePairState copyWith({
     DevicePairStatus? status,
+    String? childName,
     String? deviceRemoteId,
     String? message,
   }) {
     return DevicePairState(
       status: status ?? this.status,
+      childName: childName ?? this.childName,
       deviceRemoteId: deviceRemoteId ?? "",
       message: message ?? "",
     );
