@@ -69,6 +69,8 @@ class AnalysisHomeScreenState extends State<AnalysisHomeScreen> {
                 return CircularProgressIndicator();
               } else if (state.status.isInitial) {
                 return Text("Refresh to fetch data");
+              } if (state.status.isFailure) {
+                return Text("No data exits. Please sync your device");
               }
               return Expanded(
                 child: ListView.builder(

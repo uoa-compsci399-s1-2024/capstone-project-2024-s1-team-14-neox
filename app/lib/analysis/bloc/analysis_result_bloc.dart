@@ -18,23 +18,39 @@ class AnalysisBloc extends Bloc<AnalysisEvent, AnalysisState> {
   Future<void> _onAnalysisChangeChildEvent(
       AnalysisChangeChildEvent event, Emitter<AnalysisState> emit) async {
     emit(state.copyWith(status: AnalysisStatus.loading));
-    List<SensorDataModel> data =
-        await ChildDeviceRepository.fetchArduinoSamplesByChildId(event.childId);
-    emit(state.copyWith(
-      status: AnalysisStatus.success,
-      focusChildId: event.childId,
-      data: data,
-    ));
+    // List<SensorDataModel> data =
+    //     await ChildDeviceRepository.fetchArduinoSamplesByChildId(event.childId);
+
+    List<SensorDataModel>? data =
+        ChildDeviceRepository.fetchArduinoSamplesByChildId(event.childId);
+    if (data != null) {
+      emit(state.copyWith(
+        status: AnalysisStatus.success,
+        data: data,
+      ));
+    } else {
+      emit(state.copyWith(
+        status: AnalysisStatus.failure,
+      ));
+    }
   }
 
   Future<void> _onAnalysisLoadDataEvent(
       AnalysisLoadDataEvent event, Emitter<AnalysisState> emit) async {
-        emit(state.copyWith(status: AnalysisStatus.loading));
-        List<SensorDataModel> data =
-        await ChildDeviceRepository.fetchArduinoSamplesByChildId(event.childId);
-    emit(state.copyWith(
-      status: AnalysisStatus.success,
-      data: data
-    ));
-      }
+    emit(state.copyWith(status: AnalysisStatus.loading));
+    // List<SensorDataModel> data =
+    // await ChildDeviceRepository.fetchArduinoSamplesByChildId(event.childId);
+    List<SensorDataModel>? data =
+        ChildDeviceRepository.fetchArduinoSamplesByChildId(event.childId);
+    if (data != null) {
+      emit(state.copyWith(
+        status: AnalysisStatus.success,
+        data: data,
+      ));
+    } else {
+      emit(state.copyWith(
+        status: AnalysisStatus.failure,
+      ));
+    }
+  }
 }

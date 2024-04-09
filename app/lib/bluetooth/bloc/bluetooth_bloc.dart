@@ -216,7 +216,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
 
     // Send samples to repository
     for (List<int> value in values) {
-      await ChildDeviceRepository.parseAndSaveSamples(event.childName, value);
+      await ChildDeviceRepository.parseAndSaveSamples(event.childName, value, event.childId);
     }
   }
 
