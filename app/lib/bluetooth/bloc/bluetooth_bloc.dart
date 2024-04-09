@@ -195,7 +195,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     }
 
     // Read sensor data
-    int sampleCharacteristicIndex = -1;
+    int sampleCharacteristicIndex = 0;
     List<List<int>> values = [];
     await acknowledgementCharacteristic.write([0x01]);
     while (true) {
