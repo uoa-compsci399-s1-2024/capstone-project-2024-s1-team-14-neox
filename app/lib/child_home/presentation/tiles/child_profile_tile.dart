@@ -5,12 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bluetooth/bloc/bluetooth_bloc.dart';
 import '../../../bluetooth/presentation/bluetooth_panel.dart';
-import '../../cubit/device_pair_cubit.dart';
-import '../../domain/child_device_model.dart';
+import '../../cubit/child_device_cubit.dart';
 
 class ChildProfileTile extends StatefulWidget {
-  final ChildDeviceModel profile;
-  const ChildProfileTile({super.key, required this.profile});
+  const ChildProfileTile({super.key});
 
   @override
   State<ChildProfileTile> createState() => _ChildProfileTileState();
@@ -34,19 +32,19 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
           ),
           const Text("Name"),
           Text(
-            widget.profile.name,
+            context.read<ChildDeviceCubit>().state.childName,
             style: const TextStyle(
               fontSize: 30,
             ),
           ),
           const Text("Age"),
           Text(
-            calculateAge(widget.profile.birthDate),
+            calculateAge(context.read<ChildDeviceCubit>().state.birthDate),
             style: const TextStyle(
               fontSize: 30,
             ),
           ),
-          BlocConsumer<DevicePairCubit, DevicePairState>(
+          BlocConsumer<ChildDeviceCubit, ChildDeviceState>(
               listener: (context, state) {
             // if (state.status.isPairSuccess) {
             //   ScaffoldMessenger.of(context)
@@ -76,7 +74,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
           }, builder: (context, state) {
             return BlocProvider(
               create: (_) => BluetoothBloc(),
-              child: BluetoothPanel(name: widget.profile.name, childId: widget.profile.id ?? -1,),
+              child: const BluetoothPanel(),
             );
           }),
         ],

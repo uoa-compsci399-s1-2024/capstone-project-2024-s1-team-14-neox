@@ -1,3 +1,4 @@
+import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -195,7 +196,8 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
 
     // Read sensor data
     int sampleCharacteristicIndex = 0;
-    List<int> bytes = [];
+    List<List<int>> values = [];
+    await acknowledgementCharacteristic.write([0x01]);
     while (true) {
       BluetoothCharacteristic sampleCharacteristic = sampleCharacteristics[sampleCharacteristicIndex]!;
       List<int> value = await sampleCharacteristic.read();
@@ -210,14 +212,13 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
         break;
       }
 
-      bytes.addAll(value);
+      values.add(value);
     }
 
-    // TODO: Send data to repository
-    // Resources
-    // https://github.com/boskokg/flutter_blue_plus/issues/274
-    // https://pub.dev/packages/flutter_blue_plus#subscribe-to-a-characteristic
-    print(bytes);
+    // Send samples to repository
+    for (List<int> value in values) {
+      await ChildDeviceRepository.parseAndSaveSamples(event.childName, value);
+    }
   }
 
   Future<void> _onBluetoothDisconnectPressed(

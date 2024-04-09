@@ -17,7 +17,8 @@ class BluetoothDisconnectPressed extends BluetoothEvent {
 
 }
 class BluetoothSyncPressed extends BluetoothEvent {
+    final String childName;
     final String deviceRemoteId;
 
-  BluetoothSyncPressed({required this.deviceRemoteId});
+  BluetoothSyncPressed({required this.childName, required this.deviceRemoteId});
 } 
