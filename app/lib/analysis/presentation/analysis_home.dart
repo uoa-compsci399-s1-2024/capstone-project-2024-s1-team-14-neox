@@ -2,6 +2,7 @@ import 'package:capstone_project_2024_s1_team_14_neox/analysis/bloc/analysis_res
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/cubit/all_child_profile_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../child_home/domain/child_device_model.dart';
 
@@ -34,10 +35,8 @@ class AnalysisHomeScreenState extends State<AnalysisHomeScreen> {
                       value: profile,
                       child: Column(
                         children: [
-                          Text(profile.childName),
-                          Text(
-                            profile.birthDate.toString(),
-                          )
+                          Text("Name: ${profile.childName}"),
+                          Text("Date of Birth: ${DateFormat('yyyy-MM-dd').format(profile.birthDate)}"),                          
                         ],
                       ),
                     ))
@@ -76,7 +75,7 @@ class AnalysisHomeScreenState extends State<AnalysisHomeScreen> {
                   itemCount: state.data.length,
                   itemBuilder: (BuildContext context, int index) {
                     return ExpansionTile(
-                      title: Text(state.data[index].dateTime.toString()),
+                      title: Text(DateFormat('yyyy-MM-dd - kk:mm:ss').format(state.data[index].dateTime)),
                       children: [
                         Text("Light: ${state.data[index].light}"),
                         Text("UV: ${state.data[index].uv}"),

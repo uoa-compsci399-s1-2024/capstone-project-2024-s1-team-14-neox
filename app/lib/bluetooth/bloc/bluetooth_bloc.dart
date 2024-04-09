@@ -134,24 +134,21 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
   }
 
   Future<void> _onBluetoothSyncPressed(
-    BluetoothSyncPressed event,
-    Emitter<BluetoothState> emit) async
-  {
+      BluetoothSyncPressed event, Emitter<BluetoothState> emit) async {
     if (event.deviceRemoteId == "") {
       emit(
         state.copyWith(
-          status: BluetoothStatus.error,
-          message: "No device paired"
-        ),
+            status: BluetoothStatus.error, message: "No device paired"),
       );
       return;
     }
-  
+
     // Connect to device if not connected already
     BluetoothDevice device = BluetoothDevice.fromId(event.deviceRemoteId);
     if (device.isDisconnected) {
       await device.connect(mtu: 23);
-      print("${device.disconnectReason?.code} $device.disconnectReason?.description}");
+      print(
+          "${device.disconnectReason?.code} $device.disconnectReason?.description}");
     }
 
     // Find characteristics
@@ -164,7 +161,8 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
       }
 
       for (BluetoothCharacteristic characteristic in service.characteristics) {
-        String characteristicUuid = characteristic.characteristicUuid.toString().toLowerCase();
+        String characteristicUuid =
+            characteristic.characteristicUuid.toString().toLowerCase();
 
         if (characteristicUuid == uuidAcknowledgement) {
           acknowledgementCharacteristic = characteristic;
@@ -182,14 +180,14 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     }
 
     // Check if all characteristics are found
-    if (sampleCharacteristics.any((char) => char == null || !char.properties.read)
-        || acknowledgementCharacteristic == null
-        || !acknowledgementCharacteristic.properties.write) {
+    if (sampleCharacteristics
+            .any((char) => char == null || !char.properties.read) ||
+        acknowledgementCharacteristic == null ||
+        !acknowledgementCharacteristic.properties.write) {
       emit(
         state.copyWith(
-          status: BluetoothStatus.error,
-          message: "Service missing characteristics"
-        ),
+            status: BluetoothStatus.error,
+            message: "Service missing characteristics"),
       );
       return;
     }
@@ -199,7 +197,8 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     List<List<int>> values = [];
     await acknowledgementCharacteristic.write([0x01]);
     while (true) {
-      BluetoothCharacteristic sampleCharacteristic = sampleCharacteristics[sampleCharacteristicIndex]!;
+      BluetoothCharacteristic sampleCharacteristic =
+          sampleCharacteristics[sampleCharacteristicIndex]!;
       List<int> value = await sampleCharacteristic.read();
 
       sampleCharacteristicIndex++;
