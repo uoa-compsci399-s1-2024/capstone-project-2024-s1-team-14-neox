@@ -221,7 +221,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: secretsmanager-sg
-      GroupDescription: Allow inbound HTTP traffic from authorised applications for Secrets Manager
+      GroupDescription: Allow inbound HTTPS traffic from authorised applications for Secrets Manager
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
