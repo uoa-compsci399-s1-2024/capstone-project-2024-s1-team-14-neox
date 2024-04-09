@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 
+import '../../analysis/domain/sensor_data_model.dart';
 import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
 
@@ -83,4 +84,11 @@ class ChildDeviceRepository {
       );
     }
   }
+
+  static Future<List<SensorDataModel>> fetchArduinoSamplesByChildId(int childId) async {
+        List<ArduinoDataEntity> entities = await ChildEntity.getAllDataForChild(childId);
+    return entities.map((data) => SensorDataModel.fromEntity(data)).toList();
+  }
+
+
 }
