@@ -9,8 +9,8 @@ import '../domain/sensor_data_model.dart';
 part 'analysis_result_event.dart';
 part 'analysis_result_state.dart';
 
-class AnalysisResultBloc extends Bloc<AnalysisEvent, AnalysisState> {
-  AnalysisResultBloc() : super(AnalysisState()) {
+class AnalysisBloc extends Bloc<AnalysisEvent, AnalysisState> {
+  AnalysisBloc() : super(AnalysisState()) {
     on<AnalysisChangeChildEvent>(_onAnalysisChangeChildEvent);
     on<AnalysisLoadDataEvent>(_onAnalysisLoadDataEvent);
   }
@@ -29,12 +29,12 @@ class AnalysisResultBloc extends Bloc<AnalysisEvent, AnalysisState> {
 
   Future<void> _onAnalysisLoadDataEvent(
       AnalysisLoadDataEvent event, Emitter<AnalysisState> emit) async {
-    emit(state.copyWith(status: AnalysisStatus.loading));
-    List<SensorDataModel> data =
+        emit(state.copyWith(status: AnalysisStatus.loading));
+        List<SensorDataModel> data =
         await ChildDeviceRepository.fetchArduinoSamplesByChildId(event.childId);
     emit(state.copyWith(
       status: AnalysisStatus.success,
-      data: data,
+      data: data
     ));
-  }
+      }
 }
