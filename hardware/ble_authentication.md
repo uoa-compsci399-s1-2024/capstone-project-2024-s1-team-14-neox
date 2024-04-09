@@ -33,10 +33,10 @@ This avoids the central needing to check when the data is ready to be read.
 
 ## Characteristics
 
-| Name | Size | UUID | Function |
-|------|------|------|----------|
-| R1 | 32 Bytes | 9ab7d3df-a7b4-4858-8060-84a9adcf1420 | Random challenge from peripheral. |
-| H1 | 32 Bytes | a90aa9a2-b186-4717-bc8d-f169eead75da | Hash response from central. |
-| R2 | 32 Bytes | c03b7267-dcfa-4525-8521-1bc31c08c312 | Random challenge from central. |
-| H2 | 32 Bytes | 750d5d43-96c4-4f5c-8ce1-fdb44a150336 | Hash response from peripheral. |
-| A  | 1 Byte   | 776edbca-a020-4d86-a5e8-25eb87e82554 | Central authenticated flag. |
+| Name | Size | Properties | UUID | Function |
+|------|------|------------|------|----------|
+| R1 | 32 Bytes | Read        | 9ab7d3df-a7b4-4858-8060-84a9adcf1420 | Random challenge from peripheral. |
+| H1 | 32 Bytes | Write       | a90aa9a2-b186-4717-bc8d-f169eead75da | Hash response from central. |
+| R2 | 32 Bytes | Write       | c03b7267-dcfa-4525-8521-1bc31c08c312 | Random challenge from central. |
+| H2 | 32 Bytes | Read, Write | 750d5d43-96c4-4f5c-8ce1-fdb44a150336 | Hash response from peripheral. |
+| A  | 1 Byte   | Read        | 776edbca-a020-4d86-a5e8-25eb87e82554 | Central authenticated flag. |
