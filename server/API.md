@@ -309,7 +309,7 @@ User sends a JSON object with the schema:
 }
 ```
 where each `SAMPLE` is a JSON object containing the sample fields
-mentioned before.
+mentioned before except the field for child ID since it's already been specified in the URI.
 
 If authorised to add samples for `childID`: server will return 204 or
 207 (see later).
