@@ -174,6 +174,18 @@ where:
 
 ### Sign up (POST) (`/users/`)
 
+In the `data` field of the response, the server will send the client a
+JSON object whose only field (for now) will be the ID of the user.
+The ID won't need to be added to any requests from client because we
+would already know their ID once they've been authenticated.
+
+The schema:
+```json
+{
+	"id": ID,
+}
+```
+
 AWS Cognito allows using third party identity providers like Google
 and Facebook, so we will use Cognito even if we don't use third party
 identity providers.
