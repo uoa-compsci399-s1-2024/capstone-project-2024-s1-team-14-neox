@@ -81,7 +81,6 @@ class ChildEntity {
     await db
         .into(db.children)
         .insert(childEntity.toCompanion(), mode: InsertMode.insert);
-    print(childEntity.name);
   }
 
   // READ
@@ -98,7 +97,6 @@ class ChildEntity {
     //   childEntity.arduinoDeviceEntity =
     //   await queryArduinoDeviceBydeviceRemoteId(childEntity.deviceRemoteId ?? '');
     // });
-    print(childEntityList[1].id);
     return childEntityList;
   }
 
