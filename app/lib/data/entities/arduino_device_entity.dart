@@ -3,24 +3,24 @@ import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 
 @UseRowClass(ArduinoDeviceEntity)
 class ArduinoDevices extends Table {
-  TextColumn get remoteDeviceId => text()();
+  TextColumn get deviceRemoteId => text()();
 
   TextColumn get authorisationCode => text()();
 }
 
 class ArduinoDeviceEntity {
-  String? remoteDeviceId;
+  String? deviceRemoteId;
   String? authorisationCode;
 
   ArduinoDeviceEntity({
-    this.remoteDeviceId,
+    this.deviceRemoteId,
     this.authorisationCode,
   });
 
   // JSON serialization
   Map<String, dynamic> toJson() {
     return {
-      'remoteDeviceId': remoteDeviceId,
+      'deviceRemoteId': deviceRemoteId,
       'authorisationCode': authorisationCode,
     };
   }
@@ -28,14 +28,14 @@ class ArduinoDeviceEntity {
   // JSON deserialization
   factory ArduinoDeviceEntity.fromJson(Map<String, dynamic> json) {
     return ArduinoDeviceEntity(
-      remoteDeviceId: json['remoteDeviceId'],
+      deviceRemoteId: json['deviceRemoteId'],
       authorisationCode: json['authorisationCode'],
     );
   }
 
   ArduinoDevicesCompanion toCompanion() {
     return ArduinoDevicesCompanion(
-      remoteDeviceId: Value(remoteDeviceId ?? ''),
+      deviceRemoteId: Value(deviceRemoteId ?? ''),
       authorisationCode: Value(authorisationCode ?? ''),
     );
   }
@@ -60,7 +60,7 @@ class ArduinoDeviceEntity {
     AppDb db = AppDb.instance();
     ArduinoDeviceEntity? arduinoDeviceEntity =
         await (db.select(db.arduinoDevices)
-              ..where((tbl) => tbl.remoteDeviceId.equals(deviceId)))
+              ..where((tbl) => tbl.deviceRemoteId.equals(deviceId)))
             .getSingleOrNull();
     return arduinoDeviceEntity;
   }

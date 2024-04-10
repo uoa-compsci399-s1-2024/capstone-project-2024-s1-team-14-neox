@@ -19,7 +19,7 @@ LazyDatabase _openConnection() {
   });
 }
 
-@DriftDatabase(tables: [Children, ArduinoDevices, ArduinoDatas])
+@DriftDatabase(tables: [ ArduinoDevices, ArduinoDatas, Children])
 class AppDb extends _$AppDb {
   static final AppDb _instance = AppDb();
 
