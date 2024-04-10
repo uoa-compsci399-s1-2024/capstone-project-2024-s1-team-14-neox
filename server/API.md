@@ -190,7 +190,7 @@ AWS Cognito allows using third party identity providers like Google
 and Facebook, so we will use Cognito even if we don't use third party
 identity providers.
 
-LOW PRIORITY: MAYBE: Session token is OPTIONAL.  If the session token
+LOW PRIORITY: MAYBE: Session token[^3] is OPTIONAL.  If the session token
 given to the server is an admin's token, then allow registering other
 accounts?  This is to allow site admins to register clinicians since
 the admins would need to set which child devices they can monitor.
@@ -309,8 +309,11 @@ deleted too?
 #### Details
 
 - This will just be an interface to AWS Cognito.
+- Client doesn't need to do this API action if they authenticate with
+  OAuth, for example.  The client can just pass the token from a
+  third-party identity provider directly to the API.
 - NOTE: Every other action (except registration) will take a session
-  token to identify the user.
+  token[^3] to identify the user.
 
 ### Add samples (POST) (`/samples/{childID}`)
 
@@ -412,3 +415,5 @@ by device ID.
 [^2]: NOTE: The clients want child names anonymised on backend or
     encrypted (they said "hashed" but the way they used it implied
     encryption)
+
+[^3]: TODO: is "session token" an accurate name?
