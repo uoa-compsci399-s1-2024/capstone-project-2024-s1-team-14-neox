@@ -23,4 +23,20 @@ class ChildApiService {
      return child;
 
   }
+
+  static Future<void> postData(ChildData child) async {
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(child.toJson()),
+    );
+
+    if (response.statusCode == 201) {
+      print('Data posted successfully');
+    } else {
+      throw Exception('Failed to post data: ${response.body}');
+    }
+  }
 }

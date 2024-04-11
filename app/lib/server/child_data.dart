@@ -20,6 +20,15 @@ class ChildData {
       lux: json['lux'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'tstamp': tstamp,
+      'child_id': childId,
+      'uv_index': uvIndex,
+      'lux': lux,
+    };
+  }
 }
 
 
