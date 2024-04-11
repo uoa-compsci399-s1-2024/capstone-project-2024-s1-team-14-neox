@@ -220,7 +220,6 @@ Resources:
   SecretsManagerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: secretsmanager-sg
       GroupDescription: Allow inbound HTTPS traffic from authorised applications for Secrets Manager
       VpcId: !Ref VPC
       SecurityGroupIngress:
@@ -232,7 +231,6 @@ Resources:
   SecretsAccessSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: secretsmanager-access-sg
       GroupDescription: Security group for applications allowed to access Secrets Manager
       VpcId: !Ref VPC
       # no in/egress rules since none needed
@@ -247,7 +245,6 @@ Resources:
   DatabaseSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: db-sg
       GroupDescription: Allow inbound postgres traffic from authorised applications for database
       VpcId: !Ref VPC
       SecurityGroupIngress:
@@ -259,7 +256,6 @@ Resources:
   DBAccessSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: db-access-sg
       GroupDescription: Security group for services allowed to access database
       VpcId: !Ref VPC
       # no in/egress rules since none needed
