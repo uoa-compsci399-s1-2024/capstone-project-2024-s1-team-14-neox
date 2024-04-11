@@ -118,6 +118,15 @@ class ChildEntity {
     return await ArduinoDeviceEntity.queryArduinoDeviceById(deviceRemoteId);
   }
 
+  static Future<List<ArduinoDataEntity>> getAllDataForChild(int childId) async {
+    AppDb db = AppDb.instance();
+    ChildEntity? child = await ChildEntity.queryChildById(childId);
+    String? name = child?.name;
+    List<ArduinoDataEntity> data =
+        await ArduinoDataEntity.queryArduinoDataByName(name!);
+    return data;
+  }
+
   // UPDATE
   static Future<void> updateRemoteDeviceId(
       int? id, String remoteDeviceId) async {
