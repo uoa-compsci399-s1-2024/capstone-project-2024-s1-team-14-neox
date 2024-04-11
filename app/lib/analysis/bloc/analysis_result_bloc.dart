@@ -21,7 +21,7 @@ class AnalysisBloc extends Bloc<AnalysisEvent, AnalysisState> {
     // List<SensorDataModel> data =
     //     await ChildDeviceRepository.fetchArduinoSamplesByChildId(event.childId);
 
-    List<SensorDataModel>? data =
+    List<SensorDataModel>? data = await 
         ChildDeviceRepository.fetchArduinoSamplesByChildId(event.childId);
     if (data != null) {
       emit(state.copyWith(
@@ -40,7 +40,7 @@ class AnalysisBloc extends Bloc<AnalysisEvent, AnalysisState> {
     emit(state.copyWith(status: AnalysisStatus.loading));
     // List<SensorDataModel> data =
     // await ChildDeviceRepository.fetchArduinoSamplesByChildId(event.childId);
-    List<SensorDataModel>? data =
+    List<SensorDataModel>? data = await
         ChildDeviceRepository.fetchArduinoSamplesByChildId(event.childId);
     if (data != null) {
       emit(state.copyWith(

@@ -119,11 +119,8 @@ class ChildEntity {
   }
 
   static Future<List<ArduinoDataEntity>> getAllDataForChild(int childId) async {
-    AppDb db = AppDb.instance();
-    ChildEntity? child = await ChildEntity.queryChildById(childId);
-    String? name = child?.name;
     List<ArduinoDataEntity> data =
-        await ArduinoDataEntity.queryArduinoDataByName(name!);
+        await ArduinoDataEntity.queryArduinoDataById(childId);
     return data;
   }
 

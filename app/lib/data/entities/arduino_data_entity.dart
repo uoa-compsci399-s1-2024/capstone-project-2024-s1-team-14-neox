@@ -93,10 +93,15 @@ class ArduinoDataEntity {
         await db.select(db.arduinoDatas).get();
     return arduinoDataEntityList;
   }
-
+  // Deprecate
   static Future<List<ArduinoDataEntity>> queryArduinoDataByName(String name) async {
     final db = AppDb.instance();
     final query = db.select(db.arduinoDatas)..where((tbl) => tbl.name.equals(name));
+    return query.get();
+  }
+  static Future<List<ArduinoDataEntity>> queryArduinoDataById(int childId) async {
+    final db = AppDb.instance();
+    final query = db.select(db.arduinoDatas)..where((tbl) => tbl.id.equals(childId));
     return query.get();
   }
 
