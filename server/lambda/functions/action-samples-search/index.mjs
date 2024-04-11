@@ -1,4 +1,5 @@
 import {
+  addCorsHeaders,
   connectToDB,
 } from "/opt/nodejs/lib.mjs";
 
@@ -13,5 +14,6 @@ export const handler = async (event) => {
       "Content-Type": "application/json",
     }
   };
+  addCorsHeaders(response);
   return response;
 };

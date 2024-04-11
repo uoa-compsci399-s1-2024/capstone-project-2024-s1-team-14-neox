@@ -1,4 +1,5 @@
 import {
+  addCorsHeaders,
   connectToDB,
 } from "/opt/nodejs/lib.mjs";
 
@@ -31,5 +32,6 @@ export const handler = async (event) => {
   const response = {
     statusCode: 200,
   };
+  addCorsHeaders(response);
   return response;
 };
