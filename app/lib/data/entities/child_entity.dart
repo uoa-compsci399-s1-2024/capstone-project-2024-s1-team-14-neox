@@ -26,7 +26,7 @@ class ChildEntity {
   ArduinoDeviceEntity? arduinoDeviceEntity;
 
   ChildEntity(
-      {required this.name, required this.birthDate, this.deviceRemoteId});
+      {required this.name, required this.birthDate, this.deviceRemoteId, this.id});
 
   // JSON serialization
   Map<String, dynamic> toJson() {
@@ -81,7 +81,6 @@ class ChildEntity {
     await db
         .into(db.children)
         .insert(childEntity.toCompanion(), mode: InsertMode.insert);
-    print(childEntity.name);
   }
 
   // READ
@@ -120,11 +119,8 @@ class ChildEntity {
   }
 
   static Future<List<ArduinoDataEntity>> getAllDataForChild(int childId) async {
-    AppDb db = AppDb.instance();
-    ChildEntity? child = await ChildEntity.queryChildById(childId);
-    String? name = child?.name;
     List<ArduinoDataEntity> data =
-        await ArduinoDataEntity.queryArduinoDataByName(name!);
+        await ArduinoDataEntity.queryArduinoDataById(childId);
     return data;
   }
 

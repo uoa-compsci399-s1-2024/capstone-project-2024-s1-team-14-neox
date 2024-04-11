@@ -4,9 +4,13 @@ import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 import 'package:drift/drift.dart';
 import 'dart:convert';
 
+import 'child_entity.dart';
+
 @UseRowClass(ArduinoDataEntity)
 class ArduinoDatas extends Table {
   TextColumn get name => text()();
+
+  IntColumn get id => integer().references(Children, #id)();
 
   IntColumn get uv => integer()();
 
@@ -27,9 +31,10 @@ class ArduinoDataEntity {
   int? light;
   DateTime datetime;
   Int16List? accel;
+  int? id;
 
   ArduinoDataEntity(
-      {this.name, this.uv, this.light, required this.datetime, this.accel});
+      {this.id, this.name, this.uv, this.light, required this.datetime, this.accel, });
 
   Map<String, dynamic> toJson() {
     return {
@@ -50,6 +55,7 @@ class ArduinoDataEntity {
       accel: (json['accel'] != null)
           ? Int16List.fromList(List<int>.from(json['accel']))
           : null,
+
     );
   }
 
@@ -62,6 +68,7 @@ class ArduinoDataEntity {
       accelX: Value(accel?[0] ?? 0),
       accelY: Value(accel?[1] ?? 0),
       accelZ: Value(accel?[2] ?? 0),
+      id: Value(id ?? 0),
     );
   }
 
@@ -86,10 +93,15 @@ class ArduinoDataEntity {
         await db.select(db.arduinoDatas).get();
     return arduinoDataEntityList;
   }
-
+  // Deprecate
   static Future<List<ArduinoDataEntity>> queryArduinoDataByName(String name) async {
     final db = AppDb.instance();
     final query = db.select(db.arduinoDatas)..where((tbl) => tbl.name.equals(name));
+    return query.get();
+  }
+  static Future<List<ArduinoDataEntity>> queryArduinoDataById(int childId) async {
+    final db = AppDb.instance();
+    final query = db.select(db.arduinoDatas)..where((tbl) => tbl.id.equals(childId));
     return query.get();
   }
 

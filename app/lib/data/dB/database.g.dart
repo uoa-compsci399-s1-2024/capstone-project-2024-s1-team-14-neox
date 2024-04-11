@@ -3,101 +3,52 @@
 part of 'database.dart';
 
 // ignore_for_file: type=lint
-class $ArduinoDatasTable extends ArduinoDatas
-    with TableInfo<$ArduinoDatasTable, ArduinoDataEntity> {
+class $ArduinoDevicesTable extends ArduinoDevices
+    with TableInfo<$ArduinoDevicesTable, ArduinoDeviceEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ArduinoDatasTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  $ArduinoDevicesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _deviceRemoteIdMeta =
+      const VerificationMeta('deviceRemoteId');
   @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
+  late final GeneratedColumn<String> deviceRemoteId = GeneratedColumn<String>(
+      'device_remote_id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _uvMeta = const VerificationMeta('uv');
+  static const VerificationMeta _authorisationCodeMeta =
+      const VerificationMeta('authorisationCode');
   @override
-  late final GeneratedColumn<int> uv = GeneratedColumn<int>(
-      'uv', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _lightMeta = const VerificationMeta('light');
+  late final GeneratedColumn<String> authorisationCode =
+      GeneratedColumn<String>('authorisation_code', aliasedName, false,
+          type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  late final GeneratedColumn<int> light = GeneratedColumn<int>(
-      'light', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _datetimeMeta =
-      const VerificationMeta('datetime');
-  @override
-  late final GeneratedColumn<DateTime> datetime = GeneratedColumn<DateTime>(
-      'datetime', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
-  static const VerificationMeta _accelXMeta = const VerificationMeta('accelX');
-  @override
-  late final GeneratedColumn<int> accelX = GeneratedColumn<int>(
-      'accel_x', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _accelYMeta = const VerificationMeta('accelY');
-  @override
-  late final GeneratedColumn<int> accelY = GeneratedColumn<int>(
-      'accel_y', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _accelZMeta = const VerificationMeta('accelZ');
-  @override
-  late final GeneratedColumn<int> accelZ = GeneratedColumn<int>(
-      'accel_z', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  @override
-  List<GeneratedColumn> get $columns =>
-      [name, uv, light, datetime, accelX, accelY, accelZ];
+  List<GeneratedColumn> get $columns => [deviceRemoteId, authorisationCode];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'arduino_datas';
+  static const String $name = 'arduino_devices';
   @override
-  VerificationContext validateIntegrity(Insertable<ArduinoDataEntity> instance,
+  VerificationContext validateIntegrity(
+      Insertable<ArduinoDeviceEntity> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('name')) {
+    if (data.containsKey('device_remote_id')) {
       context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+          _deviceRemoteIdMeta,
+          deviceRemoteId.isAcceptableOrUnknown(
+              data['device_remote_id']!, _deviceRemoteIdMeta));
     } else if (isInserting) {
-      context.missing(_nameMeta);
+      context.missing(_deviceRemoteIdMeta);
     }
-    if (data.containsKey('uv')) {
-      context.handle(_uvMeta, uv.isAcceptableOrUnknown(data['uv']!, _uvMeta));
-    } else if (isInserting) {
-      context.missing(_uvMeta);
-    }
-    if (data.containsKey('light')) {
+    if (data.containsKey('authorisation_code')) {
       context.handle(
-          _lightMeta, light.isAcceptableOrUnknown(data['light']!, _lightMeta));
+          _authorisationCodeMeta,
+          authorisationCode.isAcceptableOrUnknown(
+              data['authorisation_code']!, _authorisationCodeMeta));
     } else if (isInserting) {
-      context.missing(_lightMeta);
-    }
-    if (data.containsKey('datetime')) {
-      context.handle(_datetimeMeta,
-          datetime.isAcceptableOrUnknown(data['datetime']!, _datetimeMeta));
-    } else if (isInserting) {
-      context.missing(_datetimeMeta);
-    }
-    if (data.containsKey('accel_x')) {
-      context.handle(_accelXMeta,
-          accelX.isAcceptableOrUnknown(data['accel_x']!, _accelXMeta));
-    } else if (isInserting) {
-      context.missing(_accelXMeta);
-    }
-    if (data.containsKey('accel_y')) {
-      context.handle(_accelYMeta,
-          accelY.isAcceptableOrUnknown(data['accel_y']!, _accelYMeta));
-    } else if (isInserting) {
-      context.missing(_accelYMeta);
-    }
-    if (data.containsKey('accel_z')) {
-      context.handle(_accelZMeta,
-          accelZ.isAcceptableOrUnknown(data['accel_z']!, _accelZMeta));
-    } else if (isInserting) {
-      context.missing(_accelZMeta);
+      context.missing(_authorisationCodeMeta);
     }
     return context;
   }
@@ -105,100 +56,56 @@ class $ArduinoDatasTable extends ArduinoDatas
   @override
   Set<GeneratedColumn> get $primaryKey => const {};
   @override
-  ArduinoDataEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+  ArduinoDeviceEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ArduinoDataEntity(
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      uv: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}uv'])!,
-      light: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}light'])!,
-      datetime: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}datetime'])!,
+    return ArduinoDeviceEntity(
+      deviceRemoteId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}device_remote_id'])!,
+      authorisationCode: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}authorisation_code'])!,
     );
   }
 
   @override
-  $ArduinoDatasTable createAlias(String alias) {
-    return $ArduinoDatasTable(attachedDatabase, alias);
+  $ArduinoDevicesTable createAlias(String alias) {
+    return $ArduinoDevicesTable(attachedDatabase, alias);
   }
 }
 
-class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
-  final Value<String> name;
-  final Value<int> uv;
-  final Value<int> light;
-  final Value<DateTime> datetime;
-  final Value<int> accelX;
-  final Value<int> accelY;
-  final Value<int> accelZ;
+class ArduinoDevicesCompanion extends UpdateCompanion<ArduinoDeviceEntity> {
+  final Value<String> deviceRemoteId;
+  final Value<String> authorisationCode;
   final Value<int> rowid;
-  const ArduinoDatasCompanion({
-    this.name = const Value.absent(),
-    this.uv = const Value.absent(),
-    this.light = const Value.absent(),
-    this.datetime = const Value.absent(),
-    this.accelX = const Value.absent(),
-    this.accelY = const Value.absent(),
-    this.accelZ = const Value.absent(),
+  const ArduinoDevicesCompanion({
+    this.deviceRemoteId = const Value.absent(),
+    this.authorisationCode = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  ArduinoDatasCompanion.insert({
-    required String name,
-    required int uv,
-    required int light,
-    required DateTime datetime,
-    required int accelX,
-    required int accelY,
-    required int accelZ,
+  ArduinoDevicesCompanion.insert({
+    required String deviceRemoteId,
+    required String authorisationCode,
     this.rowid = const Value.absent(),
-  })  : name = Value(name),
-        uv = Value(uv),
-        light = Value(light),
-        datetime = Value(datetime),
-        accelX = Value(accelX),
-        accelY = Value(accelY),
-        accelZ = Value(accelZ);
-  static Insertable<ArduinoDataEntity> custom({
-    Expression<String>? name,
-    Expression<int>? uv,
-    Expression<int>? light,
-    Expression<DateTime>? datetime,
-    Expression<int>? accelX,
-    Expression<int>? accelY,
-    Expression<int>? accelZ,
+  })  : deviceRemoteId = Value(deviceRemoteId),
+        authorisationCode = Value(authorisationCode);
+  static Insertable<ArduinoDeviceEntity> custom({
+    Expression<String>? deviceRemoteId,
+    Expression<String>? authorisationCode,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (name != null) 'name': name,
-      if (uv != null) 'uv': uv,
-      if (light != null) 'light': light,
-      if (datetime != null) 'datetime': datetime,
-      if (accelX != null) 'accel_x': accelX,
-      if (accelY != null) 'accel_y': accelY,
-      if (accelZ != null) 'accel_z': accelZ,
+      if (deviceRemoteId != null) 'device_remote_id': deviceRemoteId,
+      if (authorisationCode != null) 'authorisation_code': authorisationCode,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  ArduinoDatasCompanion copyWith(
-      {Value<String>? name,
-      Value<int>? uv,
-      Value<int>? light,
-      Value<DateTime>? datetime,
-      Value<int>? accelX,
-      Value<int>? accelY,
-      Value<int>? accelZ,
+  ArduinoDevicesCompanion copyWith(
+      {Value<String>? deviceRemoteId,
+      Value<String>? authorisationCode,
       Value<int>? rowid}) {
-    return ArduinoDatasCompanion(
-      name: name ?? this.name,
-      uv: uv ?? this.uv,
-      light: light ?? this.light,
-      datetime: datetime ?? this.datetime,
-      accelX: accelX ?? this.accelX,
-      accelY: accelY ?? this.accelY,
-      accelZ: accelZ ?? this.accelZ,
+    return ArduinoDevicesCompanion(
+      deviceRemoteId: deviceRemoteId ?? this.deviceRemoteId,
+      authorisationCode: authorisationCode ?? this.authorisationCode,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -206,26 +113,11 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
+    if (deviceRemoteId.present) {
+      map['device_remote_id'] = Variable<String>(deviceRemoteId.value);
     }
-    if (uv.present) {
-      map['uv'] = Variable<int>(uv.value);
-    }
-    if (light.present) {
-      map['light'] = Variable<int>(light.value);
-    }
-    if (datetime.present) {
-      map['datetime'] = Variable<DateTime>(datetime.value);
-    }
-    if (accelX.present) {
-      map['accel_x'] = Variable<int>(accelX.value);
-    }
-    if (accelY.present) {
-      map['accel_y'] = Variable<int>(accelY.value);
-    }
-    if (accelZ.present) {
-      map['accel_z'] = Variable<int>(accelZ.value);
+    if (authorisationCode.present) {
+      map['authorisation_code'] = Variable<String>(authorisationCode.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -235,14 +127,9 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
 
   @override
   String toString() {
-    return (StringBuffer('ArduinoDatasCompanion(')
-          ..write('name: $name, ')
-          ..write('uv: $uv, ')
-          ..write('light: $light, ')
-          ..write('datetime: $datetime, ')
-          ..write('accelX: $accelX, ')
-          ..write('accelY: $accelY, ')
-          ..write('accelZ: $accelZ, ')
+    return (StringBuffer('ArduinoDevicesCompanion(')
+          ..write('deviceRemoteId: $deviceRemoteId, ')
+          ..write('authorisationCode: $authorisationCode, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -268,10 +155,7 @@ class $ChildrenTable extends Children
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'REFERENCES arduino_datas (name)'));
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _birthDateMeta =
       const VerificationMeta('birthDate');
   @override
@@ -283,7 +167,10 @@ class $ChildrenTable extends Children
   @override
   late final GeneratedColumn<String> deviceRemoteId = GeneratedColumn<String>(
       'device_remote_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES arduino_devices (device_remote_id)'));
   @override
   List<GeneratedColumn> get $columns => [id, name, birthDate, deviceRemoteId];
   @override
@@ -334,6 +221,8 @@ class $ChildrenTable extends Children
           .read(DriftSqlType.dateTime, data['${effectivePrefix}birth_date'])!,
       deviceRemoteId: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}device_remote_id'])!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
     );
   }
 
@@ -419,52 +308,114 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
   }
 }
 
-class $ArduinoDevicesTable extends ArduinoDevices
-    with TableInfo<$ArduinoDevicesTable, ArduinoDeviceEntity> {
+class $ArduinoDatasTable extends ArduinoDatas
+    with TableInfo<$ArduinoDatasTable, ArduinoDataEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ArduinoDevicesTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _remoteDeviceIdMeta =
-      const VerificationMeta('remoteDeviceId');
+  $ArduinoDatasTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<String> remoteDeviceId = GeneratedColumn<String>(
-      'remote_device_id', aliasedName, false,
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _authorisationCodeMeta =
-      const VerificationMeta('authorisationCode');
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> authorisationCode =
-      GeneratedColumn<String>('authorisation_code', aliasedName, false,
-          type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES children (id)'));
+  static const VerificationMeta _uvMeta = const VerificationMeta('uv');
   @override
-  List<GeneratedColumn> get $columns => [remoteDeviceId, authorisationCode];
+  late final GeneratedColumn<int> uv = GeneratedColumn<int>(
+      'uv', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _lightMeta = const VerificationMeta('light');
+  @override
+  late final GeneratedColumn<int> light = GeneratedColumn<int>(
+      'light', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _datetimeMeta =
+      const VerificationMeta('datetime');
+  @override
+  late final GeneratedColumn<DateTime> datetime = GeneratedColumn<DateTime>(
+      'datetime', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _accelXMeta = const VerificationMeta('accelX');
+  @override
+  late final GeneratedColumn<int> accelX = GeneratedColumn<int>(
+      'accel_x', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _accelYMeta = const VerificationMeta('accelY');
+  @override
+  late final GeneratedColumn<int> accelY = GeneratedColumn<int>(
+      'accel_y', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _accelZMeta = const VerificationMeta('accelZ');
+  @override
+  late final GeneratedColumn<int> accelZ = GeneratedColumn<int>(
+      'accel_z', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [name, id, uv, light, datetime, accelX, accelY, accelZ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'arduino_devices';
+  static const String $name = 'arduino_datas';
   @override
-  VerificationContext validateIntegrity(
-      Insertable<ArduinoDeviceEntity> instance,
+  VerificationContext validateIntegrity(Insertable<ArduinoDataEntity> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('remote_device_id')) {
+    if (data.containsKey('name')) {
       context.handle(
-          _remoteDeviceIdMeta,
-          remoteDeviceId.isAcceptableOrUnknown(
-              data['remote_device_id']!, _remoteDeviceIdMeta));
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     } else if (isInserting) {
-      context.missing(_remoteDeviceIdMeta);
+      context.missing(_nameMeta);
     }
-    if (data.containsKey('authorisation_code')) {
-      context.handle(
-          _authorisationCodeMeta,
-          authorisationCode.isAcceptableOrUnknown(
-              data['authorisation_code']!, _authorisationCodeMeta));
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
-      context.missing(_authorisationCodeMeta);
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('uv')) {
+      context.handle(_uvMeta, uv.isAcceptableOrUnknown(data['uv']!, _uvMeta));
+    } else if (isInserting) {
+      context.missing(_uvMeta);
+    }
+    if (data.containsKey('light')) {
+      context.handle(
+          _lightMeta, light.isAcceptableOrUnknown(data['light']!, _lightMeta));
+    } else if (isInserting) {
+      context.missing(_lightMeta);
+    }
+    if (data.containsKey('datetime')) {
+      context.handle(_datetimeMeta,
+          datetime.isAcceptableOrUnknown(data['datetime']!, _datetimeMeta));
+    } else if (isInserting) {
+      context.missing(_datetimeMeta);
+    }
+    if (data.containsKey('accel_x')) {
+      context.handle(_accelXMeta,
+          accelX.isAcceptableOrUnknown(data['accel_x']!, _accelXMeta));
+    } else if (isInserting) {
+      context.missing(_accelXMeta);
+    }
+    if (data.containsKey('accel_y')) {
+      context.handle(_accelYMeta,
+          accelY.isAcceptableOrUnknown(data['accel_y']!, _accelYMeta));
+    } else if (isInserting) {
+      context.missing(_accelYMeta);
+    }
+    if (data.containsKey('accel_z')) {
+      context.handle(_accelZMeta,
+          accelZ.isAcceptableOrUnknown(data['accel_z']!, _accelZMeta));
+    } else if (isInserting) {
+      context.missing(_accelZMeta);
     }
     return context;
   }
@@ -472,56 +423,110 @@ class $ArduinoDevicesTable extends ArduinoDevices
   @override
   Set<GeneratedColumn> get $primaryKey => const {};
   @override
-  ArduinoDeviceEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+  ArduinoDataEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ArduinoDeviceEntity(
-      remoteDeviceId: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}remote_device_id'])!,
-      authorisationCode: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}authorisation_code'])!,
+    return ArduinoDataEntity(
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      uv: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}uv'])!,
+      light: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}light'])!,
+      datetime: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}datetime'])!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
     );
   }
 
   @override
-  $ArduinoDevicesTable createAlias(String alias) {
-    return $ArduinoDevicesTable(attachedDatabase, alias);
+  $ArduinoDatasTable createAlias(String alias) {
+    return $ArduinoDatasTable(attachedDatabase, alias);
   }
 }
 
-class ArduinoDevicesCompanion extends UpdateCompanion<ArduinoDeviceEntity> {
-  final Value<String> remoteDeviceId;
-  final Value<String> authorisationCode;
+class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
+  final Value<String> name;
+  final Value<int> id;
+  final Value<int> uv;
+  final Value<int> light;
+  final Value<DateTime> datetime;
+  final Value<int> accelX;
+  final Value<int> accelY;
+  final Value<int> accelZ;
   final Value<int> rowid;
-  const ArduinoDevicesCompanion({
-    this.remoteDeviceId = const Value.absent(),
-    this.authorisationCode = const Value.absent(),
+  const ArduinoDatasCompanion({
+    this.name = const Value.absent(),
+    this.id = const Value.absent(),
+    this.uv = const Value.absent(),
+    this.light = const Value.absent(),
+    this.datetime = const Value.absent(),
+    this.accelX = const Value.absent(),
+    this.accelY = const Value.absent(),
+    this.accelZ = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  ArduinoDevicesCompanion.insert({
-    required String remoteDeviceId,
-    required String authorisationCode,
+  ArduinoDatasCompanion.insert({
+    required String name,
+    required int id,
+    required int uv,
+    required int light,
+    required DateTime datetime,
+    required int accelX,
+    required int accelY,
+    required int accelZ,
     this.rowid = const Value.absent(),
-  })  : remoteDeviceId = Value(remoteDeviceId),
-        authorisationCode = Value(authorisationCode);
-  static Insertable<ArduinoDeviceEntity> custom({
-    Expression<String>? remoteDeviceId,
-    Expression<String>? authorisationCode,
+  })  : name = Value(name),
+        id = Value(id),
+        uv = Value(uv),
+        light = Value(light),
+        datetime = Value(datetime),
+        accelX = Value(accelX),
+        accelY = Value(accelY),
+        accelZ = Value(accelZ);
+  static Insertable<ArduinoDataEntity> custom({
+    Expression<String>? name,
+    Expression<int>? id,
+    Expression<int>? uv,
+    Expression<int>? light,
+    Expression<DateTime>? datetime,
+    Expression<int>? accelX,
+    Expression<int>? accelY,
+    Expression<int>? accelZ,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (remoteDeviceId != null) 'remote_device_id': remoteDeviceId,
-      if (authorisationCode != null) 'authorisation_code': authorisationCode,
+      if (name != null) 'name': name,
+      if (id != null) 'id': id,
+      if (uv != null) 'uv': uv,
+      if (light != null) 'light': light,
+      if (datetime != null) 'datetime': datetime,
+      if (accelX != null) 'accel_x': accelX,
+      if (accelY != null) 'accel_y': accelY,
+      if (accelZ != null) 'accel_z': accelZ,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  ArduinoDevicesCompanion copyWith(
-      {Value<String>? remoteDeviceId,
-      Value<String>? authorisationCode,
+  ArduinoDatasCompanion copyWith(
+      {Value<String>? name,
+      Value<int>? id,
+      Value<int>? uv,
+      Value<int>? light,
+      Value<DateTime>? datetime,
+      Value<int>? accelX,
+      Value<int>? accelY,
+      Value<int>? accelZ,
       Value<int>? rowid}) {
-    return ArduinoDevicesCompanion(
-      remoteDeviceId: remoteDeviceId ?? this.remoteDeviceId,
-      authorisationCode: authorisationCode ?? this.authorisationCode,
+    return ArduinoDatasCompanion(
+      name: name ?? this.name,
+      id: id ?? this.id,
+      uv: uv ?? this.uv,
+      light: light ?? this.light,
+      datetime: datetime ?? this.datetime,
+      accelX: accelX ?? this.accelX,
+      accelY: accelY ?? this.accelY,
+      accelZ: accelZ ?? this.accelZ,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -529,11 +534,29 @@ class ArduinoDevicesCompanion extends UpdateCompanion<ArduinoDeviceEntity> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (remoteDeviceId.present) {
-      map['remote_device_id'] = Variable<String>(remoteDeviceId.value);
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
     }
-    if (authorisationCode.present) {
-      map['authorisation_code'] = Variable<String>(authorisationCode.value);
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (uv.present) {
+      map['uv'] = Variable<int>(uv.value);
+    }
+    if (light.present) {
+      map['light'] = Variable<int>(light.value);
+    }
+    if (datetime.present) {
+      map['datetime'] = Variable<DateTime>(datetime.value);
+    }
+    if (accelX.present) {
+      map['accel_x'] = Variable<int>(accelX.value);
+    }
+    if (accelY.present) {
+      map['accel_y'] = Variable<int>(accelY.value);
+    }
+    if (accelZ.present) {
+      map['accel_z'] = Variable<int>(accelZ.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -543,9 +566,15 @@ class ArduinoDevicesCompanion extends UpdateCompanion<ArduinoDeviceEntity> {
 
   @override
   String toString() {
-    return (StringBuffer('ArduinoDevicesCompanion(')
-          ..write('remoteDeviceId: $remoteDeviceId, ')
-          ..write('authorisationCode: $authorisationCode, ')
+    return (StringBuffer('ArduinoDatasCompanion(')
+          ..write('name: $name, ')
+          ..write('id: $id, ')
+          ..write('uv: $uv, ')
+          ..write('light: $light, ')
+          ..write('datetime: $datetime, ')
+          ..write('accelX: $accelX, ')
+          ..write('accelY: $accelY, ')
+          ..write('accelZ: $accelZ, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -554,13 +583,13 @@ class ArduinoDevicesCompanion extends UpdateCompanion<ArduinoDeviceEntity> {
 
 abstract class _$AppDb extends GeneratedDatabase {
   _$AppDb(QueryExecutor e) : super(e);
-  late final $ArduinoDatasTable arduinoDatas = $ArduinoDatasTable(this);
-  late final $ChildrenTable children = $ChildrenTable(this);
   late final $ArduinoDevicesTable arduinoDevices = $ArduinoDevicesTable(this);
+  late final $ChildrenTable children = $ChildrenTable(this);
+  late final $ArduinoDatasTable arduinoDatas = $ArduinoDatasTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [arduinoDatas, children, arduinoDevices];
+      [arduinoDevices, children, arduinoDatas];
 }
