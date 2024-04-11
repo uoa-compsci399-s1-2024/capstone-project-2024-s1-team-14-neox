@@ -306,7 +306,10 @@ Resources:
       AlwaysDeploy: true
       StageName: dev
       # TODO: more restrictive?
-      Cors: "'*'"
+      Cors:
+        AllowOrigin: "'*'"
+        AllowMethods: "'OPTIONS, GET, POST, PUT, PATCH, DELETE'"
+        AllowHeaders: "'Origin, Content-Type, Accept'"
       MethodSettings:
         - LoggingLevel: INFO
           MetricsEnabled: true

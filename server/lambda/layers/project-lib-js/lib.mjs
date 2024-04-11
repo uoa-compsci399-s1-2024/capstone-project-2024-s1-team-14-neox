@@ -60,3 +60,11 @@ export async function connectToDB()
   console.log("connection success");
   return db;
 }
+
+export function addCorsHeaders(response)
+{
+  if (response.headers === undefined) {
+    response.headers = {};
+  }
+  response.headers["Access-Control-Allow-Origin"] = "*";
+}
