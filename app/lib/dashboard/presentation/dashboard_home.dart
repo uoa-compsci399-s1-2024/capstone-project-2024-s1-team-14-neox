@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-import '../../child_home/domain/child_device_model.dart';
-import '../child_home/cubit/all_child_profile_cubit.dart';
-import 'cubit/daily_cubit.dart';
-import 'cubit/dashboard_cubit.dart';
-import 'cubit/monthly_cubit.dart';
-import 'cubit/weekly_cubit.dart';
+import '../../../child_home/domain/child_device_model.dart';
+import '../../child_home/cubit/all_child_profile_cubit.dart';
+import '../cubit/daily_cubit.dart';
+import '../cubit/dashboard_cubit.dart';
+import '../cubit/monthly_cubit.dart';
+import '../cubit/weekly_cubit.dart';
+import 'daily/daily_panel.dart';
+import 'monthly/monthly_panel.dart';
+import 'weekly/weekly_panel.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -85,15 +88,15 @@ class DashboardState extends State<Dashboard> with TickerProviderStateMixin {
           children: [
             BlocProvider(
               create: (context) => DailyCubit(),
-              child: Text("daily"),
+              child: DailyPanel(),
             ),
             BlocProvider(
               create: (context) => WeeklyCubit(),
-              child: Text("weekly"),
+              child: WeeklyPanel(),
             ),
             BlocProvider(
               create: (context) => MonthlyCubit(),
-              child: Text("montlhy"),
+              child: MonthlyPanel(),
             ),
           ],
         ),

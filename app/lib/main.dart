@@ -1,5 +1,5 @@
 import 'package:capstone_project_2024_s1_team_14_neox/analysis/bloc/analysis_result_bloc.dart';
-import 'package:capstone_project_2024_s1_team_14_neox/dashboard/dashboard_home.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/dashboard/presentation/dashboard_home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
