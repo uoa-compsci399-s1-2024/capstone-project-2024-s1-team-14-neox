@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../cubit/cloud_sync_cubit.dart';
 import '../../cubit/login_cubit.dart';
 import '../authentication_repository.dart';
 import 'screen/login_screen.dart';
@@ -21,7 +22,10 @@ class CloudHomeScreen extends StatelessWidget {
           if (state.status.isLoading) {
             return const CircularProgressIndicator();
           } else if (state.status.isLoginSuccess) {
-            return SyncScreen();
+            return BlocProvider(
+              create: (context) => CloudSyncCubit(),
+              child: SyncScreen(),
+            );
           } else {
             return LoginScreen();
           }

@@ -94,7 +94,7 @@ class ChildDeviceRepository {
   ///           CLOUD            ///
   //////////////////////////////////
 
-  Future<void> syncAllChildData() async {
+  static Future<void> syncAllChildData() async {
     await ChildEntity.syncAllChildData();
   }
 }

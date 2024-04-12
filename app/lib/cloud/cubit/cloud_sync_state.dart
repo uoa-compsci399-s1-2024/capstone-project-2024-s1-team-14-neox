@@ -19,21 +19,25 @@ class CloudSyncState extends Equatable {
     this.status = CloudSyncStatus.initial,
     this.progress,
     this.message,
+    this.lastSynced,
   });
 
   final CloudSyncStatus status;
   final double? progress;
   final String? message;
+  final DateTime? lastSynced;
 
   CloudSyncState copyWith({
     CloudSyncStatus? status,
     double? progress,
     String? message,
+    DateTime? lastSynced,
   }) {
     return CloudSyncState(
       status: status ?? this.status,
       progress: progress ?? this.progress,
       message: message ?? this.message,
+      lastSynced: lastSynced ?? this.lastSynced,
     );
   }
 
@@ -42,5 +46,6 @@ class CloudSyncState extends Equatable {
         status,
         progress,
         message,
+        lastSynced,
       ];
 }
