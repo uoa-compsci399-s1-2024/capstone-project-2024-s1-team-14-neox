@@ -17,7 +17,7 @@ extension LoginStatusX on LoginStatus {
 
 
 
-final class LoginState extends Equatable {
+class LoginState extends Equatable {
   const LoginState({
 
     this.status = LoginStatus.initial,

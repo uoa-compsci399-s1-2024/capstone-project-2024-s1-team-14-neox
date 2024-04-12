@@ -161,4 +161,17 @@ class ChildEntity {
     await db.delete(db.children)
       ..where((tbl) => tbl.id.equals(childId));
   }
+
+
+  
+  //////////////////////////////////
+  ///           CLOUD            ///
+  //////////////////////////////////
+  
+
+  static Future<void> syncAllChildData() async{
+    
+  }
+
+
 }

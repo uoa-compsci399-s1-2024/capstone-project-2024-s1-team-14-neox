@@ -7,13 +7,11 @@ import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
 
 class ChildDeviceRepository {
-
   // Fetch all children profiles
 
   Future<List<ChildDeviceModel>> fetchChildProfiles() async {
     List<ChildEntity> entities = await ChildEntity.queryAllChildren();
     return entities.map((child) => ChildDeviceModel.fromEntity(child)).toList();
-
   }
 
   // deletl child profile based on id
@@ -82,16 +80,21 @@ class ChildDeviceRepository {
           accel: Int16List.fromList([accelX, accelY, accelZ]),
         ),
       );
-
-
     }
   }
-
 
   static Future<List<SensorDataModel>> fetchArduinoSamplesByChildId(
       int childId) async {
     List<ArduinoDataEntity> entities =
         await ChildEntity.getAllDataForChild(childId);
     return entities.map((data) => SensorDataModel.fromEntity(data)).toList();
+  }
+
+  //////////////////////////////////
+  ///           CLOUD            ///
+  //////////////////////////////////
+
+  Future<void> syncAllChildData() async {
+    await ChildEntity.syncAllChildData();
   }
 }
