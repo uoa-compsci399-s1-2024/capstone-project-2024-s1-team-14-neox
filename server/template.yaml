@@ -376,7 +376,7 @@ Resources:
         ApiEvent:
           Type: Api
           Properties:
-            Path: /samples
+            Path: /samples/{childID}
             Method: post
             RestApiId: !Ref API
   FuncMetaSetupDB:
