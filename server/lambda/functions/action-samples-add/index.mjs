@@ -12,7 +12,6 @@ export const handler = async (event) => {
   let childID = event.pathParameters.childID;
   for (let i=0; i<samples.length; i++) {
     try {
-      await db.query("BEGIN");
       await db.query(
         "INSERT INTO samples (tstamp,child_id,uv_index,lux) VALUES ($1,$2,$3,$4)",
         [samples[i].tstamp,
@@ -20,9 +19,8 @@ export const handler = async (event) => {
          samples[i].uv_index,
          samples[i].lux],
       );
-      await db.query("COMMIT");
     } catch (e) {
-      await db.query("ROLLBACK");
+      // TODO: handle errors
       throw e;
     }
   }
