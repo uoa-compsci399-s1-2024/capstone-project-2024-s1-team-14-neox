@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bluetooth/bloc/bluetooth_bloc.dart';
 import '../../../bluetooth/presentation/bluetooth_panel.dart';
+import '../../../dashboard/domain/dashboard_repository.dart';
 import '../../cubit/child_device_cubit.dart';
 
 class ChildProfileTile extends StatefulWidget {
@@ -77,6 +78,13 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
               child: const BluetoothPanel(),
             );
           }),
+          ElevatedButton(
+            onPressed: () => DashboardRepository.createRandomDataFromDate(
+              context.read<ChildDeviceCubit>().state.childId ?? -1,
+              DateTime.now(),
+            ),
+            child: Text("add random data"),
+          ),
         ],
       ),
     );

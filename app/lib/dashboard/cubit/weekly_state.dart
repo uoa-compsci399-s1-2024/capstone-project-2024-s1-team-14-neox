@@ -8,6 +8,7 @@ enum WeeklyStatus {
 }
 
 extension WeeklyStatusX on WeeklyStatus {
+  bool get isInitial => this == WeeklyStatus.initial;
   bool get isLoading => this == WeeklyStatus.loading;
   bool get isSuccess => this == WeeklyStatus.success;
   bool get isFailure => this == WeeklyStatus.failure;
@@ -26,6 +27,7 @@ class WeeklyState extends Equatable {
     WeeklyStatus? status,
     Map<DateTime, int>? summary,
   }) {
+    print(summary);
     return WeeklyState(
       status: status ?? this.status,
       summary: summary ?? this.summary,

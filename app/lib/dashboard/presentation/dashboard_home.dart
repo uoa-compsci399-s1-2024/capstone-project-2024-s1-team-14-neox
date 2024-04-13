@@ -12,14 +12,15 @@ import 'daily/daily_panel.dart';
 import 'monthly/monthly_panel.dart';
 import 'weekly/weekly_panel.dart';
 
-class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+class DashboardHome extends StatefulWidget {
+  const DashboardHome({super.key});
 
   @override
-  State<Dashboard> createState() => DashboardState();
+  State<DashboardHome> createState() => DashboardHomeState();
 }
 
-class DashboardState extends State<Dashboard> with TickerProviderStateMixin {
+class DashboardHomeState extends State<DashboardHome>
+    with TickerProviderStateMixin {
   //with TickerProviderStateMixin needed for animation
   ChildDeviceModel? _selectedChildProfile;
   late TabController _tabController;
@@ -32,48 +33,54 @@ class DashboardState extends State<Dashboard> with TickerProviderStateMixin {
     super.initState();
   }
 
+//https://github.com/felangel/bloc/issues/1131
+//  Could not find the correct Provider<DashboardCubit> above this Dashboard Widget
+// Caused by accessing the bloc from the same BuildContext used to provide it
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => DashboardCubit(),
+      create: (_) => DashboardCubit(),
       child: Scaffold(
         appBar: AppBar(
           title: Text("Analysis"),
           actions: [
-            DropdownButton<ChildDeviceModel>(
-              value: _selectedChildProfile,
-              items: context
-                  .read<AllChildProfileCubit>()
-                  .state
-                  .profiles
-                  .map((profile) => DropdownMenuItem(
-                        value: profile,
-                        child: Column(
-                          children: [
-                            Text("Name: ${profile.childName}"),
-                            // Text(
-                            //     "Date of Birth: ${DateFormat('yyyy-MM-dd').format(profile.birthDate)}"),
-                          ],
-                        ),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedChildProfile = value;
-                });
-                context.read<DashboardCubit>().onFocusChildChange(
-                      value?.childId ?? -999,
-                    );
+            BlocBuilder<DashboardCubit, DashboardState>(
+              builder: (context, state) {
+                return DropdownButton<ChildDeviceModel>(
+                  value: _selectedChildProfile,
+                  items: context
+                      .read<AllChildProfileCubit>()
+                      .state
+                      .profiles
+                      .map((profile) => DropdownMenuItem(
+                            value: profile,
+                            child: Column(
+                              children: [
+                                Text("Name: ${profile.childName}"),
+                                // Text(
+                                //     "Date of Birth: ${DateFormat('yyyy-MM-dd').format(profile.birthDate)}"),
+                              ],
+                            ),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedChildProfile = value;
+                    });
+                    context.read<DashboardCubit>().onFocusChildChange(
+                          value?.childId ?? -999,
+                        );
+                  },
+                );
               },
             ),
           ],
-          bottom:  TabBar(
+          bottom: TabBar(
             indicatorSize: TabBarIndicatorSize.tab,
             dividerColor: Colors.transparent,
             indicator: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-              borderRadius: BorderRadius.all(Radius.circular(10))
-            ),
+                color: Theme.of(context).colorScheme.primary,
+                borderRadius: BorderRadius.all(Radius.circular(10))),
             labelColor: Colors.white,
             tabs: const [
               Tab(text: "Daily"),
@@ -83,22 +90,20 @@ class DashboardState extends State<Dashboard> with TickerProviderStateMixin {
             controller: _tabController,
           ),
         ),
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            BlocProvider(
-              create: (context) => DailyCubit(),
-              child: DailyPanel(),
-            ),
-            BlocProvider(
-              create: (context) => WeeklyCubit(),
-              child: WeeklyPanel(),
-            ),
-            BlocProvider(
-              create: (context) => MonthlyCubit(),
-              child: MonthlyPanel(),
-            ),
+        body: MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => DailyCubit()),
+            BlocProvider(create: (_) => WeeklyCubit()),
+            BlocProvider(create: (_) => MonthlyCubit()),
           ],
+          child: TabBarView(
+            controller: _tabController,
+            children: const [
+              DailyPanel(),
+              WeeklyPanel(),
+              MonthlyPanel(),
+            ],
+          ),
         ),
       ),
     );

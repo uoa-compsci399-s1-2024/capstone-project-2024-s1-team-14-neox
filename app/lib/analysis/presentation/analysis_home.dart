@@ -21,7 +21,7 @@ class AnalysisHomeScreenState extends State<AnalysisHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Analysis"),
+        title: Text("Sensor"),
       ),
       body: Column(
         children: [

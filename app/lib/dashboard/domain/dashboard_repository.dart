@@ -9,16 +9,25 @@ class DashboardRepository {
       database[childId] = Map<DateTime, int>();
     }
     DateTime current_date = date;
-    for (int i = 0; i < 60; i++) {
+    for (int i = 0; i < 30; i++) {
       database[childId]?[current_date] = random.nextInt(180);
       current_date = current_date.subtract(Duration(days: 1));
     }
+    print(database[childId]);
   }
 
   static Map<DateTime, int> getDataForChildId(int childId) {
+    print("The child id is $childId");
     if (database.containsKey(childId)) {
       return database[childId] as Map<DateTime, int>;
     }
     return {DateTime.now(): 0};
   }
+
+
+  // TODO
+  // Caclulate total minutes per day
+  // Calculate total minutes per hour between 00:00 to 24:59
+
+
 }

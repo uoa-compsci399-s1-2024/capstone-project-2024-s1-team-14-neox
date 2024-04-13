@@ -7,6 +7,7 @@ class DashboardCubit extends Cubit<DashboardState> {
   DashboardCubit() : super(const DashboardState());
 
   void onFocusChildChange(int childId) {
+    print("focus child changed $childId");
     emit(state.copyWith(status: DashboardStatus.success, focusChildId: childId));
 
   }

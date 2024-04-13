@@ -2,6 +2,7 @@ import 'package:capstone_project_2024_s1_team_14_neox/dashboard/cubit/weekly_cub
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../cubit/dashboard_cubit.dart';
 import 'weekly_bar_graph/weekly_bar_graph.dart';
 
 class WeeklyPanel extends StatefulWidget {
@@ -12,13 +13,42 @@ class WeeklyPanel extends StatefulWidget {
 }
 
 class _WeeklyPanelState extends State<WeeklyPanel> {
+  // Methods
+
+  // Set current day of interest
+  // Calculate number of days since today that is loaded in bloc
+  // Future builder for data in bar graph?
+
+  void refreshGraphData() {
+    //TODO refresh scroll down
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<WeeklyCubit, WeeklyState>(
+    return BlocBuilder<DashboardCubit, DashboardState>(
       builder: (context, state) {
-        return WeeklyBarGraph(
-          dailySummary: state.summary ?? {DateTime.now(): 0},
-          startDay: DateTime.now(),
+        return Column(
+          children: [
+            ElevatedButton(
+              onPressed: () => context.read<WeeklyCubit>().onGetDataForChildId(
+                    context.read<DashboardCubit>().state.focusChildId,
+                  ),
+              child: Text("Refresh"),
+            ),
+            BlocBuilder<WeeklyCubit, WeeklyState>(
+              builder: (context, state) {
+                if (state.status.isInitial) {
+                  return Text("Refresh to get data");
+                }
+                return Expanded(
+                  child: WeeklyBarGraph(
+                    dailySummary: state.summary ?? {DateTime.now(): 0},
+                    startDay: DateTime.now(),
+                  ),
+                );
+              },
+            ),
+          ],
         );
       },
     );

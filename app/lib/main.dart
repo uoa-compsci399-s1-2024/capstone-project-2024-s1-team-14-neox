@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
       create: (context) => AnalysisBloc(),
       child: AnalysisHomeScreen(),
     ),
-    const Dashboard(),
+    const DashboardHome(),
     const CloudHomeScreen(),
 
   ];
@@ -96,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           NavigationDestination(
             icon: Icon(Icons.sunny),
-            label: "Analysis",
+            label: "Sensor",
           ),
           NavigationDestination(
             icon: Icon(Icons.dashboard),
