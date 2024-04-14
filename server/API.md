@@ -287,6 +287,65 @@ automatically associate the parent with the child.
 OPEN QUESTION: For consistency (and testing purposes), should admins
 be able to register child devices?
 
+### Get list of children associated with a user (GET) (`/users/{userID}/children`)
+
+#### If authorised:
+
+Server returns HTTP 200 response:
+
+``` json
+{
+	"data": {
+		"children": [
+			"childID1",
+			"childID2",
+			...
+		]
+	}
+}
+```
+
+#### Open question: Can clinicians also participate as parents to send sample data (using the same account)?
+
+If we allow them, we'd need to differentiate the fields in this
+response by the user's own children and their patients.
+
+### Get parents of a given child (GET) (`/children/{childID}/parents`)
+
+#### If authorised:
+
+Server returns HTTP 200 response:
+
+``` json
+{
+	"data": {
+		"parents": [
+			"userID1",
+			"userID2",
+			...
+		]
+	}
+}
+```
+
+### Get clinicians for a given child (GET) (`/children/{childID}/clinicians`)
+
+#### If authorised:
+
+Server returns HTTP 200 response:
+
+``` json
+{
+	"data": {
+		"clinicians": [
+			"userID1",
+			"userID2",
+			...
+		]
+	}
+}
+```
+
 ### Get/Replace/Update personal info associated with a specific child (GET/PUT/PATCH) (`/children/{childID}/info`)
 
 #### If authorised:
