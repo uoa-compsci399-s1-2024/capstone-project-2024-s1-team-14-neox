@@ -2,6 +2,10 @@ import logo from './data/neox.svg';
 import button from './data/button.png';
 import './App.css';
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate   } from 'react-router-dom'
+import Login from './data/login'
+import SignUp from './data/signup'
+import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 
 //for chart
 import {Bar} from 'react-chartjs-2';
@@ -18,9 +22,10 @@ import startOfMonth from 'date-fns/startOfMonth';
 import endOfMonth from 'date-fns/endOfMonth';
 import addMonths from 'date-fns/addMonths';
 
-//for fetching data from an api
+//for fetching and posting data for api
 import axios from 'axios';
 
+//get sample data and download it in csv format
 function downloadCSV(data, filename) {
   const csv = convertToCSV(data);
   const blob = new Blob([csv], { type: 'text/csv' });
@@ -32,23 +37,47 @@ function downloadCSV(data, filename) {
   link.click();
   document.body.removeChild(link);
 }
-
 function convertToCSV(data) {
   const header = Object.keys(data[0]).join(',') + '\n';
   const rows = data.map(row => Object.values(row).join(',')).join('\n');
   return header + rows;
 }
-
 function fetchDataAndDownload() {
-  axios.get('https://jsonplaceholder.typicode.com/todos/1')
-  //axios.get('https://jsonplaceholder.typicode.com/posts')
+  axios.get('https://m0q0u417k8.execute-api.ap-southeast-2.amazonaws.com/dev/samples')
     .then(response => {
-      const data = [response.data];
-      downloadCSV(data, 'test.csv');
+      const data = response.data.map(entry => ({
+        tstamp: entry.tstamp,
+        child_id: entry.child_id,
+        uv_index: entry.uv_index,
+        lux: entry.lux
+      }));
+      downloadCSV(data, 'sample.csv');
     })
     .catch(error => console.error('Error fetching data:', error));
 }
 
+//register an account
+function signUp() {
+  //axios.post('https://m0q0u417k8.execute-api.ap-southeast-2.amazonaws.com/dev/users', {
+  axios.post('https://m0q0u417k8.execute-api.ap-southeast-2.amazonaws.com/dev/samples/000914694', {
+    "samples": [{"tstamp":"2024-02-27T12:00:00.000Z",
+    "child_id":"000914694",
+    "uv_index":"2",
+    "lux":"1500"}]
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(function (response) {
+      console.log(response);
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+}
+
+//predefined ranges for calender 
 const predefinedBottomRanges = [
   {
     label: 'Today',
@@ -76,6 +105,7 @@ const predefinedBottomRanges = [
   }
 ];
 
+
 function App() {
   //set startdate and enddate
   const [startDate, setStartDate] = useState(null);
@@ -89,11 +119,45 @@ function App() {
       setEndDate(date[1]);
       }
   };
+
+  //for hiding and showing elements
+  const [showButton, setShowButton] = useState(true);
+  const toggleButton = () => {
+    setShowButton(!showButton);
+  };
   
  
   return (
     <div className="Background">
-      <div className="App">
+
+      {showButton &&<Router>
+        <div className="App">
+          <nav className="navbar navbar-expand-lg navbar-light fixed-top">
+            <div className="container">
+              <Link className="navbar-brand" to={'/sign-in'}>NEOX</Link>
+              <div className="collapse navbar-collapse" id="navbarTogglerDemo02">
+                <ul className="navbar-nav ml-auto">
+                  <li className="nav-item"><Link className="nav-link" to={'/sign-in'}>Login</Link></li>
+                  <li className="nav-item"><Link className="nav-link" to={'/sign-up'}>Sign up</Link></li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+          <div className="auth-wrapper">
+            <div className="auth-inner">
+              <Routes>
+                <Route path="/" element={<Navigate to="/sign-in" />} />
+                <Route path="/sign-in" element={<Login toggleButton={toggleButton}/>} />
+                <Route path="/sign-up" element={<SignUp />} />
+              </Routes>
+            </div>
+          </div>
+        </div>
+      </Router>}
+
+
+
+      {!showButton &&<div className="App">
         
         <div className="logoCard">
           <img src={logo} className="App-logo" alt="logo" />
@@ -102,7 +166,7 @@ function App() {
 
         <div className="dataCard clientCard">
           <pre>
-            <b>Jamie SMITH</b>
+            <b>Jamie Smith</b>
             <br></br>
             DOB: 04/12/2010
             <br></br>
@@ -243,9 +307,13 @@ function App() {
         
           
         </div>
+      {!showButton && <button onClick={toggleButton}>Logout</button>}
+      {!showButton && <button onClick={signUp}>Settings</button>}         
 
 
-      </div>
+      </div>}
+
+
     </div>  
   );
 }
