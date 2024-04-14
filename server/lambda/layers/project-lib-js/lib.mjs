@@ -140,3 +140,5 @@ export function generateID()
   const strN = n + "";
   return strN.padStart(ID_LEN, "0");
 }
+
+export const TEMP_PARENT_ID = '1';
