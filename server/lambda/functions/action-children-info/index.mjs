@@ -3,11 +3,20 @@ import {
   connectToDB,
   generateID,
   TEMP_PARENT_ID,
-  setPersonalInfoFields,
 } from "/opt/nodejs/lib.mjs";
 import assert from "node:assert/strict";
 
 let db = await connectToDB();
+
+// TODO: replace with AWS Cognito calls
+// NOTE: empty `fields` means nothing happens
+const PERSONAL_INFO_FIELDS_CHILD = [
+  "birthdate",
+  "family_name",
+  "given_name",
+  "middle_name",
+  "nickname",
+];
 
 async function clearPersonalInfoFields(db, childID)
 {
@@ -21,10 +30,41 @@ async function clearPersonalInfoFields(db, childID)
     WHERE id = $1`, [childID]);
 }
 
+async function setPersonalInfoFields(db, infoResource, childID, fields)
+{
+  let errors = [];
+  for (let f in fields) {
+    // FIXME: O(n) -> O(n^2) when `fields` contains all fields AND
+    // `fields` comes from client input, so it can get very large.
+    if (!(PERSONAL_INFO_FIELDS_CHILD.includes(f))) {
+      errors.push({
+        resource: `${infoResource}?field=${encodeURIComponent(f)}`,
+        status: 400,
+        message: "bad field name"
+      });
+      continue;
+    }
+    try {
+      // Inefficient since we only set one field at a time but it's easier to isolate which field is bad.
+      // We can trust the value of `f` to be a valid and whitelisted column identifier.
+      await db.query(`UPDATE children SET ${f} = $2 WHERE id = $1`,
+                     [childID, fields[f]]);
+      console.log(`set field ${f} to "${fields[f]}"`);
+    } catch (e) {
+      console.error(e);
+      errors.push({
+        resource: `${infoResource}?field=${encodeURIComponent(f)}`,
+        status: 400,
+        message: "bad field"
+      });
+    }
+  }
+  return errors;
+}
+
 export const handler = async (event) => {
   const childID = event.pathParameters.childID;
-  // setPersonalInfoFields constructs a resource URI, so we want to avoid duplicate path parts
-  const rootChildrenResource = event.resource.replace(/\/\{childID\}\/.*$/, "");
+  const infoResource = event.resource.replace("{childID}", childID);
   const body = {};
   const response = {};
   console.log(`method: ${event.httpMethod}`);
@@ -52,7 +92,7 @@ export const handler = async (event) => {
       }
       errors = await setPersonalInfoFields(
         db,
-        rootChildrenResource,
+        infoResource,
         childID,
         personal_info
       );
@@ -64,7 +104,7 @@ export const handler = async (event) => {
         errors = [];
       }
       errors.push({
-        resource: resolvedResource,
+        resource: infoResource,
         status: 500,
         message: "internal server error"
       });
@@ -79,6 +119,7 @@ export const handler = async (event) => {
     } else {
       response.statusCode = 204;
     }
+    assert(response.data === undefined, "info replace/update action returned some data but it should never do it");
   }
 
   addCorsHeaders(response);
