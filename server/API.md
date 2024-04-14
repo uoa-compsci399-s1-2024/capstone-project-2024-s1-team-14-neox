@@ -260,6 +260,18 @@ OPEN QUESTION: Should only admins be allowed to delete users?
 
 ### Register child (POST) (`/children`)
 
+The client will send a JSON object containing any personal information
+the client wants to share about the child (see note on personal info
+fields above).  In other words, all fields are optional.  It will have
+the schema:
+
+```json
+{
+	"<PERSONAL_INFO_FIELD_NAME>": "<PERSONAL_INFO_FIELD_VALUE>",
+	...
+}
+```
+
 In the `data` field of the response, the server will send the client a
 JSON object whose only field (for now) will be the ID of the child.
 The client should add this ID to samples for that child before sending
@@ -269,6 +281,32 @@ The schema:
 ```json
 {
 	"id": ID,
+}
+```
+
+If any personal info fields are invalid: return 207 response, where
+the `resource` field of `errors` will be
+`/children/{childID}/info?field={field}` and `status` will be 400 for
+each invalid field.  However, the `data` field will still contain the
+generated ID.  The client should correct the fields listed in the
+errors.  For example, if the client provided the `birthdate` field but
+it was in the wrong format:
+
+```json
+{
+	"data": {
+		"id": "123456789"
+	},
+	"errors": [
+		{
+			"resource": "/children/123456789/info?field=birthdate",
+			"status": 400,
+			"message": "birthdate must be formatted YYYY-MM-DD",
+		}
+	],
+	"metadata": {
+		...
+	}
 }
 ```
 
