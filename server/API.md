@@ -165,7 +165,11 @@ where:
 
 ### Schema for error responses
 
-The `data` field of error code responses will be:
+When there are errors, it will go into the `errors` field BUT the
+`data` field will still be available to the client in case the API can
+still do other useful work despite the error.  The `errors` field will
+have the schema:
+
 ```json
 [
   {
