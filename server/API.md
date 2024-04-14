@@ -230,6 +230,14 @@ If authorised:
 - PATCH: server will update only the personal info fields of `userID`
   supplied by caller.
 
+Personal info schema:
+```json
+{
+	"<PERSONAL_INFO_FIELD_NAME>": "<PERSONAL_INFO_FIELD_VALUE>",
+	...
+}
+```
+
 If not authorised:
 
 Return 403 response where the `resource` field of the error response
@@ -259,18 +267,6 @@ OPEN QUESTION: Should only admins be allowed to delete users?
 
 ### Register child (POST) (`/children`)
 
-The client will send a JSON object containing any personal information
-the client wants to share about the child (see note on personal info
-fields above).  In other words, all fields are optional.  It will have
-the schema:
-
-```json
-{
-	"<PERSONAL_INFO_FIELD_NAME>": "<PERSONAL_INFO_FIELD_VALUE>",
-	...
-}
-```
-
 In the `data` field of the response, the server will send the client a
 JSON object whose only field (for now) will be the ID of the child.
 The client should add this ID to samples for that child before sending
@@ -280,32 +276,6 @@ The schema:
 ```json
 {
 	"id": ID,
-}
-```
-
-If any personal info fields are invalid: return 207 response, where
-the `resource` field of `errors` will be
-`/children/{childID}/info?field={field}` and `status` will be 400 for
-each invalid field.  However, the `data` field will still contain the
-generated ID.  The client should correct the fields listed in the
-errors.  For example, if the client provided the `birthdate` field but
-it was in the wrong format:
-
-```json
-{
-	"data": {
-		"id": "123456789"
-	},
-	"errors": [
-		{
-			"resource": "/children/123456789/info?field=birthdate",
-			"status": 400,
-			"message": "birthdate must be formatted YYYY-MM-DD",
-		}
-	],
-	"metadata": {
-		...
-	}
 }
 ```
 
@@ -319,7 +289,7 @@ be able to register child devices?
 
 ### Get/Replace/Update personal info associated with a specific child (GET/PUT/PATCH) (`/children/{childID}/info`)
 
-If authorised:
+#### If authorised:
 
 - GET: the `data` field of the response body will contain the personal
   info associated with the child with ID `childID`.
@@ -328,14 +298,51 @@ If authorised:
 - PATCH: server will update only the personal info fields of `childID`
   supplied by caller.
 
-If not authorised:
+#### Personal info schema:
+
+```json
+{
+	"<PERSONAL_INFO_FIELD_NAME>": "<PERSONAL_INFO_FIELD_VALUE>",
+	...
+}
+```
+
+#### If not authorised:
 
 Return 403 response where the `resource` field of the error response
 is the same as the URI at which the action was invoked.
 
-If no such child:
+#### If no such child:
 
 Return 404 "Not Found".
+
+#### PUT/PATCH
+
+If any personal info fields are invalid: return 400 response, where for each invalid field name/value:
+
+- the `resource` field of `errors` will be:
+  - `/children/{childID}/info?fieldname={field}` when `field` is an invalid field name
+  - `/children/{childID}/info?fieldvalue={field}` when the value of `field` is invalid
+- `status` will be 400.
+
+No personal info fields will be updated so the client should correct
+the fields listed in the errors when they try again.  For example, if
+the client provided the `birthdate` field but it was in the wrong
+format:
+
+```json
+{
+	"errors": [
+		{
+			"resource": "/children/123456789/info?fieldvalue=birthdate",
+			"status": 400,
+			"message": "birthdate must be formatted YYYY-MM-DD",
+		}
+	],
+}
+
+
+```
 
 ### LOW PRIORITY: Delete child (DELETE) (`/children/{childID}`)
 
