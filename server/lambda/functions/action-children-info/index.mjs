@@ -59,6 +59,9 @@ async function setPersonalInfoFields(db, infoResource, childID, fields)
       });
     }
   }
+  for (let i=0; i<errors.length; i++) {
+    console.error(`error ${i+1}/${errors.length}: ${errors[i]}`);
+  }
   return errors;
 }
 
