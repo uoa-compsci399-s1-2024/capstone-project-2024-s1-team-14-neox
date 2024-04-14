@@ -89,6 +89,19 @@ that it can be represented as an integer is an implementation detail.
   where the first element is the `x` component, second is `y`, and
   third is `z`.
 
+## Note on personal info fields
+
+We use some fields from here:
+https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-attributes.html
+
+- birthdate
+- family_name
+- given_name
+- middle_name
+- gender
+- nickname
+- (for users:) email
+
 ## Authentication (SUBJECT TO CHANGE)
 
 Use HTTP authentication: use the `Authorization` header.
