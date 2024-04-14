@@ -144,22 +144,34 @@ export function generateID()
 export const TEMP_PARENT_ID = '1';
 
 // TODO: replace with AWS Cognito calls
+// NOTE: empty `fields` means nothing happens
+const PERSONAL_INFO_FIELDS_CHILD = [
+  "birthdate",
+  "family_name",
+  "given_name",
+  "middle_name",
+  "nickname",
+];
+
 export async function setPersonalInfoFields(db, resource, childID, fields)
 {
   let errors = [];
   for (let f in fields) {
-    // TODO: whitelist (not just "everything except ID fields") personal info fields
-    if (f === "id" || f === "parent_id") {
+    // FIXME: O(n) -> O(n^2) when `fields` contains all fields AND
+    // `fields` comes from client input, so it can get very large.
+    if (!(PERSONAL_INFO_FIELDS_CHILD.includes(f))) {
       errors.push({
         resource: `${resource}/${childID}/info?field=${encodeURIComponent(f)}`,
         status: 400,
-        message: "bad field"
+        message: "bad field name"
       });
       continue;
     }
     try {
-      await db.query("UPDATE children SET $2 = $3 WHERE id = $1",
-                     [childID, f, fields[f]]);
+      // Inefficient since we only set one field at a time but it's easier to isolate which field is bad.
+      // We can trust the value of `f` to be a valid and whitelisted column identifier.
+      await db.query(`UPDATE children SET ${f} = $2 WHERE id = $1`,
+                     [childID, fields[f]]);
       console.log(`set field ${f} to "${fields[f]}"`);
     } catch (e) {
       console.error(e);
