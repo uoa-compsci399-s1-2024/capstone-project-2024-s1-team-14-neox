@@ -34,11 +34,11 @@ async function setPersonalInfoFields(db, infoResource, childID, fields)
 {
   let errors = [];
   for (let f in fields) {
-    // FIXME: O(n) -> O(n^2) when `fields` contains all fields AND
-    // `fields` comes from client input, so it can get very large.
+    // FIXME: O(n) -> O(n^2) when `fields` contains all fields.  Also,
+    // `fields` comes from client input so it can get very large.
     if (!(PERSONAL_INFO_FIELDS_CHILD.includes(f))) {
       errors.push({
-        resource: `${infoResource}?field=${encodeURIComponent(f)}`,
+        resource: `${infoResource}?fieldname=${encodeURIComponent(f)}`,
         status: 400,
         message: "bad field name"
       });
@@ -53,7 +53,7 @@ async function setPersonalInfoFields(db, infoResource, childID, fields)
     } catch (e) {
       console.error(e);
       errors.push({
-        resource: `${infoResource}?field=${encodeURIComponent(f)}`,
+        resource: `${infoResource}?fieldvalue=${encodeURIComponent(f)}`,
         status: 400,
         message: "bad field"
       });
