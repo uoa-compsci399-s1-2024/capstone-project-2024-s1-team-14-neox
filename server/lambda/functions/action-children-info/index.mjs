@@ -99,29 +99,29 @@ export const handler = async (event) => {
         childID,
         personal_info
       );
-      await db.query("COMMIT");
     } catch (e) {
       await db.query("ROLLBACK");
-      if (errors === undefined) {
-        // failed before we got to set any fields
-        errors = [];
-      }
-      errors.push({
+      response.statusCode = 500;
+      body.errors = {
         resource: infoResource,
         status: 500,
         message: "internal server error"
-      });
-      // will be overwritten later if there were any errors at all when setting fields.
-      response.statusCode = 500;
+      };
       console.error(e);
     }
-    if (errors.length > 0) {
-      response.statusCode = 207;
+
+    if (response.statusCode == 500) {
+      // already rolled back
+    } else if (errors.length > 0) {
+      await db.query("ROLLBACK");
+      response.statusCode = 400;
       body.errors = errors;
       response.body = JSON.stringify(body);
     } else {
+      await db.query("COMMIT");
       response.statusCode = 204;
     }
+
     assert(response.data === undefined, "info replace/update action returned some data but it should never do it");
   }
 
