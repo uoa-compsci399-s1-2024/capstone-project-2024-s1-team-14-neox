@@ -3,6 +3,7 @@ import {
   connectToDB,
   generateID,
   TEMP_PARENT_ID,
+  setPersonalInfoFields,
 } from "/opt/nodejs/lib.mjs";
 
 let db = await connectToDB();
@@ -22,22 +23,7 @@ export const handler = async (event) => {
   }
   const finalChildID = tentativeChildID;
   console.log(`made child row with id ${finalChildID}`);
-  let errors = [];
-  for (let field in personal_info) {
-    // TODO: whitelist personal info fields
-    try {
-      await db.query("UPDATE children SET $2 = $3 WHERE id = $1",
-                     [finalChildID, field, personal_info[field]]);
-      console.log(`set field ${field} to "${personal_info[field]}"`);
-    } catch (e) {
-      console.error(e);
-      errors.push({
-        resource: `${event.resource}/${finalChildID}/info?field=${encodeURIComponent(field)}`,
-        status: 400,
-        message: "bad field"
-      });
-    }
-  }
+  let errors = await setPersonalInfoFields(db, event.resource, finalChildID, personal_info);
   const body = {data: finalChildID};
   const response = {};
   if (errors.length > 0) {

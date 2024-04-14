@@ -142,3 +142,33 @@ export function generateID()
 }
 
 export const TEMP_PARENT_ID = '1';
+
+// TODO: replace with AWS Cognito calls
+export async function setPersonalInfoFields(db, resource, childID, fields)
+{
+  let errors = [];
+  for (let f in fields) {
+    // TODO: whitelist (not just "everything except ID fields") personal info fields
+    if (f === "id" || f === "parent_id") {
+      errors.push({
+        resource: `${resource}/${childID}/info?field=${encodeURIComponent(f)}`,
+        status: 400,
+        message: "bad field"
+      });
+      continue;
+    }
+    try {
+      await db.query("UPDATE children SET $2 = $3 WHERE id = $1",
+                     [childID, f, fields[f]]);
+      console.log(`set field ${f} to "${fields[f]}"`);
+    } catch (e) {
+      console.error(e);
+      errors.push({
+        resource: `${resource}/${childID}/info?field=${encodeURIComponent(f)}`,
+        status: 400,
+        message: "bad field"
+      });
+    }
+  }
+  return errors;
+}
