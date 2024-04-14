@@ -456,6 +456,37 @@ Resources:
             Path: /samples/{childID}
             Method: post
             RestApiId: !Ref API
+  FuncChildrenRegister:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-children-register/
+      Handler: index.handler
+      Runtime: nodejs20.x
+      Layers:
+        - !Ref LayerDepsJS
+        - !Ref LayerCACertificates
+      Environment:
+        Variables:
+          PGHOST: !GetAtt Database.Endpoint.Address
+          # Default PGDATABASE is the user which we will get from the SecretsManager Secret
+          PGPORT: !GetAtt Database.Endpoint.Port
+          DB_SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
+          SSL_CERT_FILE: /opt/global-bundle.pem
+      Role: !GetAtt LambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref DBAccessSecurityGroup
+          - !Ref SecretsAccessSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /children
+            Method: post
+            RestApiId: !Ref API
   FuncMetaSetupDB:
     Type: AWS::Serverless::Function
     Properties:
