@@ -100,6 +100,15 @@ class ChildEntity {
     //   await queryArduinoDeviceBydeviceRemoteId(childEntity.deviceRemoteId ?? '');
     // });
 
+    // ChildData child = await ChildApiService.fetchChildDataById(22);
+    // print('Timestamp: ${child.tstamp}');
+    // print('Child ID: ${child.childId}');
+    // print('UV Index: ${child.uvIndex}');
+    // print('Lux: ${child.lux}');
+    // print('');
+
+    await ChildApiService.postData();
+
     ChildData child = await ChildApiService.fetchChildDataById(22);
     print('Timestamp: ${child.tstamp}');
     print('Child ID: ${child.childId}');

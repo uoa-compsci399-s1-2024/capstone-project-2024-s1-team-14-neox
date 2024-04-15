@@ -24,19 +24,26 @@ class ChildApiService {
 
   }
 
-  static Future<void> postData(ChildData child) async {
+  static Future<void> postData() async {
+    List<ChildData> c = [
+      ChildData("2024-02-01T12:30+12:00", "22", 2, 15),
+      ChildData("2024-03-01T12:30+12:00", "22", 5, 30),
+    ];
+
     final response = await http.post(
-      Uri.parse(apiUrl),
+      Uri.parse("${apiUrl}/22"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode(child.toJson()),
+      // need to send a *list* of samples accessible under the property `samples` in the JSON
+      body: jsonEncode({"samples": c}),
     );
 
-    if (response.statusCode == 201) {
+    // NOTE: API doc has different status codes
+    if (response.statusCode == 200) {
       print('Data posted successfully');
     } else {
-      throw Exception('Failed to post data: ${response.body}');
+      throw Exception('Failed to post data: (code ${response.statusCode}) ${response.body}');
     }
   }
 }
