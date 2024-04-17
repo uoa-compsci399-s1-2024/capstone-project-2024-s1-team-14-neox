@@ -141,6 +141,7 @@ void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
     
     if (bytesToSend == 0)
     {
+        currentSampleBufferIndex = 0;
         sentData = 0;
         return;
     }
