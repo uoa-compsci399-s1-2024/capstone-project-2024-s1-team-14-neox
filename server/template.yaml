@@ -134,6 +134,22 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
 
+  NetworkACL:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+  # no NACL entries so we deny all inbound AND outbound traffic from the subnets.
+  PrivateSubnet1NetworkACL:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      NetworkAclId: !Ref NetworkACL
+  PrivateSubnet2NetworkACL:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      NetworkAclId: !Ref NetworkACL
+
   LambdaRole:
     Type: AWS::IAM::Role
     Properties:
