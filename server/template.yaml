@@ -201,6 +201,10 @@ Resources:
               - Effect: Allow
                 Action: secretsmanager:GetSecretValue
                 Resource: !GetAtt Database.MasterUserSecret.SecretArn
+                # Based on https://docs.aws.amazon.com/secretsmanager/latest/userguide/auth-and-access_examples.html#auth-and-access_examples_vpc
+                Condition:
+                  StringEquals:
+                    aws:sourceVpce: !Ref SecretsManagerVPCEndpoint
 
   SecretsManagerVPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
