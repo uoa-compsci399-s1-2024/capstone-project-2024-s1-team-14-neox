@@ -337,7 +337,6 @@ Resources:
   FuncSamplesSearch:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: action-samples-search
       CodeUri: lambda/functions/action-samples-search/
       Handler: index.handler
       Runtime: nodejs20.x
@@ -369,7 +368,6 @@ Resources:
   FuncSamplesAdd:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: action-samples-add
       CodeUri: lambda/functions/action-samples-add/
       Handler: index.handler
       Runtime: nodejs20.x
@@ -401,7 +399,6 @@ Resources:
   FuncMetaSetupDB:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: meta-setupdb-testdata
       CodeUri: lambda/functions/meta-setupdb-testdata/
       Handler: index.handler
       Runtime: nodejs20.x
