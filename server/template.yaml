@@ -9,6 +9,11 @@ Parameters:
   #   Description: An environment name that is prefixed to resource names
   #   Type: String
 
+  DatabasePort:
+    Description: Please enter the port number on which the database will accept connections
+    Type: Number
+    Default: 5432
+
   VpcCIDR:
     Description: Please enter the IP range (CIDR notation) for this VPC
     Type: String
@@ -225,8 +230,8 @@ Resources:
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 5432
-          ToPort: 5432
+          FromPort: !Ref DatabasePort
+          ToPort: !Ref DatabasePort
           SourceSecurityGroupId:
             Ref: DBAccessSecurityGroup
   DBAccessSecurityGroup:
@@ -245,6 +250,7 @@ Resources:
       DBInstanceClass: db.t3.micro  # free-tier acceptable
       # Use Default DBName of `postgres` for PostgreSQL
       DBName: postgres
+      Port: !Ref DatabasePort
       MasterUsername: postgres
       ManageMasterUserPassword: true  # in AWS Secrets Manager
       DBSubnetGroupName: !Ref DBSubnetGroup
@@ -263,7 +269,7 @@ Resources:
   LayerCACertificates:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: layer-ca-certs
+      LayerName: !Sub "${AWS::StackName}-layer-ca-certs"
       Description: Certificates to connect to DB via TLS
       ContentUri: lambda/layers/certs/
       CompatibleRuntimes:
@@ -314,7 +320,6 @@ Resources:
   FuncSamplesSearch:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: action-samples-search
       CodeUri: lambda/functions/action-samples-search/
       Handler: index.handler
       Runtime: nodejs20.x
@@ -346,7 +351,6 @@ Resources:
   FuncSamplesAdd:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: action-samples-add
       CodeUri: lambda/functions/action-samples-add/
       Handler: index.handler
       Runtime: nodejs20.x
@@ -378,7 +382,6 @@ Resources:
   FuncMetaSetupDB:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: meta-setupdb-testdata
       CodeUri: lambda/functions/meta-setupdb-testdata/
       Handler: index.handler
       Runtime: nodejs20.x
@@ -403,7 +406,7 @@ Resources:
   LayerDepsJS:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: layer-lib-js
+      LayerName: !Sub "${AWS::StackName}-layer-lib-js"
       Description: Common code and dependencies for JS lambda functions
       # ContentUri: s3://proj-deploy-artifacts/layer-deps-js.zip
       ContentUri: lambda/layers/project-lib-js/
