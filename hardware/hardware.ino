@@ -7,14 +7,19 @@
 
 static const unsigned int SERIAL_BAUD_RATE = 9600;
 static const uint32_t POLL_INTERVAL_MS = (uint32_t)60 * 1000; // 1 minute
-static const uint8_t UV_SENSOR_PIN = A0;
-static const uint8_t LIGHT_SENSOR_PIN = A1;
+static const uint8_t UV_SENSOR_PIN = A6;
+static const uint8_t LIGHT_SENSOR_PIN = A7;
 
 // Read all sensors and save them to the EEPROM
 static void readSample();
 
 void setup()
 {
+  pinMode(A0, OUTPUT);
+  pinMode(A1, OUTPUT);
+  digitalWrite(A0, LOW);
+  digitalWrite(A1, HIGH);
+
   Serial.begin(SERIAL_BAUD_RATE);
   while (!Serial);
   Wire.begin();
