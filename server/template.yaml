@@ -182,7 +182,6 @@ Resources:
   LambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: ProjectLambdaRole
       Description: "Role to allow lambda functions to do everything in the set of things our backend needs to do (ie, it's not minimal)"
       AssumeRolePolicyDocument:
         Version: 2012-10-17
