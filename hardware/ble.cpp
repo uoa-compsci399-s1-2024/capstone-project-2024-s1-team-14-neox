@@ -10,6 +10,8 @@
 const uint32_t maxDataPerCharacteristic = 512;
 const uint32_t dataPerCharacteristic = maxDataPerCharacteristic / sizeof(SensorSample) * sizeof(SensorSample);
 const uint32_t maxData = dataPerCharacteristic * 5;
+uint32_t currentSampleBufferIndex = 0;
+uint32_t sentData = 0;
 
 BLEService sensorSamplesService("ba5c0000-243e-4f78-ac25-69688a1669b4");
 
@@ -26,6 +28,17 @@ BLECharacteristic samples_5("6eea8c3b-0004-4ec0-a842-6ed292e598dd", BLERead, max
  *   BLE Characteristic for receiving acknowledgement from app that data has been processed and sample characteristics can be updated
  */
 BLEStringCharacteristic update("f06c06bb-0005-4f4c-b6b4-a146eff5ab15", BLEWrite, 8);
+
+/*
+ * Characteristic to recieve last sent timestamp from app. If this characteristic has been written to, the device sends data after that timestamp. If not,
+ * the device sends the full sample buffer 
+ */
+BLECharacteristic ts("f06c06bb-0006-4f4c-b6b4-a146eff5ab15", BLEWrite, 4);
+
+/*
+ * Characteristic showing how many samples are to be sent
+ */
+BLECharacteristic progress("f06c06bb-0007-4f4c-b6b4-a146eff5ab15", BLERead, 8);
 
 /*
  * Byte arrays for buffers that will be used to update characteristic values. Eeprom will be read
@@ -47,14 +60,16 @@ void initializeBLE() {
     }
 
     BLE.setLocalName("Neox Sens 1.0");
-
+    ts.setValue(0);
     sensorSamplesService.addCharacteristic(samples_1);
     sensorSamplesService.addCharacteristic(samples_2);
     sensorSamplesService.addCharacteristic(samples_3);
     sensorSamplesService.addCharacteristic(samples_4);
     sensorSamplesService.addCharacteristic(samples_5);
     sensorSamplesService.addCharacteristic(update);
-
+    sensorSamplesService.addCharacteristic(ts);
+    sensorSamplesService.addCharacteristic(progress);
+    
     BLE.addService(sensorSamplesService);
     BLE.advertise();
     
@@ -64,9 +79,40 @@ void checkConnection() {
     BLEDevice central = BLE.central();
     while (central.connected())
     {
-        updateValues();
-        
+        updateValues();   
     }
+    currentSampleBufferIndex = 0;
+    sentData = 0;
+}
+
+void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
+  uint32_t left = 0;
+  uint32_t right = eepromGetSampleBufferLength() - 1;
+  while (left <= right) {
+    uint32_t mid = left + (right - left) / 2;
+
+    SensorSample sample; 
+    eepromReadSample(mid, &sample);
+    uint32_t ts = sample.timestamp[3] << 24;
+    ts += sample.timestamp[2] << 16;
+    ts += sample.timestamp[1] << 8;
+    ts += sample.timestamp[0];
+    
+    if (ts == timestamp)
+    {
+      currentSampleBufferIndex = mid;
+      return;
+    }
+    if (ts < timestamp)
+    {
+      left = mid + 1;
+    }
+    else
+    {
+      right = mid - 1;
+    }
+  }
+  return;
 }
 
 void addSample(byte arr[maxDataPerCharacteristic], uint32_t& index, SensorSample sample) {
@@ -100,7 +146,6 @@ void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
     
     if (bytesToSend == 0)
     {
-        sentData = 0;
         return;
     }
     if (bytesToSend > maxData)
@@ -157,13 +202,20 @@ void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
 }
 
 void updateValues() {
-    static uint32_t currentSampleBufferIndex = 0;
-    static uint32_t sentData = 0;
+    uint32_t samplesToSend = eepromGetSampleBufferLength();
+    if (ts.written()) 
+    {
+      uint32_t timestamp;
+      ts.readValue(timestamp);
+      findTSIndex(timestamp, currentSampleBufferIndex);
+    }
     if (update.written())
     {
-    fillBuffers(currentSampleBufferIndex, sentData);
-    fillCharacteristics();
-    emptyBuffers();
+        samplesToSend -= currentSampleBufferIndex;
+        progress.writeValue(samplesToSend);
+        fillBuffers(currentSampleBufferIndex, sentData);
+        fillCharacteristics();
+        emptyBuffers();
     }
 }
 
