@@ -177,7 +177,6 @@ Resources:
   LambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: ProjectLambdaRole
       Description: "Role to allow lambda functions to do everything in the set of things our backend needs to do (ie, it's not minimal)"
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -193,17 +192,15 @@ Resources:
         # If we want it later:
         # - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
       Policies:
-        - PolicyName: AllowReadSecretValue
+        # It seems like the PolicyName (which is the "friendly name") must be unique within an account
+        # https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html
+        - PolicyName: !Sub "${AWS::StackName}-AllowReadSecretValue-DB"
           PolicyDocument:
             Version: 2012-10-17
             Statement:
               - Effect: Allow
                 Action: secretsmanager:GetSecretValue
-                # This is OK because roles are global to the account
-                # AND any random lambda having this role isn't enough
-                # to access protected database instances since they
-                # need to be in the same VPC.
-                Resource: '*'
+                Resource: !GetAtt Database.MasterUserSecret.SecretArn
 
   SecretsManagerVPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
