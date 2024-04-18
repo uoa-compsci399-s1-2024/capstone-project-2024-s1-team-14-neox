@@ -68,7 +68,8 @@ void initializeBLE() {
     sensorSamplesService.addCharacteristic(samples_5);
     sensorSamplesService.addCharacteristic(update);
     sensorSamplesService.addCharacteristic(ts);
-
+    sensorSamplesService.addCharacteristic(progress);
+    
     BLE.addService(sensorSamplesService);
     BLE.advertise();
     
