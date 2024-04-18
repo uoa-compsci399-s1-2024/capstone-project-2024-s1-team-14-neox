@@ -426,6 +426,8 @@ class $ArduinoDatasTable extends ArduinoDatas
   ArduinoDataEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ArduinoDataEntity(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       uv: attachedDatabase.typeMapping
@@ -434,8 +436,6 @@ class $ArduinoDatasTable extends ArduinoDatas
           .read(DriftSqlType.int, data['${effectivePrefix}light'])!,
       datetime: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}datetime'])!,
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
     );
   }
 

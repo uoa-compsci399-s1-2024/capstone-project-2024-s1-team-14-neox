@@ -34,10 +34,13 @@ class AllChildProfileCubit extends Cubit<AllChildProfileState> {
         profiles: childDeviceProfiles,
         message: "The child profile has been added",
       ));
-    } on Exception {
+      print("The child profile has been added");
+    } on Exception catch (e) {
       emit(state.copyWith(
           status: AllChildProfileStatus.failure,
           message: "The child profile cannot be created."));
+      print("The child profile has not been added");
+      print(e.toString());
     }
   }
 

@@ -16,8 +16,9 @@ class Children extends Table {
   TextColumn get deviceRemoteId =>
       text().references(ArduinoDevices, #deviceRemoteId)();
 
-  @override
-  Set<Column> get primaryKey => {id};
+  // Terimnal [WARNING]  Tables can't override primaryKey and use autoIncrement()
+  // @override
+  // Set<Column> get primaryKey => {id};
 }
 
 class ChildEntity {
@@ -100,12 +101,12 @@ class ChildEntity {
     //   await queryArduinoDeviceBydeviceRemoteId(childEntity.deviceRemoteId ?? '');
     // });
 
-    ChildData child = await ChildApiService.fetchChildDataById(22);
-    print('Timestamp: ${child.tstamp}');
-    print('Child ID: ${child.childId}');
-    print('UV Index: ${child.uvIndex}');
-    print('Lux: ${child.lux}');
-    print('');
+    // ChildData child = await ChildApiService.fetchChildDataById(22);
+    // print('Timestamp: ${child.tstamp}');
+    // print('Child ID: ${child.childId}');
+    // print('UV Index: ${child.uvIndex}');
+    // print('Lux: ${child.lux}');
+    // print('');
 
     return childEntityList;
   }
