@@ -28,8 +28,13 @@ class ChildEntity {
   String? deviceRemoteId;
   ArduinoDeviceEntity? arduinoDeviceEntity;
 
+  //TODO: deviceRemoteId is duplicated in child entity and arduino device entity
+
   ChildEntity(
-      {required this.name, required this.birthDate, this.deviceRemoteId, this.id});
+      {required this.name,
+      required this.birthDate,
+      this.deviceRemoteId,
+      this.id});
 
   // JSON serialization
   Map<String, dynamic> toJson() {
@@ -54,8 +59,6 @@ class ChildEntity {
   ChildrenCompanion toCompanion() {
     return ChildrenCompanion(
       name: Value(name),
-      //TODO Change default value if birthDate is null
-
       birthDate: Value(birthDate),
       deviceRemoteId: Value(deviceRemoteId ?? ''),
     );
@@ -89,8 +92,11 @@ class ChildEntity {
   // READ
   static Future<ChildEntity?> queryChildById(int id) async {
     AppDb db = AppDb.instance();
-    return await (db.select(db.children)..where((tbl) => tbl.id.equals(id)))
+    ChildEntity? child = await (db.select(db.children)
+          ..where((tbl) => tbl.id.equals(id)))
         .getSingleOrNull();
+
+    return child;
   }
 
   static Future<List<ChildEntity>> queryAllChildren() async {
@@ -107,8 +113,10 @@ class ChildEntity {
     // print('UV Index: ${child.uvIndex}');
     // print('Lux: ${child.lux}');
     // print('');
-
+    int count = 0;
+    print("queryAllChildren: ${count++} ${childEntityList}");
     return childEntityList;
+    
   }
 
   static Future<ChildEntity?> queryChildByName(String name) async {
@@ -137,31 +145,44 @@ class ChildEntity {
 
   // UPDATE
   static Future<void> updateRemoteDeviceId(
-      int? id, String remoteDeviceId) async {
-  if (id == null) throw Exception("Child ID cannot be null");
-    ChildEntity? child = await queryChildById(id);
-    AppDb db = AppDb.instance();
-
-
-    if (child != null) {
-      await db.update(db.children).replace(ChildrenCompanion(
-          id: Value(id), deviceRemoteId: Value(remoteDeviceId)));
+      int? childId, String remoteDeviceId) async {
+    if (childId == null) {
+      throw Exception("Child ID cannot be null");
     } else {
-      throw Exception('Child with ID $id not found');
+      AppDb db = AppDb.instance();
+      await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
+          .write(ChildrenCompanion(deviceRemoteId: Value(remoteDeviceId)));
     }
+
+    // ChildEntity? child = await queryChildById(id);
+
+    // if (child != null) {
+    //   await db.update(db.children).write(ChildrenCompanion(
+    //       id: Value(id), deviceRemoteId: Value(remoteDeviceId)));
+    // } else {
+    //   throw Exception('Child with ID $id not found');
+    // }
   }
 
   // DELETE
   static Future<void> deleteDeviceForChild(int? childId) async {
-      if (childId == null) throw Exception("Child ID cannot be null");
-    
-    AppDb db = AppDb.instance();
+    // if (childId == null) throw Exception("Child ID cannot be null");
 
-    ChildEntity? child = await queryChildById(childId);
-    if (child != null) {
-      child.deviceRemoteId = null; // or ''
+    // AppDb db = AppDb.instance();
 
-      await db.update(db.children).replace(child.toCompanion());
+    // ChildEntity? child = await queryChildById(childId);
+    // if (child != null) {
+    //   child.deviceRemoteId = null; // or ''
+
+    //   await db.update(db.children).replace(child.toCompanion());
+    // }
+
+        if (childId == null) {
+      throw Exception("Child ID cannot be null");
+    } else {
+      AppDb db = AppDb.instance();
+      await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
+          .write(const ChildrenCompanion(deviceRemoteId: Value("")));
     }
   }
 
@@ -169,7 +190,14 @@ class ChildEntity {
     AppDb db = AppDb.instance();
 
     // Delete the child entity from the database based on its ID
+    // print("count of${db.children.id.count(filter: childId > 0)}");
     await db.delete(db.children)
       ..where((tbl) => tbl.id.equals(childId));
+    print("count of${db.children.id.count()}");
+  }
+
+  @override
+  String toString() {
+    return "$id, $name, $birthDate, $deviceRemoteId \n";
   }
 }

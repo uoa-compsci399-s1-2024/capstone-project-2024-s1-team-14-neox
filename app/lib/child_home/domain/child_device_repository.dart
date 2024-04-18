@@ -35,7 +35,7 @@ class ChildDeviceRepository {
 
   Future<List<ChildDeviceModel>> updateChildDeviceRemoteID(
       int? childId, String deviceRemoteId) async {
-    ChildEntity.updateRemoteDeviceId(childId, deviceRemoteId);
+    ChildEntity.updateRemoteDeviceId(childId ?? 0, deviceRemoteId);
     return fetchChildProfiles();
   }
 

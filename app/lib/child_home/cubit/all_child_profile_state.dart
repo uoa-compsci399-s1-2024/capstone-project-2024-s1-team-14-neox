@@ -34,6 +34,7 @@ class AllChildProfileState extends Equatable {
     List<ChildDeviceModel>? profiles,
     String? message,
   }) {
+    print("state has changed: $profiles");
     return AllChildProfileState(
       status: status ?? this.status,
       profiles: profiles ?? this.profiles,
