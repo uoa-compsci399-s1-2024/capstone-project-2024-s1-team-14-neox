@@ -10,6 +10,8 @@
 const uint32_t maxDataPerCharacteristic = 512;
 const uint32_t dataPerCharacteristic = maxDataPerCharacteristic / sizeof(SensorSample) * sizeof(SensorSample);
 const uint32_t maxData = dataPerCharacteristic * 5;
+uint32_t currentSampleBufferIndex = 0;
+uint32_t sentData = 0;
 
 BLEService sensorSamplesService("ba5c0000-243e-4f78-ac25-69688a1669b4");
 
@@ -65,6 +67,7 @@ void initializeBLE() {
     sensorSamplesService.addCharacteristic(samples_4);
     sensorSamplesService.addCharacteristic(samples_5);
     sensorSamplesService.addCharacteristic(update);
+    sensorSamplesService.addCharacteristic(ts);
 
     BLE.addService(sensorSamplesService);
     BLE.advertise();
@@ -75,9 +78,10 @@ void checkConnection() {
     BLEDevice central = BLE.central();
     while (central.connected())
     {
-        updateValues();
-        
+        updateValues();   
     }
+    currentSampleBufferIndex = 0;
+    sentData = 0;
 }
 
 void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
@@ -141,8 +145,6 @@ void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
     
     if (bytesToSend == 0)
     {
-        currentSampleBufferIndex = 0;
-        sentData = 0;
         return;
     }
     if (bytesToSend > maxData)
@@ -199,8 +201,6 @@ void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
 }
 
 void updateValues() {
-    static uint32_t currentSampleBufferIndex = 0;
-    static uint32_t sentData = 0;
     uint32_t samplesToSend = eepromGetSampleBufferLength();
     if (ts.written()) 
     {
