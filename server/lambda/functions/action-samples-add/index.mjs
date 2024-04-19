@@ -46,7 +46,19 @@ export const handler = async (event) => {
         {
           response: resolvedResource,
           status: 400,
-          message: "missing request body",
+          message: "missing or empty request body",
+        }
+      ],
+    });
+    return maybeEarlyErrorResp;
+  }
+  if (reqBody == null) {
+    maybeEarlyErrorResp.body = JSON.stringify({
+      errors: [
+        {
+          response: resolvedResource,
+          status: 400,
+          message: "missing or empty request body",
         }
       ],
     });
