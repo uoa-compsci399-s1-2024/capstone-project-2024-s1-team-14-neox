@@ -29,7 +29,26 @@ export const handler = async (event) => {
   }
   // NOTE: for now, not checking child IDs
   // NOTE: for now, not checking payload fields to see if they match column names of DB
-  let sampleMapping = JSON.parse(event.body);
+  let sampleMapping;
+  try {
+    sampleMapping = JSON.parse(event.body);
+  } catch (e) {
+    console.error(e);
+    const errorResp = {
+      statusCode: 400,
+      body: JSON.stringify({
+        errors: [
+          {
+            response: event.resource,
+            status: 400,
+            message: "missing request body",
+          }
+        ]
+      }),
+    };
+    addCorsHeaders(errorResp);
+    return errorResp;
+  }
   let childID;
   let errors = [];
   for (childID in sampleMapping) {
