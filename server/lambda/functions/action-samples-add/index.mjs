@@ -22,7 +22,9 @@ const REQUIRED_FIELDS = [
 ];
 
 export const handler = async (event) => {
-  const contentTypeError = validateContentType(event.headers, event.resource);
+  const childID = event.pathParameters.childID;
+  const resolvedResource = event.resource.replace("{childID}", childID);
+  const contentTypeError = validateContentType(event.headers, resolvedResource);
   if (contentTypeError !== null) {
     const errorResp = {
       statusCode: 400,
@@ -42,7 +44,7 @@ export const handler = async (event) => {
       body: JSON.stringify({
         errors: [
           {
-            response: event.resource,
+            response: resolvedResource,
             status: 400,
             message: "missing request body",
           }
@@ -52,8 +54,6 @@ export const handler = async (event) => {
     addCorsHeaders(errorResp);
     return errorResp;
   }
-  const childID = event.pathParameters.childID;
-  const resolvedResource = event.resource.replace("{childID}", childID);
   let errors = [];
   for (let i=0; i<samples.length; i++) {
     let missingfields = false;
