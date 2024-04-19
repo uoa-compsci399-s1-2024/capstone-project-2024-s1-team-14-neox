@@ -8,6 +8,9 @@ import {
 import {
   isMatch,
 } from "date-fns";
+import {
+  UNIQUE_VIOLATION,
+} from "pg-error-constants";
 
 let db = await connectToDB();
 
@@ -108,7 +111,16 @@ export const handler = async (event) => {
            currSamples[i].light],
         );
       } catch (e) {
-        throw e;
+        if (e.code === UNIQUE_VIOLATION && e.constraint === "samples_pkey") {
+          errors.push({
+            resource: `${resolvedResource}?index=${i}&field=timestamp`,
+            status: 400,
+            message: `sample timestamp already seen`,
+          });
+          continue;
+        } else {
+          throw e;
+        }
       }
     }
   }
