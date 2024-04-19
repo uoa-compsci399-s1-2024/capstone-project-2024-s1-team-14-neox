@@ -115,7 +115,7 @@ export const handler = async (event) => {
         if (e.code === UNIQUE_VIOLATION && e.constraint === "samples_pkey") {
           errors.push({
             resource: `${resolvedResource}?index=${i}&field=timestamp`,
-            status: 400,
+            status: 409,
             message: `sample timestamp already seen`,
           });
           continue;
