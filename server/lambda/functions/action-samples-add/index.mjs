@@ -76,7 +76,7 @@ export const handler = async (event) => {
     });
     return maybeEarlyErrorResp;
   }
-  samples = reqBody.samples;
+  const samples = reqBody.samples;
 
   let errors = [];
   for (let i=0; i<samples.length; i++) {
