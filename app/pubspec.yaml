@@ -48,6 +48,7 @@ dependencies:
   age_calculator: ^1.0.0
   font_awesome_flutter: ^10.7.0
   fl_chart: ^0.67.0
+  percent_indicator: ^4.2.3
 
 dev_dependencies:
   flutter_test:
