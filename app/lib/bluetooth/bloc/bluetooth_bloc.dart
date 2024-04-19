@@ -260,7 +260,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     }
 
     // Authenticate us
-    String authorisationCode = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";//event.authorisationCode;
+    String authorisationCode = event.authorisationCode;
     if (authorisationCode.length != 10 || authorisationCode.codeUnits.any((c) => c >= 128)) {
       emit(
         state.copyWith(
@@ -283,7 +283,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
 
     // Authenticate them
     {
-      await authResponseFromPeripheral!.write([0]);
+      await authResponseFromPeripheral!.write(List.generate(32, (_) => 0), allowLongWrite: true);
 
       List<int> challenge = List.generate(32, (index) => Random.secure().nextInt(256));
       await authChallengeFromCentral!.write(challenge, allowLongWrite: true);
