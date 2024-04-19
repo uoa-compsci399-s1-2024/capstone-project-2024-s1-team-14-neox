@@ -68,16 +68,15 @@ export const handler = async (event) => {
         missingfields = true;
         continue;
       }
-      if (samples[i].child_id !== undefined && samples[i].child_id !== childID) {
-        errors.push({
-          resource: `${resolvedResource}?index=${i}&field=child_id`,
-          status: 400,
-          message: `child IDs don't match in sample (${samples[i].child_id}) and in path (${childID})`,
-        });
-        console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
-        missingfields = true;
-        continue;
-      }
+    }
+    if (samples[i].child_id !== undefined && samples[i].child_id !== childID) {
+      errors.push({
+        resource: `${resolvedResource}?index=${i}&field=child_id`,
+        status: 400,
+        message: `child IDs don't match in sample (${samples[i].child_id}) and in path (${childID})`,
+      });
+      console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
+      missingfields = true;
     }
     if (missingfields) {
       continue;  // to next sample
