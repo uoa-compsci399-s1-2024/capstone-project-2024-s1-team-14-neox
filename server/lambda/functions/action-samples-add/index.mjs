@@ -28,7 +28,6 @@ export const handler = async (event) => {
     return errorResp;
   }
   // NOTE: for now, not checking child IDs
-  // NOTE: for now, not checking payload fields to see if they match column names of DB
   let sampleMapping;
   try {
     sampleMapping = JSON.parse(event.body);
