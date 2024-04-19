@@ -150,12 +150,12 @@ export const handler = async (event) => {
       } else if (e.code === FOREIGN_KEY_VIOLATION && e.constraint === "samples_child_id_fkey") {
         // FIXME: Handle permissions.
         errors.push({
-          resource: `${resolvedResource}?index=${i}&field=child_id`,
+          resource: resolvedResource,
           status: 403,
           message: `child ID doesn't exist or user is not authorised to add samples to the child`,
         });
         console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
-        continue;
+        break;
       } else {
         throw e;
       }
