@@ -13,6 +13,11 @@ void initializeBLE();
 void checkConnection();
 
 /*
+ * Called to find the index of the last timestamp sent to the app
+ */
+void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex);
+
+/*
  * Adds a sample to one of the five buffers which will be written to a characteristic.
  */
 void addSample(byte arr[512], uint32_t& index, SensorSample sample);
