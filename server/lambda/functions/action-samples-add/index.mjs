@@ -9,6 +9,7 @@ import {
   isMatch,
 } from "date-fns";
 import {
+  FOREIGN_KEY_VIOLATION,
   UNIQUE_VIOLATION,
 } from "pg-error-constants";
 
@@ -116,6 +117,14 @@ export const handler = async (event) => {
             resource: `${resolvedResource}?index=${i}&field=timestamp`,
             status: 400,
             message: `sample timestamp already seen`,
+          });
+          continue;
+        } else if (e.code === FOREIGN_KEY_VIOLATION && e.constraint === "samples_child_id_fkey") {
+          // FIXME: Handle permissions.
+          errors.push({
+            resource: `${resolvedResource}?index=${i}&field=child_id`,
+            status: 403,
+            message: `child ID doesn't exist or user is not authorised to add samples to the child`,
           });
           continue;
         } else {
