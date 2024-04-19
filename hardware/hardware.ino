@@ -27,6 +27,9 @@ void setup()
   initializeIMU();
   initializeRTC();
   eepromBegin();
+  
+  //uint8_t key[32] = "verysecure";
+  //eepromFactoryReset(key);
 }
 
 void loop()

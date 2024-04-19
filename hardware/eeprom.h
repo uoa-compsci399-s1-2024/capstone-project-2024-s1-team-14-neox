@@ -115,4 +115,16 @@ void eepromLockSampleBuffer();
  */
 void eepromUnlockSampleBuffer();
 
+/*
+ * Get or set the BLE authentication key.
+ * The buffer passed must be a 32 bytes (256 bits).
+ */
+void eepromGetBLEAuthKey(uint8_t* key);
+void eepromSetBLEAuthKey(const uint8_t* key);
+
+/*
+ * Reset the sample buffer and BLE authentication key.
+ */
+void eepromFactoryReset(const uint8_t* bleAuthKey);
+
 #endif

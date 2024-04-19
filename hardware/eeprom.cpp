@@ -16,6 +16,7 @@ struct SampleBuffer
   EEPROMAddress bufferAddress;
   EEPROMAddress tail;
   EEPROMAddress len;
+  uint32_t cachedLen;
   bool locked;
 };
 
@@ -47,6 +48,7 @@ static uint32_t allocatedLen;
 static ExternalEEPROM eeprom;
 static SampleBuffer sampleBuffer;
 static TempSampleBuffer tempSampleBuffer;
+static EEPROMAddress authKey;
 static AtomicTransaction atomicTransaction;
 
 
@@ -64,8 +66,11 @@ void eepromBegin()
   sampleBuffer.bufferAddress = eepromAllocate(SAMPLE_BUFFER_MAX_SIZE_BYTES);
   sampleBuffer.tail = eepromAllocateUint32();
   sampleBuffer.len = eepromAllocateUint32();
+  sampleBuffer.cachedLen = eepromReadUint32(sampleBuffer.len);
   sampleBuffer.locked = false;
   tempSampleBuffer.len = 0;
+  
+  authKey = eepromAllocate(32);
 
   atomicTransaction.address = eepromAllocateUint32();
   atomicTransaction.value = eepromAllocateUint32();
@@ -181,6 +186,7 @@ void eepromPushSample(const SensorSample* sample)
   // for keeping the data consistent even if the power is lost.
   if (len < SAMPLE_BUFFER_MAX_SIZE_ELEMS - 1)
   {
+    sampleBuffer.cachedLen = len + 1;
     eepromAtomicWriteUint32(sampleBuffer.len, len + 1);
   }
   else
@@ -199,7 +205,7 @@ void eepromReadSample(uint32_t index, SensorSample* sample)
 
 uint32_t eepromGetSampleBufferLength()
 {
-  return eepromReadUint32(sampleBuffer.len);
+  return sampleBuffer.cachedLen;
 }
 
 void eepromLockSampleBuffer()
@@ -246,4 +252,18 @@ static void freeze()
   {
     delay(1000);
   }
+}
+
+void eepromGetBLEAuthKey(uint8_t* key) {
+  eepromRead(authKey, key, 32);
+}
+
+void eepromSetBLEAuthKey(const uint8_t* key) {
+  eepromWrite(authKey, key, 32);
+}
+
+void eepromFactoryReset(const uint8_t* bleAuthKey) {
+  eepromClear();
+  eepromSetBLEAuthKey(bleAuthKey);
+  Serial.println("Factory reset complete.");
 }

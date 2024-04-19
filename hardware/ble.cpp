@@ -7,7 +7,6 @@
 #include "ble.h"
 #include "sensor_sample.h"
 
-
 const uint32_t maxDataPerCharacteristic = 512;
 const uint32_t dataPerCharacteristic = maxDataPerCharacteristic / sizeof(SensorSample) * sizeof(SensorSample);
 const uint32_t maxData = dataPerCharacteristic * 5;
@@ -55,8 +54,8 @@ byte buffer_5[maxDataPerCharacteristic];
 /*
  * Authentication properties
  */
-static const int unpaddedAuthKeyLen = 10;
-static const int authKeyLen = 32;
+static uint8_t authKey[32];
+static bool authenticated = false;
 
 static BLECharacteristic authChallengeFromPeripheral("9ab7d3df-a7b4-4858-8060-84a9adcf1420", BLERead, 32, true);
 static BLECharacteristic authResponseFromCentral    ("a90aa9a2-b186-4717-bc8d-f169eead75da", BLEWrite | BLEEncryption, 32, true);
@@ -64,11 +63,9 @@ static BLECharacteristic authChallengeFromCentral   ("c03b7267-dcfa-4525-8521-1b
 static BLECharacteristic authResponseFromPeripheral ("750d5d43-96c4-4f5c-8ce1-fdb44a150336", BLERead | BLEWrite | BLEEncryption, 32, true);
 static BLECharacteristic centralAuthenticated       ("776edbca-a020-4d86-a5e8-25eb87e82554", BLERead, 1, true);
 
-static uint32_t authKey;
-static bool authenticated;
-
-static uint32_t sha256(uint32_t data); // Input and output as 32 byte little endian.
-static uint32_t generateRandom();
+static void sha256(const uint8_t* value, uint8_t* hash); // Takes and returns a 32 byte array
+static void generateRandom(uint8_t* value); // Returns 32 byte array
+static void solveAuthChallenge(const uint8_t* challenge, uint8_t* solution);
 static void onConnection(BLEDevice central);
 static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic characteristic);
 static void onAuthChallengeFromCentral(BLEDevice central, BLECharacteristic characteristic);
@@ -81,14 +78,11 @@ void initializeBLE() {
         while(1);
     }
 
-    EEPROMAddress authKeyBuffer = eepromAllocate(authKeyLen);
-    // Use the following to set the authentication key:
-    //uint8_t buf[authKeyLen] = "secure pwd";
-    //eepromWrite(authKeyBuffer, buf, sizeof(buf));
-    eepromRead(authKeyBuffer, (uint8_t*)&authKey, sizeof(authKey));
+    eepromGetBLEAuthKey(authKey);
 
-    authResponseFromCentral.setEventHandler(BLEWrite, onAuthResponseFromCentral);
-    authChallengeFromCentral.setEventHandler(BLEWrite, onAuthChallengeFromCentral);
+    authResponseFromCentral.setEventHandler(BLEWritten, onAuthResponseFromCentral);
+    authChallengeFromCentral.setEventHandler(BLEWritten, onAuthChallengeFromCentral);
+    BLE.setEventHandler(BLEConnected, onConnection);
 
     BLE.setLocalName("Neox Sens 1.0");
     ts.setValue(0);
@@ -108,15 +102,12 @@ void initializeBLE() {
     
     BLE.addService(sensorSamplesService);
     BLE.advertise();
-    
 }
 
 void checkConnection() {
     BLEDevice central = BLE.central();
     while (central.connected())
     {
-        uint8_t authenticated;
-        centralAuthenticated.readValue(authenticated);
         if (authenticated) {
             updateValues();
         }
@@ -243,7 +234,7 @@ void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
 
 void updateValues() {
     uint32_t samplesToSend = eepromGetSampleBufferLength();
-    if (ts.written()) 
+    if (ts.written())
     {
       uint32_t timestamp;
       ts.readValue(timestamp);
@@ -259,58 +250,68 @@ void updateValues() {
     }
 }
 
-static uint32_t sha256(uint32_t data) {
+static void sha256(const uint8_t* data, uint8_t* hash) {
   SHA256 hasher;
-  hasher.update(&data, sizeof(data));
-
-  uint32_t hash;
-  hasher.finalize(&hash, sizeof(hash));
-  return hash;
+  hasher.update(data, 32);
+  hasher.finalize(hash, 32);
 }
 
-static uint32_t generateRandom() {
-  uint32_t value = 0;
-  for (int i = 0; i < 7; i++) {
-    value |= (analogRead(A0 + i) & 0xF) << (4 * i);
+static void generateRandom(uint8_t* value) {
+  static const uint8_t pins[] = {
+    A2, A3, A6, A7,
+  };
+
+  for (int i = 0; i < 32; i++) {
+    value[i] |= analogRead(pins[i % sizeof(pins)]);
+    if (i % sizeof(pins) == 0) {
+      delay(50);
+    }
   }
-  return sha256(value);
+  sha256(value, value);
+}
+
+static void solveAuthChallenge(const uint8_t* challenge, uint8_t* solution) {
+  uint8_t buffer[32];
+  for (int i = 0; i < sizeof(buffer); i++) {
+    buffer[i] = challenge[i] ^ authKey[i];
+  }
+  sha256(buffer, solution);
 }
 
 static void onConnection(BLEDevice central) {
   authenticated = false;
 
   uint8_t falsy = 0;
-  centralAuthenticated.setValue(&falsy, sizeof(falsy));
+  centralAuthenticated.writeValue(&falsy, sizeof(falsy));
 
-  uint32_t challengeFromPeripheral = generateRandom();
-  authChallengeFromPeripheral.setValue((const uint8_t*)&challengeFromPeripheral, sizeof(challengeFromPeripheral));
+  uint8_t challengeFromPeripheral[32];
+  generateRandom(challengeFromPeripheral);
+  authChallengeFromPeripheral.writeValue(challengeFromPeripheral, sizeof(challengeFromPeripheral));
 }
 
 static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic characteristic) {
-  uint32_t response;
-  authResponseFromCentral.readValue(response);
+  uint8_t response[32];
+  authResponseFromCentral.readValue(response, sizeof(response));
 
-  uint32_t challenge;
-  authChallengeFromPeripheral.readValue(challenge);
+  uint8_t challenge[32];
+  authChallengeFromPeripheral.readValue(challenge, sizeof(challenge));
 
-  uint32_t expected = sha256(authKey ^ challenge);
-  if (response == expected) {
+  uint8_t expected[32];
+  solveAuthChallenge(challenge, expected);
+  if (memcmp(response, expected, sizeof(expected)) == 0) {
     uint8_t truthy = 1;
-    centralAuthenticated.setValue(&truthy, sizeof(truthy));
-    Serial.println("auth success");
+    centralAuthenticated.writeValue(&truthy, sizeof(truthy));
+    authenticated = true;
   }
-  Serial.println("auth failed");
-  Serial.println(response);
-  Serial.println(challenge);
-  Serial.println(expected);
 }
 
 static void onAuthChallengeFromCentral(BLEDevice central, BLECharacteristic characteristic) {
-  uint32_t challenge;
-  authChallengeFromCentral.readValue(challenge);
+  uint8_t challenge[32];
+  authChallengeFromCentral.readValue(challenge, sizeof(challenge));
 
-  uint32_t response = sha256(authKey ^ challenge);
-  authResponseFromPeripheral.setValue((const uint8_t*)&response, sizeof(response));
+  uint8_t response[32];
+  solveAuthChallenge(challenge, response);
+  authResponseFromPeripheral.writeValue(response, sizeof(response));
 }
 
 
