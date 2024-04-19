@@ -10,6 +10,7 @@ import fs from "node:fs";
 import process from "node:process";
 import pg from 'pg';
 
+
 export const SECRETS_MANAGER_CLIENT = new SecretsManagerClient({
   region: process.env.AWS_REGION,
 });
@@ -119,3 +120,8 @@ export function validateContentType(headers, resource)
   return error;
 }
 
+// See formats at https://date-fns.org/v3.6.0/docs/isMatch
+const ISO8601_FORMAT_DATETIME = "yyyy-MM-dd'T'HH:mm:ss"
+export const DATETIME_FORMAT_UTC = `${ISO8601_FORMAT_DATETIME}XXXXX`;  // use "Z" for UTC 0
+export const DATETIME_FORMAT_WITHOFFSET = `${ISO8601_FORMAT_DATETIME}xxxxx`;  // use +00:00 for UTC 0
+export const DATETIME_OUTPUT_FORMAT = DATETIME_FORMAT_UTC;
