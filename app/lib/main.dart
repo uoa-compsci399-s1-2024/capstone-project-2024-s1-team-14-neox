@@ -13,6 +13,7 @@ import 'cloud/cloud_home.dart';
 
 // Import blocs and repositories
 import 'child_home/cubit/all_child_profile_cubit.dart';
+import 'data/database_viewer.dart';
 
 void main() {
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true); // Used to log BLE
@@ -73,6 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
       child: AnalysisHomeScreen(),
     ),
     const CloudHomeScreen(),
+    const DatabaseViewer(),
 
   ];
   @override
@@ -99,6 +101,10 @@ class _MyHomePageState extends State<MyHomePage> {
           NavigationDestination(
             icon: Icon(Icons.cloud_upload),
             label: "Cloud",
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.table_chart),
+            label: "Database",
           ),
         ],
       ),

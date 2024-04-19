@@ -1,10 +1,12 @@
 import 'package:age_calculator/age_calculator.dart';
 
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bluetooth/bloc/bluetooth_bloc.dart';
 import '../../../bluetooth/presentation/bluetooth_panel.dart';
+import '../../cubit/all_child_profile_cubit.dart';
 import '../../cubit/child_device_cubit.dart';
 
 class ChildProfileTile extends StatefulWidget {
@@ -77,6 +79,12 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
               child: const BluetoothPanel(),
             );
           }),
+          OutlinedButton(onPressed: () => context.read<AllChildProfileCubit>().deleteChildProfile(
+            context.read<ChildDeviceCubit>().state.childId ?? -999
+          ), child: Text("Remove child profile")),
+          
+          
+
         ],
       ),
     );

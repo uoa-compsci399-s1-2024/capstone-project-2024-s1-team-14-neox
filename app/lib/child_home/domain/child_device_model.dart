@@ -20,13 +20,13 @@ class ChildDeviceModel {
         childId: entity.id,
         childName: entity.name,
         birthDate: entity.birthDate,
-        deviceRemoteId: entity.arduinoDeviceEntity?.deviceRemoteId,
+        deviceRemoteId: entity.deviceRemoteId,
         authorisationCode: entity.arduinoDeviceEntity?.authorisationCode,
         // TODO implement last synced in database
       );
 
   @override
-  String toString() => "$childId, $childName, $birthDate, $deviceRemoteId";
+  String toString() => "$childId, $childName, $birthDate, $deviceRemoteId \n";
 
 //  factory MobileViewModel.fromJson(final Map<String, dynamic> json) =>
 //       MobileViewModel(
