@@ -55,21 +55,12 @@ export const handler = async (event) => {
         }
       }
       # See https://date-fns.org/v3.6.0/docs/isMatch
-      const ISO8601_FORMAT_DATE = "yyyy-MM-dd";
-      const ISO8601_FORMAT_DATE_TIME_DELIMITER = "'T'";
-      const ISO8601_FORMAT_TIME = "HH:mm:ss";
-      const ISO8601_FORMAT_TIMEZONE_OPTIONS = [
-        "XXXXX",  // use "Z" for UTC 0
-        "xxxxx",  // use +00:00 for UTC 0
-      ];
-      const _temp_prefix = `${ISO8601_FORMAT_DATE}${ISO8601_FORMAT_DATE_TIME_DELIMITER}${ISO8601_FORMAT_TIME}`;
-      const DATETIME_OUTPUT_FORMAT = `${_temp_prefix}${ISO8601_FORMAT_TIMEZONE_OPTIONS[0]}`;
-      const DATETIME_FORMATS = [
-        ISO8601_OUTPUT_FORMAT,
-        `${_temp_prefix}${ISO8601_FORMAT_TIMEZONE_OPTIONS}[1]`,
-      ];
-      if (!isMatch(currSamples[i].timestamp, DATETIME_FORMATS[0]) ||
-          !isMatch(currSamples[i].timestamp, DATETIME_FORMATS[1])) {
+      const ISO8601_FORMAT_DATETIME = "yyyy-MM-dd'T'HH:mm:ss"
+      const DATETIME_FORMAT_UTC = `${ISO8601_FORMAT_DATETIME}XXXXX`;  // use "Z" for UTC 0
+      const DATETIME_FORMAT_WITHOFFSET = `${ISO8601_FORMAT_DATETIME}xxxxx`;  // use +00:00 for UTC 0
+      const DATETIME_OUTPUT_FORMAT = DATETIME_FORMAT_UTC;
+      if (!isMatch(currSamples[i].timestamp, DATETIME_FORMAT_UTC) ||
+          !isMatch(currSamples[i].timestamp, DATETIME_FORMAT_WITHOFFSET)) {
         errors.push({
           resource: `${resolvedResource}?index=${i}&field=timestamp`,
           status: 400,
