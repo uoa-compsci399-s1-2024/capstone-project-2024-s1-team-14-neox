@@ -24,14 +24,16 @@ const REQUIRED_FIELDS = [
 export const handler = async (event) => {
   const childID = event.pathParameters.childID;
   const resolvedResource = event.resource.replace("{childID}", childID);
+
+  const maybeEarlyErrorResp = {
+    statusCode: 400,
+  };
+  addCorsHeaders(maybeEarlyErrorResp);
+
   const contentTypeError = validateContentType(event.headers, resolvedResource);
   if (contentTypeError !== null) {
-    const errorResp = {
-      statusCode: 400,
-      body: JSON.stringify({errors: [contentTypeError]}),
-    };
-    addCorsHeaders(errorResp);
-    return errorResp;
+    maybeEarlyErrorResp.body = JSON.stringify({errors: [contentTypeError]});
+    return maybeEarlyErrorResp;
   }
 
   let reqBody;
@@ -39,52 +41,40 @@ export const handler = async (event) => {
     reqBody = JSON.parse(event.body);
   } catch (e) {
     console.error(e);
-    const errorResp = {
-      statusCode: 400,
-      body: JSON.stringify({
-        errors: [
-          {
-            response: resolvedResource,
-            status: 400,
-            message: "missing request body",
-          }
-        ]
-      }),
-    };
-    addCorsHeaders(errorResp);
-    return errorResp;
+    maybeEarlyErrorResp.body = JSON.stringify({
+      errors: [
+        {
+          response: resolvedResource,
+          status: 400,
+          message: "missing request body",
+        }
+      ],
+    });
+    return maybeEarlyErrorResp;
   }
   if (reqBody.samples === undefined) {
-    const errorResp = {
-      statusCode: 400,
-      body: JSON.stringify({
-        errors: [
-          {
-            response: resolvedResource,
-            status: 400,
-            message: "missing `samples` property in request body",
-          }
-        ]
-      }),
-    };
-    addCorsHeaders(errorResp);
-    return errorResp;
+    maybeEarlyErrorResp.body = JSON.stringify({
+      errors: [
+        {
+          response: resolvedResource,
+          status: 400,
+          message: "missing `samples` property in request body",
+        }
+      ],
+    });
+    return maybeEarlyErrorResp
   }
   if (!Array.isArray(reqBody.samples)) {
-    const errorResp = {
-      statusCode: 400,
-      body: JSON.stringify({
-        errors: [
-          {
-            response: resolvedResource,
-            status: 400,
-            message: "samples property in request body must be an array",
-          }
-        ]
-      }),
-    };
-    addCorsHeaders(errorResp);
-    return errorResp;
+    maybeEarlyErrorResp.body = JSON.stringify({
+      errors: [
+        {
+          response: resolvedResource,
+          status: 400,
+          message: "samples property in request body must be an array",
+        }
+      ]
+    });
+    return maybeEarlyErrorResp;
   }
   samples = reqBody.samples;
 
