@@ -23,10 +23,10 @@ void setup()
   Serial.begin(SERIAL_BAUD_RATE);
   while (!Serial);
   Wire.begin();
+  eepromBegin();
   initializeBLE();
   initializeIMU();
   initializeRTC();
-  eepromBegin();
   
   //uint8_t key[32] = "verysecure";
   //eepromFactoryReset(key);
