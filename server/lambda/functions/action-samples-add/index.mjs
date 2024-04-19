@@ -56,7 +56,9 @@ export const handler = async (event) => {
   }
   let errors = [];
   for (let i=0; i<samples.length; i++) {
-    let missingfields = false;
+    let badfields = false;
+
+    // check if all samples fields are present
     for (let j=0; j<REQUIRED_FIELDS.length; j++) {
       if (samples[i][REQUIRED_FIELDS[j]] == null) {
         errors.push({
@@ -65,10 +67,12 @@ export const handler = async (event) => {
           message: `${REQUIRED_FIELDS[j]} missing from sample`,
         });
         console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
-        missingfields = true;
+        badfields = true;
         continue;
       }
     }
+
+    // check if child ID in sample (if present) and in path agree with each other
     if (samples[i].child_id !== undefined && samples[i].child_id !== childID) {
       errors.push({
         resource: `${resolvedResource}?index=${i}&field=child_id`,
@@ -76,14 +80,13 @@ export const handler = async (event) => {
         message: `child IDs don't match in sample (${samples[i].child_id}) and in path (${childID})`,
       });
       console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
-      missingfields = true;
-    }
-    if (missingfields) {
-      continue;  // to next sample
+      badfields = true;
     }
 
-    if (!isMatch(samples[i].timestamp, DATETIME_FORMAT_UTC) ||
-        !isMatch(samples[i].timestamp, DATETIME_FORMAT_WITHOFFSET)) {
+    // check if timestamp is in correct format
+    if (samples[i].timestamp !== undefined &&
+         (!isMatch(samples[i].timestamp, DATETIME_FORMAT_UTC) ||
+          !isMatch(samples[i].timestamp, DATETIME_FORMAT_WITHOFFSET))) {
       errors.push({
         resource: `${resolvedResource}?index=${i}&field=timestamp`,
         status: 400,
@@ -91,6 +94,10 @@ export const handler = async (event) => {
       });
       console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
       continue;
+    }
+
+    if (badfields) {
+      continue;  // to next sample
     }
 
     // structuredClone is new to JS but available in Node
