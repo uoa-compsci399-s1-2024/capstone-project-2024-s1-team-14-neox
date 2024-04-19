@@ -55,6 +55,7 @@ export const handler = async (event) => {
     let resolvedResource = `${event.resource}/${childID}`;
     let currSamples = sampleMapping[childID];
     for (let i=0; i<currSamples.length; i++) {
+      let missingfields = false;
       for (let j=0; j<REQUIRED_FIELDS.length; j++) {
         if (currSamples[i][REQUIRED_FIELDS[j]] == null) {
           errors.push({
@@ -63,6 +64,7 @@ export const handler = async (event) => {
             message: `${REQUIRED_FIELDS[j]} missing from sample`,
           });
           console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
+          missingfields = true;
           continue;
         }
         if (currSamples[i].child_id !== undefined && currSamples[i].child_id !== childID) {
@@ -72,8 +74,12 @@ export const handler = async (event) => {
             message: `child IDs don't match in sample (${currSamples[i].child_id}) and in containing object (${childID})`,
           });
           console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
+          missingfields = true;
           continue;
         }
+      }
+      if (missingfields) {
+        continue;  // to next sample
       }
 
       if (!isMatch(currSamples[i].timestamp, DATETIME_FORMAT_UTC) ||
