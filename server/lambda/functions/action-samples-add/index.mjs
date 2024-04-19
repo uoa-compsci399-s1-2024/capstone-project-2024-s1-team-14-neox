@@ -14,7 +14,7 @@ let db = await connectToDB();
 const REQUIRED_FIELDS = [
   "timestamp",
   "uv",
-  "light,"
+  "light",
 ];
 
 export const handler = async (event) => {
