@@ -102,6 +102,7 @@ export function validateContentType(headers, resource)
 {
   let res = checkCorrectContentType(headers);
   if (res.correct) {
+    console.log(`content-type OK, got ${res.contentType}`);
     return null;
   }
   let error = {
@@ -113,6 +114,7 @@ export function validateContentType(headers, resource)
   else {
     error.message = `content-type must be ${CORRECT_CONTENT_TYPE}/${CORRECT_CONTENT_SUBTYPE} but got ${res.contentType} instead`;
   }
+  console.error(error.message);
   return error;
 }
 

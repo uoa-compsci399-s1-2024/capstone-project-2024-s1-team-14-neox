@@ -1,11 +1,21 @@
 import {
   addCorsHeaders,
   connectToDB,
+  validateContentType,
 } from "/opt/nodejs/lib.mjs";
 
 let db = await connectToDB();
 
 export const handler = async (event) => {
+  const contentTypeError = validateContentType(event.headers, event.resource);
+  if (contentTypeError !== null) {
+    const errorResp = {
+      statusCode: 400,
+      body: JSON.stringify({errors: [contentTypeError]}),
+    };
+    addCorsHeaders(errorResp);
+    return errorResp;
+  }
   // NOTE: for now, not checking child IDs
   // NOTE: for now, not checking payload fields to see if they match column names of DB
   let sampleMapping = JSON.parse(event.body);
