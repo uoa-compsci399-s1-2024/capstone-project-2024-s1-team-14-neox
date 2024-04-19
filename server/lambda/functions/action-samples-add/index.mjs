@@ -10,6 +10,7 @@ import {
 } from "date-fns";
 import {
   FOREIGN_KEY_VIOLATION,
+  INVALID_TEXT_REPRESENTATION,
   UNIQUE_VIOLATION,
 } from "pg-error-constants";
 
@@ -168,6 +169,32 @@ export const handler = async (event) => {
         });
         console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
         break;
+      } else if (e.code === INVALID_TEXT_REPRESENTATION) {
+        const m = e.where.match(/\$(?<param>[0-9])/);
+        if (!m) {
+          console.error("can't parse parameter number from postgresql error");
+          throw e;
+        }
+
+        let badField;
+        switch (m.groups.param) {
+        case '3':
+          badField = "uv";
+          break;
+        case '4':
+          badField = "light";
+          break;
+        default:
+          console.error(`unhandled parameter number ${m.groups.param}`);
+          throw e;
+        }
+        errors.push({
+          resource: `${resolvedResource}?index=${i}&field=${badField}`,
+          status: 400,
+          message: "failed to parse value",
+        });
+        console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
+        continue;
       } else {
         throw e;
       }
