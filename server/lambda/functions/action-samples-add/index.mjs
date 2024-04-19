@@ -33,10 +33,10 @@ export const handler = async (event) => {
     addCorsHeaders(errorResp);
     return errorResp;
   }
-  // NOTE: for now, not checking child IDs
-  let sampleMapping;
+
+  let reqBody;
   try {
-    sampleMapping = JSON.parse(event.body);
+    reqBody = JSON.parse(event.body);
   } catch (e) {
     console.error(e);
     const errorResp = {
@@ -54,6 +54,40 @@ export const handler = async (event) => {
     addCorsHeaders(errorResp);
     return errorResp;
   }
+  if (reqBody.samples === undefined) {
+    const errorResp = {
+      statusCode: 400,
+      body: JSON.stringify({
+        errors: [
+          {
+            response: resolvedResource,
+            status: 400,
+            message: "missing `samples` property in request body",
+          }
+        ]
+      }),
+    };
+    addCorsHeaders(errorResp);
+    return errorResp;
+  }
+  if (!Array.isArray(reqBody.samples)) {
+    const errorResp = {
+      statusCode: 400,
+      body: JSON.stringify({
+        errors: [
+          {
+            response: resolvedResource,
+            status: 400,
+            message: "samples property in request body must be an array",
+          }
+        ]
+      }),
+    };
+    addCorsHeaders(errorResp);
+    return errorResp;
+  }
+  samples = reqBody.samples;
+
   let errors = [];
   for (let i=0; i<samples.length; i++) {
     let badfields = false;
