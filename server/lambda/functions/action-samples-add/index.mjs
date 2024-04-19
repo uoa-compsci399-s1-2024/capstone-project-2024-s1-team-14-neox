@@ -12,7 +12,7 @@ import {
 let db = await connectToDB();
 
 const REQUIRED_FIELDS = [
-  "timestamp".
+  "timestamp",
   "uv",
   "light,"
 ];

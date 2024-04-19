@@ -79,7 +79,7 @@ function checkCorrectContentType(headers)
 {
   let contentType = "";
   // FIXME: Potential attacks by sending loads of headers
-  for (prop in headers) {
+  for (let prop in headers) {
     if (prop.toLowerCase() === "content-type") {
       contentType = headers[prop];
       break;
@@ -110,9 +110,10 @@ export function validateContentType(headers, resource)
   let error = {
     resource: resource,
     status: 400,
-  }
-  if (res.contentType === null)
+  };
+  if (res.contentType === null) {
     error.message = "content-type was missing or couldn't be parsed";
+  }
   else {
     error.message = `content-type must be ${CORRECT_CONTENT_TYPE}/${CORRECT_CONTENT_SUBTYPE} but got "${res.contentType}" instead`;
   }
@@ -121,7 +122,7 @@ export function validateContentType(headers, resource)
 }
 
 // See formats at https://date-fns.org/v3.6.0/docs/isMatch
-const ISO8601_FORMAT_DATETIME = "yyyy-MM-dd'T'HH:mm:ss"
+const ISO8601_FORMAT_DATETIME = "yyyy-MM-dd'T'HH:mm:ss";
 export const DATETIME_FORMAT_UTC = `${ISO8601_FORMAT_DATETIME}XXXXX`;  // use "Z" for UTC 0
 export const DATETIME_FORMAT_WITHOFFSET = `${ISO8601_FORMAT_DATETIME}xxxxx`;  // use +00:00 for UTC 0
 export const DATETIME_OUTPUT_FORMAT = DATETIME_FORMAT_UTC;
