@@ -3,6 +3,9 @@ import {
   connectToDB,
   validateContentType,
 } from "/opt/nodejs/lib.mjs";
+import {
+  isMatch,
+} from "date-fns";
 
 let db = await connectToDB();
 
@@ -50,6 +53,30 @@ export const handler = async (event) => {
           console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
           continue;
         }
+      }
+      # See https://date-fns.org/v3.6.0/docs/isMatch
+      const ISO8601_FORMAT_DATE = "yyyy-MM-dd";
+      const ISO8601_FORMAT_DATE_TIME_DELIMITER = "'T'";
+      const ISO8601_FORMAT_TIME = "HH:mm:ss";
+      const ISO8601_FORMAT_TIMEZONE_OPTIONS = [
+        "XXXXX",  // use "Z" for UTC 0
+        "xxxxx",  // use +00:00 for UTC 0
+      ];
+      const _temp_prefix = `${ISO8601_FORMAT_DATE}${ISO8601_FORMAT_DATE_TIME_DELIMITER}${ISO8601_FORMAT_TIME}`;
+      const DATETIME_OUTPUT_FORMAT = `${_temp_prefix}${ISO8601_FORMAT_TIMEZONE_OPTIONS[0]}`;
+      const DATETIME_FORMATS = [
+        ISO8601_OUTPUT_FORMAT,
+        `${_temp_prefix}${ISO8601_FORMAT_TIMEZONE_OPTIONS}[1]`,
+      ];
+      if (!isMatch(currSamples[i].timestamp, DATETIME_FORMATS[0]) ||
+          !isMatch(currSamples[i].timestamp, DATETIME_FORMATS[1])) {
+        errors.push({
+          resource: `${resolvedResource}?index=${i}&field=timestamp`,
+          status: 400,
+          message: `timestamp must be in full ISO8601 datetime format with offset OR in UTC`,
+        });
+        console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
+        continue;
       }
 
       // structuredClone is new to JS but available in Node
