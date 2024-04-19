@@ -102,9 +102,12 @@ class ChildEntity {
   static Future<List<ChildEntity>> queryAllChildren() async {
     AppDb db = AppDb.instance();
     List<ChildEntity> childEntityList = await db.select(db.children).get();
+    
+    // Remove arduino device entity
     // await Future.forEach(childEntityList, (childEntity) async {
     //   childEntity.arduinoDeviceEntity =
-    //   await queryArduinoDeviceBydeviceRemoteId(childEntity.deviceRemoteId ?? '');
+    //       await queryArduinoDeviceBydeviceRemoteId(
+    //           childEntity.deviceRemoteId ?? '');
     // });
 
     // ChildData child = await ChildApiService.fetchChildDataById(22);
@@ -113,10 +116,7 @@ class ChildEntity {
     // print('UV Index: ${child.uvIndex}');
     // print('Lux: ${child.lux}');
     // print('');
-    int count = 0;
-    print("queryAllChildren: ${count++} ${childEntityList}");
     return childEntityList;
-    
   }
 
   static Future<ChildEntity?> queryChildByName(String name) async {
@@ -153,31 +153,11 @@ class ChildEntity {
       await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
           .write(ChildrenCompanion(deviceRemoteId: Value(remoteDeviceId)));
     }
-
-    // ChildEntity? child = await queryChildById(id);
-
-    // if (child != null) {
-    //   await db.update(db.children).write(ChildrenCompanion(
-    //       id: Value(id), deviceRemoteId: Value(remoteDeviceId)));
-    // } else {
-    //   throw Exception('Child with ID $id not found');
-    // }
   }
 
   // DELETE
   static Future<void> deleteDeviceForChild(int? childId) async {
-    // if (childId == null) throw Exception("Child ID cannot be null");
-
-    // AppDb db = AppDb.instance();
-
-    // ChildEntity? child = await queryChildById(childId);
-    // if (child != null) {
-    //   child.deviceRemoteId = null; // or ''
-
-    //   await db.update(db.children).replace(child.toCompanion());
-    // }
-
-        if (childId == null) {
+    if (childId == null) {
       throw Exception("Child ID cannot be null");
     } else {
       AppDb db = AppDb.instance();

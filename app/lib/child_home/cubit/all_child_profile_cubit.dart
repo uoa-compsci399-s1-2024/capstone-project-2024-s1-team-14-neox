@@ -17,8 +17,6 @@ class AllChildProfileCubit extends Cubit<AllChildProfileState> {
       final List<ChildDeviceModel> profiles = await _childDeviceRepository.fetchChildProfiles();
       emit(state.copyWith(
           status: AllChildProfileStatus.fetchSuccess, profiles: profiles));
-
-      print(profiles);
     } on Exception catch (e) {
       emit(state.copyWith(
           status: AllChildProfileStatus.failure,
@@ -37,19 +35,15 @@ class AllChildProfileCubit extends Cubit<AllChildProfileState> {
         profiles: childDeviceProfiles,
         message: "The child profile has been added",
       ));
-      print("The child profile has been added");
     } on Exception catch (e) {
       emit(state.copyWith(
           status: AllChildProfileStatus.failure,
           message: "The child profile cannot be created."));
-      print("The child profile has not been added");
       print(e.toString());
     }
   }
 
   Future<void> deleteChildProfile(int childId) async {
-    print("pressed");
-    print(childId);
     emit(state.copyWith(status: AllChildProfileStatus.loading));
     try {
       

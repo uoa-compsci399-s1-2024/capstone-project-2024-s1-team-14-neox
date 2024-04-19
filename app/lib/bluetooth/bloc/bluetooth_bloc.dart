@@ -67,7 +67,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
 
     await FlutterBluePlus.startScan(
       // withServices:[Guid("180D")],
-      // withNames:["Bluno"],
+      // withNames:["Neox"], //TODO uncomment this to search for only Neox Sens
       timeout: const Duration(seconds: 15),
     );
     await Future.delayed(const Duration(seconds: 15))
