@@ -78,9 +78,9 @@ function checkCorrectContentType(headers)
 {
   let contentType = "";
   // FIXME: Potential attacks by sending loads of headers
-  for (prop in xs.headers) {
+  for (prop in headers) {
     if (prop.toLowerCase() === "content-type") {
-      contentType = xs.headers[prop];
+      contentType = headers[prop];
       break;
     }
   }
@@ -88,7 +88,8 @@ function checkCorrectContentType(headers)
   if ( (m = contentType.match(CONTENT_TYPE_RE)) ) {
     return {
       contentType: contentType,
-      correct: m.type === CORRECT_CONTENT_TYPE && m.subtype === CORRECT_CONTENT_SUBTYPE,
+      correct: m.groups.type.toLowerCase() === CORRECT_CONTENT_TYPE &&
+        m.groups.subtype.toLowerCase() === CORRECT_CONTENT_SUBTYPE,
     }
   } else {
     return {
