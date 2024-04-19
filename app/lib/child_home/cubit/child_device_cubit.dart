@@ -10,7 +10,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       required DateTime birthDate,
       String? deviceRemoteId,
       String? authorisationCode})
-      : super(deviceRemoteId != null
+      : super(deviceRemoteId != ""
             ? ChildDeviceState(
                 status: ChildDeviceStatus.paired,
                 childId: childId,
@@ -39,7 +39,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
   void onChildDeviceUnpairSuccess() {
     emit(state.copyWith(
       status: ChildDeviceStatus.unpairSuccess,
-      deviceRemoteId: null,
+      deviceRemoteId: "",
       message: "Successfully unpaired device",
     ));
   }

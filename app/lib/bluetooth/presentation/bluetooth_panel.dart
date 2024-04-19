@@ -14,7 +14,6 @@ class BluetoothPanel extends StatelessWidget {
     return BlocListener<BluetoothBloc, BluetoothState>(
       listener: (context, state) {
         if (state.status.isConnectSuccess) {
-          // TODO: Change repository function to update remote ID
           // TODO: may need to change the chain of updating deviceRemoteID, currently calling two functions
           context.read<AllChildProfileCubit>().updateDeviceRemoteId(
               childId: context.read<ChildDeviceCubit>().state.childId,
@@ -66,9 +65,10 @@ class BluetoothPanel extends StatelessWidget {
               ElevatedButton(
                 onPressed: () =>
                     context.read<BluetoothBloc>().add(BluetoothSyncPressed(
+                          childId: state.childId,
                           childName: state.childName,
                           deviceRemoteId: state.deviceRemoteId ?? "",
-                          childId: state.childId,
+                          authorisationCode: state.authorisationCode ?? "",
                         )),
                 child: Text("Sync device"),
               ),

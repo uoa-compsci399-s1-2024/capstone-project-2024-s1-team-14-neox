@@ -21,9 +21,11 @@ class BluetoothSyncPressed extends BluetoothEvent {
   final int childId;
   final String childName;
   final String deviceRemoteId;
+  final String authorisationCode;
 
-  BluetoothSyncPressed(
-      {required this.childId,
-      required this.childName,
-      required this.deviceRemoteId});
+  BluetoothSyncPressed({
+    required this.childId,
+    required this.childName,
+    required this.deviceRemoteId,
+    required this.authorisationCode});
 }

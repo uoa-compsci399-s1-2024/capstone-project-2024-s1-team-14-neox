@@ -16,8 +16,9 @@ class Children extends Table {
   TextColumn get deviceRemoteId =>
       text().references(ArduinoDevices, #deviceRemoteId)();
 
-  @override
-  Set<Column> get primaryKey => {id};
+  // Terimnal [WARNING]  Tables can't override primaryKey and use autoIncrement()
+  // @override
+  // Set<Column> get primaryKey => {id};
 }
 
 class ChildEntity {
@@ -27,8 +28,13 @@ class ChildEntity {
   String? deviceRemoteId;
   ArduinoDeviceEntity? arduinoDeviceEntity;
 
+  //TODO: deviceRemoteId is duplicated in child entity and arduino device entity
+
   ChildEntity(
-      {required this.name, required this.birthDate, this.deviceRemoteId, this.id});
+      {required this.name,
+      required this.birthDate,
+      this.deviceRemoteId,
+      this.id});
 
   // JSON serialization
   Map<String, dynamic> toJson() {
@@ -53,8 +59,6 @@ class ChildEntity {
   ChildrenCompanion toCompanion() {
     return ChildrenCompanion(
       name: Value(name),
-      //TODO Change default value if birthDate is null
-
       birthDate: Value(birthDate),
       deviceRemoteId: Value(deviceRemoteId ?? ''),
     );
@@ -88,8 +92,11 @@ class ChildEntity {
   // READ
   static Future<ChildEntity?> queryChildById(int id) async {
     AppDb db = AppDb.instance();
-    return await (db.select(db.children)..where((tbl) => tbl.id.equals(id)))
+    ChildEntity? child = await (db.select(db.children)
+          ..where((tbl) => tbl.id.equals(id)))
         .getSingleOrNull();
+
+    return child;
   }
 
   static Future<List<ChildEntity>> queryAllChildren() async {
@@ -99,10 +106,17 @@ class ChildEntity {
     // Remove arduino device entity
     // await Future.forEach(childEntityList, (childEntity) async {
     //   childEntity.arduinoDeviceEntity =
-    //   await queryArduinoDeviceBydeviceRemoteId(childEntity.deviceRemoteId ?? '');
+    //       await queryArduinoDeviceBydeviceRemoteId(
+    //           childEntity.deviceRemoteId ?? '');
     // });
 
 
+    // ChildData child = await ChildApiService.fetchChildDataById(22);
+    // print('Timestamp: ${child.tstamp}');
+    // print('Child ID: ${child.childId}');
+    // print('UV Index: ${child.uvIndex}');
+    // print('Lux: ${child.lux}');
+    // print('');
     return childEntityList;
   }
 
@@ -143,15 +157,21 @@ class ChildEntity {
     AppDb db = AppDb.instance();
     await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
         .write(const ChildrenCompanion(deviceRemoteId: Value("")));
-
   }
 
   static Future<void> deleteChild(int childId) async {
     AppDb db = AppDb.instance();
 
     // Delete the child entity from the database based on its ID
+    // print("count of${db.children.id.count(filter: childId > 0)}");
     await db.delete(db.children)
       ..where((tbl) => tbl.id.equals(childId));
+    print("count of${db.children.id.count()}");
+  }
+
+  @override
+  String toString() {
+    return "$id, $name, $birthDate, $deviceRemoteId \n";
   }
 
 
