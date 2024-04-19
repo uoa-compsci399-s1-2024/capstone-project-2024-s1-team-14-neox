@@ -80,7 +80,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
           }),
           ElevatedButton(
             onPressed: () => DashboardRepository.createRandomDataFromDate(
-              context.read<ChildDeviceCubit>().state.childId ?? -1,
+              context.read<ChildDeviceCubit>().state.childId,
               DateTime.now(),
             ),
             child: Text("add random data"),

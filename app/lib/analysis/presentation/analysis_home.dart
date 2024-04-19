@@ -14,8 +14,9 @@ class AnalysisHomeScreen extends StatefulWidget {
 }
 
 class AnalysisHomeScreenState extends State<AnalysisHomeScreen> {
-    ChildDeviceModel? _selectedChildProfile;
+  ChildDeviceModel? _selectedChildProfile;
   // TODO update Ui, mighnt not be drop button
+
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,8 @@ class AnalysisHomeScreenState extends State<AnalysisHomeScreen> {
                       child: Column(
                         children: [
                           Text("Name: ${profile.childName}"),
-                          Text("Date of Birth: ${DateFormat('yyyy-MM-dd').format(profile.birthDate)}"),                          
+                          Text(
+                              "Date of Birth: ${DateFormat('yyyy-MM-dd').format(profile.birthDate)}"),
                         ],
                       ),
                     ))
@@ -46,7 +48,7 @@ class AnalysisHomeScreenState extends State<AnalysisHomeScreen> {
                 _selectedChildProfile = value;
                 context.read<AnalysisBloc>().add(
                       AnalysisChangeChildEvent(
-                        childId: value?.childId ?? -999,
+                        childId: value!.childId, //NONNULLABLE value selected
                       ),
                     );
               });
@@ -69,7 +71,8 @@ class AnalysisHomeScreenState extends State<AnalysisHomeScreen> {
                 return CircularProgressIndicator();
               } else if (state.status.isInitial) {
                 return Text("Refresh to fetch data");
-              } if (state.status.isFailure) {
+              }
+              if (state.status.isFailure) {
                 return Text("No data exits. Please sync your device");
               }
               return Expanded(
@@ -77,7 +80,8 @@ class AnalysisHomeScreenState extends State<AnalysisHomeScreen> {
                   itemCount: state.data.length,
                   itemBuilder: (BuildContext context, int index) {
                     return ExpansionTile(
-                      title: Text(DateFormat('yyyy-MM-dd - kk:mm:ss').format(state.data[index].dateTime)),
+                      title: Text(DateFormat('yyyy-MM-dd - kk:mm:ss')
+                          .format(state.data[index].dateTime)),
                       children: [
                         Text("Light: ${state.data[index].light}"),
                         Text("UV: ${state.data[index].uv}"),

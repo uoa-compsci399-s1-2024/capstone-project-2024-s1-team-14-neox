@@ -32,12 +32,12 @@ class ChildDeviceRepository {
   }
 
   Future<List<ChildDeviceModel>> updateChildDeviceRemoteID(
-      int? childId, String deviceRemoteId) async {
+      int childId, String deviceRemoteId) async {
     ChildEntity.updateRemoteDeviceId(childId, deviceRemoteId);
     return fetchChildProfiles();
   }
 
-  Future<List<ChildDeviceModel>> deleteChildDeviceRemoteID(int? childId) async {
+  Future<List<ChildDeviceModel>> deleteChildDeviceRemoteID(int childId) async {
     ChildEntity.deleteDeviceForChild(childId);
     return fetchChildProfiles();
   }

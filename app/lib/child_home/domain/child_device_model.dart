@@ -1,7 +1,7 @@
 import '../../data/entities/child_entity.dart';
 
 class ChildDeviceModel {
-  final int? childId;
+  final int childId;
   final String childName;
   final DateTime birthDate;
   String? deviceRemoteId;
@@ -17,7 +17,7 @@ class ChildDeviceModel {
       this.lastSynced});
 
   factory ChildDeviceModel.fromEntity(ChildEntity entity) => ChildDeviceModel(
-        childId: entity.id,
+        childId: entity.id!, // NONNULL CHILDID
         childName: entity.name,
         birthDate: entity.birthDate,
         deviceRemoteId: entity.arduinoDeviceEntity?.deviceRemoteId,

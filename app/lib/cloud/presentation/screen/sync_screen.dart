@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-import '../../../cubit/cloud_sync_cubit.dart';
+import '../../cubit/cloud_sync_cubit.dart';
+
 
 class SyncScreen extends StatelessWidget {
   const SyncScreen({super.key});

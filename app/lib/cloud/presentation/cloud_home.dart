@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubit/cloud_sync_cubit.dart';
-import '../../cubit/login_cubit.dart';
-import '../authentication_repository.dart';
+import '../cubit/cloud_sync_cubit.dart';
+import '../cubit/login_cubit.dart';
+import '../domain/authentication_repository.dart';
 import 'screen/login_screen.dart';
 import 'screen/sync_screen.dart';
 

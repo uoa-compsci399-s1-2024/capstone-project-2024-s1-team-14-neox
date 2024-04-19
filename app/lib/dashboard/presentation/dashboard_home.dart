@@ -68,7 +68,7 @@ class DashboardHomeState extends State<DashboardHome>
                       _selectedChildProfile = value;
                     });
                     context.read<DashboardCubit>().onFocusChildChange(
-                          value?.childId ?? -999,
+                          value!.childId, //NONNULLABLE Selection
                         );
                   },
                 );

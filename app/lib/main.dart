@@ -9,7 +9,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'analysis/presentation/analysis_home.dart';
 import 'child_home/domain/child_device_repository.dart';
 import 'child_home/presentation/child_profile_home.dart';
-import 'cloud/domain/presentation/cloud_home.dart';
+import 'cloud/presentation/cloud_home.dart';
 
 
 // Import blocs and repositories

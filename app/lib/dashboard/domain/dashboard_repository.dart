@@ -10,14 +10,12 @@ class DashboardRepository {
     }
     DateTime current_date = date;
     for (int i = 0; i < 30; i++) {
-      database[childId]?[current_date] = random.nextInt(180);
+      database[childId]?[current_date] = random.nextInt(130);
       current_date = current_date.subtract(Duration(days: 1));
     }
-    print(database[childId]);
   }
 
   static Map<DateTime, int> getDataForChildId(int childId) {
-    print("The child id is $childId");
     if (database.containsKey(childId)) {
       return database[childId] as Map<DateTime, int>;
     }
