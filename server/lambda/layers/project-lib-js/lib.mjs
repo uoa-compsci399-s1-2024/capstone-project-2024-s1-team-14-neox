@@ -68,3 +68,51 @@ export function addCorsHeaders(response)
   }
   response.headers["Access-Control-Allow-Origin"] = "*";
 }
+
+// Based on https://www.rfc-editor.org/rfc/rfc7231#section-3.1.1.1
+// We only need the type and subtype.
+const CONTENT_TYPE_RE = /^\s*(?<type>[^\s]+)\/(?<subtype>[^\s]+)(\s*;.*)?$/;
+const CORRECT_CONTENT_TYPE = "application";
+const CORRECT_CONTENT_SUBTYPE = "json";
+function checkCorrectContentType(headers)
+{
+  let contentType = "";
+  // FIXME: Potential attacks by sending loads of headers
+  for (prop in xs.headers) {
+    if (prop.toLowerCase() === "content-type") {
+      contentType = xs.headers[prop];
+      break;
+    }
+  }
+  let m;
+  if ( (m = contentType.match(CONTENT_TYPE_RE)) ) {
+    return {
+      contentType: contentType,
+      correct: m.type === CORRECT_CONTENT_TYPE && m.subtype === CORRECT_CONTENT_SUBTYPE,
+    }
+  } else {
+    return {
+      contentType: null,
+      correct: false,
+    }
+  }
+}
+
+export function validateContentType(headers, resource)
+{
+  let res = checkCorrectContentType(headers);
+  if (res.correct) {
+    return null;
+  }
+  let error = {
+    resource: resource,
+    status: 400,
+  }
+  if (res.contentType === null)
+    error.message = "content-type was missing or couldn't be parsed";
+  else {
+    error.message = `content-type must be ${CORRECT_CONTENT_TYPE}/${CORRECT_CONTENT_SUBTYPE} but got ${res.contentType} instead`;
+  }
+  return error;
+}
+
