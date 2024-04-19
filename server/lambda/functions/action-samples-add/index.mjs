@@ -118,6 +118,7 @@ export const handler = async (event) => {
             status: 409,
             message: `sample timestamp already seen`,
           });
+          console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
           continue;
         } else if (e.code === FOREIGN_KEY_VIOLATION && e.constraint === "samples_child_id_fkey") {
           // FIXME: Handle permissions.
@@ -126,6 +127,7 @@ export const handler = async (event) => {
             status: 403,
             message: `child ID doesn't exist or user is not authorised to add samples to the child`,
           });
+          console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
           continue;
         } else {
           throw e;
