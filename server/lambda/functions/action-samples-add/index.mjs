@@ -9,6 +9,7 @@ import {
   isMatch,
 } from "date-fns";
 import {
+  CHECK_VIOLATION,
   FOREIGN_KEY_VIOLATION,
   INVALID_TEXT_REPRESENTATION,
   UNIQUE_VIOLATION,
@@ -192,6 +193,27 @@ export const handler = async (event) => {
           resource: `${resolvedResource}?index=${i}&field=${badField}`,
           status: 400,
           message: "failed to parse value",
+        });
+        console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
+        continue;
+      } else if (e.code === CHECK_VIOLATION) {
+        const m = e.constraint.match(/(?<field>[a-z_]+)_range/);
+        if (!m) {
+          console.error("can't parse field from CHECK_VIOLATION postgresql error");
+          throw e;
+        }
+        switch (m.groups.field) {
+        case 'light':
+        case 'uv':
+          break;
+        default:
+          console.error(`invalid field "${m.groups.field}"`);
+          throw e;
+        }
+        errors.push({
+          resource: `${resolvedResource}?index=${i}&field=${m.groups.field}`,
+          status: 400,
+          message: "field value out of range",
         });
         console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
         continue;
