@@ -9,19 +9,16 @@ Parameters:
   #   Description: An environment name that is prefixed to resource names
   #   Type: String
 
+  DatabasePort:
+    Description: Please enter the port number on which the database will accept connections
+    Type: Number
+    Default: 5432
+
   VpcCIDR:
     Description: Please enter the IP range (CIDR notation) for this VPC
     Type: String
     Default: 10.8.0.0/16
 
-  PublicSubnet1CIDR:
-    Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
-    Type: String
-    Default: 10.8.10.0/24
-  PublicSubnet2CIDR:
-    Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
-    Type: String
-    Default: 10.8.11.0/24
   PrivateSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
     Type: String
@@ -45,49 +42,45 @@ Resources:
       # Tags:
       #   - Key: Name
       #     Value: !Ref EnvironmentName
+  VPCFlowLog:
+    Type: AWS::EC2::FlowLog
+    Properties:
+      ResourceType: VPC
+      ResourceId: !Ref VPC
+      TrafficType: ALL
+      LogDestinationType: cloud-watch-logs
+      LogGroupName: !Sub "${AWS::StackName}-VPCFlowLogsGroup"
+      LogFormat: ${version} ${vpc-id} ${subnet-id} ${instance-id} ${srcaddr} ${dstaddr} ${srcport} ${dstport} ${packets} ${bytes} ${start} ${end} ${action} ${log-status}
+      DeliverLogsPermissionArn: !GetAtt FlowLogRole.Arn
+  FlowLogRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: Role to allow VPC to publish flow logs.
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - vpc-flow-logs.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        # It seems like the PolicyName (which is the "friendly name") must be unique within an account
+        # https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html
+        - PolicyName: !Sub "${AWS::StackName}-FlowLogsPublish"
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                Resource: '*'
 
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-        - Key: Name
-          Value: Internet Gateway
-    # Properties:
-      # Tags:
-      #   - Key: Name
-      #     Value: !Ref EnvironmentName
-  InternetGatewayAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      InternetGatewayId: !Ref InternetGateway
-      VpcId: !Ref VPC
-
-  PublicSubnet1:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
-      CidrBlock: !Ref PublicSubnet1CIDR
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: Public Subnet (AZ1)
-      # Tags:
-      #   - Key: Name
-      #     Value: !Sub ${EnvironmentName} Public Subnet (AZ1)
-  PublicSubnet2:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 1, !GetAZs  '' ]
-      CidrBlock: !Ref PublicSubnet2CIDR
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: Public Subnet (AZ2)
-      # Tags:
-      #   - Key: Name
-      #     Value: !Sub ${EnvironmentName} Public Subnet (AZ2)
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -114,34 +107,6 @@ Resources:
       # Tags:
       #   - Key: Name
       #     Value: !Sub ${EnvironmentName} Private Subnet (AZ2)
-
-  PublicRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: Public Routes
-      # Tags:
-      #   - Key: Name
-      #     Value: !Sub ${EnvironmentName} Public Routes
-  DefaultPublicRoute:
-    Type: AWS::EC2::Route
-    DependsOn: InternetGatewayAttachment
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
-  PublicSubnet1RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref PublicSubnet1
-  PublicSubnet2RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref PublicSubnet2
 
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
@@ -174,10 +139,25 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
 
+  NetworkACL:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+  # no NACL entries so we deny all inbound AND outbound traffic from the subnets.
+  PrivateSubnet1NetworkACL:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      NetworkAclId: !Ref NetworkACL
+  PrivateSubnet2NetworkACL:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      NetworkAclId: !Ref NetworkACL
+
   LambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: ProjectLambdaRole
       Description: "Role to allow lambda functions to do everything in the set of things our backend needs to do (ie, it's not minimal)"
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -190,20 +170,21 @@ Resources:
               - sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-        # If we want it later:
-        # - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
       Policies:
-        - PolicyName: AllowReadSecretValue
+        # It seems like the PolicyName (which is the "friendly name") must be unique within an account
+        # https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html
+        - PolicyName: !Sub "${AWS::StackName}-AllowReadSecretValue-DB"
           PolicyDocument:
             Version: 2012-10-17
             Statement:
               - Effect: Allow
                 Action: secretsmanager:GetSecretValue
-                # This is OK because roles are global to the account
-                # AND any random lambda having this role isn't enough
-                # to access protected database instances since they
-                # need to be in the same VPC.
-                Resource: '*'
+                Resource: !GetAtt Database.MasterUserSecret.SecretArn
+                # Based on https://docs.aws.amazon.com/secretsmanager/latest/userguide/auth-and-access_examples.html#auth-and-access_examples_vpc
+                Condition:
+                  StringEquals:
+                    aws:sourceVpce: !Ref SecretsManagerVPCEndpoint
 
   SecretsManagerVPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
@@ -249,8 +230,8 @@ Resources:
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 5432
-          ToPort: 5432
+          FromPort: !Ref DatabasePort
+          ToPort: !Ref DatabasePort
           SourceSecurityGroupId:
             Ref: DBAccessSecurityGroup
   DBAccessSecurityGroup:
@@ -269,6 +250,7 @@ Resources:
       DBInstanceClass: db.t3.micro  # free-tier acceptable
       # Use Default DBName of `postgres` for PostgreSQL
       DBName: postgres
+      Port: !Ref DatabasePort
       MasterUsername: postgres
       ManageMasterUserPassword: true  # in AWS Secrets Manager
       DBSubnetGroupName: !Ref DBSubnetGroup
@@ -287,7 +269,7 @@ Resources:
   LayerCACertificates:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: layer-ca-certs
+      LayerName: !Sub "${AWS::StackName}-layer-ca-certs"
       Description: Certificates to connect to DB via TLS
       ContentUri: lambda/layers/certs/
       CompatibleRuntimes:
@@ -311,6 +293,7 @@ Resources:
           MetricsEnabled: true
           ResourcePath: '/*'
           HttpMethod: '*'
+      TracingEnabled: true
       # Domain:
       #   DomainName: api.neox.co.nz
 
@@ -337,7 +320,6 @@ Resources:
   FuncSamplesSearch:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: action-samples-search
       CodeUri: lambda/functions/action-samples-search/
       Handler: index.handler
       Runtime: nodejs20.x
@@ -369,7 +351,6 @@ Resources:
   FuncSamplesAdd:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: action-samples-add
       CodeUri: lambda/functions/action-samples-add/
       Handler: index.handler
       Runtime: nodejs20.x
@@ -401,8 +382,55 @@ Resources:
   FuncMetaSetupDB:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: meta-setupdb-testdata
-      CodeUri: lambda/functions/meta-setupdb-testdata/
+      CodeUri: lambda/functions/meta-setupdb/
+      Handler: index.handler
+      Runtime: nodejs20.x
+      Layers:
+        - !Ref LayerDepsJS
+        - !Ref LayerCACertificates
+      Environment:
+        Variables:
+          PGHOST: !GetAtt Database.Endpoint.Address
+          # Default PGDATABASE is the user which we will get from the SecretsManager Secret
+          PGPORT: !GetAtt Database.Endpoint.Port
+          DB_SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
+          SSL_CERT_FILE: /opt/global-bundle.pem
+      Role: !GetAtt LambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref DBAccessSecurityGroup
+          - !Ref SecretsAccessSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
+  FuncMetaSetupTestData:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/meta-setuptestdata/
+      Handler: index.handler
+      Runtime: nodejs20.x
+      Layers:
+        - !Ref LayerDepsJS
+        - !Ref LayerCACertificates
+      Environment:
+        Variables:
+          PGHOST: !GetAtt Database.Endpoint.Address
+          # Default PGDATABASE is the user which we will get from the SecretsManager Secret
+          PGPORT: !GetAtt Database.Endpoint.Port
+          DB_SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
+          SSL_CERT_FILE: /opt/global-bundle.pem
+      Role: !GetAtt LambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref DBAccessSecurityGroup
+          - !Ref SecretsAccessSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
+  FuncMetaReadAllTables:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/meta-read-all-tables/
       Handler: index.handler
       Runtime: nodejs20.x
       Layers:
@@ -426,7 +454,7 @@ Resources:
   LayerDepsJS:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: layer-lib-js
+      LayerName: !Sub "${AWS::StackName}-layer-lib-js"
       Description: Common code and dependencies for JS lambda functions
       # ContentUri: s3://proj-deploy-artifacts/layer-deps-js.zip
       ContentUri: lambda/layers/project-lib-js/
@@ -440,18 +468,9 @@ Outputs:
     Description: A reference to the created VPC
     Value: !Ref VPC
 
-  PublicSubnets:
-    Description: A list of the public subnets
-    Value: !Join [ ",", [ !Ref PublicSubnet1, !Ref PublicSubnet2 ]]
   PrivateSubnets:
     Description: A list of the private subnets
     Value: !Join [ ",", [ !Ref PrivateSubnet1, !Ref PrivateSubnet2 ]]
-  PublicSubnet1:
-    Description: A reference to the public subnet in the 1st Availability Zone
-    Value: !Ref PublicSubnet1
-  PublicSubnet2:
-    Description: A reference to the public subnet in the 2nd Availability Zone
-    Value: !Ref PublicSubnet2
   PrivateSubnet1:
     Description: A reference to the private subnet in the 1st Availability Zone
     Value: !Ref PrivateSubnet1

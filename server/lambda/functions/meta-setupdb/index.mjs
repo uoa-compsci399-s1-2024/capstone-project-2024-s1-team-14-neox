@@ -35,17 +35,7 @@ CREATE TABLE samples (
        lux INTEGER,
        FOREIGN KEY (child_id) REFERENCES children (id)
 );
-
-INSERT INTO parents (id, fname, lname) VALUES ('1', 'John', 'Cena');
-INSERT INTO children (id, parent_id, fname) VALUES ('22', '1', 'Bobby');
-INSERT INTO samples (child_id, tstamp, uv_index, lux) VALUES ('22', '2024-02-01+12', 2, 1500);
 `;
 export const handler = async (event) => {
   await db.query(CREATE_TABLES_TEXT);
-  const res_parents = await db.query("SELECT * FROM parents");
-  const res_children = await db.query("SELECT * FROM children");
-  const res_samples = await db.query("SELECT * FROM samples");
-  console.dir(res_parents.rows);
-  console.dir(res_children.rows);
-  console.dir(res_samples.rows);
 };
