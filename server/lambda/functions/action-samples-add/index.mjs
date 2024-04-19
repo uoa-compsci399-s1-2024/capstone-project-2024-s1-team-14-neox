@@ -99,7 +99,6 @@ export const handler = async (event) => {
     delete logSample.child_id;  // if present
     delete logSample.timestamp;
     console.log(`adding sample for child ID "${childID}" with timestamp "${samples[i].timestamp}": ${JSON.stringify(logSample)}`);
-    // TODO check if child exists
     // Don't need to add BEGIN and COMMIT (plus ROLLBACK) statements because this is atomic.
     try {
       await db.query(
