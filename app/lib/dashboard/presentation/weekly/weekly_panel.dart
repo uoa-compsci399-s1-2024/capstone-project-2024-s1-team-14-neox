@@ -25,32 +25,35 @@ class _WeeklyPanelState extends State<WeeklyPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DashboardCubit, DashboardState>(
-      builder: (context, state) {
-        return Column(
-          children: [
-            ElevatedButton(
-              onPressed: () => context.read<WeeklyCubit>().onGetDataForChildId(
-                    context.read<DashboardCubit>().state.focusChildId,
-                  ),
-              child: Text("Refresh"),
-            ),
-            BlocBuilder<WeeklyCubit, WeeklyState>(
-              builder: (context, state) {
-                if (state.status.isInitial) {
-                  return Text("Refresh to get data");
-                }
-                return Expanded(
-                  child: WeeklyBarGraph(
-                    dailySummary: state.summary ?? {DateTime.now(): 0},
-                    startDay: DateTime.now(),
-                  ),
-                );
-              },
-            ),
-          ],
-        );
+    return BlocListener<DashboardCubit, DashboardState>(
+      listener: (context, state) {
+        context.read<WeeklyCubit>().onGetDataForChildId(
+              context.read<DashboardCubit>().state.focusChildId,
+            );
       },
+      child: Column(
+        children: [
+          ElevatedButton(
+            onPressed: () => context.read<WeeklyCubit>().onGetDataForChildId(
+                  context.read<DashboardCubit>().state.focusChildId,
+                ),
+            child: Text("Refresh"),
+          ),
+          BlocBuilder<WeeklyCubit, WeeklyState>(
+            builder: (context, state) {
+              // if (state.status.isInitial) {
+              //   return Text("Refresh to get data");
+              // }
+              return Expanded(
+                child: WeeklyBarGraph(
+                  dailySummary: state.summary ?? {DateTime.now(): 0},
+                  startDay: DateTime.now(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

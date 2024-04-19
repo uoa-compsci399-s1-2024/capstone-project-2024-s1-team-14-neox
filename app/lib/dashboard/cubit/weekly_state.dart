@@ -27,7 +27,6 @@ class WeeklyState extends Equatable {
     WeeklyStatus? status,
     Map<DateTime, int>? summary,
   }) {
-    print(summary);
     return WeeklyState(
       status: status ?? this.status,
       summary: summary ?? this.summary,

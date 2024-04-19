@@ -6,11 +6,12 @@ import '../domain/dashboard_repository.dart';
 part 'weekly_state.dart';
 
 class WeeklyCubit extends Cubit<WeeklyState> {
-  WeeklyCubit() : super(WeeklyState());
+  WeeklyCubit()
+      : super(WeeklyState());
 
   void onGetDataForChildId(int childId) {
     emit(state.copyWith(status: WeeklyStatus.loading));
-    print(DashboardRepository.database);
+
     emit(state.copyWith(
       status: WeeklyStatus.success,
       summary: DashboardRepository.getDataForChildId(childId),
