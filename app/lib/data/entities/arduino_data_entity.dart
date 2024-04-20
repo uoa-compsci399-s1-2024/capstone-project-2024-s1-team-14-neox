@@ -10,7 +10,8 @@ import 'child_entity.dart';
 class ArduinoDatas extends Table {
   IntColumn get id => integer().autoIncrement()();
 
-  IntColumn get childId => integer().customConstraint('REFERENCES children(id) ON DELETE CASCADE')();
+  IntColumn get childId =>
+      integer().customConstraint('REFERENCES children(id) ON DELETE CASCADE')();
 
   IntColumn get uv => integer()();
 
@@ -43,15 +44,16 @@ class ArduinoDataEntity {
   int? serverClass;
   int? appClass;
 
-  ArduinoDataEntity({this.id,
-    this.name,
-    this.uv,
-    this.light,
-    required this.datetime,
-    this.accel,
-    this.appClass,
-    this.serverClass,
-    required this.childId});
+  ArduinoDataEntity(
+      {this.id,
+      this.name,
+      this.uv,
+      this.light,
+      required this.datetime,
+      this.accel,
+      this.appClass,
+      this.serverClass,
+      required this.childId});
 
   ArduinoDatasCompanion toCompanion() {
     return ArduinoDatasCompanion(
@@ -65,6 +67,10 @@ class ArduinoDataEntity {
         serverClass: Value(serverClass ?? -1),
         childId: Value(childId));
   }
+
+  ////////////////////////////////////////////////////////////////////////////
+  // CREATE //////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
 
   static Future<void> saveSingleArduinoDataEntity(
       ArduinoDataEntity arduinoDataEntity) async {
@@ -81,11 +87,14 @@ class ArduinoDataEntity {
     });
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  // READ ////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
 
   static Future<List<ArduinoDataEntity>> queryAllArduinoData() async {
     AppDb db = AppDb.instance();
     List<ArduinoDataEntity> arduinoDataEntityList =
-    await db.select(db.arduinoDatas).get();
+        await db.select(db.arduinoDatas).get();
     return arduinoDataEntityList;
   }
 
@@ -101,35 +110,51 @@ class ArduinoDataEntity {
       int uvLevel) async {
     AppDb db = AppDb.instance();
     List<ArduinoDataEntity> arduinoDataEntityList =
-    await (db.select(db.arduinoDatas)
-      ..where((tbl) => tbl.uv.equals(uvLevel)))
-        .get();
+        await (db.select(db.arduinoDatas)
+              ..where((tbl) => tbl.uv.equals(uvLevel)))
+            .get();
     return arduinoDataEntityList;
   }
+  ////////////////////////////////////////////////////////////////////////////
+  // UPDATE //////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
 
-  ///////////////////////////////////////////////////////////////////
-  // FOR TESTING PURPOSE DELETE LATER //////////////////////////////
-  //////////////////////////////////////////////////////////////////
+  static Future<void> updateAppClass(int id, int appClass) async {
+    final db = AppDb.instance();
+    await (db.update(db.arduinoDatas)
+      ..where((tbl) => tbl.id.equals(id)))
+        .write(ArduinoDatasCompanion(appClass: Value(appClass)));
+  }
 
-  // static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
-  //     int childId) async {
-  //   final List<ArduinoDataEntity> dataList = [];
-  //
-  //   // Sample data for testing
-  //   for (int i = 0; i < 10; i++) {
-  //     final data = ArduinoDataEntity(
-  //       uv: 5,
-  //       light: 100,
-  //       datetime: DateTime.now(),
-  //       accel: Int16List.fromList([1, 2, 3]),
-  //       serverClass: 1,
-  //       appClass: 2,
-  //       childId: childId,
-  //     );
-  //     dataList.add(data);
-  //   }
-  //
-  //   return dataList;
-  // }
+  static Future<void> updateServerClass(int id, int serverClass) async {
+    final db = AppDb.instance();
+    await (db.update(db.arduinoDatas)
+      ..where((tbl) => tbl.id.equals(id)))
+        .write(ArduinoDatasCompanion(serverClass: Value(serverClass)));
+  }
 
+///////////////////////////////////////////////////////////////////
+// FOR TESTING PURPOSE DELETE LATER //////////////////////////////
+//////////////////////////////////////////////////////////////////
+
+// static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
+//     int childId) async {
+//   final List<ArduinoDataEntity> dataList = [];
+//
+//   // Sample data for testing
+//   for (int i = 0; i < 10; i++) {
+//     final data = ArduinoDataEntity(
+//       uv: 5,
+//       light: 100,
+//       datetime: DateTime.now(),
+//       accel: Int16List.fromList([1, 2, 3]),
+//       serverClass: 1,
+//       appClass: 2,
+//       childId: childId,
+//     );
+//     dataList.add(data);
+//   }
+//
+//   return dataList;
+// }
 }
