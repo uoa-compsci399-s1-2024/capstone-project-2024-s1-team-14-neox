@@ -5,7 +5,7 @@ part 'child_device_state.dart';
 
 class ChildDeviceCubit extends Cubit<ChildDeviceState> {
   ChildDeviceCubit(
-      {required int? childId,
+      {required int childId,
       required String childName,
       required DateTime birthDate,
       String? deviceRemoteId,

@@ -63,7 +63,7 @@ class AllChildProfileCubit extends Cubit<AllChildProfileState> {
   }
 
   Future<void> updateDeviceRemoteId(
-      {required int? childId, required String deviceRemoteId}) async {
+      {required int childId, required String deviceRemoteId}) async {
     emit(state.copyWith(status: AllChildProfileStatus.loading));
 
     final childDeviceProfiles =
@@ -75,7 +75,7 @@ class AllChildProfileCubit extends Cubit<AllChildProfileState> {
   }
 
     Future<void> deleteDeviceRemoteId(
-      {required int? childId}) async {
+      {required int childId}) async {
     emit(state.copyWith(status: AllChildProfileStatus.loading));
 
     final childDeviceProfiles =

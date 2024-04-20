@@ -1,4 +1,5 @@
 import 'package:capstone_project_2024_s1_team_14_neox/analysis/bloc/analysis_result_bloc.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/dashboard/presentation/dashboard_home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -8,7 +9,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'analysis/presentation/analysis_home.dart';
 import 'child_home/domain/child_device_repository.dart';
 import 'child_home/presentation/child_profile_home.dart';
-import 'cloud/cloud_home.dart';
+import 'cloud/presentation/cloud_home.dart';
 
 
 // Import blocs and repositories
@@ -73,6 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
       create: (context) => AnalysisBloc(),
       child: AnalysisHomeScreen(),
     ),
+    const DashboardHome(),
     const CloudHomeScreen(),
     const DatabaseViewer(),
 
@@ -96,7 +98,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           NavigationDestination(
             icon: Icon(Icons.sunny),
-            label: "Analysis",
+            label: "Sensor",
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.dashboard),
+            label: "Dashboard",
           ),
           NavigationDestination(
             icon: Icon(Icons.cloud_upload),

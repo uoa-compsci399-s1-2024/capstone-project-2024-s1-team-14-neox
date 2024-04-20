@@ -102,13 +102,14 @@ class ChildEntity {
   static Future<List<ChildEntity>> queryAllChildren() async {
     AppDb db = AppDb.instance();
     List<ChildEntity> childEntityList = await db.select(db.children).get();
-    
+
     // Remove arduino device entity
     // await Future.forEach(childEntityList, (childEntity) async {
     //   childEntity.arduinoDeviceEntity =
     //       await queryArduinoDeviceBydeviceRemoteId(
     //           childEntity.deviceRemoteId ?? '');
     // });
+
 
     // ChildData child = await ChildApiService.fetchChildDataById(22);
     // print('Timestamp: ${child.tstamp}');
@@ -119,18 +120,18 @@ class ChildEntity {
     return childEntityList;
   }
 
-  static Future<ChildEntity?> queryChildByName(String name) async {
-    AppDb db = AppDb.instance();
-    ChildEntity? childEntity = await (db.select(db.children)
-          ..where((tbl) => tbl.name.equals(name)))
-        .getSingleOrNull();
-    if (childEntity != null) {
-      childEntity.arduinoDeviceEntity =
-          await queryArduinoDeviceBydeviceRemoteId(
-              childEntity.deviceRemoteId ?? '');
-    }
-    return childEntity;
-  }
+  // static Future<ChildEntity?> queryChildByName(String name) async {
+  //   AppDb db = AppDb.instance();
+  //   ChildEntity? childEntity = await (db.select(db.children)
+  //         ..where((tbl) => tbl.name.equals(name)))
+  //       .getSingleOrNull();
+  //   if (childEntity != null) {
+  //     childEntity.arduinoDeviceEntity =
+  //         await queryArduinoDeviceBydeviceRemoteId(
+  //             childEntity.deviceRemoteId ?? '');
+  //   }
+  //   return childEntity;
+  // }
 
   static Future<ArduinoDeviceEntity?> queryArduinoDeviceBydeviceRemoteId(
       String deviceRemoteId) async {
@@ -145,25 +146,17 @@ class ChildEntity {
 
   // UPDATE
   static Future<void> updateRemoteDeviceId(
-      int? childId, String remoteDeviceId) async {
-    if (childId == null) {
-      throw Exception("Child ID cannot be null");
-    } else {
-      AppDb db = AppDb.instance();
-      await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
-          .write(ChildrenCompanion(deviceRemoteId: Value(remoteDeviceId)));
-    }
+      int childId, String deviceRemoteId) async {
+    AppDb db = AppDb.instance();
+    await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
+        .write(ChildrenCompanion(deviceRemoteId: Value(deviceRemoteId)));
   }
 
   // DELETE
-  static Future<void> deleteDeviceForChild(int? childId) async {
-    if (childId == null) {
-      throw Exception("Child ID cannot be null");
-    } else {
-      AppDb db = AppDb.instance();
-      await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
-          .write(const ChildrenCompanion(deviceRemoteId: Value("")));
-    }
+  static Future<void> deleteDeviceForChild(int childId) async {
+    AppDb db = AppDb.instance();
+    await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
+        .write(const ChildrenCompanion(deviceRemoteId: Value("")));
   }
 
   static Future<void> deleteChild(int childId) async {
@@ -180,4 +173,17 @@ class ChildEntity {
   String toString() {
     return "$id, $name, $birthDate, $deviceRemoteId \n";
   }
+
+
+  
+  //////////////////////////////////
+  ///           CLOUD            ///
+  //////////////////////////////////
+  
+
+  static Future<void> syncAllChildData() async{
+    
+  }
+
+
 }

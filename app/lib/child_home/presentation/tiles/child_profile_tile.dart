@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bluetooth/bloc/bluetooth_bloc.dart';
 import '../../../bluetooth/presentation/bluetooth_panel.dart';
+import '../../../dashboard/domain/dashboard_repository.dart';
 import '../../cubit/all_child_profile_cubit.dart';
 import '../../cubit/child_device_cubit.dart';
 
@@ -79,11 +80,16 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
               child: const BluetoothPanel(),
             );
           }),
+          ElevatedButton(
+            onPressed: () => DashboardRepository.createRandomDataFromDate(
+              context.read<ChildDeviceCubit>().state.childId,
+              DateTime.now(),
+            ),
+            child: Text("add random data"),
+          ),
           OutlinedButton(onPressed: () => context.read<AllChildProfileCubit>().deleteChildProfile(
-            context.read<ChildDeviceCubit>().state.childId ?? -999
+            context.read<ChildDeviceCubit>().state.childId,
           ), child: Text("Remove child profile")),
-          
-          
 
         ],
       ),
