@@ -4,19 +4,52 @@ import {
   generateID,
   TEMP_PARENT_ID,
 } from "/opt/nodejs/lib.mjs";
+import {
+  UNIQUE_VIOLATION,
+} from "pg-error-constants";
 
 let db = await connectToDB();
 
+const MAX_ATTEMPTS = 3;
 export const handler = async (event) => {
-  let tentativeChildID = generateID();
-  // TODO: retry child IDs if there are conflicts in DB.
-  try {
-    await db.query(
-      "INSERT INTO children (id,parent_id) VALUES ($1,$2)",
-      [tentativeChildID,TEMP_PARENT_ID]
-    );
-  } catch (e) {
-    throw e;
+  let attempts = 0;
+  let allocated = false;
+  let tentativeChildID;
+  while (attempts < MAX_ATTEMPTS) {
+    tentativeChildID = generateID();
+    console.log(`attempt ${attempts+1}: trying to allocate ID ${tentativeChildID}`);
+    try {
+      await db.query(
+        "INSERT INTO children (id,parent_id) VALUES ($1,$2)",
+        [tentativeChildID,TEMP_PARENT_ID]
+      );
+    } catch (e) {
+      if (e.code === UNIQUE_VIOLATION && e.constraint === "children_pkey") {
+        console.error(`attempt ${attempts+1}: failed to allocate ID ${tentativeChildID}`);
+        attempts++;
+        continue;
+      }
+      throw e;
+    }
+    allocated = true;
+    break;
+  }
+  if (!allocated) {
+    const code = 500;
+    const errResp = {
+      statusCode: code,
+      body: JSON.stringify({
+        errors: [
+          {
+            resource: event.resource,
+            statusCode: code,
+            message: "exceeded max number of attempts to allocate random ID to child, try again later"
+          }
+        ]
+      }),
+    };
+    addCorsHeaders(errResp);
+    return errResp;
   }
   const finalChildID = tentativeChildID;
   console.log(`made child row with id ${finalChildID}`);
