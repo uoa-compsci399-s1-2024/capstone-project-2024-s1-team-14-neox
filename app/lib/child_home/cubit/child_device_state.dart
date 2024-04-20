@@ -20,7 +20,7 @@ extension ChildDeviceStatusX on ChildDeviceStatus {
 
 class ChildDeviceState extends Equatable {
   final ChildDeviceStatus status;
-  final int? childId;
+  final int childId;
   final String childName;
   final DateTime birthDate;
   final String? deviceRemoteId;
@@ -41,6 +41,7 @@ class ChildDeviceState extends Equatable {
     ChildDeviceStatus? status,
     int? childId,
     String? childName,
+    DateTime? birthDate,
     String? deviceRemoteId,
     String? message,
   }) {

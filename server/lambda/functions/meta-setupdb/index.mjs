@@ -29,10 +29,13 @@ CREATE TABLE children (
 CREATE TABLE samples (
        -- id INTEGER NOT NULL PRIMARY KEY,
        -- Use timestamptz alias for TIMESTAMP WITH TIMEZONE because there were syntax errors when I sent the query to the DB in RDS
-       tstamp TIMESTAMPTZ NOT NULL PRIMARY KEY,
+       "timestamp" TIMESTAMPTZ NOT NULL,
        child_id VARCHAR(50) NOT NULL,
-       uv_index INTEGER,
-       lux INTEGER,
+       uv INTEGER NOT NULL,
+       CONSTRAINT uv_range CHECK (uv >= 0),
+       light INTEGER NOT NULL,
+       CONSTRAINT light_range CHECK (light >= 0),
+       PRIMARY KEY (child_id, "timestamp"),
        FOREIGN KEY (child_id) REFERENCES children (id)
 );
 `;
