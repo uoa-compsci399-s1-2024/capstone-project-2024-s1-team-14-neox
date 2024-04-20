@@ -21,7 +21,7 @@ class ChildDeviceModel {
         childName: entity.name,
         birthDate: entity.birthDate,
         deviceRemoteId: entity.deviceRemoteId,
-        authorisationCode: entity.arduinoDeviceEntity?.authorisationCode,
+      //  authorisationCode: entity.arduinoDeviceEntity?.authorisationCode,
         // TODO implement last synced in database
       );
 

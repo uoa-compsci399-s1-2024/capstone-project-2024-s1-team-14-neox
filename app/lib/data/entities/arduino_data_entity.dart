@@ -8,9 +8,10 @@ import 'child_entity.dart';
 
 @UseRowClass(ArduinoDataEntity)
 class ArduinoDatas extends Table {
-  TextColumn get name => text()();
+  IntColumn get id => integer().autoIncrement()();
 
-  IntColumn get id => integer().references(Children, #id)();
+  IntColumn get childId =>
+      integer().customConstraint('REFERENCES children(id) ON DELETE CASCADE')();
 
   IntColumn get uv => integer()();
 
@@ -23,6 +24,13 @@ class ArduinoDatas extends Table {
   IntColumn get accelY => integer()();
 
   IntColumn get accelZ => integer()();
+
+  IntColumn get serverClass => integer()();
+
+  IntColumn get appClass => integer()();
+
+  @override
+  Set<Column> get primaryKey => {id};
 }
 
 class ArduinoDataEntity {
@@ -32,45 +40,37 @@ class ArduinoDataEntity {
   DateTime datetime;
   Int16List? accel;
   int? id;
+  int childId;
+  int serverClass;
+  int appClass;
 
   ArduinoDataEntity(
-      {this.id, this.name, this.uv, this.light, required this.datetime, this.accel, });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'uv': uv,
-      'light': light,
-      'datetime': datetime.toIso8601String(),
-      'accel': accel?.toList(),
-    };
-  }
-
-  factory ArduinoDataEntity.fromJson(Map<String, dynamic> json) {
-    return ArduinoDataEntity(
-      name: json['name'],
-      uv: json['uv'],
-      light: json['light'],
-      datetime: DateTime.parse(json['datetime']),
-      accel: (json['accel'] != null)
-          ? Int16List.fromList(List<int>.from(json['accel']))
-          : null,
-
-    );
-  }
+      {this.id,
+      this.name,
+      this.uv,
+      this.light,
+      required this.datetime,
+      this.accel,
+      this.appClass = -1,
+      this.serverClass = -1,
+      required this.childId});
 
   ArduinoDatasCompanion toCompanion() {
     return ArduinoDatasCompanion(
-      name: Value(name ?? ''),
-      uv: Value(uv ?? -1),
-      light: Value(light ?? -1),
-      datetime: Value(datetime),
-      accelX: Value(accel?[0] ?? 0),
-      accelY: Value(accel?[1] ?? 0),
-      accelZ: Value(accel?[2] ?? 0),
-      id: Value(id ?? 0),
-    );
+        uv: Value(uv ?? -1),
+        light: Value(light ?? -1),
+        datetime: Value(datetime),
+        accelX: Value(accel?[0] ?? -1),
+        accelY: Value(accel?[1] ?? -1),
+        accelZ: Value(accel?[2] ?? -1),
+        appClass: Value(appClass),
+        serverClass: Value(serverClass),
+        childId: Value(childId));
   }
+
+  ////////////////////////////////////////////////////////////////////////////
+  // CREATE //////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
 
   static Future<void> saveSingleArduinoDataEntity(
       ArduinoDataEntity arduinoDataEntity) async {
@@ -87,24 +87,24 @@ class ArduinoDataEntity {
     });
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  // READ ////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
+
   static Future<List<ArduinoDataEntity>> queryAllArduinoData() async {
     AppDb db = AppDb.instance();
     List<ArduinoDataEntity> arduinoDataEntityList =
         await db.select(db.arduinoDatas).get();
     return arduinoDataEntityList;
   }
-  // Deprecate
-  static Future<List<ArduinoDataEntity>> queryArduinoDataByName(String name) async {
-    final db = AppDb.instance();
-    final query = db.select(db.arduinoDatas)..where((tbl) => tbl.name.equals(name));
-    return query.get();
-  }
-  static Future<List<ArduinoDataEntity>> queryArduinoDataById(int childId) async {
-    final db = AppDb.instance();
-    final query = db.select(db.arduinoDatas)..where((tbl) => tbl.id.equals(childId));
-    return query.get();
-  }
 
+  static Future<List<ArduinoDataEntity>> queryArduinoDataById(
+      int childId) async {
+    final db = AppDb.instance();
+    final query = db.select(db.arduinoDatas)
+      ..where((tbl) => tbl.id.equals(childId));
+    return query.get();
+  }
 
   static Future<List<ArduinoDataEntity>> queryListOfArduinoDataByUVLevel(
       int uvLevel) async {
@@ -115,5 +115,46 @@ class ArduinoDataEntity {
             .get();
     return arduinoDataEntityList;
   }
-}
+  ////////////////////////////////////////////////////////////////////////////
+  // UPDATE //////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
 
+  static Future<void> updateAppClass(int id, int appClass) async {
+    final db = AppDb.instance();
+    await (db.update(db.arduinoDatas)
+      ..where((tbl) => tbl.id.equals(id)))
+        .write(ArduinoDatasCompanion(appClass: Value(appClass)));
+  }
+
+  static Future<void> updateServerClass(int id, int serverClass) async {
+    final db = AppDb.instance();
+    await (db.update(db.arduinoDatas)
+      ..where((tbl) => tbl.id.equals(id)))
+        .write(ArduinoDatasCompanion(serverClass: Value(serverClass)));
+  }
+
+///////////////////////////////////////////////////////////////////
+// FOR TESTING PURPOSE DELETE LATER //////////////////////////////
+//////////////////////////////////////////////////////////////////
+
+// static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
+//     int childId) async {
+//   final List<ArduinoDataEntity> dataList = [];
+//
+//   // Sample data for testing
+//   for (int i = 0; i < 10; i++) {
+//     final data = ArduinoDataEntity(
+//       uv: 5,
+//       light: 100,
+//       datetime: DateTime.now(),
+//       accel: Int16List.fromList([1, 2, 3]),
+//       serverClass: 1,
+//       appClass: 2,
+//       childId: childId,
+//     );
+//     dataList.add(data);
+//   }
+//
+//   return dataList;
+// }
+}
