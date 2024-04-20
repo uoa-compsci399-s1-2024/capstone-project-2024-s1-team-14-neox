@@ -60,9 +60,9 @@ class ArduinoDataEntity {
         uv: Value(uv ?? -1),
         light: Value(light ?? -1),
         datetime: Value(datetime),
-        accelX: Value(accel?[0] ?? -1),
-        accelY: Value(accel?[1] ?? -1),
-        accelZ: Value(accel?[2] ?? -1),
+        accelX: Value(accel?[0] ?? 0),
+        accelY: Value(accel?[1] ?? 0),
+        accelZ: Value(accel?[2] ?? 0),
         appClass: Value(appClass ?? -1),
         serverClass: Value(serverClass ?? -1),
         childId: Value(childId));
