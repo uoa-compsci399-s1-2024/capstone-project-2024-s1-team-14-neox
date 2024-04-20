@@ -59,7 +59,7 @@ class _WeeklyBarGraphState extends State<WeeklyBarGraph> {
       scrollDirection: Axis.horizontal,
       child: SizedBox(
         width:
-            barWidth * barData.length + spaceBetweenBars * (barData.length - 1),
+            barData.length == 1 ? 300 : barWidth * barData.length + spaceBetweenBars * (barData.length - 1),
         child: BarChart(
           BarChartData(
             minY: 0,
