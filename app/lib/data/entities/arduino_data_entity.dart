@@ -41,8 +41,8 @@ class ArduinoDataEntity {
   Int16List? accel;
   int? id;
   int childId;
-  int? serverClass;
-  int? appClass;
+  int serverClass;
+  int appClass;
 
   ArduinoDataEntity(
       {this.id,
@@ -51,8 +51,8 @@ class ArduinoDataEntity {
       this.light,
       required this.datetime,
       this.accel,
-      this.appClass,
-      this.serverClass,
+      this.appClass = -1,
+      this.serverClass = -1,
       required this.childId});
 
   ArduinoDatasCompanion toCompanion() {
@@ -63,8 +63,8 @@ class ArduinoDataEntity {
         accelX: Value(accel?[0] ?? -1),
         accelY: Value(accel?[1] ?? -1),
         accelZ: Value(accel?[2] ?? -1),
-        appClass: Value(appClass ?? -1),
-        serverClass: Value(serverClass ?? -1),
+        appClass: Value(appClass),
+        serverClass: Value(serverClass),
         childId: Value(childId));
   }
 
