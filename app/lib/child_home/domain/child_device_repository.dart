@@ -75,7 +75,7 @@ class ChildDeviceRepository {
       await ArduinoDataEntity.saveSingleArduinoDataEntity(
         ArduinoDataEntity(
           name: childName,
-          id: childId,
+          childId: childId,
           uv: uv,
           light: light,
           datetime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
