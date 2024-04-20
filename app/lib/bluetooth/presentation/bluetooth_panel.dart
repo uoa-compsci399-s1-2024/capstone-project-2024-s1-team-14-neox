@@ -11,25 +11,37 @@ class BluetoothPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<BluetoothBloc, BluetoothState>(
+    return BlocListener<ChildDeviceCubit, ChildDeviceState>(
       listener: (context, state) {
-        if (state.status.isConnectSuccess) {
-          // TODO: may need to change the chain of updating deviceRemoteID, currently calling two functions
+        if (state is ChildDeviceConnectState) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Pairing success'),
+            duration: Duration(seconds: 2),
+          ));
           context.read<AllChildProfileCubit>().updateDeviceRemoteId(
-              childId: context.read<ChildDeviceCubit>().state.childId,
-              deviceRemoteId: state.newDeviceRemoteId);
-
-          context
-              .read<ChildDeviceCubit>()
-              .onChildDevicePairSuccess(state.newDeviceRemoteId);
+              childId: state.childId,
+              deviceRemoteId: state.deviceRemoteId);
+        } else if (state is ChildDeviceDisconnectState) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Unpaired'),
+            duration: Duration(seconds: 2),
+          ));
+          context.read<AllChildProfileCubit>().deleteDeviceRemoteId(
+              childId: state.childId);
+        } else if (state is ChildDeviceErrorState) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(state.errorMessage),
+            duration: const Duration(seconds: 2),
+          ));
         }
       },
       child: BlocBuilder<ChildDeviceCubit, ChildDeviceState>(
         builder: (context, state) {
-          if (state.status.isLoading) {
-            return CircularProgressIndicator();
+          if (state is ChildDeviceLoadingState) {
+            return const CircularProgressIndicator();
           }
-          if (state.status.isUnknown || state.status.isUnpairSuccess) {
+
+          if (state.deviceRemoteId.isEmpty) {
             return Column(
               children: [
                 ElevatedButton(
@@ -39,58 +51,35 @@ class BluetoothPanel extends StatelessWidget {
                       // Must use _ for context in builder, otherwise wrong context is looked up
                       MaterialPageRoute(builder: (_) {
                         return BlocProvider.value(
-                          value: BlocProvider.of<BluetoothBloc>(context),
-                          child: ScanScreen(
-                              name: context
-                                  .read<ChildDeviceCubit>()
-                                  .state
-                                  .childName),
+                          value: BlocProvider.of<ChildDeviceCubit>(context),
+                          child: BlocProvider.value(
+                            value: BlocProvider.of<BluetoothBloc>(context),
+                            child: ScanScreen(name: state.childName),
+                          ),
                         );
                       }),
                     );
                   },
                   child: const Text("Pair device"),
                 ),
-                // ElevatedButton(
-                //   onPressed: () {
-                //     print(context.read<AllChildProfileCubit>().state.profiles);
-                //   },
-                //   child: Text("Test"),
-                // )
               ],
             );
           }
           return Column(
             children: [
               ElevatedButton(
-                onPressed: () =>
-                    context.read<BluetoothBloc>().add(BluetoothSyncPressed(
-                          childId: state.childId,
-                          childName: state.childName,
-                          deviceRemoteId: state.deviceRemoteId ?? "",
-                          authorisationCode: state.authorisationCode ?? "",
-                        )),
-                child: Text("Sync device"),
+                onPressed: () => context.read<ChildDeviceCubit>().onSyncPressed(
+                  childName: state.childName,
+                  childId: state.childId,
+                  deviceRemoteId: state.deviceRemoteId,
+                  authorisationCode: "verysecure",//state.authorisationCode,
+                ),
+                child: const Text("Sync device"),
               ),
               ElevatedButton(
-                // Unpair means to remove deviceRemoteId from child repository
-                onPressed: () {
-                  // Disconnect bluetooth
-                  context.read<BluetoothBloc>().add(BluetoothDisconnectPressed(
-                      deviceRemoteId: state.deviceRemoteId ?? ""));
-                  context.read<ChildDeviceCubit>().onChildDeviceUnpairSuccess();
-                  // Update in child repository
-                  context.read<AllChildProfileCubit>().deleteDeviceRemoteId(
-                      childId: context.read<ChildDeviceCubit>().state.childId);
-                },
-                child: Text("Unpair device"),
+                onPressed: () => context.read<ChildDeviceCubit>().onChildDeviceDisconnectPressed(),
+                child: const Text("Unpair device"),
               ),
-              // ElevatedButton(
-              //   onPressed: () {
-              //     print(context.read<AllChildProfileCubit>().state.profiles);
-              //   },
-              //   child: Text("Test"),
-              // )
             ],
           );
         },
