@@ -10,7 +10,7 @@ import 'child_entity.dart';
 class ArduinoDatas extends Table {
   TextColumn get name => text()();
 
-  IntColumn get id => integer().references(Children, #id)();
+  IntColumn get id => integer()();
 
   IntColumn get uv => integer()();
 
