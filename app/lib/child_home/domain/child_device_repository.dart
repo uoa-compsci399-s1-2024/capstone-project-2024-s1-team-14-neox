@@ -7,13 +7,11 @@ import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
 
 class ChildDeviceRepository {
-
   // Fetch all children profiles
 
   Future<List<ChildDeviceModel>> fetchChildProfiles() async {
     List<ChildEntity> entities = await ChildEntity.queryAllChildren();
     return entities.map((child) => ChildDeviceModel.fromEntity(child)).toList();
-
   }
 
   // deletl child profile based on id
@@ -34,12 +32,12 @@ class ChildDeviceRepository {
   }
 
   Future<List<ChildDeviceModel>> updateChildDeviceRemoteID(
-      int? childId, String deviceRemoteId) async {
-    ChildEntity.updateRemoteDeviceId(childId ?? 0, deviceRemoteId);
+      int childId, String deviceRemoteId) async {
+    ChildEntity.updateRemoteDeviceId(childId, deviceRemoteId);
     return fetchChildProfiles();
   }
 
-  Future<List<ChildDeviceModel>> deleteChildDeviceRemoteID(int? childId) async {
+  Future<List<ChildDeviceModel>> deleteChildDeviceRemoteID(int childId) async {
     ChildEntity.deleteDeviceForChild(childId);
     return fetchChildProfiles();
   }
@@ -82,16 +80,21 @@ class ChildDeviceRepository {
           accel: Int16List.fromList([accelX, accelY, accelZ]),
         ),
       );
-
-
     }
   }
-
 
   static Future<List<SensorDataModel>> fetchArduinoSamplesByChildId(
       int childId) async {
     List<ArduinoDataEntity> entities =
         await ChildEntity.getAllDataForChild(childId);
     return entities.map((data) => SensorDataModel.fromEntity(data)).toList();
+  }
+
+  //////////////////////////////////
+  ///           CLOUD            ///
+  //////////////////////////////////
+
+  static Future<void> syncAllChildData() async {
+    await ChildEntity.syncAllChildData();
   }
 }
