@@ -1,0 +1,79 @@
+version = 0.1
+
+[default.global.parameters]
+stack_name = "sam-cloud-backend"
+region = "ap-southeast-2"
+[default.deploy.parameters]
+resolve_s3 = true
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
+parameter_overrides = "VpcCIDR=\"10.1.0.0/16\" PrivateSubnet1CIDR=\"10.1.20.0/24\" PrivateSubnet2CIDR=\"10.1.21.0/24\""
+
+
+
+[app.global.parameters]
+stack_name = "backend-app"
+[app.deploy.parameters]
+resolve_s3 = true
+s3_prefix = "backend-app"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "VpcCIDR=\"10.8.0.0/16\" PrivateSubnet1CIDR=\"10.8.20.0/24\" PrivateSubnet2CIDR=\"10.8.21.0/24\""
+
+
+
+[dev.global.parameters]
+stack_name = "backend-dev"
+[dev.deploy.parameters]
+resolve_s3 = true
+s3_prefix = "backend-dev"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "VpcCIDR=\"10.16.0.0/16\" PrivateSubnet1CIDR=\"10.16.20.0/24\" PrivateSubnet2CIDR=\"10.16.21.0/24\""
+
+[dev-localhost.global.parameters]
+stack_name = "backend-dev"
+[dev-localhost.deploy.parameters]
+stack_name = "backend-dev"
+resolve_s3 = true
+s3_prefix = "backend-dev"
+region = "ap-southeast-2"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=\"localhost\" WebsiteStackName=\"frontend\" WebsiteLocalhostPort=\"3000\" VpcCIDR=\"10.16.0.0/16\" PrivateSubnet1CIDR=\"10.16.20.0/24\" PrivateSubnet2CIDR=\"10.16.21.0/24\""
+image_repositories = []
+
+
+[website-dev.global.parameters]
+stack_name = "backend-website-dev"
+[website-dev.deploy.parameters]
+stack_name = "backend-website-dev"
+resolve_s3 = true
+s3_prefix = "backend-website-dev"
+region = "ap-southeast-2"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=\"dev\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.24.0.0/16\" PrivateSubnet1CIDR=\"10.24.20.0/24\" PrivateSubnet2CIDR=\"10.24.21.0/24\""
+image_repositories = []
+
+[website-prod.global.parameters]
+stack_name = "backend-website-prod"
+[website-prod.deploy.parameters]
+stack_name = "backend-website-prod"
+resolve_s3 = true
+s3_prefix = "backend-website-prod"
+region = "ap-southeast-2"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=\"prod\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.32.0.0/16\" PrivateSubnet1CIDR=\"10.32.20.0/24\" PrivateSubnet2CIDR=\"10.32.21.0/24\""
+image_repositories = []
+
+[website-localhost.global.parameters]
+stack_name = "backend-website-localhost"
+[website-localhost.deploy.parameters]
+stack_name = "backend-website-localhost"
+resolve_s3 = true
+s3_prefix = "backend-website-localhost"
+region = "ap-southeast-2"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=\"localhost\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.48.0.0/16\" PrivateSubnet1CIDR=\"10.48.20.0/24\" PrivateSubnet2CIDR=\"10.48.21.0/24\""
+image_repositories = []
+
