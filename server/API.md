@@ -244,27 +244,19 @@ Schema of `data` field of response:
 }
 ```
 
-If not authorised:
+If not authorised OR no such user:
 
 Return 403 response where the `resource` field of the error response
 is the same as the URI at which the action was invoked.
-
-If no such user:
-
-Return 404 "Not Found".
 
 ### Delete a specific user (DELETE) (`/users/{userID}`)
 
 If authorised: server will delete user with ID `userID` and return a
 204 response.
 
-If not authorised: server will return a 403 response where the
-`resource` field of the error response is the same as the URI at which
-the action was invoked.
-
-If no such user:
-
-Return 404 "Not Found".
+If not authorised OR no such user: server will return a 403 response
+where the `resource` field of the error response is the same as the
+URI at which the action was invoked.
 
 OPEN QUESTION: Should this delete their children and the data of their
 children too?
@@ -372,14 +364,10 @@ Server returns HTTP 200 response:
 }
 ```
 
-#### If not authorised:
+#### If not authorised OR no such child:
 
 Return 403 response where the `resource` field of the error response
 is the same as the URI at which the action was invoked.
-
-#### If no such child:
-
-Return 404 "Not Found".
 
 #### PUT/PATCH
 
@@ -414,13 +402,9 @@ format:
 If authorised: server will delete child with ID `childID` and return a
 204 response.
 
-If not authorised: server will return a 403 response where the
+If not authorised OR no such child: server will return a 403 response where the
 `resource` field of the error response is the same as the URI at which
 the action was invoked.
-
-If no such child:
-
-Return 404 "Not Found".
 
 OPEN QUESTION: Should all the samples associated with `childID` be
 deleted too?
@@ -455,7 +439,7 @@ mentioned before except the field for child ID since it's already been specified
 If authorised to add samples for `childID`: server will return 204 or
 207 (see later).
 
-If not authorised: server will return 403 response.
+If not authorised OR no such child: server will return 403 response.
 
 If any errors: return 207 response, where `resource` will be
 `/samples/{childID}/{timestamp}` and `timestamp` is the `timestamp`
