@@ -92,14 +92,13 @@ export const handler = async (event) => {
     try {
       await db.query("BEGIN");
       if (event.httpMethod.toUpperCase() == "PUT") {
-        await db.query(`
-          UPDATE children
-            SET birthdate = NULL,
-                family_name = NULL,
-                given_name = NULL,
-                middle_name = NULL,
-                nickname = NULL
-          WHERE id = $1`, [childID]);
+        for (let i=0; i<PERSONAL_INFO_FIELDS_CHILD.length; i++) {
+          await db.query(
+            // We can trust PERSONAL_INFO_FIELDS_CHILD to only have valid fields.
+            `UPDATE children SET ${PERSONAL_INFO_FIELDS_CHILD[i]} = NULL WHERE id = $1`,
+            [childID]
+          );
+        }
       }
       errors = await setPersonalInfoFields(
         db,
