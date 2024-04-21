@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/server/child_data.dart';
-import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 
 class ChildApiService {
@@ -30,22 +28,22 @@ class ChildApiService {
 
   static Future<void> postData(int childId) async {
     Dio dio = Dio();
-    var samples = await ArduinoDataEntity.queryArduinoDataById(childId);
+    var sampleList = await ArduinoDataEntity.queryArduinoDataById(childId);
     var dataList = [];
 
-    for (var sample in samples) {
+    for (var sample in sampleList) {
       ChildData newSample = sample.toChildData();
       dataList.add(newSample);
     }
     final url = '$apiUrl/$childId';
     try {
-      List<Map<String, dynamic>> samples = [];
+      List<Map<String, dynamic>> jsonSamples = [];
 
       for (var childData in dataList) {
         final jsonData = childData.toJson();
-        samples.add(jsonData);
+        jsonSamples.add(jsonData);
       }
-      final data = {"samples": samples};
+      final data = {"samples": jsonSamples};
       final response = await dio.post(url, data: data);
       print(response.statusCode);
       print(response.data);
