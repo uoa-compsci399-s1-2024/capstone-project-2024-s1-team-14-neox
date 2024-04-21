@@ -54,7 +54,7 @@ async function setPersonalInfoFields(db, infoResource, childID, fields)
 
 export const handler = async (event) => {
   const childID = event.pathParameters.childID;
-  const infoResource = event.resource.replace("{childID}", childID);
+  const infoResource = event.resource.replace("{childID}", encodeURIComponent(childID));
   const body = {};
   const response = {};
   console.log(`method: ${event.httpMethod}`);
