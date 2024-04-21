@@ -278,7 +278,7 @@ JSON object whose only field (for now) will be the ID of the child.
 The client should add this ID to samples for that child before sending
 them to server.
 
-The schema:
+Schema of `data` field of response:
 ```json
 {
 	"id": ID,
