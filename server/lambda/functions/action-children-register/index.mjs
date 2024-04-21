@@ -26,7 +26,7 @@ export const handler = async (event) => {
       );
     } catch (e) {
       if (e.code === UNIQUE_VIOLATION && e.constraint === "children_pkey") {
-        console.error(`attempt ${attempts+1}: failed to allocate ID ${tentativeChildID}`);
+        console.error(`attempt ${attempts+1}/${MAX_ATTEMPTS}: failed to allocate ID ${tentativeChildID}`);
         attempts++;
         continue;
       }
