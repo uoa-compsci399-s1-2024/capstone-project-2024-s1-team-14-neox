@@ -81,11 +81,11 @@ that it can be represented as an integer is an implementation detail.
 
 - `child_id`: ID of child with which the sample is associated.
 - `timestamp`: String of ISO8601-formatted datetime with seconds
-  resolution.  TODO: will we require timezone to be specified? (ie, no
-  default timezone).
+  resolution and timezone.  If timezone is UTC 0, then it must be
+  specified either as `Z` OR an offset of `+00:00`.
 - `uv`: Numeric value of UV exposure (TODO units).
 - `light`: Numeric value of light exposure (TODO units).
-- `acceleration`: Three-element numeric array for device acceleration
+- `acceleration`: UNDECIDED: Three-element numeric array for device acceleration
   where the first element is the `x` component, second is `y`, and
   third is `z`.
 
