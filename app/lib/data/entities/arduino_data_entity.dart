@@ -4,6 +4,7 @@ import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 import 'package:drift/drift.dart';
 import 'dart:convert';
 
+import '../../server/child_data.dart';
 import 'child_entity.dart';
 
 @UseRowClass(ArduinoDataEntity)
@@ -68,6 +69,14 @@ class ArduinoDataEntity {
         childId: Value(childId));
   }
 
+   ChildData toChildData() {
+    return ChildData(
+      timestamp: datetime.toIso8601String(),
+      childId: childId.toString(),
+      uv: uv!,
+      light: light!,
+    );
+  }
   ////////////////////////////////////////////////////////////////////////////
   // CREATE //////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
@@ -102,7 +111,7 @@ class ArduinoDataEntity {
       int childId) async {
     final db = AppDb.instance();
     final query = db.select(db.arduinoDatas)
-      ..where((tbl) => tbl.id.equals(childId));
+      ..where((tbl) => tbl.childId.equals(childId));
     return query.get();
   }
 
@@ -137,24 +146,23 @@ class ArduinoDataEntity {
 // FOR TESTING PURPOSE DELETE LATER //////////////////////////////
 //////////////////////////////////////////////////////////////////
 
-// static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
-//     int childId) async {
-//   final List<ArduinoDataEntity> dataList = [];
-//
-//   // Sample data for testing
-//   for (int i = 0; i < 10; i++) {
-//     final data = ArduinoDataEntity(
-//       uv: 5,
-//       light: 100,
-//       datetime: DateTime.now(),
-//       accel: Int16List.fromList([1, 2, 3]),
-//       serverClass: 1,
-//       appClass: 2,
-//       childId: childId,
-//     );
-//     dataList.add(data);
-//   }
-//
-//   return dataList;
-// }
+static void createSampleArduinoDataList(
+    int childId) async {
+  final List<ArduinoDataEntity> dataList = [];
+
+  // Sample data for testing
+  for (int i = 0; i < 10; i++) {
+    final data = ArduinoDataEntity(
+      uv: 5,
+      light: 100,
+      datetime: DateTime.now(),
+      accel: Int16List.fromList([1, 2, 3]),
+      serverClass: 1,
+      appClass: 2,
+      childId: childId,
+    );
+    dataList.add(data);
+  }
+  ArduinoDataEntity.saveListOfArduinoDataEntity(dataList);
+}
 }

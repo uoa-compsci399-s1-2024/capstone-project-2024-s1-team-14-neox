@@ -1,35 +1,35 @@
 
 class ChildData {
-  final String tstamp;
+  final String timestamp;
   final String childId;
-  final int uvIndex;
-  final int lux;
+  final int uv;
+  final int light;
 
   ChildData({
-    required this.tstamp,
+    required this.timestamp,
     required this.childId,
-    required this.uvIndex,
-    required this.lux,
+    required this.uv,
+    required this.light,
   });
 
   factory ChildData.fromJson(Map<String, dynamic> json) {
     return ChildData(
-      tstamp: json['tstamp'],
+      timestamp: json['tstamp'],
       childId: json['child_id'],
-      uvIndex: json['uv_index'],
-      lux: json['lux'],
+      uv: json['uv_index'],
+      light: json['lux'],
     );
   }
 
   Map<String, dynamic> toJson() {
-    DateTime dateTime = DateTime.parse(tstamp);
+    DateTime dateTime = DateTime.parse(timestamp);
     String iso8601Timestamp = '${dateTime.toUtc().toIso8601String().substring(0, 19)}Z';
 
     return {
       'timestamp': iso8601Timestamp,
       'child_id': childId,
-      'uv': uvIndex,
-      'light': lux,
+      'uv': uv,
+      'light': light,
     };
   }
 
@@ -40,22 +40,22 @@ class ChildData {
   static List<ChildData> getChildDataList() {
     List<ChildData> childDataList = [
       ChildData(
-        tstamp: '2024-04-21T08:00:00',
+        timestamp: '2024-04-21T08:00:00',
         childId: '22',
-        uvIndex: 5,
-        lux: 100,
+        uv: 5,
+        light: 100,
       ),
       ChildData(
-        tstamp: '2024-04-21T08:15:00',
+        timestamp: '2024-04-21T08:15:00',
         childId: '22',
-        uvIndex: 6,
-        lux: 110,
+        uv: 6,
+        light: 110,
       ),
       ChildData(
-        tstamp: '2024-04-21T08:30:00',
+        timestamp: '2024-04-21T08:30:00',
         childId: '22',
-        uvIndex: 4,
-        lux: 90,
+        uv: 4,
+        light: 90,
       ),
 
     ];
