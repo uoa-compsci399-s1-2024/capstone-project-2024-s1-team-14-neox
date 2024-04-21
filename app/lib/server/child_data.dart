@@ -22,12 +22,45 @@ class ChildData {
   }
 
   Map<String, dynamic> toJson() {
+    DateTime dateTime = DateTime.parse(tstamp);
+    String iso8601Timestamp = '${dateTime.toUtc().toIso8601String().substring(0, 19)}Z';
+
     return {
-      'tstamp': tstamp,
+      'timestamp': iso8601Timestamp,
       'child_id': childId,
-      'uv_index': uvIndex,
-      'lux': lux,
+      'uv': uvIndex,
+      'light': lux,
     };
+  }
+
+
+
+
+
+  static List<ChildData> getChildDataList() {
+    List<ChildData> childDataList = [
+      ChildData(
+        tstamp: '2024-04-21T08:00:00',
+        childId: '22',
+        uvIndex: 5,
+        lux: 100,
+      ),
+      ChildData(
+        tstamp: '2024-04-21T08:15:00',
+        childId: '22',
+        uvIndex: 6,
+        lux: 110,
+      ),
+      ChildData(
+        tstamp: '2024-04-21T08:30:00',
+        childId: '22',
+        uvIndex: 4,
+        lux: 90,
+      ),
+
+    ];
+
+    return childDataList;
   }
 }
 
