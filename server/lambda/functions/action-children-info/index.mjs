@@ -58,7 +58,7 @@ export const handler = async (event) => {
   const body = {};
   const response = {};
   console.log(`method: ${event.httpMethod}`);
-  if (event.httpMethod.toUpperCase() == "GET") {
+  if (event.httpMethod.toUpperCase() === "GET") {
     let res;
     try {
       res = await db.query("SELECT * FROM children WHERE id = $1", [childID]);
@@ -89,12 +89,12 @@ export const handler = async (event) => {
       response.statusCode = 200;
     }
   } else {
-    assert(event.httpMethod.toUpperCase() == "PUT" || event.httpMethod.toUpperCase() == "PATCH");
+    assert(event.httpMethod.toUpperCase() === "PUT" || event.httpMethod.toUpperCase() === "PATCH");
     let personal_info = JSON.parse(event.body);
     let errors;
     try {
       await db.query("BEGIN");
-      if (event.httpMethod.toUpperCase() == "PUT") {
+      if (event.httpMethod.toUpperCase() === "PUT") {
         for (let i=0; i<PERSONAL_INFO_FIELDS_CHILD.length; i++) {
           await db.query(
             // We can trust PERSONAL_INFO_FIELDS_CHILD to only have valid fields.
