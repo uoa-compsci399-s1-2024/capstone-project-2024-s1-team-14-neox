@@ -94,12 +94,21 @@ that it can be represented as an integer is an implementation detail.
 We use some fields from here:
 https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-attributes.html
 
-- birthdate (not for users)
+### Children
+
+- birthdate
 - family_name
 - given_name
 - middle_name
 - nickname
-- (for users:) email
+
+### Users (ie, everyone except children)
+
+- family_name
+- given_name
+- middle_name
+- nickname
+- email
 
 ## Authentication (SUBJECT TO CHANGE)
 
