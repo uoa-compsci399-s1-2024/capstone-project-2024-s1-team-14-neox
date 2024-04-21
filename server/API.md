@@ -409,7 +409,7 @@ the action was invoked.
 OPEN QUESTION: Should all the samples associated with `childID` be
 deleted too?
 
-### Authenticate (POST) (one of `/auth`, `/authenticate`, `/login`)
+### UNDECIDED Authenticate (POST) (one of `/auth`, `/authenticate`, `/login`)
 
 #### Flow
 
