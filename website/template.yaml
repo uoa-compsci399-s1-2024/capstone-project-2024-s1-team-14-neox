@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: SAM template for web interface
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  WebsiteBucketDev:
+    Type: AWS::S3::Bucket
+    # Make sure to delete all objects in bucket first.
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: neox-frontend-dev
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        # We're a single-page web app so just use the default error page from AWS.
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+  WebsiteBucketPolicyDev:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucketDev
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub "${WebsiteBucketDev.Arn}/*"
+
+  WebsiteBucketProd:
+    Type: AWS::S3::Bucket
+    # Make sure to delete all objects in bucket first.
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: neox-frontend-prod
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        # We're a single-page web app so just use the default error page from AWS.
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+  WebsiteBucketPolicyProd:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucketProd
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub "${WebsiteBucketProd.Arn}/*"
+
+
+Outputs:
+  WebsiteBucketDevS3Name:
+    Description: Name of S3 bucket for website
+    Value: !Ref WebsiteBucketDev
+    Export:
+      Name: !Sub "${AWS::StackName}-bucketname-dev"
+  WebsiteDevURL:
+    Description: URL for website
+    Value: !GetAtt WebsiteBucketDev.WebsiteURL
+    Export:
+      Name: !Sub "${AWS::StackName}-url-dev"
+
+  WebsiteBucketProdS3Name:
+    Description: Name of S3 bucket for website
+    Value: !Ref WebsiteBucketProd
+    Export:
+      Name: !Sub "${AWS::StackName}-bucketname-prod"
+  WebsiteProdURL:
+    Description: URL for website
+    Value: !GetAtt WebsiteBucketProd.WebsiteURL
+    Export:
+      Name: !Sub "${AWS::StackName}-url-prod"
