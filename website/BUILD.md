@@ -52,7 +52,6 @@ Run
 
 ``` shell
 sam build
-
 ```
 
 Making sure to replace `ENVIRONMENT` depending on whether you're
