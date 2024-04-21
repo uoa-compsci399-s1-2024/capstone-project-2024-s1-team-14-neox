@@ -195,7 +195,7 @@ where:
 
 ## Actions
 
-### Sign up (POST) (`/users/`)
+### UNDECIDED Sign up (POST) (`/users/`)
 
 In the `data` field of the response, the server will send the client a
 JSON object whose only field (for now) will be the ID of the user.
