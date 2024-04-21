@@ -1,0 +1,11 @@
+version = 0.1
+
+[default.global.parameters]
+stack_name = "frontend"
+region = "ap-southeast-2"
+
+[default.deploy.parameters]
+resolve_s3 = true
+s3_prefix = "frontend"
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
