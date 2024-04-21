@@ -69,7 +69,7 @@ reject that sample.
   - Can view the associations of the children they work with.
   - Can request to become associated with a given child.
 - Researcher: Can only view anonymised data of children.
-- Admin:
+- Admin (maybe for now just provided as lambdas to run?):
   - Can register and delete users.
   - Can add, delete, and modify a user's personal information.
   - Can add, delete, and modify a user's associations???
