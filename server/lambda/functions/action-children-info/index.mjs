@@ -77,12 +77,27 @@ export const handler = async (event) => {
     } catch (e) {
       throw e;
     }
-    const fields = res.rows[0];
-    delete fields.id;
-    delete fields.parent_id;
-    body.data = fields;
-    response.statusCode = 200;
-    response.body = JSON.stringify(body);
+
+    if (res.rows.length === 0){
+      // FIXME: Handle permissions
+      const err = {
+        resource: infoResource,
+        status: 403,
+        message: `child ID doesn't exist or user is not authorised to view their personal info`,
+      };
+      console.error(`${childID}: ${err.message}`);
+      body.errors = [err];
+      response.statusCode = 403;
+      response.body = JSON.stringify(body);
+    } else {
+      assert(res.rows.length === 1, `${childID}: somehow saw multiple child rows with the same ID (which is primary key!)`);
+      const fields = res.rows[0];
+      delete fields.id;
+      delete fields.parent_id;
+      body.data = fields;
+      response.statusCode = 200;
+      response.body = JSON.stringify(body);
+    }
   } else {
     assert(event.httpMethod.toUpperCase() == "PUT" || event.httpMethod.toUpperCase() == "PATCH");
     let personal_info = JSON.parse(event.body);
