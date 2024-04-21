@@ -1,0 +1,148 @@
+# How to build the website
+
+## Prerequisites
+
+- `aws` CLI.  I (Gabriel) use version 1
+- Configured credentials for AWS
+- `sam` CLI.  Download from PyPI or ... (TODO)
+
+Before we do anything, we need to first create the S3 buckets for the
+`prod` and `dev` websites.  I've already made them using the
+Cloudformation stack called `frontend`.  Check the Cloudformation
+console on the AWS website.
+
+If there is no such Cloudformation stack, run (in this directory):
+
+``` shell
+sam deploy
+```
+
+The output will look like this:
+
+```
+CloudFormation outputs from deployed stack
+-----------------------------------------------------------------------------------------------------------------------------------------
+Outputs
+-----------------------------------------------------------------------------------------------------------------------------------------
+Key                 WebsiteBucketProdS3Name
+Description         Name of S3 bucket for website
+Value               neox-frontend-prod
+
+Key                 WebsiteProdURL
+Description         URL for website
+Value               http://neox-frontend-prod.s3-website-ap-southeast-2.amazonaws.com
+
+Key                 WebsiteBucketDevS3Name
+Description         Name of S3 bucket for website
+Value               neox-frontend-dev
+
+Key                 WebsiteDevURL
+Description         URL for website
+Value               http://neox-frontend-dev.s3-website-ap-southeast-2.amazonaws.com
+-----------------------------------------------------------------------------------------------------------------------------------------
+```
+
+Have each of these values ready for later.
+
+## 1. Build an instance of the backend for localhost/dev/prod (needed for CORS)
+
+Go to the `server/` directory.
+
+Run
+
+``` shell
+sam build
+
+```
+
+Making sure to replace `ENVIRONMENT` depending on whether you're
+developing on `localhost`, for the `dev` website, or for the `prod`
+website, run this:
+
+```
+sam deploy --config-env website-ENVIRONMENT --guided
+```
+
+When deploying, use the default values for everything EXCEPT when it
+asks if it's OK for lambdas to have no auth (eg `FuncChildrenRegister
+has no authentication. Is this okay? [y/N]`).  Answer `y` instead of
+the default `n` (no).
+
+DO NOT say `y` when it asks `Save arguments to configuration file
+[Y/n]`.  Say `n` instead.
+
+Once the deployment succeeds, you will see the outputs of the
+Cloudformation stack as follows:
+
+```
+CloudFormation outputs from deployed stack
+-----------------------------------------------------------------------------------------------------------------------------------------
+Outputs
+-----------------------------------------------------------------------------------------------------------------------------------------
+Key                 APIEndpoint
+Description         Base URL of API
+Value               https://nyttfeb9u6.execute-api.ap-southeast-2.amazonaws.com/localhost
+```
+
+Note down the `Value` field of `APIEndpoint`.  In this example, it is
+`https://nyttfeb9u6.execute-api.ap-southeast-2.amazonaws.com/localhost`.
+
+## Develop on localhost
+
+### 2. Start the web app (`npm start`) with the API URL as an environment variable
+
+Follow the instructions in the link to:
+
+- start the development server, and
+- set the `REACT_APP_API_URL` environment variable to have the value of `APIEndpoint`
+
+<https://create-react-app.dev/docs/adding-custom-environment-variables/#adding-temporary-environment-variables-in-your-shell>
+
+### Done
+
+## Develop on website hosted on AWS
+
+### 2. Build the web app (`npm start`) with the API URL as an environment variable
+
+Follow the instructions in the link to:
+
+- build the web app, and
+- set the `REACT_APP_API_URL` environment variable to have the value of `APIEndpoint`
+
+Wherever the instructions say to do `npm start`, replace it with `npm run build`.
+
+<https://create-react-app.dev/docs/adding-custom-environment-variables/#adding-temporary-environment-variables-in-your-shell>
+
+### 3. Upload compiled web app to AWS and Visit website
+
+#### Notation: `<ENV>`
+
+In the following instructions replace `<ENV>` with the environment for
+which you are developing:
+
+- If you're developing for the developer[^1] website, you would
+  replace `<ENV>` with `dev`.
+- If you're developing for the production[^2] website, you would
+  replace `<ENV>` with `prod`.
+
+#### Instructions
+
+Run:
+
+``` shell
+aws s3 sync build/ s3://WebsiteBucket<ENV>S3Name  --delete
+```
+
+Visit the website at this URL: `Website<ENV>URL`.
+
+#### NOTE
+
+Right now, our S3 buckets are automatically assigned policy statements
+that reject unencrypted HTTP connections.  I have to manually remove
+them every time they're re-applied.  (TODO add instructions for how to
+do this).  Once we have an ACM certificate, we will no longer need to
+do this.
+
+[^1]: which is only for cloud devs
+
+[^2]: which is for everyone in our project, including the app team
