@@ -143,6 +143,19 @@ them every time they're re-applied.  (TODO add instructions for how to
 do this).  Once we have an ACM certificate, we will no longer need to
 do this.
 
+### 4. Cleanup
+
+When you're done, shut down the instances of the backend you used.
+
+Run the following command with the same value for `--config-env` as
+when you created the backend instance:
+
+``` shell
+sam delete --config-env website-ENVIRONMENT
+```
+
+Answer `y` (yes) to all of the prompts.
+
 [^1]: which is only for cloud devs
 
 [^2]: which is the polished version of each iteration of the website
