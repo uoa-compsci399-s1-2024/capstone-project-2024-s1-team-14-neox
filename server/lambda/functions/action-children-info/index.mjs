@@ -8,7 +8,6 @@ import assert from "node:assert/strict";
 
 let db = await connectToDB();
 
-// TODO: replace with AWS Cognito calls
 // NOTE: empty `fields` means nothing happens
 const PERSONAL_INFO_FIELDS_CHILD = [
   "birthdate",
