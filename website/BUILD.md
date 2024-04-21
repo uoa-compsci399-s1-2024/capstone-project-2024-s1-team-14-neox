@@ -145,4 +145,4 @@ do this.
 
 [^1]: which is only for cloud devs
 
-[^2]: which is for everyone in our project, including the app team
+[^2]: which is the polished version of each iteration of the website
