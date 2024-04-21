@@ -25,7 +25,7 @@ const REQUIRED_FIELDS = [
 
 export const handler = async (event) => {
   const childID = event.pathParameters.childID;
-  const resolvedResource = event.resource.replace("{childID}", childID);
+  const resolvedResource = event.resource.replace("{childID}", encodeURIComponent(childID));
 
   const maybeEarlyErrorResp = {
     statusCode: 400,
