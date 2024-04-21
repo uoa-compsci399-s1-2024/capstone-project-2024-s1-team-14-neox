@@ -106,12 +106,12 @@ and then potentially use those to gain access to other systems.
 #### 2. Server always sends a successful response (unless clinician has too many pending requests)
 
 To prevent attacks by flooding the API with association requests to
-non-existent children, we will set a max number of pending requests
-(number TBD).
+non-existent children, we will set a max number of requests (total
+between pending, accepted, and rejected) (number TBD).
 
 #### 3. IF `childID` refers to a real child, then parent of the child will see the request when they next retrieve the associations for their child
 
-#### 4. Parent can respond to the request by making a special request to the associations resource for the requesting clinician
+#### 4. Parent can respond to the request by making a special request to API
 
 #### 5. If accepted, clinician will become authorised for the child
 
@@ -340,19 +340,38 @@ Server returns HTTP 200 response:
 			{"id": CHILD_ID2},
 			...
 		],
-		"requests": [
-			{"id": CHILD_ID3, "timestamp": ...},
-			{"id": CHILD_ID4, "timestamp" ...},
-		]
 	}
 }
 ```
 
-The `requests` field contains the IDs of children for which the
-clinician has requested access to their sample data and personal info.
-The IDs of such children don't necessarily refer to existing children
-to prevent leaking IDs.  The `timestamp` of pending requests will be
-an ISO8601-formatted datetime with timezone.
+#### If not authorised OR no such user:
+
+Server returns 403.
+
+### Get association requests sent by a user (GET) (`/users/{userID}/associations/requests`)
+
+#### If authorised:
+
+Server returns HTTP 200 response:
+
+``` json
+{
+	"data": {
+		"pending": [
+			{"id": CHILD_ID1, "timestamp": ...},
+			{"id": CHILD_ID2, "timestamp": ...},
+		],
+		"accepted": [ ... ],
+		"rejected": [ ... ],
+	}
+}
+```
+
+The `pending`, `accepted`, and `rejected` fields contain the IDs of
+children for which the clinician has requested access to their sample
+data and personal info.  The IDs of such children don't necessarily
+refer to existing children to prevent leaking IDs.  The `timestamp` of
+requests will be an ISO8601-formatted datetime with timezone.
 
 #### If not authorised OR no such user:
 
@@ -360,7 +379,7 @@ Server returns 403.
 
 ### Get users associated with a given child (GET) (`/children/{childID}/associations`)
 
-#### If authorised but NOT the parent of child:
+#### If authorised (parent of child OR user is associated with child):
 
 Server returns HTTP 200 response:
 
@@ -376,45 +395,29 @@ Server returns HTTP 200 response:
 	}
 }
 ```
-
-#### If authorised AND the parent of child:
-
-Server returns HTTP 200 response:
-
-``` json
-{
-	"data": {
-		"parent_id": USERID_PARENT,
-		"clinicians": [
-			{"id": USERID_CLINICIAN1},
-			{"id": USERID_CLINICIAN2},
-			...
-		],
-		"requests": [
-			{"id": USERID_CLINICIAN1, "timestamp": ...},
-			{"id": USERID_CLINICIAN2, "timestamp": ...},
-			...
-		]
-	}
-}
-```
-
-The `requests` field contains the IDs of clinicians who have requested
-access to sample data and personal info of the child.  The `timestamp`
-of pending requests will be an ISO8601-formatted datetime with
-timezone.  To respond, send a POST request to the associations
-resource of the clinician (ie, `/users/{userID}/associations`).
 
 #### If not authorised OR no such child:
 
 Server returns 403.
 
-##### Who is *not* authorised
+### Get association requests for a child (GET) (`/children/{childID}/associations/requests`)
 
-- Parent-users who *aren't* the parent of the child
-- Researchers
+``` json
+{
+	"data": [
+		{"id": USERID_CLINICIAN1, "timestamp": ...},
+		{"id": USERID_CLINICIAN2, "timestamp": ...},
+		...
+	]
+}
+```
 
-### CLINICIAN: Request access to sample data and personal info of a specific child (POST) (`/children/{childID}/associations`)
+Each request object contains the IDs of clinicians who have requested
+access to sample data and personal info of the child.  The `timestamp`
+of pending requests will be an ISO8601-formatted datetime with
+timezone.
+
+### CLINICIAN: Request access to sample data and personal info of a specific child (PUT) (`/children/{childID}/associations/requests/{userID}`)
 
 First, the clinician must know the ID of the child so they must ask the parent.
 
@@ -423,13 +426,71 @@ Request body is undefined.  Future versions of the API may define this.
 To prevent leaking child IDs, this request will always succeed (HTTP
 status 2XX) even if the child ID doesn't refer to an existing child.
 
-### PARENT: Respond to clinician's request for child association (POST) (`/users/{userID}/associations/requests`)
+### PARENT: ACCEPT clinician's request for child association (PUT) (`/users/{userID}/associations/{childID}`)
 
-```json
-{
-	"accept": TRUE_OR_FALSE,
-}
-```
+Request body is undefined.  A future version of the API may define it
+if we want more granular permissions granted with an association (ie,
+role-based [RBAC] vs attribute-based [ABAC] access control).
+
+#### If authorised (parent of child):
+
+Server will return 204.
+
+As a consequence:
+
+- CLINICIAN will see the child's ID in its `accepted` requests.
+- CLINICIAN will see the child's ID in its list of child associations
+  when they next request their own associations.
+- CLINICIAN will have the corresponding access rights to sample data
+  and personal info.
+- PARENT will see the clinician's ID in the child's list of
+  associations when they next request the child's associations.
+
+The corresponding requests in the child and clinician resources will
+no longer be seen in further requests.
+
+#### If not authorised OR no such child:
+
+Server will return 403.
+
+### PARENT: REJECT clinician's request for child association (DELETE) (`/children/{childID}/associations/requests/{userID}`)
+
+#### If authorised (parent of child):
+
+Server will return 204.
+
+As a consequence:
+
+- CLINICIAN will see the child's ID in its `rejected` requests.
+- The corresponding requests in the child and clinician resources will
+  no longer be seen in further requests.
+
+#### If not authorised OR no such child:
+
+Server will return 403.
+
+### CLINICIAN: DELETE request for child association (DELETE) (`/children/{childID}/associations/requests/{userID}`)
+
+#### If authorised (parent of child):
+
+Server will return 204.
+
+As a consequence:
+
+- CLINICIAN will no longer see the request for child ID.
+- PARENT will no longer see the request for child ID from clinician ID.
+
+##### If trying to DELETE accepted association request
+
+It's OK.  It will be removed from the list of `accepted` requests.
+
+##### If trying to DELETE association request that doesn't actually exist
+
+Server will return 404.
+
+#### If not authorised OR no such child:
+
+Server will return 403.
 
 ### Get/Replace/Update personal info associated with a specific child (GET/PUT/PATCH) (`/children/{childID}/info`)
 
