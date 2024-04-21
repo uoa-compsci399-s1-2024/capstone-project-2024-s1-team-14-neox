@@ -80,8 +80,11 @@ export const handler = async (event) => {
     } else {
       assert(res.rows.length === 1, `${childID}: somehow saw multiple child rows with the same ID (which is primary key!)`);
       const fields = res.rows[0];
-      delete fields.id;
-      delete fields.parent_id;
+      for (let f in fields) {
+        if (!(PERSONAL_INFO_FIELDS_CHILD.includes(f))) {
+          delete fields[f];
+        }
+      }
       body.data = fields;
       response.statusCode = 200;
     }
