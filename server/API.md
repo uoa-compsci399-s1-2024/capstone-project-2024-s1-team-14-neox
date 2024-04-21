@@ -59,14 +59,20 @@ reject that sample.
   - Can view only their own children's data.
   - Can view their own personal info.
   - Can view their children's personal info.
+  - Can view their own associations.
+  - Can view their children's associations.
 - Clinician:
   - Can only view data of children they work with.
   - Can view their own personal info.
   - Can view the personal info of the children they work with.
+  - Can view their own associations.
+  - Can view the associations of the children they work with.
+  - Can request to become associated with a given child.
 - Researcher: Can only view anonymised data of children.
 - Admin:
   - Can register and delete users.
   - Can add, delete, and modify a user's personal information.
+  - Can add, delete, and modify a user's associations???
 
 ## Note on IDs
 
@@ -76,6 +82,41 @@ words, a child ID and a user ID can't be the same.
 
 The client should treat it as an opaque string, however.  The fact
 that it can be represented as an integer is an implementation detail.
+
+### Privacy
+
+Although IDs aren't a secret, we will only share IDs to those who need
+it.
+
+## Note on clinicians requesting access to sample data and personal info of a specific child
+
+### Process
+
+#### 1. Clinician sends request to make an association with a given `childID`
+
+To prevent leaking IDs, callers won't get any indication of whether an
+ID exists or not.
+
+Even though we can assume we will trust the process of verifying
+clinicians, we can't trust that their credentials will *never* be
+compromised and thereby allowing attackers to use their account to
+harvest IDs (of children they don't already have associations with)
+and then potentially use those to gain access to other systems.
+
+#### 2. Server always sends a successful response (unless clinician has too many pending requests)
+
+To prevent attacks by flooding the API with association requests to
+non-existent children, we will set a max number of pending requests
+(number TBD).
+
+#### 3. IF `childID` refers to a real child, then parent of the child will see the request when they next retrieve the associations for their child
+
+#### 4. Parent can respond to the request by making a special request to the associations resource for the requesting clinician
+
+#### 5. If accepted, clinician will become authorised for the child
+
+OPEN QUESTION: should requests have a status flag and a way for them
+to be cleared?
 
 ## Note on sample fields
 
@@ -285,7 +326,7 @@ automatically associate the parent with the child.
 OPEN QUESTION: For consistency (and testing purposes), should admins
 be able to register child devices?
 
-### Get list of children associated with a user (GET) (`/users/{userID}/children`)
+### Get list of children associated with a user (GET) (`/users/{userID}/associations`)
 
 #### If authorised:
 
@@ -295,52 +336,98 @@ Server returns HTTP 200 response:
 {
 	"data": {
 		"children": [
-			"childID1",
-			"childID2",
+			{"id": CHILD_ID1},
+			{"id": CHILD_ID2},
 			...
+		],
+		"requests": [
+			{"id": CHILD_ID3, "timestamp": ...},
+			{"id": CHILD_ID4, "timestamp" ...},
 		]
 	}
 }
 ```
 
-#### Open question: Can clinicians also participate as parents to send sample data (using the same account)?
+The `requests` field contains the IDs of children for which the
+clinician has requested access to their sample data and personal info.
+The IDs of such children don't necessarily refer to existing children
+to prevent leaking IDs.  The `timestamp` of pending requests will be
+an ISO8601-formatted datetime with timezone.
 
-If we allow them, we'd need to differentiate the fields in this
-response by the user's own children and their patients.
+#### If not authorised OR no such user:
 
-### Get parents of a given child (GET) (`/children/{childID}/parents`)
+Server returns 403.
 
-#### If authorised:
+### Get users associated with a given child (GET) (`/children/{childID}/associations`)
+
+#### If authorised but NOT the parent of child:
 
 Server returns HTTP 200 response:
 
 ``` json
 {
 	"data": {
-		"parents": [
-			"userID1",
-			"userID2",
-			...
-		]
-	}
-}
-```
-
-### Get clinicians for a given child (GET) (`/children/{childID}/clinicians`)
-
-#### If authorised:
-
-Server returns HTTP 200 response:
-
-``` json
-{
-	"data": {
+		"parent_id": USERID_PARENT,
 		"clinicians": [
-			"userID1",
-			"userID2",
+			{"id": USERID_CLINICIAN1},
+			{"id": USERID_CLINICIAN2},
+			...
+		],
+	}
+}
+```
+
+#### If authorised AND the parent of child:
+
+Server returns HTTP 200 response:
+
+``` json
+{
+	"data": {
+		"parent_id": USERID_PARENT,
+		"clinicians": [
+			{"id": USERID_CLINICIAN1},
+			{"id": USERID_CLINICIAN2},
+			...
+		],
+		"requests": [
+			{"id": USERID_CLINICIAN1, "timestamp": ...},
+			{"id": USERID_CLINICIAN2, "timestamp": ...},
 			...
 		]
 	}
+}
+```
+
+The `requests` field contains the IDs of clinicians who have requested
+access to sample data and personal info of the child.  The `timestamp`
+of pending requests will be an ISO8601-formatted datetime with
+timezone.  To respond, send a POST request to the associations
+resource of the clinician (ie, `/users/{userID}/associations`).
+
+#### If not authorised OR no such child:
+
+Server returns 403.
+
+##### Who is *not* authorised
+
+- Parent-users who *aren't* the parent of the child
+- Researchers
+
+### CLINICIAN: Request access to sample data and personal info of a specific child (POST) (`/children/{childID}/associations`)
+
+First, the clinician must know the ID of the child so they must ask the parent.
+
+Request body is undefined.  Future versions of the API may define this.
+
+To prevent leaking child IDs, this request will always succeed (HTTP
+status 2XX) even if the child ID doesn't refer to an existing child.
+
+### PARENT: Respond to clinician's request for child association (POST) (`/users/{userID}/associations/requests`)
+
+```json
+{
+	"accept": TRUE_OR_FALSE,
 }
 ```
 
