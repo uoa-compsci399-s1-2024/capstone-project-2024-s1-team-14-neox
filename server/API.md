@@ -290,7 +290,7 @@ If not authorised OR no such user:
 Return 403 response where the `resource` field of the error response
 is the same as the URI at which the action was invoked.
 
-### Delete a specific user (DELETE) (`/users/{userID}`)
+### LOW PRIORITY: Delete a specific user (DELETE) (`/users/{userID}`)
 
 If authorised: server will delete user with ID `userID` and return a
 204 response.
