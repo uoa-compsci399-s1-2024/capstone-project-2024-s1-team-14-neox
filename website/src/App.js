@@ -46,10 +46,10 @@ function fetchDataAndDownload() {
   axios.get('https://m0q0u417k8.execute-api.ap-southeast-2.amazonaws.com/dev/samples')
     .then(response => {
       const data = response.data.map(entry => ({
-        tstamp: entry.tstamp,
+        tstamp: entry.timestamp,
         child_id: entry.child_id,
-        uv_index: entry.uv_index,
-        lux: entry.lux
+        uv_index: entry.uv,
+        lux: entry.light
       }));
       downloadCSV(data, 'sample.csv');
     })
