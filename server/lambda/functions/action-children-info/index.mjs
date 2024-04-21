@@ -96,7 +96,6 @@ export const handler = async (event) => {
       delete fields.parent_id;
       body.data = fields;
       response.statusCode = 200;
-      response.body = JSON.stringify(body);
     }
   } else {
     assert(event.httpMethod.toUpperCase() == "PUT" || event.httpMethod.toUpperCase() == "PATCH");
@@ -130,7 +129,6 @@ export const handler = async (event) => {
       await db.query("ROLLBACK");
       response.statusCode = 400;
       body.errors = errors;
-      response.body = JSON.stringify(body);
     } else {
       await db.query("COMMIT");
       response.statusCode = 204;
@@ -139,6 +137,7 @@ export const handler = async (event) => {
     assert(response.data === undefined, "info replace/update action returned some data but it should never do it");
   }
 
+  response.body = JSON.stringify(body);
   addCorsHeaders(response);
   return response;
 };
