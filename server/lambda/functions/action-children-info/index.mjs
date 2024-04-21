@@ -80,11 +80,14 @@ export const handler = async (event) => {
     } else {
       assert(res.rows.length === 1, `${childID}: somehow saw multiple child rows with the same ID (which is primary key!)`);
       const fields = res.rows[0];
+      let deletedFields = [];
       for (let f in fields) {
         if (!(PERSONAL_INFO_FIELDS_CHILD.includes(f))) {
           delete fields[f];
+          deletedFields.push(f);
         }
       }
+      console.log(`${childID}: deleted the following fields before sending to caller: ${deletedFields}`);
       body.data = fields;
       response.statusCode = 200;
     }
