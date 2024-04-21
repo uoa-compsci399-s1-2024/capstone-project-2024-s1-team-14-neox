@@ -5,6 +5,9 @@ import {
   TEMP_PARENT_ID,
 } from "/opt/nodejs/lib.mjs";
 import assert from "node:assert/strict";
+import {
+  format,
+} from "date-fns";
 
 let db = await connectToDB();
 
@@ -88,6 +91,9 @@ export const handler = async (event) => {
         }
       }
       console.log(`${childID}: deleted the following fields before sending to caller: ${deletedFields}`);
+      if (fields.birthdate != null) {
+        fields.birthdate = format(fields.birthdate, "yyyy-MM-dd");
+      }
       body.data = fields;
       response.statusCode = 200;
     }
