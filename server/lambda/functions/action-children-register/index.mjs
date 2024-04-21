@@ -15,13 +15,14 @@ export const handler = async (event) => {
   let attempts = 0;
   let allocated = false;
   let tentativeChildID;
+  const parentID = TEMP_PARENT_ID;
   while (attempts < MAX_ATTEMPTS) {
     tentativeChildID = generateID();
-    console.log(`attempt ${attempts+1}: trying to allocate ID ${tentativeChildID}`);
+    console.log(`attempt ${attempts+1}/${MAX_ATTEMPTS}: trying to allocate ID ${tentativeChildID} to parent with ID ${parentID}`);
     try {
       await db.query(
         "INSERT INTO children (id,parent_id) VALUES ($1,$2)",
-        [tentativeChildID,TEMP_PARENT_ID]
+        [tentativeChildID, parentID]
       );
     } catch (e) {
       if (e.code === UNIQUE_VIOLATION && e.constraint === "children_pkey") {
