@@ -17,18 +17,6 @@ const PERSONAL_INFO_FIELDS_CHILD = [
   "nickname",
 ];
 
-async function clearPersonalInfoFields(db, childID)
-{
-  await db.query(`
-    UPDATE children
-      SET birthdate = NULL,
-          family_name = NULL,
-          given_name = NULL,
-          middle_name = NULL,
-          nickname = NULL
-    WHERE id = $1`, [childID]);
-}
-
 async function setPersonalInfoFields(db, infoResource, childID, fields)
 {
   let errors = [];
@@ -104,7 +92,14 @@ export const handler = async (event) => {
     try {
       await db.query("BEGIN");
       if (event.httpMethod.toUpperCase() == "PUT") {
-        await clearPersonalInfoFields(db, childID);
+        await db.query(`
+          UPDATE children
+            SET birthdate = NULL,
+                family_name = NULL,
+                given_name = NULL,
+                middle_name = NULL,
+                nickname = NULL
+          WHERE id = $1`, [childID]);
       }
       errors = await setPersonalInfoFields(
         db,
