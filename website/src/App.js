@@ -43,7 +43,7 @@ function convertToCSV(data) {
   return header + rows;
 }
 function fetchDataAndDownload() {
-  axios.get('https://m0q0u417k8.execute-api.ap-southeast-2.amazonaws.com/dev/samples')
+  axios.get(`${process.env.REACT_APP_API_URL}/samples`)
     .then(response => {
       const data = response.data.map(entry => ({
         tstamp: entry.timestamp,
