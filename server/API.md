@@ -236,7 +236,7 @@ If authorised:
 - PATCH: server will update only the personal info fields of `userID`
   supplied by caller.
 
-Personal info schema:
+Schema of `data` field of response:
 ```json
 {
 	"<PERSONAL_INFO_FIELD_NAME>": "<PERSONAL_INFO_FIELD_VALUE>",
