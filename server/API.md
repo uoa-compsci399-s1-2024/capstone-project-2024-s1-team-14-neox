@@ -156,7 +156,6 @@ Expect them also.
 The schema for response bodies from every status code (except 204 of course, and also 401):
 ```json
 {
-	"version": API_VERSION,
 	"data": CONTENT,
 	"metadata": {
 		"key1": "val1",
@@ -167,7 +166,6 @@ The schema for response bodies from every status code (except 204 of course, and
 ```
 where:
 
-- the `version` key is always first;
 - the content and type of `API_VERSION` is currently unspecified (maybe int or maybe string); and
 - the schema for `CONTENT` will differ depending on the API action and status code.
 
