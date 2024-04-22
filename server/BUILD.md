@@ -51,14 +51,14 @@ To initialise the database:
 sam remote invoke --config-env <USECASE>-<ENVIRONMENT> FuncMetaSetupDB
 ```
 
+You can also use `FuncMetaSetupDB` to clear the DB.
+
 Since we don't have user auth yet, setup test users, children, and
 data:
 
 ``` shell
 sam remote invoke --config-env <USECASE>-<ENVIRONMENT> FuncMetaSetupTestData
 ```
-
-You can also use `FuncMetaSetupTestData` to clear the DB.
 
 View all tables with:
 
