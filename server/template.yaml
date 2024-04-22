@@ -52,6 +52,7 @@ Parameters:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
     Type: String
     Default: 10.8.21.0/24
+# Mappings:
 
 Conditions:
   IsProd: !Equals [ !Ref Environment, prod ]
@@ -66,17 +67,6 @@ Rules:
       - Assert:
           Fn::Equals: [ !Ref Environment, prod ]
         AssertionDescription: Prod use case implies prod environment
-
-Mappings:
-  EnvironmentMap:
-    dev:
-      Origin: !ImportValue
-        Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-dev-website"
-    prod:
-      Origin: !ImportValue
-        Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-prod-website"
-    localhost:
-      Origin: !Sub "'http://localhost:${WebsiteLocalhostPort}'"
 
 Resources:
   VPC:
@@ -415,7 +405,22 @@ Resources:
       # Why the difference between Ref output and hardcoding it????
       StageName: dev
       Cors:
-        AllowOrigin: !FindInMap [ EnvironmentMap, !Ref Environment, Origin ]
+        AllowOrigin: !If
+          - IsProd
+          - Fn::Sub:
+            - "'${Origin}'"
+            - Origin: !ImportValue
+                Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-prod-website"
+          - !If
+            - IsDev
+            - Fn::Sub:
+              - "'${Origin}'"
+              - Origin: !ImportValue
+                  Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-dev-website"
+            - !If
+              - IsLocalhostWebsite
+              - !Sub "'http://localhost:${WebsiteLocalhostPort}'"
+              - "'*'"
         AllowMethods: "'OPTIONS, GET, POST, PUT, PATCH, DELETE'"
         AllowHeaders: "'Origin, Content-Type, Accept'"
       MethodSettings:
@@ -714,4 +719,19 @@ Outputs:
 
   CorsAllowOrigin:
     Description: The origin which CORS will accept
-    Value: !FindInMap [ EnvironmentMap, !Ref Environment, Origin ]
+    Value: !If
+      - IsProd
+      - Fn::Sub:
+        - "'${Origin}'"
+        - Origin: !ImportValue
+            Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-prod-website"
+      - !If
+        - IsDev
+        - Fn::Sub:
+          - "'${Origin}'"
+          - Origin: !ImportValue
+              Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-dev-website"
+        - !If
+          - IsLocalhostWebsite
+          - !Sub "'http://localhost:${WebsiteLocalhostPort}'"
+          - "'*'"
