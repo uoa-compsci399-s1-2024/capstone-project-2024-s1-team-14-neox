@@ -14,15 +14,22 @@ DROP TABLE IF EXISTS parents;
 CREATE TABLE parents (
        -- id INTEGER NOT NULL PRIMARY KEY,
        id VARCHAR(50) NOT NULL PRIMARY KEY,
-       fname VARCHAR(100) NOT NULL,
-       lname VARCHAR(100) NOT NULL
+       -- don't care about parents' birthdate
+       family_name TEXT,
+       given_name TEXT,
+       middle_name TEXT,
+       nickname TEXT,
+       email TEXT
 );
 
 CREATE TABLE children (
        id VARCHAR(50) NOT NULL PRIMARY KEY,
        parent_id VARCHAR(50) NOT NULL,
-       fname VARCHAR(100),
-       lname VARCHAR(100),
+       birthdate DATE,
+       family_name TEXT,
+       given_name TEXT,
+       middle_name TEXT,
+       nickname TEXT,
        FOREIGN KEY (parent_id) REFERENCES parents (id)
 );
 
