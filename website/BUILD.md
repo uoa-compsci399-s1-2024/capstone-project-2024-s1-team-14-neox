@@ -143,8 +143,8 @@ Visit the website at this URL: `Website<ENV>URL`.
 Right now, our S3 buckets are automatically assigned policy statements
 that reject unencrypted HTTP connections.  I have to manually remove
 them every time they're re-applied.  (TODO add instructions for how to
-do this).  Once we have an ACM certificate, we will no longer need to
-do this.
+do this).  Once we figure out a way to serve our static site content,
+we will no longer need to do this.
 
 ### 4. Cleanup
 
