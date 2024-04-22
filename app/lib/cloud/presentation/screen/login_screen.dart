@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/services/aws_cognito.dart';
-
 import '../../cubit/login_cubit.dart';
 import '../widget/input_field.dart';
 import '../widget/primary_btn.dart';
 import 'spacer.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -71,10 +71,29 @@ class _LoginScreenState extends State<LoginScreen> {
               icon: const Icon(FontAwesomeIcons.google, color: Colors.white),
               onPressed: () => context.read<LoginCubit>().logInWithGoogle(),
             ),
-            PrimaryBtn(
-                btnText: 'Login',
-                btnFun: () =>
-                    login(emailController.text, passwordController.text))
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: PrimaryBtn(
+                    btnText: 'Login',
+                    btnFun: () => login(emailController.text, passwordController.text),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => RegisterScreen()),
+                      );
+                    },
+                    child: Text('Dont have an account? Register here'),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -84,5 +103,4 @@ class _LoginScreenState extends State<LoginScreen> {
   void login(String email, String password) {
     AWSServices().createInitialRecord(email, password);
   }
-
 }

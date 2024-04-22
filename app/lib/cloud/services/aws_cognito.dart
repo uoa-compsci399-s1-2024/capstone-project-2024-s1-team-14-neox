@@ -8,6 +8,28 @@ class AWSServices {
     '${(dotenv.env['CLIENT_ID'])}',
   );
 
+
+  void register(String email, String password, String nickname, String middleName, String givenName, String familyName) async {
+    try {
+      var signUpResult = await userPool.signUp(
+        email,
+        password,
+        userAttributes: [
+          AttributeArg(name: 'email', value: email),
+          AttributeArg(name: 'nickname', value: 'Hrik'),
+          AttributeArg(name: 'middle_name', value: 'Hrik'),
+          AttributeArg(name: 'given_name', value: 'Hrik'),
+          AttributeArg(name: 'family_name', value: 'Hrik'),
+          // Add more attributes as needed
+        ],
+      );
+      print('User registration successful: ${signUpResult.user}');
+    } catch (e) {
+      print('Error during user registration: $e');
+    }
+  }
+
+
   Future createInitialRecord(email, password) async {
     debugPrint('Authenticating User...');
     final cognitoUser = CognitoUser(email, userPool);
