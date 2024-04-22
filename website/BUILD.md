@@ -1,4 +1,4 @@
-# How to build the website
+# How to build the website (for website team)
 
 ## Prerequisites
 
@@ -11,6 +11,8 @@ Before we do anything, we need to first create the S3 buckets for the
 Cloudformation stack called `frontend`.  Check the Cloudformation
 console on the AWS website.
 
+However, if you just want to test on localhost, you can skip this step.
+
 If there is no such Cloudformation stack, run (in this directory):
 
 ``` shell
@@ -21,25 +23,33 @@ The output will look like this:
 
 ```
 CloudFormation outputs from deployed stack
------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
 Outputs
------------------------------------------------------------------------------------------------------------------------------------------
-Key                 WebsiteBucketProdS3Name
-Description         Name of S3 bucket for website
-Value               neox-frontend-prod
+----------------------------------------------------------------------------------------------
+Key                 ServerDevURL
+Description         -
+Value               http://neox-frontend-server-dev.s3-website-ap-southeast-2.amazonaws.com
 
-Key                 WebsiteProdURL
-Description         URL for website
-Value               http://neox-frontend-prod.s3-website-ap-southeast-2.amazonaws.com
-
-Key                 WebsiteBucketDevS3Name
-Description         Name of S3 bucket for website
-Value               neox-frontend-dev
+Key                 WebsiteDevS3Name
+Description         -
+Value               neox-frontend-website-dev
 
 Key                 WebsiteDevURL
-Description         URL for website
-Value               http://neox-frontend-dev.s3-website-ap-southeast-2.amazonaws.com
------------------------------------------------------------------------------------------------------------------------------------------
+Description         -
+Value               http://neox-frontend-website-dev.s3-website-ap-southeast-2.amazonaws.com
+
+Key                 AppDevURL
+Description         -
+Value               http://neox-frontend-app-dev.s3-website-ap-southeast-2.amazonaws.com
+
+Key                 ServerDevS3Name
+Description         -
+Value               neox-frontend-server-dev
+
+Key                 AppDevS3Name
+Description         -
+Value               neox-frontend-app-dev
+----------------------------------------------------------------------------------------------
 ```
 
 Have each of these values ready for later.
@@ -59,19 +69,11 @@ developing on `localhost`, for the `dev` website, or for the `prod`
 website, run this:
 
 ```
-sam deploy --config-env website-ENVIRONMENT --guided
+sam deploy --config-env website-ENVIRONMENT
 ```
 
-When deploying, use the default values for everything EXCEPT when it
-asks if it's OK for lambdas to have no auth (eg `FuncChildrenRegister
-has no authentication. Is this okay? [y/N]`).  Answer `y` instead of
-the default `n` (no).
-
-DO NOT say `y` when it asks `Save arguments to configuration file
-[Y/n]`.  Say `n` instead.
-
 Once the deployment succeeds, you will see the outputs of the
-Cloudformation stack as follows:
+CloudFormation stack which look look this:
 
 ```
 CloudFormation outputs from deployed stack
@@ -101,7 +103,7 @@ Follow the instructions in the link to:
 
 ## Develop on website hosted on AWS
 
-### 2. Build the web app (`npm start`) with the API URL as an environment variable
+### 2. Build the web app (`npm run build`) with the API URL as an environment variable
 
 Follow the instructions in the link to:
 
@@ -124,12 +126,14 @@ which you are developing:
 - If you're developing for the production[^2] website, you would
   replace `<ENV>` with `prod`.
 
+FOR NOW: we only support `dev`.
+
 #### Instructions
 
 Run:
 
 ``` shell
-aws s3 sync build/ s3://WebsiteBucket<ENV>S3Name  --delete
+aws s3 sync build/ s3://Website<ENV>S3Name  --delete
 ```
 
 Visit the website at this URL: `Website<ENV>URL`.
@@ -146,8 +150,8 @@ do this.
 
 When you're done, shut down the instances of the backend you used.
 
-Run the following command with the same value for `--config-env` as
-when you created the backend instance:
+In the `server/` directory, run the following command with the same
+value for `--config-env` as when you created the backend instance:
 
 ``` shell
 sam delete --config-env website-ENVIRONMENT
