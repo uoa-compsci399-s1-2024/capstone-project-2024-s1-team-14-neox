@@ -47,68 +47,70 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(
         title: const Text("Register"),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            InputField(
-              controller: emailController,
-              isPassword: false,
-              labelTxt: 'Email',
-              icon: Icons.person,
-            ),
-            InputField(
-              controller: passwordController,
-              isPassword: true,
-              labelTxt: 'Password',
-              icon: Icons.lock,
-            ),
-            InputField(
-              controller: nicknameController,
-              isPassword: false,
-              labelTxt: 'Nickname',
-              icon: Icons.person,
-            ),
-            InputField(
-              controller: middleNameController,
-              isPassword: false,
-              labelTxt: 'Middle Name',
-              icon: Icons.person,
-            ),
-            InputField(
-              controller: givenNameController,
-              isPassword: false,
-              labelTxt: 'Given Name',
-              icon: Icons.person,
-            ),
-            InputField(
-              controller: familyNameController,
-              isPassword: false,
-              labelTxt: 'Family Name',
-              icon: Icons.person,
-            ),
-            HeightSpacer(myHeight: 20),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: PrimaryBtn(
-                btnText: 'Register',
-                btnFun: () => register(
-                  emailController.text,
-                  passwordController.text,
-                  nicknameController.text,
-                  middleNameController.text,
-                  givenNameController.text,
-                  familyNameController.text,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              InputField(
+                controller: emailController,
+                isPassword: false,
+                labelTxt: 'Email',
+                icon: Icons.person,
+              ),
+              InputField(
+                controller: passwordController,
+                isPassword: true,
+                labelTxt: 'Password',
+                icon: Icons.lock,
+              ),
+              InputField(
+                controller: nicknameController,
+                isPassword: false,
+                labelTxt: 'Nickname',
+                icon: Icons.person,
+              ),
+              InputField(
+                controller: middleNameController,
+                isPassword: false,
+                labelTxt: 'Middle Name',
+                icon: Icons.person,
+              ),
+              InputField(
+                controller: givenNameController,
+                isPassword: false,
+                labelTxt: 'Given Name',
+                icon: Icons.person,
+              ),
+              InputField(
+                controller: familyNameController,
+                isPassword: false,
+                labelTxt: 'Family Name',
+                icon: Icons.person,
+              ),
+              HeightSpacer(myHeight: 20),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PrimaryBtn(
+                  btnText: 'Register',
+                  btnFun: () => register(context,
+                    emailController.text,
+                    passwordController.text,
+                    nicknameController.text,
+                    middleNameController.text,
+                    givenNameController.text,
+                    familyNameController.text,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  void register(String email, String password, String nickname, String middleName, String givenName, String familyName) {
-    AWSServices().register(email, password, nickname, middleName, givenName, familyName);
+  void register(BuildContext context, String email, String password, String nickname, String middleName, String givenName, String familyName) {
+    AWSServices().register(context, email, password, nickname, middleName, givenName, familyName);
   }
 }

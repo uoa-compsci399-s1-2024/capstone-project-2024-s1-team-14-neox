@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.all(8.0),
                   child: PrimaryBtn(
                     btnText: 'Login',
-                    btnFun: () => login(emailController.text, passwordController.text),
+                    btnFun: () => login(context, emailController.text, passwordController.text),
                   ),
                 ),
                 Padding(
@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void login(String email, String password) {
-    AWSServices().createInitialRecord(email, password);
+  void login(BuildContext context, email, String password) {
+    AWSServices().createInitialRecord(context, email, password);
   }
 }
