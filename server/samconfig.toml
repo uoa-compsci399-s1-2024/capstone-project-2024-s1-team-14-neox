@@ -37,7 +37,7 @@ resolve_s3 = true
 s3_prefix = "backend-server-dev"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "VpcCIDR=\"10.16.0.0/16\" PrivateSubnet1CIDR=\"10.16.20.0/24\" PrivateSubnet2CIDR=\"10.16.21.0/24\""
+parameter_overrides = "UseCase=\"server\" Environment=\"dev\" VpcCIDR=\"10.16.0.0/16\" PrivateSubnet1CIDR=\"10.16.20.0/24\" PrivateSubnet2CIDR=\"10.16.21.0/24\""
 
 [server-localhost.global.parameters]
 stack_name = "backend-server-dev"
