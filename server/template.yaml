@@ -398,8 +398,13 @@ Resources:
     Type: AWS::Serverless::Api
     DependsOn: APICloudWatchRoleArn
     Properties:
-      AlwaysDeploy: true
-      StageName: !Ref Environment
+      # It doesn't actually matter what value this is since we separate dev and prod instances.
+      # I also get baffling errors saying:
+      #   <API_PHYSICAL_ID>|<STAGE> already exists in stack <STACK_ARN>
+      # where <STAGE> is the Environment parameter
+      # EVEN if Environment is dev.
+      # Why the difference between Ref output and hardcoding it????
+      StageName: dev
       # TODO: more restrictive?
       Cors:
         AllowOrigin: !If
@@ -712,7 +717,7 @@ Outputs:
 
   APIEndpoint:
     Description: Base URL of API
-    Value: !Sub "https://${API}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+    Value: !Sub "https://${API}.execute-api.${AWS::Region}.amazonaws.com/dev"
 
   CorsAllowOrigin:
     Description: The origin which CORS will accept
