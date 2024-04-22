@@ -2,8 +2,6 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: SAM template for cloud backend
 Transform: AWS::Serverless-2016-10-31
 
-# TODO: set up dev and "prod" (ie, OK for non-cloud devs to use) environments
-
 Parameters:
   Environment:
     Description: The environment in which to run the stack (needed for CORS)
