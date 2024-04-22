@@ -21,11 +21,11 @@ version = 0.1
 
 # TODO: Rename the stack to match the general pattern.  This stack
 # already existed before this file was refactored.
-[app.global.parameters]
-stack_name = "backend-app"
-[app.deploy.parameters]
+[app-dev.global.parameters]
+stack_name = "backend-app-dev"
+[app-dev.deploy.parameters]
 resolve_s3 = true
-s3_prefix = "backend-app"
+s3_prefix = "backend-app-dev"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 parameter_overrides = "UseCase=\"app\" Environment=\"dev\" VpcCIDR=\"10.8.0.0/16\" PrivateSubnet1CIDR=\"10.8.20.0/24\" PrivateSubnet2CIDR=\"10.8.21.0/24\""
