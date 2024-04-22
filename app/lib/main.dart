@@ -3,6 +3,7 @@ import 'package:capstone_project_2024_s1_team_14_neox/dashboard/presentation/das
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
 // Import bottom navigation screens
@@ -16,8 +17,9 @@ import 'cloud/presentation/cloud_home.dart';
 import 'child_home/cubit/all_child_profile_cubit.dart';
 import 'data/database_viewer.dart';
 
-void main() {
+void main() async{
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true); // Used to log BLE
+  await dotenv.load();
   runApp(const MyApp());
 
 }
