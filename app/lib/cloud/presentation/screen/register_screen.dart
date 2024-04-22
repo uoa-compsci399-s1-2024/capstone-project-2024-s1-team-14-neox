@@ -65,21 +65,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 icon: Icons.lock,
               ),
               InputField(
-                controller: nicknameController,
+                controller: givenNameController,
                 isPassword: false,
-                labelTxt: 'Nickname',
+                labelTxt: 'Given Name',
                 icon: Icons.person,
               ),
               InputField(
                 controller: middleNameController,
                 isPassword: false,
                 labelTxt: 'Middle Name',
-                icon: Icons.person,
-              ),
-              InputField(
-                controller: givenNameController,
-                isPassword: false,
-                labelTxt: 'Given Name',
                 icon: Icons.person,
               ),
               InputField(
@@ -96,7 +90,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   btnFun: () => register(context,
                     emailController.text,
                     passwordController.text,
-                    nicknameController.text,
                     middleNameController.text,
                     givenNameController.text,
                     familyNameController.text,
@@ -110,7 +103,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void register(BuildContext context, String email, String password, String nickname, String middleName, String givenName, String familyName) {
-    AWSServices().register(context, email, password, nickname, middleName, givenName, familyName);
+  void register(BuildContext context, String email, String password,  String givenName, String middleName, String familyName) {
+    AWSServices().register(context, email, password, givenName, middleName, familyName);
   }
 }

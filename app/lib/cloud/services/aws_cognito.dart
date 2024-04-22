@@ -16,7 +16,7 @@ class AWSServices {
 
 
   void register(BuildContext context, String email, String password,
-      String nickname, String middleName, String givenName,
+       String middleName, String givenName,
       String familyName) async {
     try {
       var signUpResult = await userPool.signUp(
@@ -24,7 +24,7 @@ class AWSServices {
         password,
         userAttributes: [
           AttributeArg(name: 'email', value: email),
-          AttributeArg(name: 'nickname', value: nickname),
+          AttributeArg(name: 'nickname', value: 'whocares'),
           AttributeArg(name: 'middle_name', value: middleName),
           AttributeArg(name: 'given_name', value: givenName),
           AttributeArg(name: 'family_name', value: familyName),
