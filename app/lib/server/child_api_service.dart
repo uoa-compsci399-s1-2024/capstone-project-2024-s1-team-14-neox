@@ -2,15 +2,16 @@ import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/server/child_data.dart';
 import 'package:dio/dio.dart';
+import 'dart:convert';
 
 class ChildApiService {
   static const String apiUrl =
-      'https://e4h0hpg8k5.execute-api.ap-southeast-2.amazonaws.com/dev/samples';
+      'https://lso1fucxza.execute-api.ap-southeast-2.amazonaws.com/dev';
 
   static void fetchChildrenData() async {
     Dio dio = Dio();
     try {
-      var response = await dio.get(apiUrl);
+      var response = await dio.get('$apiUrl/samples');
       print(response);
     } catch (e) {
       print(e);
@@ -30,12 +31,14 @@ class ChildApiService {
     Dio dio = Dio();
     var sampleList = await ArduinoDataEntity.queryArduinoDataById(childId);
     var dataList = [];
+    ChildEntity? child = await ChildEntity.queryChildById(childId);
+    String? serverId = child?.serverId;
 
     for (var sample in sampleList) {
-      ChildData newSample = sample.toChildData();
+      ChildData newSample = sample.toChildData(serverId!);
       dataList.add(newSample);
     }
-    final url = '$apiUrl/$childId';
+    final url = '$apiUrl/samples/$serverId';
     try {
       List<Map<String, dynamic>> jsonSamples = [];
 
@@ -51,4 +54,17 @@ class ChildApiService {
       print('Error posting data: $e');
     }
   }
+
+  static Future<String> registerChild()async {
+    print('hello');
+    Dio dio = Dio();
+    const url = '$apiUrl/children';
+    var response = await dio.post(url);
+
+    print(response.data);
+    Map<String, dynamic> responseData = response.data;
+    String id = responseData['data']['id'];
+    return id;
+  }
+
 }

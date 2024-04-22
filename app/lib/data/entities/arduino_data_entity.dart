@@ -69,10 +69,10 @@ class ArduinoDataEntity {
         childId: Value(childId));
   }
 
-   ChildData toChildData() {
+   ChildData toChildData(String serverId) {
     return ChildData(
       timestamp: datetime.toIso8601String(),
-      childId: childId.toString(),
+      childId:  serverId,
       uv: uv!,
       light: light!,
     );

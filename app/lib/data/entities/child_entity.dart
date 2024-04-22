@@ -8,7 +8,7 @@ import 'package:capstone_project_2024_s1_team_14_neox/server/child_api_service.d
 class Children extends Table {
   IntColumn get id => integer().autoIncrement()();
 
-  IntColumn get serverId => integer()();
+  TextColumn get serverId => text()();
 
   TextColumn get name => text()();
 
@@ -25,7 +25,7 @@ class ChildEntity {
   DateTime birthDate;
   String? deviceRemoteId;
   String? authorisationCode;
-  int? serverId;
+  String? serverId;
 
   //TODO: deviceRemoteId is duplicated in child entity and arduino device entity
 
@@ -40,7 +40,7 @@ class ChildEntity {
   ChildrenCompanion toCompanion() {
     return ChildrenCompanion(
       name: Value(name),
-      serverId: Value(serverId ?? 0),
+      serverId: Value(serverId ?? ''),
       birthDate: Value(birthDate),
       deviceRemoteId: Value(deviceRemoteId ?? ''),
       authorisationCode: Value(authorisationCode ?? ''),
@@ -49,8 +49,8 @@ class ChildEntity {
 
 
 
-  ////////////////////////////////////////////////////////////////////////////
-  // CREATE //////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////
+  //   // CREATE ///////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
 
   static Future<void> saveSingleChildEntity(ChildEntity childEntity) async {
@@ -70,15 +70,21 @@ class ChildEntity {
 
   static Future<void> saveSingleChildEntityFromParameters(
       String name, DateTime birthDate) async {
+    String serverId = await ChildApiService.registerChild();
+
     ChildEntity childEntity = ChildEntity(
       name: name,
       birthDate: birthDate,
+      serverId:  serverId,
     );
+
     AppDb db = AppDb.instance();
     await db
         .into(db.children)
         .insert(childEntity.toCompanion(), mode: InsertMode.insert);
   }
+
+
   ////////////////////////////////////////////////////////////////////////////
   // READ ////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
@@ -94,8 +100,6 @@ class ChildEntity {
   static Future<List<ChildEntity>> queryAllChildren() async {
     AppDb db = AppDb.instance();
     List<ChildEntity> childEntityList = await db.select(db.children).get();
-    ChildApiService.postData(2);
-
     return childEntityList;
   }
 

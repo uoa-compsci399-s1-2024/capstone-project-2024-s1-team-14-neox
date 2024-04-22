@@ -1,7 +1,7 @@
 
 class ChildData {
   final String timestamp;
-  final String childId;
+  String childId;
   final int uv;
   final int light;
 
@@ -37,23 +37,23 @@ class ChildData {
 
 
 
-  static List<ChildData> getChildDataList() {
+  static List<ChildData> getChildDataList(String id) {
     List<ChildData> childDataList = [
       ChildData(
         timestamp: '2024-04-21T08:00:00',
-        childId: '22',
+        childId: id,
         uv: 5,
         light: 100,
       ),
       ChildData(
         timestamp: '2024-04-21T08:15:00',
-        childId: '22',
+        childId: id,
         uv: 6,
         light: 110,
       ),
       ChildData(
         timestamp: '2024-04-21T08:30:00',
-        childId: '22',
+        childId: id,
         uv: 4,
         light: 90,
       ),
