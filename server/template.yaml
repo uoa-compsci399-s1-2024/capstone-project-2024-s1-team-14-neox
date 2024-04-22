@@ -713,3 +713,22 @@ Outputs:
   APIEndpoint:
     Description: Base URL of API
     Value: !Sub "https://${API}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+
+  CorsAllowOrigin:
+    Description: The origin which CORS will accept
+    Value: !If
+      - IsProd
+      - Fn::Sub:
+        - "'${Origin}'"
+        - Origin: !ImportValue
+            Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-prod-website"
+      - !If
+        - IsDev
+        - Fn::Sub:
+          - "'${Origin}'"
+          - Origin: !ImportValue
+              Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-dev-website"
+        - !If
+          - IsLocalhostWebsite
+          - !Sub "'http://localhost:${WebsiteLocalhostPort}'"
+          - "'*'"
