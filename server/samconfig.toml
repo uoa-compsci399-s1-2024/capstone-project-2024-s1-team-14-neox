@@ -1,16 +1,23 @@
 version = 0.1
 
-[default.global.parameters]
-stack_name = "sam-cloud-backend"
-region = "ap-southeast-2"
-[default.deploy.parameters]
-resolve_s3 = true
-confirm_changeset = true
-capabilities = "CAPABILITY_IAM"
-image_repositories = []
-parameter_overrides = "VpcCIDR=\"10.1.0.0/16\" PrivateSubnet1CIDR=\"10.1.20.0/24\" PrivateSubnet2CIDR=\"10.1.21.0/24\""
+# [default.global.parameters]
+# stack_name = "sam-cloud-backend"
+# region = "ap-southeast-2"
+# [default.deploy.parameters]
+# resolve_s3 = true
+# confirm_changeset = true
+# capabilities = "CAPABILITY_IAM"
+# image_repositories = []
+# parameter_overrides = "VpcCIDR=\"10.1.0.0/16\" PrivateSubnet1CIDR=\"10.1.20.0/24\" PrivateSubnet2CIDR=\"10.1.21.0/24\""
 
+# These sections are organised by the primary users ("UseCase") of the backend interface.
 
+# Different usecases reside in different CloudFormation stacks (and VPCs).
+
+# Within each usecase, the developments environments ("dev" and
+# "localhost") share a stack and VPC.  This stack and VPC for the
+# development environments is *not* shared with the "prod"
+# environment.
 
 [app.global.parameters]
 stack_name = "backend-app"
@@ -19,29 +26,30 @@ resolve_s3 = true
 s3_prefix = "backend-app"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "VpcCIDR=\"10.8.0.0/16\" PrivateSubnet1CIDR=\"10.8.20.0/24\" PrivateSubnet2CIDR=\"10.8.21.0/24\""
+parameter_overrides = "UseCase=\"app\" Environment=\"dev\" VpcCIDR=\"10.8.0.0/16\" PrivateSubnet1CIDR=\"10.8.20.0/24\" PrivateSubnet2CIDR=\"10.8.21.0/24\""
 
 
 
-[dev.global.parameters]
-stack_name = "backend-dev"
-[dev.deploy.parameters]
+[server-dev.global.parameters]
+stack_name = "backend-server-dev"
+[server-dev.deploy.parameters]
 resolve_s3 = true
-s3_prefix = "backend-dev"
+s3_prefix = "backend-server-dev"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
 parameter_overrides = "VpcCIDR=\"10.16.0.0/16\" PrivateSubnet1CIDR=\"10.16.20.0/24\" PrivateSubnet2CIDR=\"10.16.21.0/24\""
 
-[dev-localhost.global.parameters]
-stack_name = "backend-dev"
-[dev-localhost.deploy.parameters]
-stack_name = "backend-dev"
+[server-localhost.global.parameters]
+stack_name = "backend-server-dev"
+[server-localhost.deploy.parameters]
+stack_name = "backend-server-dev"
 resolve_s3 = true
-s3_prefix = "backend-dev"
+s3_prefix = "backend-server-dev"
 region = "ap-southeast-2"
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "Environment=\"localhost\" WebsiteStackName=\"frontend\" WebsiteLocalhostPort=\"3000\" VpcCIDR=\"10.16.0.0/16\" PrivateSubnet1CIDR=\"10.16.20.0/24\" PrivateSubnet2CIDR=\"10.16.21.0/24\""
+parameter_overrides = "UseCase=\"server\" Environment=\"localhost\" WebsiteStackName=\"frontend\" WebsiteLocalhostPort=\"3000\" VpcCIDR=\"10.16.0.0/16\" PrivateSubnet1CIDR=\"10.16.20.0/24\" PrivateSubnet2CIDR=\"10.16.21.0/24\""
 image_repositories = []
+
 
 
 [website-dev.global.parameters]
@@ -52,28 +60,44 @@ resolve_s3 = true
 s3_prefix = "backend-website-dev"
 region = "ap-southeast-2"
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "Environment=\"dev\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.24.0.0/16\" PrivateSubnet1CIDR=\"10.24.20.0/24\" PrivateSubnet2CIDR=\"10.24.21.0/24\""
-image_repositories = []
-
-[website-prod.global.parameters]
-stack_name = "backend-website-prod"
-[website-prod.deploy.parameters]
-stack_name = "backend-website-prod"
-resolve_s3 = true
-s3_prefix = "backend-website-prod"
-region = "ap-southeast-2"
-capabilities = "CAPABILITY_IAM"
-parameter_overrides = "Environment=\"prod\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.32.0.0/16\" PrivateSubnet1CIDR=\"10.32.20.0/24\" PrivateSubnet2CIDR=\"10.32.21.0/24\""
+parameter_overrides = "UseCase=\"website\" Environment=\"dev\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.24.0.0/16\" PrivateSubnet1CIDR=\"10.24.20.0/24\" PrivateSubnet2CIDR=\"10.24.21.0/24\""
 image_repositories = []
 
 [website-localhost.global.parameters]
-stack_name = "backend-website-localhost"
+stack_name = "backend-website-dev"
 [website-localhost.deploy.parameters]
-stack_name = "backend-website-localhost"
+stack_name = "backend-website-dev"
 resolve_s3 = true
-s3_prefix = "backend-website-localhost"
+s3_prefix = "backend-website-dev"
 region = "ap-southeast-2"
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "Environment=\"localhost\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.48.0.0/16\" PrivateSubnet1CIDR=\"10.48.20.0/24\" PrivateSubnet2CIDR=\"10.48.21.0/24\""
+parameter_overrides = "UseCase=\"website\" Environment=\"localhost\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.24.0.0/16\" PrivateSubnet1CIDR=\"10.24.20.0/24\" PrivateSubnet2CIDR=\"10.24.21.0/24\""
+image_repositories = []
+
+
+
+# Here we integrate everyone's stuff
+
+
+[all-dev.global.parameters]
+stack_name = "backend-all-dev"
+[all-dev.deploy.parameters]
+resolve_s3 = true
+s3_prefix_name = "backend-all-dev"
+region = "ap-southeast-2"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "UseCase=\"all\" Environment=\"dev\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.128.0.0/16\" PrivateSubnet1CIDR=\"10.128.20.0/24\" PrivateSubnet2CIDR=\"10.128.21.0/24\""
+image_repositories = []
+
+# BUT localhost website uses same VPC and stack as dev
+
+[all-localhost.global.parameters]
+stack_name = "backend-all-dev"
+[all-localhost.deploy.parameters]
+resolve_s3 = true
+s3_prefix_name = "backend-all-dev"
+region = "ap-southeast-2"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "UseCase=\"all\" Environment=\"localhost\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.128.0.0/16\" PrivateSubnet1CIDR=\"10.128.20.0/24\" PrivateSubnet2CIDR=\"10.128.21.0/24\""
 image_repositories = []
 
