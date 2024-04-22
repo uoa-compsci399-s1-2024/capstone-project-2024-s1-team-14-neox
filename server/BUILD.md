@@ -58,6 +58,8 @@ data:
 sam remote invoke --config-env <USECASE>-<ENVIRONMENT> FuncMetaSetupTestData
 ```
 
+You can also use `FuncMetaSetupTestData` to clear the DB.
+
 View all tables with:
 
 ``` shell
