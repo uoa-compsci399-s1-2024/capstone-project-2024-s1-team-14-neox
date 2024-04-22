@@ -404,7 +404,6 @@ Resources:
       # EVEN if Environment is dev.
       # Why the difference between Ref output and hardcoding it????
       StageName: dev
-      # TODO: more restrictive?
       Cors:
         AllowOrigin: !If
           - IsProd

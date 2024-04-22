@@ -19,8 +19,6 @@ version = 0.1
 # development environments is *not* shared with the "prod"
 # environment.
 
-# TODO: Rename the stack to match the general pattern.  This stack
-# already existed before this file was refactored.
 [app-dev.global.parameters]
 stack_name = "backend-app-dev"
 [app-dev.deploy.parameters]
