@@ -30,8 +30,8 @@ special uses.
 - website
 - app
 - all (all teams)
-- prod (final product)
-<!-- - ml (machine learning) -->
+- prod (presentable iteration of project)
+- ml (machine learning)
 
 ## Building
 

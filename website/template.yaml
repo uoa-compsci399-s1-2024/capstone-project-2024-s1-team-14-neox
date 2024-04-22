@@ -81,6 +81,16 @@ Resources:
         UseCase: all
         Environment: dev
 
+  MlDevInstance:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: subtemplates/website-template.yaml
+      Parameters:
+        ProjectOrg: !Ref ProjectOrg
+        ParentStackName: !Ref 'AWS::StackName'
+        UseCase: ml
+        Environment: dev
+
   ProdInstance:
     Type: AWS::CloudFormation::Stack
     Condition: ShouldStartProdInstance
@@ -130,6 +140,15 @@ Outputs:
     Value: !GetAtt AllDevInstance.Outputs.WebsiteURL
     Export:
       Name: !Sub "${ProjectOrg}-${AWS::StackName}-all-dev-website"
+
+  MlDevS3Name:
+    Value: !GetAtt MlDevInstance.Outputs.WebsiteBucketS3Name
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-ml-dev-bucket"
+  MlDevURL:
+    Value: !GetAtt MlDevInstance.Outputs.WebsiteURL
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-ml-dev-website"
 
   ProdS3Name:
     Condition: ShouldStartProdInstance

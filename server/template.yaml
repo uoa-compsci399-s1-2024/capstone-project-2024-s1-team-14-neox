@@ -20,6 +20,7 @@ Parameters:
       - server
       - all
       - prod
+      - ml
 
   WebsiteStackName:
     Description: Name of an active CloudFormation stack containing the S3 buckets to use for prod and dev websites.

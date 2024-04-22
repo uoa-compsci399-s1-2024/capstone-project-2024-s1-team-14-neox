@@ -103,3 +103,24 @@ capabilities = "CAPABILITY_IAM"
 parameter_overrides = "UseCase=\"all\" Environment=\"localhost\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.128.0.0/16\" PrivateSubnet1CIDR=\"10.128.20.0/24\" PrivateSubnet2CIDR=\"10.128.21.0/24\""
 image_repositories = []
 
+
+# Special usecases
+
+[ml-dev.global.parameters]
+stack_name = "backend-ml-dev"
+[ml-dev.deploy.parameters]
+resolve_s3 = true
+s3_prefix = "backend-ml-dev"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "UseCase=\"ml\" Environment=\"dev\" VpcCIDR=\"10.150.0.0/16\" PrivateSubnet1CIDR=\"10.150.20.0/24\" PrivateSubnet2CIDR=\"10.150.21.0/24\""
+
+[ml-localhost.global.parameters]
+stack_name = "backend-ml-dev"
+[ml-localhost.deploy.parameters]
+stack_name = "backend-ml-dev"
+resolve_s3 = true
+s3_prefix = "backend-ml-dev"
+region = "ap-southeast-2"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "UseCase=\"ml\" Environment=\"localhost\" WebsiteStackName=\"frontend\" WebsiteLocalhostPort=\"3000\" VpcCIDR=\"10.150.0.0/16\" PrivateSubnet1CIDR=\"10.150.20.0/24\" PrivateSubnet2CIDR=\"10.150.21.0/24\""
+image_repositories = []
