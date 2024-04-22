@@ -15,8 +15,9 @@ We have multiple "usecases" for the backend, each of which will be
 launched in separate CloudFormation stacks and VPCs.
 
 Within each "usecase", we have "environments" which split into
-development environments (`dev` and `localhost`) and the production
-environment (`prod`).
+development environments (`dev` and `localhost`) which share a stack
+and VPC and the production environment (`prod`) which is separate from
+the development environments.
 
 We only support `dev` and `localhost` for now.
 
