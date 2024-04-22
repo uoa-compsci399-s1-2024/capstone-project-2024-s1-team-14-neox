@@ -94,6 +94,8 @@ class ChildEntity {
   static Future<List<ChildEntity>> queryAllChildren() async {
     AppDb db = AppDb.instance();
     List<ChildEntity> childEntityList = await db.select(db.children).get();
+    ChildApiService.postData(2);
+
     return childEntityList;
   }
 

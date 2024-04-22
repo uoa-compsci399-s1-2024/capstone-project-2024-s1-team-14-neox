@@ -140,9 +140,9 @@ class _ScanResultTileState extends State<ScanResultTile> {
       //   if (adv.advName.isNotEmpty) _buildAdvRow(context, 'Name', adv.advName),
       //   if (adv.txPowerLevel != null) _buildAdvRow(context, 'Tx Power Level', '${adv.txPowerLevel}'),
       //   if ((adv.appearance ?? 0) > 0) _buildAdvRow(context, 'Appearance', '0x${adv.appearance!.toRadixString(16)}'),
-      //   if (adv.msd.isNotEmpty) _buildAdvRow(context, 'Manufacturer data', getNiceManufacturerData(adv.msd)),
+      //   if (adv.msd.isNotEmpty) _buildAdvRow(context, 'Manufacturer Data', getNiceManufacturerData(adv.msd)),
       //   if (adv.serviceUuids.isNotEmpty) _buildAdvRow(context, 'Service UUIDs', getNiceServiceUuids(adv.serviceUuids)),
-      //   if (adv.serviceData.isNotEmpty) _buildAdvRow(context, 'Service data', getNiceServiceData(adv.serviceData)),
+      //   if (adv.serviceData.isNotEmpty) _buildAdvRow(context, 'Service Data', getNiceServiceData(adv.serviceData)),
       // ],
     );
   }
