@@ -1,82 +1,143 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: SAM template for web interface
+Description: SAM template for all instances of web interface
 Transform: AWS::Serverless-2016-10-31
 
+Parameters:
+  ProjectOrg:
+    Description: "Organisation that runs the website (used for bucket name -> website URL)"
+    Type: String
+    Default: neox
+    MinLength: 1
+    MaxLength: 255
+    AllowedPattern: "^[a-zA-Z][-a-zA-Z0-9]*$"
+
+  # There is no specific boolean datatype in Cloudformation
+  StartAllDevInstance:
+    Description: Whether to start a developer website instance for all teams
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  # There is no specific boolean datatype in Cloudformation
+  StartProdInstance:
+    Description: Whether to start a prod website instance
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+
+Conditions:
+  ShouldStartAllDevInstance: !Equals
+    - !Ref StartAllDevInstance
+    - true
+  ShouldStartProdInstance: !Equals
+    - !Ref StartProdInstance
+    - true
+
 Resources:
-  WebsiteBucketDev:
-    Type: AWS::S3::Bucket
-    # Make sure to delete all objects in bucket first.
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
+  # Server team instances
+  ServerDevInstance:
+    Type: AWS::CloudFormation::Stack
     Properties:
-      BucketName: neox-frontend-dev
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        # We're a single-page web app so just use the default error page from AWS.
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        BlockPublicPolicy: false
-        IgnorePublicAcls: false
-        RestrictPublicBuckets: false
-  WebsiteBucketPolicyDev:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref WebsiteBucketDev
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal: '*'
-            Action: s3:GetObject
-            Resource: !Sub "${WebsiteBucketDev.Arn}/*"
+      TemplateURL: subtemplates/website-template.yaml
+      Parameters:
+        ProjectOrg: !Ref ProjectOrg
+        ParentStackName: !Ref 'AWS::StackName'
+        UseCase: server
+        Environment: dev
 
-  WebsiteBucketProd:
-    Type: AWS::S3::Bucket
-    # Make sure to delete all objects in bucket first.
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
+  # Website team instances
+  WebsiteDevInstance:
+    Type: AWS::CloudFormation::Stack
     Properties:
-      BucketName: neox-frontend-prod
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        # We're a single-page web app so just use the default error page from AWS.
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        BlockPublicPolicy: false
-        IgnorePublicAcls: false
-        RestrictPublicBuckets: false
-  WebsiteBucketPolicyProd:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref WebsiteBucketProd
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal: '*'
-            Action: s3:GetObject
-            Resource: !Sub "${WebsiteBucketProd.Arn}/*"
+      TemplateURL: subtemplates/website-template.yaml
+      Parameters:
+        ProjectOrg: !Ref ProjectOrg
+        ParentStackName: !Ref 'AWS::StackName'
+        UseCase: website
+        Environment: dev
 
+  # App team instances
+  AppDevInstance:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: subtemplates/website-template.yaml
+      Parameters:
+        ProjectOrg: !Ref ProjectOrg
+        ParentStackName: !Ref 'AWS::StackName'
+        UseCase: app
+        Environment: dev
+
+  AllDevInstance:
+    Type: AWS::CloudFormation::Stack
+    Condition: ShouldStartAllDevInstance
+    Properties:
+      TemplateURL: subtemplates/website-template.yaml
+      Parameters:
+        ProjectOrg: !Ref ProjectOrg
+        ParentStackName: !Ref 'AWS::StackName'
+        UseCase: all
+        Environment: dev
+
+  ProdInstance:
+    Type: AWS::CloudFormation::Stack
+    Condition: ShouldStartProdInstance
+    Properties:
+      TemplateURL: subtemplates/website-template.yaml
+      Parameters:
+        ProjectOrg: !Ref ProjectOrg
+        ParentStackName: !Ref 'AWS::StackName'
+        UseCase: prod
+        Environment: prod
 
 Outputs:
-  WebsiteBucketDevS3Name:
-    Description: Name of S3 bucket for website
-    Value: !Ref WebsiteBucketDev
+  ServerDevS3Name:
+    Value: !GetAtt ServerDevInstance.Outputs.WebsiteBucketS3Name
     Export:
-      Name: !Sub "${AWS::StackName}-bucketname-dev"
-  WebsiteDevURL:
-    Description: URL for website
-    Value: !GetAtt WebsiteBucketDev.WebsiteURL
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-server-dev-bucket"
+  ServerDevURL:
+    Value: !GetAtt ServerDevInstance.Outputs.WebsiteURL
     Export:
-      Name: !Sub "${AWS::StackName}-url-dev"
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-server-dev-website"
 
-  WebsiteBucketProdS3Name:
-    Description: Name of S3 bucket for website
-    Value: !Ref WebsiteBucketProd
+  WebsiteDevS3Name:
+    Value: !GetAtt WebsiteDevInstance.Outputs.WebsiteBucketS3Name
     Export:
-      Name: !Sub "${AWS::StackName}-bucketname-prod"
-  WebsiteProdURL:
-    Description: URL for website
-    Value: !GetAtt WebsiteBucketProd.WebsiteURL
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-website-dev-bucket"
+  WebsiteDevURL:
+    Value: !GetAtt WebsiteDevInstance.Outputs.WebsiteURL
     Export:
-      Name: !Sub "${AWS::StackName}-url-prod"
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-website-dev-website"
+
+  AppDevS3Name:
+    Value: !GetAtt AppDevInstance.Outputs.WebsiteBucketS3Name
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-app-dev-bucket"
+  AppDevURL:
+    Value: !GetAtt AppDevInstance.Outputs.WebsiteURL
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-app-dev-website"
+
+  AllDevS3Name:
+    Condition: ShouldStartAllDevInstance
+    Value: !GetAtt AllDevInstance.Outputs.WebsiteBucketS3Name
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-all-dev-bucket"
+  AllDevURL:
+    Condition: ShouldStartAllDevInstance
+    Value: !GetAtt AllDevInstance.Outputs.WebsiteURL
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-all-dev-website"
+
+  ProdS3Name:
+    Condition: ShouldStartProdInstance
+    Value: !GetAtt ProdInstance.Outputs.WebsiteBucketS3Name
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-prod-prod-bucket"
+  ProdURL:
+    Condition: ShouldStartProdInstance
+    Value: !GetAtt ProdInstance.Outputs.WebsiteURL
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-prod-prod-website"

@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: SAM template for one instance of web interface
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  SubtemplatesS3Bucket:
+    Type: AWS::S3::Bucket
+    # Make sure to delete all objects in bucket first.
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+
+Outputs:
+  SubtemplatesS3BucketName:
+    Description: Name of S3 bucket
+    Value: !Ref SubtemplatesS3Bucket
+  SubtemplatesS3BucketURI:
+    Description: URI of S3 bucket with s3:// prefix
+    Value: !Sub "s3://${SubtemplatesS3Bucket}"

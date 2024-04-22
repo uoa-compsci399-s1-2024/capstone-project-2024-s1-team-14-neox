@@ -7,5 +7,6 @@ region = "ap-southeast-2"
 [default.deploy.parameters]
 resolve_s3 = true
 s3_prefix = "frontend"
-capabilities = "CAPABILITY_IAM"
+capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND"
 image_repositories = []
+parameter_overrides = "ProjectOrg=\"neox\" StartAllDevInstance=\"false\" StartProdInstance=\"false\""
