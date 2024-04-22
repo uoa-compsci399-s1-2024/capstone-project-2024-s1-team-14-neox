@@ -14,7 +14,7 @@ version = 0.1
 
 # Different usecases reside in different CloudFormation stacks (and VPCs).
 
-# Within each usecase, the developments environments ("dev" and
+# Within each usecase, the development environments ("dev" and
 # "localhost") share a stack and VPC.  This stack and VPC for the
 # development environments is *not* shared with the "prod"
 # environment.
