@@ -2,12 +2,37 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: SAM template for cloud backend
 Transform: AWS::Serverless-2016-10-31
 
-# TODO: set up dev and "prod" (ie, OK for non-cloud devs to use) environments
-
 Parameters:
-  # EnvironmentName:
-  #   Description: An environment name that is prefixed to resource names
-  #   Type: String
+  Environment:
+    Description: The environment in which to run the stack (needed for CORS)
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+      - localhost
+  UseCase:
+    Description: "Which team will use the website instance (prod is no team, it's a releasable 'product')"
+    Type: String
+    AllowedValues:
+      - app
+      - website
+      - server
+      - all
+      - prod
+      - ml
+
+  WebsiteStackName:
+    Description: Name of an active CloudFormation stack containing the S3 buckets to use for prod and dev websites.
+    Type: String
+    MinLength: 1
+    MaxLength: 255
+    AllowedPattern: "^[a-zA-Z][-a-zA-Z0-9]*$"
+    Default: frontend
+  WebsiteLocalhostPort:
+    Description: The port used for localhost development of website
+    Type: Number
+    Default: 3000
 
   DatabasePort:
     Description: Please enter the port number on which the database will accept connections
@@ -28,6 +53,20 @@ Parameters:
     Type: String
     Default: 10.8.21.0/24
 # Mappings:
+
+Conditions:
+  IsProd: !Equals [ !Ref Environment, prod ]
+  IsDev: !Equals [ !Ref Environment, dev ]
+  IsLocalhostWebsite: !Equals [ !Ref Environment, localhost ]
+
+Rules:
+  ProdUseCaseMeansProdEnv:
+    RuleCondition:
+      Fn::Equals: [ !Ref UseCase, prod ]
+    Assertions:
+      - Assert:
+          Fn::Equals: [ !Ref Environment, prod ]
+        AssertionDescription: Prod use case implies prod environment
 
 Resources:
   VPC:
@@ -358,11 +397,30 @@ Resources:
     Type: AWS::Serverless::Api
     DependsOn: APICloudWatchRoleArn
     Properties:
-      AlwaysDeploy: true
+      # It doesn't actually matter what value this is since we separate dev and prod instances.
+      # I also get baffling errors saying:
+      #   <API_PHYSICAL_ID>|<STAGE> already exists in stack <STACK_ARN>
+      # where <STAGE> is the Environment parameter
+      # EVEN if Environment is dev.
+      # Why the difference between Ref output and hardcoding it????
       StageName: dev
-      # TODO: more restrictive?
       Cors:
-        AllowOrigin: "'*'"
+        AllowOrigin: !If
+          - IsProd
+          - Fn::Sub:
+            - "'${Origin}'"
+            - Origin: !ImportValue
+                Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-prod-website"
+          - !If
+            - IsDev
+            - Fn::Sub:
+              - "'${Origin}'"
+              - Origin: !ImportValue
+                  Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-dev-website"
+            - !If
+              - IsLocalhostWebsite
+              - !Sub "'http://localhost:${WebsiteLocalhostPort}'"
+              - "'*'"
         AllowMethods: "'OPTIONS, GET, POST, PUT, PATCH, DELETE'"
         AllowHeaders: "'Origin, Content-Type, Accept'"
       MethodSettings:
@@ -655,10 +713,25 @@ Outputs:
     Description: "Port for the endpoint to DB (should be unreachable from public Internet)"
     Value: !GetAtt Database.Endpoint.Port
 
-  # TODO: Once different environments are set up, STOP hardcoding "/dev"
   APIEndpoint:
     Description: Base URL of API
-    Value: !Sub
-      - "https://${ApiID}.execute-api.${Region}.amazonaws.com/dev"
-      - ApiID: !Ref API
-        Region: !Ref AWS::Region
+    Value: !Sub "https://${API}.execute-api.${AWS::Region}.amazonaws.com/dev"
+
+  CorsAllowOrigin:
+    Description: The origin which CORS will accept
+    Value: !If
+      - IsProd
+      - Fn::Sub:
+        - "'${Origin}'"
+        - Origin: !ImportValue
+            Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-prod-website"
+      - !If
+        - IsDev
+        - Fn::Sub:
+          - "'${Origin}'"
+          - Origin: !ImportValue
+              Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-dev-website"
+        - !If
+          - IsLocalhostWebsite
+          - !Sub "'http://localhost:${WebsiteLocalhostPort}'"
+          - "'*'"
