@@ -65,3 +65,30 @@ View all tables with:
 ``` shell
 sam remote invoke --config-env <USECASE>-<ENVIRONMENT> FuncMetaReadAllTables
 ```
+
+## Debugging lambdas
+
+You can use
+
+``` shell
+sam logs --config-env <USECASE>-<ENVIRONMENT> -n <FUNCTION_LOGICAL_NAME>
+```
+
+where `<FUNCTION_LOGICAL_NAME>` is the name that the lambda function
+has in the `Resources` section of the template.
+
+You can also add the `-i` flag to include AWS X-Ray traces for
+summaries of execution times and HTTP status codes returned by the
+functions.
+
+There are also the `-s` and `-e` flags to configure which function
+invocations you want to see the logs of.
+
+Also, the logs may not update immediately after calling the function.
+If you want to see the latest call to the function but it's not there
+yet, just run the command again.
+
+## Help
+
+- `sam`: Run `sam --help` (`sam -h` for short) OR `sam <SUBCOMMAND> -h`.
+- `aws`: Run `aws help` OR `aws <SUBCOMMAND> help`.
