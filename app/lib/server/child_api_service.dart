@@ -6,7 +6,7 @@ import 'dart:convert';
 
 class ChildApiService {
   static const String apiUrl =
-      ' https://xql8m9zukd.execute-api.ap-southeast-2.amazonaws.com/dev';
+      'https://xql8m9zukd.execute-api.ap-southeast-2.amazonaws.com/dev';
 
   static void fetchChildrenData() async {
     Dio dio = Dio();
