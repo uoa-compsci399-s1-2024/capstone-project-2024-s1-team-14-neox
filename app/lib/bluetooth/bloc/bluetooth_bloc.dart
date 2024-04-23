@@ -9,8 +9,7 @@ part 'bluetooth_state.dart';
 class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
 
   BluetoothBloc() : super(const BluetoothIdleState(scanResults: [])) {
-    on<BluetoothScanStartPressed>(_wrapCatch(_onBluetoothScanStartPressed));
-    on<BluetoothScanStopPressed>(_wrapCatch(_onBluetoothScanStopPressed));
+    on<BluetoothScanStarted>(_wrapCatch(_onBluetoothScanStart));
     on<BluetoothConnectPressed>(_wrapCatch(_onBluetoothConnectPressed));
   }
 
@@ -28,7 +27,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     };
   }
 
-  Future<void> _onBluetoothScanStartPressed(BluetoothScanStartPressed event, Emitter<BluetoothState> emit) async {
+  Future<void> _onBluetoothScanStart(BluetoothScanStarted event, Emitter<BluetoothState> emit) async {
     if (FlutterBluePlus.adapterStateNow != BluetoothAdapterState.on) {
       if (Platform.isAndroid) {
         await FlutterBluePlus.turnOn();
@@ -52,11 +51,6 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     await Future.delayed(const Duration(seconds: 15));
 
     await scan.cancel();
-    await FlutterBluePlus.stopScan();
-    emit(BluetoothIdleState(scanResults: state.scanResults));
-  }
-
-  Future<void> _onBluetoothScanStopPressed(BluetoothScanStopPressed event, Emitter<BluetoothState> emit) async {
     await FlutterBluePlus.stopScan();
     emit(BluetoothIdleState(scanResults: state.scanResults));
   }

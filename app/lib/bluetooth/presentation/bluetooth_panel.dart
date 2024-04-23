@@ -65,6 +65,9 @@ class BluetoothPanel extends StatelessWidget {
               children: [
                 ElevatedButton(
                   onPressed: () {
+                    // Automatically begin scanning
+                    BlocProvider.of<BluetoothBloc>(context).add(BluetoothScanStarted());
+
                     Navigator.push(
                       context,
                       // Must use _ for context in builder, otherwise wrong context is looked up

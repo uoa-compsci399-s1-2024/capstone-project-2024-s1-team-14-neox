@@ -32,30 +32,6 @@ class ScanScreen extends StatelessWidget {
     );
   }
 
-  Widget buildScanButton(BuildContext context) {
-    return BlocBuilder<BluetoothBloc, BluetoothState>(
-      builder: (context, state) {
-        if (state is BluetoothScanLoadingState) {
-          return FloatingActionButton(
-            onPressed: () => context.read<BluetoothBloc>().add(BluetoothScanStopPressed()),
-            backgroundColor: Colors.red,
-            child: const Icon(Icons.stop),
-          );
-        } else if (state is BluetoothConnectLoadingState) {
-          return FloatingActionButton(
-            onPressed: () => context.read<BluetoothBloc>().add(BluetoothScanStartPressed()),
-            child: const CircularProgressIndicator(),
-          );
-        } else {
-          return FloatingActionButton(
-            onPressed: () => context.read<BluetoothBloc>().add(BluetoothScanStartPressed()),
-            child: const Text("SCAN"),
-          );
-        }
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,12 +65,11 @@ class ScanScreen extends StatelessWidget {
               .map((r) => ScanResultTile(
                 result: r,
                 onConnect: () => context.read<BluetoothBloc>().add(BluetoothConnectPressed(deviceRemoteId: r.device.remoteId.str)),
+                loading: state is BluetoothConnectLoadingState
               )),
           ]);
         },
       ),
-      floatingActionButton: buildScanButton(context),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
