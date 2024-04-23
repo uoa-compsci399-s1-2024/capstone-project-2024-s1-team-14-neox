@@ -4,6 +4,7 @@ import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data
 
 import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
+import 'classifiers/xgboost.dart';
 
 class ChildDeviceRepository {
   // Fetch all children profiles
@@ -69,6 +70,10 @@ class ChildDeviceRepository {
       int accelZ = bytes[i] | (bytes[i + 1] << 8);
       i += 2;
 
+      int appClass = score([uv, light, accelX, accelY, accelZ])[1] > 0.7 ? 1 : 0;
+
+
+
       await ArduinoDataEntity.saveSingleArduinoDataEntity(
         ArduinoDataEntity(
           name: childName,
@@ -77,6 +82,8 @@ class ChildDeviceRepository {
           light: light,
           datetime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
           accel: Int16List.fromList([accelX, accelY, accelZ]),
+          appClass: appClass,
+
         ),
       );
     }

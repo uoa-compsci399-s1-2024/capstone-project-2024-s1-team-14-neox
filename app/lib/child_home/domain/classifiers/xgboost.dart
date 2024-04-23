@@ -1,5 +1,5 @@
 import 'dart:math';
-List<double> score(List<double> input) {
+List<double> score(List<int> input) {
     double var0;
     if (input[4] < 8385.0) {
         if (input[1] < 56.0) {
