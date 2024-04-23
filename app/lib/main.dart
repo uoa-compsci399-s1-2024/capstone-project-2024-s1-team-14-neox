@@ -33,6 +33,13 @@ class MyApp extends StatelessWidget {
       disableBackButton: true,
       overlayColor: Colors.black.withOpacity(0.5),
       overlayWidgetBuilder: (progress) {
+        String progressText = "Preparing Sync...";
+        if (progress != null) {
+          progressText = progress < 1
+            ? "Syncing... ${(progress * 100).round()}%"
+            : "Finishing sync...";
+        }
+
         return Center(
           child: Card(
             color: Colors.white,
@@ -44,12 +51,12 @@ class MyApp extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.all(20),
-                    child: CircularProgressIndicator()
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: CircularProgressIndicator(value: progress)
                   ),
                   Text(
-                    progress == null ? "Preparing Sync..." : "Syncing... ${(progress * 100).round()}%",
+                    progressText,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
