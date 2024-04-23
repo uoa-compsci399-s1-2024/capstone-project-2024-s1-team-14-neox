@@ -2,11 +2,13 @@ import 'dart:typed_data';
 
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 
-import '../../analysis/domain/sensor_data_model.dart';
 import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
+import 'classifiers/xgboost.dart';
 
 class ChildDeviceRepository {
+  static const int bytesPerSample = 14;
+
   // Fetch all children profiles
 
   Future<List<ChildDeviceModel>> fetchChildProfiles() async {
@@ -44,7 +46,6 @@ class ChildDeviceRepository {
 
   static Future<void> parseAndSaveSamples(
       String childName, List<int> bytes, int childId) async {
-    const int bytesPerSample = 14;
     while (bytes.length % bytesPerSample != 0) {
       bytes.removeLast();
     }
@@ -70,6 +71,10 @@ class ChildDeviceRepository {
       int accelZ = bytes[i] | (bytes[i + 1] << 8);
       i += 2;
 
+      int appClass = score([uv, light, accelX, accelY, accelZ])[1] > 0.7 ? 1 : 0;
+
+
+
       await ArduinoDataEntity.saveSingleArduinoDataEntity(
         ArduinoDataEntity(
           name: childName,
@@ -78,17 +83,13 @@ class ChildDeviceRepository {
           light: light,
           datetime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
           accel: Int16List.fromList([accelX, accelY, accelZ]),
+          appClass: 1,
+
         ),
       );
     }
   }
 
-  static Future<List<SensorDataModel>> fetchArduinoSamplesByChildId(
-      int childId) async {
-    List<ArduinoDataEntity> entities =
-        await ChildEntity.getAllDataForChild(childId);
-    return entities.map((data) => SensorDataModel.fromEntity(data)).toList();
-  }
 
   //////////////////////////////////
   ///           CLOUD            ///

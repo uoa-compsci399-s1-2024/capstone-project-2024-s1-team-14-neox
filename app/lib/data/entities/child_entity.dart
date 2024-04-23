@@ -32,11 +32,11 @@ class ChildEntity {
 
   ChildEntity(
       {required this.name,
-      required this.birthDate,
-      this.deviceRemoteId,
-      this.authorisationCode,
-      this.serverId,
-      this.id});
+        required this.birthDate,
+        this.deviceRemoteId,
+        this.authorisationCode,
+        this.serverId,
+        this.id});
 
   ChildrenCompanion toCompanion() {
     return ChildrenCompanion(
@@ -92,7 +92,7 @@ class ChildEntity {
   static Future<ChildEntity?> queryChildById(int id) async {
     AppDb db = AppDb.instance();
     ChildEntity? child = await (db.select(db.children)
-          ..where((tbl) => tbl.id.equals(id)))
+      ..where((tbl) => tbl.id.equals(id)))
         .getSingleOrNull();
 
     return child;
@@ -107,7 +107,7 @@ class ChildEntity {
   static Future<ChildEntity?> queryChildByName(String name) async {
     AppDb db = AppDb.instance();
     ChildEntity? childEntity = await (db.select(db.children)
-          ..where((tbl) => tbl.name.equals(name)))
+      ..where((tbl) => tbl.name.equals(name)))
         .getSingleOrNull();
     return childEntity;
   }
@@ -120,7 +120,7 @@ class ChildEntity {
 
   static Future<List<ArduinoDataEntity>> getAllDataForChild(int childId) async {
     List<ArduinoDataEntity> data =
-        await ArduinoDataEntity.queryArduinoDataById(childId);
+    await ArduinoDataEntity.queryArduinoDataById(childId);
     return data;
   }
   ////////////////////////////////////////////////////////////////////////////
@@ -161,14 +161,16 @@ class ChildEntity {
   }
 
 
-  
+
   //////////////////////////////////
   ///           CLOUD            ///
   //////////////////////////////////
-  
+
 
   static Future<void> syncAllChildData() async{
+
     ChildApiService.postData(3);
+
   }
 
 

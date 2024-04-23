@@ -21,7 +21,7 @@ void setup()
   digitalWrite(A1, HIGH);
 
   Serial.begin(SERIAL_BAUD_RATE);
-  while (!Serial);
+  //while (!Serial);
   Wire.begin();
   eepromBegin();
   initializeBLE();

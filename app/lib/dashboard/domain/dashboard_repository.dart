@@ -1,4 +1,5 @@
 import 'dart:math';
+import '../../data/entities/arduino_data_entity.dart';
 
 class DashboardRepository {
   static Map<int, Map<DateTime, int>> database = {};
@@ -15,13 +16,16 @@ class DashboardRepository {
     }
   }
 
-  static Map<DateTime, int> getDataForChildId(int childId) {
+  static Map<DateTime, int> getFalseDataForChildId(int childId) {
     if (database.containsKey(childId)) {
       return database[childId] as Map<DateTime, int>;
     }
     return {DateTime.now(): 0};
   }
 
+  static Future<Map<DateTime, int>> getDailyOutdoorMinutes(int childId) async {
+    return await ArduinoDataEntity.getDailyOutdoorMinutesForChildId(childId);
+  }
 
   // TODO
   // Caclulate total minutes per day

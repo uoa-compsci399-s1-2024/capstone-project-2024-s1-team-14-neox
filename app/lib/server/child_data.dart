@@ -37,6 +37,7 @@ class ChildData {
 
 
 
+
   static List<ChildData> getChildDataList(String id) {
     List<ChildData> childDataList = [
       ChildData(
@@ -63,8 +64,3 @@ class ChildData {
     return childDataList;
   }
 }
-
-
-
-
-

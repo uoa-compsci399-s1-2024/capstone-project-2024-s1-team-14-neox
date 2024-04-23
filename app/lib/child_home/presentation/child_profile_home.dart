@@ -53,9 +53,10 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
                       childId: profile.childId,
                       childName: profile.childName,
                       birthDate: profile.birthDate,
-                      deviceRemoteId: profile.deviceRemoteId,
+                      deviceRemoteId: profile.deviceRemoteId ?? "", // Change ?? to ! and make deviceRemoteId nonnullable.
+                      authorisationCode: profile.authorisationCode ?? "", // Same here
                     ),
-                    child: ChildProfileTile(),
+                    child: const ChildProfileTile(),
                   ),
                 ),
                 Column(
