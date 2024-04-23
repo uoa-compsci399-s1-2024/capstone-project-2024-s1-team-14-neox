@@ -27,7 +27,7 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  Widget _buildLoadingOverlay({ required Widget child }) {
+  Widget _buildLoadingOverlay(BuildContext context, { required Widget child }) {
     return LoaderOverlay(
       useDefaultLoading: false,
       disableBackButton: true,
@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
                   ),
                   Text(
                     progress == null ? "Preparing Sync..." : "Syncing... ${(progress * 100).round()}%",
-                    style: const TextStyle(color: Colors.deepPurple, fontSize: 20)
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
               ),
@@ -81,7 +81,7 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
             useMaterial3: true,
           ),
-          home: _buildLoadingOverlay(child: const MyHomePage(title: 'Neox')),
+          home: _buildLoadingOverlay(context, child: const MyHomePage(title: 'Neox')),
         ),
       ),
     );

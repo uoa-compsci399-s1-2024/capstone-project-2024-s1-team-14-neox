@@ -75,8 +75,16 @@ class ScanScreen extends StatelessWidget {
           }
         },
         builder: (context, state) {
+          if (state.scanResults.isEmpty) {
+            return Center(
+              child: Text(
+                'No devices found',
+                style: Theme.of(context).textTheme.bodyMedium,
+              )
+            );
+          }
+
           return ListView(children: [
-            const Text("Devices:"),
             ...state.scanResults
               .map((r) => ScanResultTile(
                 result: r,

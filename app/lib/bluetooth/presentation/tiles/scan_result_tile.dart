@@ -13,28 +13,6 @@ class ScanResultTile extends StatefulWidget {
 }
 
 class _ScanResultTileState extends State<ScanResultTile> {
-  String getNiceHexArray(List<int> bytes) {
-    return '[${bytes.map((i) => i.toRadixString(16).padLeft(2, '0')).join(', ')}]';
-  }
-
-  String getNiceManufacturerData(List<List<int>> data) {
-    return data
-        .map((val) => getNiceHexArray(val))
-        .join(', ')
-        .toUpperCase();
-  }
-
-  String getNiceServiceData(Map<Guid, List<int>> data) {
-    return data.entries
-        .map((v) => '${v.key}: ${getNiceHexArray(v.value)}')
-        .join(', ')
-        .toUpperCase();
-  }
-
-  String getNiceServiceUuids(List<Guid> serviceUuids) {
-    return serviceUuids.join(', ').toUpperCase();
-  }
-
   Widget _buildTitle(BuildContext context) {
     if (widget.result.device.platformName.isNotEmpty) {
       return Column(
@@ -46,7 +24,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
             overflow: TextOverflow.ellipsis,
           ),
           Text(
-            widget.result.device.remoteId.str,
+            "ID: ${widget.result.device.remoteId.str}",
             style: Theme.of(context).textTheme.bodySmall,
           )
         ],
