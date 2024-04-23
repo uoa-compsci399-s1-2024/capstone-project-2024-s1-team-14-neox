@@ -26,6 +26,7 @@ const REQUIRED_FIELDS = [
 export const handler = async (event) => {
   const childID = event.pathParameters.childID;
   const resolvedResource = event.resource.replace("{childID}", encodeURIComponent(childID));
+  console.log(`got child ID ${childID}`);
 
   const maybeEarlyErrorResp = {
     statusCode: 400,
@@ -105,7 +106,7 @@ export const handler = async (event) => {
           status: 400,
           message: `${REQUIRED_FIELDS[j]} missing from sample`,
         });
-        console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
+        console.error(`index=${i}: ${errors[errors.length-1].message}`);
         badfields = true;
         continue;
       }
@@ -118,7 +119,7 @@ export const handler = async (event) => {
         status: 400,
         message: `child IDs don't match in sample (${samples[i].child_id}) and in path (${childID})`,
       });
-      console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
+      console.error(`index=${i}: ${errors[errors.length-1].message}`);
       badfields = true;
     }
 
@@ -131,7 +132,7 @@ export const handler = async (event) => {
         status: 400,
         message: `timestamp must be in full ISO8601 datetime format with offset OR in UTC`,
       });
-      console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
+      console.error(`index=${i}: ${errors[errors.length-1].message}`);
       continue;
     }
 
@@ -143,7 +144,7 @@ export const handler = async (event) => {
     let logSample = structuredClone(samples[i]);
     delete logSample.child_id;  // if present
     delete logSample.timestamp;
-    console.log(`adding sample for child ID "${childID}" with timestamp "${samples[i].timestamp}": ${JSON.stringify(logSample)}`);
+    console.log(`sample ${i+1}/${samples.length}: adding sample with timestamp "${samples[i].timestamp}": ${JSON.stringify(logSample)}`);
     // Don't need to add BEGIN and COMMIT (plus ROLLBACK) statements because this is atomic.
     try {
       await db.query(
