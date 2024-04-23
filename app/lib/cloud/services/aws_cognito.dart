@@ -7,7 +7,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../presentation/screen/confirmation.dart';
 
 class AWSServices {
-
   final storage = FlutterSecureStorage();
 
   Future<void> initializeStorage() async {
@@ -16,17 +15,13 @@ class AWSServices {
     await storage.write(key: 'id_token', value: null);
   }
 
-
-
   final userPool = CognitoUserPool(
     '${(dotenv.env['POOL_ID'])}',
     '${(dotenv.env['CLIENT_ID'])}',
   );
 
-
   void register(BuildContext context, String email, String password,
-       String middleName, String givenName,
-      String familyName) async {
+      String middleName, String givenName, String familyName) async {
     try {
       var signUpResult = await userPool.signUp(
         email,
@@ -37,7 +32,6 @@ class AWSServices {
           AttributeArg(name: 'middle_name', value: middleName),
           AttributeArg(name: 'given_name', value: givenName),
           AttributeArg(name: 'family_name', value: familyName),
-
         ],
       );
       print('User registration successful: ${signUpResult.user}');
@@ -52,9 +46,7 @@ class AWSServices {
     }
   }
 
-
-  Future<bool> createInitialRecord(String email,
-      String password) async {
+  Future<bool> createInitialRecord(String email, String password) async {
     debugPrint('Authenticating User...');
     final cognitoUser = CognitoUser(email, userPool);
     final authDetails = AuthenticationDetails(
@@ -73,40 +65,35 @@ class AWSServices {
       await storage.write(key: 'refresh_token', value: refreshToken);
       await storage.write(key: 'id_token', value: idToken);
 
-      return(true);
-
+      return (true);
     } on CognitoUserNewPasswordRequiredException catch (e) {
-      return(false);
+      return (false);
       debugPrint('CognitoUserNewPasswordRequiredException $e');
     } on CognitoUserMfaRequiredException catch (e) {
-      return(false);
+      return (false);
       debugPrint('CognitoUserMfaRequiredException $e');
     } on CognitoUserSelectMfaTypeException catch (e) {
-      return(false);
+      return (false);
       debugPrint('CognitoUserMfaRequiredException $e');
     } on CognitoUserMfaSetupException catch (e) {
-      return(false);
+      return (false);
       debugPrint('CognitoUserMfaSetupException $e');
     } on CognitoUserTotpRequiredException catch (e) {
-      return(false);
+      return (false);
       debugPrint('CognitoUserTotpRequiredException $e');
     } on CognitoUserCustomChallengeException catch (e) {
-      return(false);
+      return (false);
       debugPrint('CognitoUserCustomChallengeException $e');
     } on CognitoUserConfirmationNecessaryException catch (e) {
       debugPrint('CognitoUserConfirmationNecessaryException $e');
-      return(false);
+      return (false);
     } on CognitoClientException catch (e) {
-      return(false);
+      return (false);
       debugPrint('CognitoClientException $e');
-
     } catch (e) {
       print(e);
-      return(false);
-
-
+      return (false);
     }
-
   }
 
   void confirm(String email, String code) async {
@@ -114,8 +101,7 @@ class AWSServices {
 
     bool registrationConfirmed = false;
     try {
-       registrationConfirmed = await cognitoUser.confirmRegistration(
-          code);
+      registrationConfirmed = await cognitoUser.confirmRegistration(code);
     } catch (e) {
       if (e is CognitoClientException && e.name == 'ExpiredCodeException') {
         // Code has expired, resend the code
@@ -131,11 +117,10 @@ class AWSServices {
     }
   }
 
-  bool inSession(){
-    if(storage.read(key: 'access_token') == null){
+  bool inSession() {
+    if (storage.read(key: 'access_token') == null) {
       return false;
     }
     return true;
   }
-
 }

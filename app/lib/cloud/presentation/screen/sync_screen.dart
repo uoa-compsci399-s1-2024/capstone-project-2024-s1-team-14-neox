@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 
 import '../../cubit/cloud_sync_cubit.dart';
 
-
 class SyncScreen extends StatelessWidget {
   const SyncScreen({super.key});
 

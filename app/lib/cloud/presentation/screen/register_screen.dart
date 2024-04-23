@@ -87,7 +87,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 padding: const EdgeInsets.all(8.0),
                 child: PrimaryBtn(
                   btnText: 'Register',
-                  btnFun: () => register(context,
+                  btnFun: () => register(
+                    context,
                     emailController.text,
                     passwordController.text,
                     middleNameController.text,
@@ -103,7 +104,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void register(BuildContext context, String email, String password,  String givenName, String middleName, String familyName) {
-    AWSServices().register(context, email, password, givenName, middleName, familyName);
+  void register(BuildContext context, String email, String password,
+      String givenName, String middleName, String familyName) {
+    AWSServices()
+        .register(context, email, password, givenName, middleName, familyName);
   }
 }

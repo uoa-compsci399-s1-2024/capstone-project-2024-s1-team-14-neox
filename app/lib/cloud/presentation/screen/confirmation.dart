@@ -27,7 +27,6 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,7 +45,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
             SizedBox(height: 20.0),
             Text(
               'A confirmation code has been sent to ${widget.email}. '
-                  'Please enter the code below:',
+              'Please enter the code below:',
             ),
             SizedBox(height: 20.0),
             TextField(
@@ -59,7 +58,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
             SizedBox(height: 20.0),
             PrimaryBtn(
               btnText: 'Confirm',
-              btnFun: () => confirmCode( widget.email, codeController.text),
+              btnFun: () => confirmCode(widget.email, codeController.text),
             ),
           ],
         ),
@@ -67,9 +66,8 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
     );
   }
 
-  void confirmCode(String email, String code){
+  void confirmCode(String email, String code) {
     AWSServices().confirm(email, code);
     MaterialPageRoute(builder: (context) => LoginScreen());
   }
 }
-

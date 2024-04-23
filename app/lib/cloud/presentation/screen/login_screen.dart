@@ -34,11 +34,10 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-        create: (context) => LoginCubit(AuthenticationRepository()),
+      create: (context) => LoginCubit(AuthenticationRepository()),
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Connect with Neox Cloud"),
@@ -80,10 +79,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: PrimaryBtn(
                       btnText: 'Login',
-                      btnFun: () => context.read<LoginCubit>().logInWithEmailAndPassword(
-                        emailController.text,
-                        passwordController.text,
-                      ),
+                      btnFun: () =>
+                          context.read<LoginCubit>().logInWithEmailAndPassword(
+                                emailController.text,
+                                passwordController.text,
+                              ),
                     ),
                   ),
                   Padding(
@@ -92,7 +92,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => RegisterScreen()),
+                          MaterialPageRoute(
+                              builder: (context) => RegisterScreen()),
                         );
                       },
                       child: Text('Dont have an account? Register here'),
@@ -106,6 +107,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-
-
 }

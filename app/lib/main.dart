@@ -1,5 +1,5 @@
 
-import 'package:capstone_project_2024_s1_team_14_neox/analysis/bloc/analysis_result_bloc.dart';
+// import 'package:capstone_project_2024_s1_team_14_neox/analysis/bloc/analysis_result_bloc.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/confirmation.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/login_screen.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/register_screen.dart';
@@ -12,6 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 
 
