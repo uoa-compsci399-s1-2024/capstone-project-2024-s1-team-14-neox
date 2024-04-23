@@ -458,6 +458,7 @@ Resources:
       CodeUri: lambda/functions/action-samples-search/
       Handler: index.handler
       Runtime: nodejs20.x
+      Timeout: 30  # there can be loads of samples on server
       Layers:
         - !Ref LayerDepsJS
         - !Ref LayerCACertificates
