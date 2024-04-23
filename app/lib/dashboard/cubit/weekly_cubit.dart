@@ -9,12 +9,12 @@ class WeeklyCubit extends Cubit<WeeklyState> {
   WeeklyCubit()
       : super(WeeklyState());
 
-  void onGetDataForChildId(int childId) {
+  Future<void> onGetDataForChildId(int childId) async {
     emit(state.copyWith(status: WeeklyStatus.loading));
 
     emit(state.copyWith(
       status: WeeklyStatus.success,
-      summary: DashboardRepository.getDataForChildId(childId),
+      summary: await DashboardRepository.getDailyOutdoorMinutes(childId),
     ));
   }
 }

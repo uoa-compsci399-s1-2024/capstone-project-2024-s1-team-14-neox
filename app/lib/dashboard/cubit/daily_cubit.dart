@@ -9,12 +9,12 @@ class DailyCubit extends Cubit<DailyState> {
   DailyCubit()
       : super(DailyState());
 
-  void onGetDataForChildId(int childId) {
+  Future<void> onGetDataForChildId(int childId) async {
     emit(state.copyWith(status: DailyStatus.loading));
 
     emit(state.copyWith(
       status: DailyStatus.success,
-      summary: DashboardRepository.getDataForChildId(childId),
+      summary: await DashboardRepository.getDailyOutdoorMinutes(childId),
     ));
   }
 }

@@ -115,21 +115,30 @@ class ArduinoDataEntity {
             .get();
     return arduinoDataEntityList;
   }
+
+  static Future<Map<DateTime, int>> getDailyOutdoorMinutesForChildId(
+      int childId) async {
+    AppDb db = AppDb.instance();
+    List<ArduinoDataEntity> entityList = await (db.select(db.arduinoDatas)
+          ..where((tbl) => tbl.childId.equals(childId))
+          ..where((tbl) => tbl.appClass.equals(1))
+          )
+        .get();
+    return {DateTime.now() : entityList.length};
+  }
   ////////////////////////////////////////////////////////////////////////////
   // UPDATE //////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
 
   static Future<void> updateAppClass(int id, int appClass) async {
     final db = AppDb.instance();
-    await (db.update(db.arduinoDatas)
-      ..where((tbl) => tbl.id.equals(id)))
+    await (db.update(db.arduinoDatas)..where((tbl) => tbl.id.equals(id)))
         .write(ArduinoDatasCompanion(appClass: Value(appClass)));
   }
 
   static Future<void> updateServerClass(int id, int serverClass) async {
     final db = AppDb.instance();
-    await (db.update(db.arduinoDatas)
-      ..where((tbl) => tbl.id.equals(id)))
+    await (db.update(db.arduinoDatas)..where((tbl) => tbl.id.equals(id)))
         .write(ArduinoDatasCompanion(serverClass: Value(serverClass)));
   }
 
