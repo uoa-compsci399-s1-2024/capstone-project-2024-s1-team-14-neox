@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import '../../server/child_data.dart';
 import 'child_entity.dart';
+import 'dart:math';
 
 @UseRowClass(ArduinoDataEntity)
 class ArduinoDatas extends Table {
@@ -112,7 +113,7 @@ class ArduinoDataEntity {
       int childId) async {
     final db = AppDb.instance();
     final query = db.select(db.arduinoDatas)
-      ..where((tbl) => tbl.id.equals(childId));
+      ..where((tbl) => tbl.childId.equals(childId));
     return query.get();
   }
 
@@ -156,24 +157,32 @@ class ArduinoDataEntity {
 // FOR TESTING PURPOSE DELETE LATER //////////////////////////////
 //////////////////////////////////////////////////////////////////
 
-// static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
-//     int childId) async {
-//   final List<ArduinoDataEntity> dataList = [];
-//
-//   // Sample data for testing
-//   for (int i = 0; i < 10; i++) {
-//     final data = ArduinoDataEntity(
-//       uv: 5,
-//       light: 100,
-//       datetime: DateTime.now(),
-//       accel: Int16List.fromList([1, 2, 3]),
-//       serverClass: 1,
-//       appClass: 2,
-//       childId: childId,
-//     );
-//     dataList.add(data);
-//   }
-//
-//   return dataList;
-// }
+static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
+    int childId) async {
+  final List<ArduinoDataEntity> dataList = [];
+
+  // Sample data for testing
+  for (int i = 0; i < 10; i++) {
+
+
+    Random gen = Random();
+    int range = 5 * 365; // 5 years in days
+
+    DateTime today = DateTime.now();
+    DateTime randomDate = today.subtract(Duration(days: gen.nextInt(range)));
+
+    final data = ArduinoDataEntity(
+      uv: 5,
+      light: 100,
+      datetime: randomDate,
+      accel: Int16List.fromList([1, 2, 3]),
+      serverClass: 1,
+      appClass: 2,
+      childId: childId,
+    );
+    dataList.add(data);
+  }
+
+  return dataList;
+}
 }
