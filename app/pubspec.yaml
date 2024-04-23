@@ -55,6 +55,7 @@ dependencies:
   crypto: ^3.0.3
   linear_progress_bar: ^1.1.1
   loader_overlay: ^4.0.0
+  dio: ^5.4.3+1
 
 
 

@@ -4,6 +4,7 @@ import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 import 'package:drift/drift.dart';
 import 'dart:convert';
 
+import '../../server/child_data.dart';
 import 'child_entity.dart';
 
 @UseRowClass(ArduinoDataEntity)
@@ -46,14 +47,14 @@ class ArduinoDataEntity {
 
   ArduinoDataEntity(
       {this.id,
-      this.name,
-      this.uv,
-      this.light,
-      required this.datetime,
-      this.accel,
-      this.appClass = -1,
-      this.serverClass = -1,
-      required this.childId});
+        this.name,
+        this.uv,
+        this.light,
+        required this.datetime,
+        this.accel,
+        this.appClass = -1,
+        this.serverClass = -1,
+        required this.childId});
 
   ArduinoDatasCompanion toCompanion() {
     return ArduinoDatasCompanion(
@@ -66,6 +67,15 @@ class ArduinoDataEntity {
         appClass: Value(appClass),
         serverClass: Value(serverClass),
         childId: Value(childId));
+  }
+
+  ChildData toChildData(String serverId) {
+    return ChildData(
+      timestamp: datetime.toIso8601String(),
+      childId:  serverId,
+      uv: uv!,
+      light: light!,
+    );
   }
 
   ////////////////////////////////////////////////////////////////////////////

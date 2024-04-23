@@ -1,42 +1,70 @@
-import 'dart:convert';
+import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/server/child_data.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import 'dart:convert';
 
 class ChildApiService {
-  static const String apiUrl = 'https://m0q0u417k8.execute-api.ap-southeast-2.amazonaws.com/dev/samples';
+  static const String apiUrl =
+      ' https://xql8m9zukd.execute-api.ap-southeast-2.amazonaws.com/dev';
 
-  static Future<List<ChildData>> fetchChildrenData() async {
-    final response = await http.get(Uri.parse(apiUrl));
-
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonData = jsonDecode(response.body);
-      return jsonData.map((data) => ChildData.fromJson(data)).toList();
-    } else {
-      throw Exception('Failed to fetch children data');
+  static void fetchChildrenData() async {
+    Dio dio = Dio();
+    try {
+      var response = await dio.get('$apiUrl/samples');
+      print(response);
+    } catch (e) {
+      print(e);
     }
   }
 
-  static Future<ChildData> fetchChildDataById(int childId) async {
+  //
+  // static Future<ChildData> fetchChildDataById(int childId) async {
+  //
+  //    List<ChildData> children = await fetchChildrenData();
+  //    ChildData child = children.firstWhere((element) => element.childId == childId.toString());
+  //    return child;
+  //
+  // }
 
-     List<ChildData> children = await fetchChildrenData();
-     ChildData child = children.firstWhere((element) => element.childId == childId.toString());
-     return child;
+  static Future<void> postData(int childId) async {
+    Dio dio = Dio();
+    var sampleList = await ArduinoDataEntity.queryArduinoDataById(childId);
+    var dataList = [];
+    ChildEntity? child = await ChildEntity.queryChildById(childId);
+    String? serverId = child?.serverId;
 
-  }
+    for (var sample in sampleList) {
+      ChildData newSample = sample.toChildData(serverId!);
+      dataList.add(newSample);
+    }
+    final url = '$apiUrl/samples/$serverId';
+    try {
+      List<Map<String, dynamic>> jsonSamples = [];
 
-  static Future<void> postData(ChildData child) async {
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(child.toJson()),
-    );
-
-    if (response.statusCode == 201) {
-      print('Data posted successfully');
-    } else {
-      throw Exception('Failed to post data: ${response.body}');
+      for (var childData in dataList) {
+        final jsonData = childData.toJson();
+        jsonSamples.add(jsonData);
+      }
+      final data = {"samples": jsonSamples};
+      final response = await dio.post(url, data: data);
+      print(response.statusCode);
+      print(response.data);
+    } catch (e) {
+      print('Error posting data: $e');
     }
   }
+
+  static Future<String> registerChild()async {
+    print('hello');
+    Dio dio = Dio();
+    const url = '$apiUrl/children';
+    var response = await dio.post(url);
+
+    print(response.data);
+    Map<String, dynamic> responseData = response.data;
+    String id = responseData['data']['id'];
+    return id;
+  }
+
 }
