@@ -22,6 +22,13 @@ const REQUIRED_FIELDS = [
   "uv",
   "light",
 ];
+// Any samples which cause exceptions upon inserting to DB are handled
+// much slower than successes (because exceptions are expensive).
+//
+// From testing, we see 1000 samples which have timestamps already
+// seen for a given child processed well within the 29s API Gateway
+// timeout AND the 30s lambda timeout we've set.  It was almost 20s.
+const MAX_SAMPLES = 1000;
 
 export const handler = async (event) => {
   const childID = event.pathParameters.childID;
@@ -93,6 +100,18 @@ export const handler = async (event) => {
   }
   const samples = reqBody.samples;
   console.log(`got ${samples.length} samples`);
+  if (samples.length > MAX_SAMPLES) {
+    maybeEarlyErrorResp.body = JSON.stringify({
+      errors: [
+        {
+          resource: resolvedResource,
+          status: 400,
+          message: "too many samples, try again with less"
+        }
+      ]
+    });
+    return maybeEarlyErrorResp;
+  }
 
   let errors = [];
   for (let i=0; i<samples.length; i++) {
