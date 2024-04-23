@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bluetooth/bloc/bluetooth_bloc.dart';
 import '../../../bluetooth/presentation/bluetooth_panel.dart';
-import '../../../dashboard/domain/dashboard_repository.dart';
 import '../../cubit/all_child_profile_cubit.dart';
 import '../../cubit/child_device_cubit.dart';
 
@@ -57,9 +56,11 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
               );
             },
           ),
-          OutlinedButton(onPressed: () => context.read<AllChildProfileCubit>().deleteChildProfile(
-            context.read<ChildDeviceCubit>().state.childId!
-          ), child: const Text("Remove child profile")),
+          OutlinedButton(
+            onPressed: () => context.read<AllChildProfileCubit>()
+              .deleteChildProfile(context.read<ChildDeviceCubit>().state.childId),
+            child: const Text("Remove child profile")
+          ),
         ],
       ),
     );

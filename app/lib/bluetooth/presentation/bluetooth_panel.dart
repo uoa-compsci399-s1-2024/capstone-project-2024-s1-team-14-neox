@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 import '../../child_home/cubit/all_child_profile_cubit.dart';
 import '../../child_home/cubit/child_device_cubit.dart';
@@ -17,10 +18,12 @@ class BluetoothPanel extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Pairing success'),
             duration: Duration(seconds: 2),
+            backgroundColor: Colors.lightBlue,
           ));
           context.read<AllChildProfileCubit>().updateDeviceRemoteId(
               childId: state.childId,
               deviceRemoteId: state.deviceRemoteId);
+
         } else if (state is ChildDeviceDisconnectState) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Unpaired'),
@@ -28,11 +31,27 @@ class BluetoothPanel extends StatelessWidget {
           ));
           context.read<AllChildProfileCubit>().deleteDeviceRemoteId(
               childId: state.childId);
+
         } else if (state is ChildDeviceErrorState) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.errorMessage),
             duration: const Duration(seconds: 2),
           ));
+
+        } else if (state is ChildDeviceSyncSuccessState) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Sync complete"),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.lightBlue,
+          ));
+
+        }
+
+        if (state is ChildDeviceSyncingState) {
+          context.loaderOverlay.show();
+          context.loaderOverlay.progress(state.progress);
+        } else {
+          context.loaderOverlay.hide();
         }
       },
       child: BlocBuilder<ChildDeviceCubit, ChildDeviceState>(
@@ -65,6 +84,7 @@ class BluetoothPanel extends StatelessWidget {
               ],
             );
           }
+
           return Column(
             children: [
               ElevatedButton(

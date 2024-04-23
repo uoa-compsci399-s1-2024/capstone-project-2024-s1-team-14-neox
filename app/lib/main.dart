@@ -3,6 +3,7 @@ import 'package:capstone_project_2024_s1_team_14_neox/dashboard/presentation/das
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 
 // Import bottom navigation screens
@@ -26,6 +27,41 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  Widget _buildLoadingOverlay({ required Widget child }) {
+    return LoaderOverlay(
+      useDefaultLoading: false,
+      disableBackButton: true,
+      overlayColor: Colors.black.withOpacity(0.5),
+      overlayWidgetBuilder: (progress) {
+        return Center(
+          child: Card(
+            color: Colors.white,
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(50, 30, 50, 30),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: CircularProgressIndicator()
+                  ),
+                  Text(
+                    progress == null ? "Preparing Sync..." : "Syncing... ${(progress * 100).round()}%",
+                    style: const TextStyle(color: Colors.deepPurple, fontSize: 20)
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      child: child,
+    );
+  }
+
    @override
   Widget build(BuildContext context) {
     // Allows ChildRepository to be accessed anywhere in MyApp
@@ -45,7 +81,7 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
             useMaterial3: true,
           ),
-          home: const MyHomePage(title: 'Neox'),
+          home: _buildLoadingOverlay(child: const MyHomePage(title: 'Neox')),
         ),
       ),
     );

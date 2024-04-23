@@ -67,3 +67,25 @@ class ChildDeviceDisconnectState extends ChildDeviceState {
     authorisationCode: childDeviceState.authorisationCode,
   );
 }
+
+class ChildDeviceSyncingState extends ChildDeviceState {
+  final double? progress; // In range [0,1] or null when sync is still starting (e.g. auth)
+
+  ChildDeviceSyncingState(ChildDeviceState childDeviceState, this.progress) : super(
+    childId: childDeviceState.childId,
+    childName: childDeviceState.childName,
+    birthDate: childDeviceState.birthDate,
+    deviceRemoteId: childDeviceState.deviceRemoteId,
+    authorisationCode: childDeviceState.authorisationCode,
+  );
+}
+
+class ChildDeviceSyncSuccessState extends ChildDeviceState {
+  ChildDeviceSyncSuccessState(ChildDeviceState childDeviceState) : super(
+    childId: childDeviceState.childId,
+    childName: childDeviceState.childName,
+    birthDate: childDeviceState.birthDate,
+    deviceRemoteId: childDeviceState.deviceRemoteId,
+    authorisationCode: childDeviceState.authorisationCode,
+  );
+}

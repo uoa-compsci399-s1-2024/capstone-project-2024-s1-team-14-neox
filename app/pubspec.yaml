@@ -53,6 +53,7 @@ dependencies:
   http: ^1.2.1
   drift_db_viewer: ^2.1.0
   crypto: ^3.0.3
+  loader_overlay: ^4.0.0
 
 
 
