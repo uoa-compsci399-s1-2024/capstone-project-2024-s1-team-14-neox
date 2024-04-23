@@ -88,6 +88,9 @@ Also, the logs may not update immediately after calling the function.
 If you want to see the latest call to the function but it's not there
 yet, just run the command again.
 
+Alternatively, you open a separate terminal and add the `--tail` flag
+to the call to get logs as they are written.
+
 ## Help
 
 - `sam`: Run `sam --help` (`sam -h` for short) OR `sam <SUBCOMMAND> -h`.
