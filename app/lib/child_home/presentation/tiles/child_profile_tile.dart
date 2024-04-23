@@ -3,7 +3,6 @@ import 'package:age_calculator/age_calculator.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:linear_progress_bar/linear_progress_bar.dart';
 
 import '../../../bluetooth/bloc/bluetooth_bloc.dart';
 import '../../../bluetooth/presentation/bluetooth_panel.dart';
@@ -61,22 +60,6 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
             onPressed: () => context.read<AllChildProfileCubit>()
               .deleteChildProfile(context.read<ChildDeviceCubit>().state.childId),
             child: const Text("Remove child profile")
-          ),
-          const Spacer(),
-          BlocBuilder<ChildDeviceCubit, ChildDeviceState>(
-            builder: (context, state) {
-              if (state is ChildDeviceSyncingState && state.progress != null) {
-                return LinearProgressBar(
-                  maxSteps: 1000,
-                  progressType: LinearProgressBar.progressTypeLinear,
-                  currentStep: (state.progress! * 1000).round(),
-                  progressColor: Colors.deepPurpleAccent,
-                  backgroundColor: Colors.grey,
-                  minHeight: 6,
-                );
-              }
-              return Container();
-            },
           ),
         ],
       ),

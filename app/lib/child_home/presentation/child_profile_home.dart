@@ -50,7 +50,7 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
                 ...state.profiles.map(
                   (profile) => BlocProvider(
                     create: (_) => ChildDeviceCubit(
-                      childId: profile.childId!,
+                      childId: profile.childId,
                       childName: profile.childName,
                       birthDate: profile.birthDate,
                       deviceRemoteId: profile.deviceRemoteId ?? "", // Change ?? to ! and make deviceRemoteId nonnullable.

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 import '../../child_home/cubit/all_child_profile_cubit.dart';
 import '../../child_home/cubit/child_device_cubit.dart';
@@ -41,6 +42,14 @@ class BluetoothPanel extends StatelessWidget {
             content: Text("Sync complete"),
             duration: Duration(seconds: 2),
           ));
+
+        }
+
+        if (state is ChildDeviceSyncingState) {
+          context.loaderOverlay.show();
+          context.loaderOverlay.progress(state.progress);
+        } else {
+          context.loaderOverlay.hide();
         }
       },
       child: BlocBuilder<ChildDeviceCubit, ChildDeviceState>(
