@@ -7,6 +7,8 @@ import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
 
 class ChildDeviceRepository {
+  static const int bytesPerSample = 14;
+
   // Fetch all children profiles
 
   Future<List<ChildDeviceModel>> fetchChildProfiles() async {
@@ -44,7 +46,6 @@ class ChildDeviceRepository {
 
   static Future<void> parseAndSaveSamples(
       String childName, List<int> bytes, int childId) async {
-    const int bytesPerSample = 14;
     while (bytes.length % bytesPerSample != 0) {
       bytes.removeLast();
     }

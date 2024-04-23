@@ -54,8 +54,15 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     required String deviceRemoteId,
     required String authorisationCode
   }) async {
+    emit(ChildDeviceSyncingState(state, null));
+
     BluetoothDevice device = BluetoothDevice.fromId(deviceRemoteId);
-    await device.connect(mtu: 23);
+    try {
+      await device.connect(mtu: 23);
+    } catch (e) {
+      emit(ChildDeviceErrorState(state, "Failed to connect to device: $e"));
+      return;
+    }
     
     const String uuidSerivce = "ba5c0000-243e-4f78-ac25-69688a1669b4";
     const List<String> uuidSamples = [
@@ -71,6 +78,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     const String uuidAuthChallengeFromCentral = "c03b7267-dcfa-4525-8521-1bc31c08c312";
     const String uuidAuthResponseFromPeripheral = "750d5d43-96c4-4f5c-8ce1-fdb44a150336";
     const String uuidCentralAuthenticated = "776edbca-a020-4d86-a5e8-25eb87e82554";
+    const String uuidProgress = "f06c06bb-0007-4f4c-b6b4-a146eff5ab15";
     
     try {
       await device.requestConnectionPriority(connectionPriorityRequest: ConnectionPriority.high);
@@ -83,6 +91,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       BluetoothCharacteristic? authChallengeFromCentral;
       BluetoothCharacteristic? authResponseFromPeripheral;
       BluetoothCharacteristic? centralAuthenticated;
+      BluetoothCharacteristic? progress;
       sampleData.length = uuidSamples.length;
       List<BluetoothService> services = await device.discoverServices();
       for (BluetoothService service in services) {
@@ -106,6 +115,8 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
             authResponseFromPeripheral = characteristic;
           } else if (characteristicUuid == uuidCentralAuthenticated) {
             centralAuthenticated = characteristic;
+          } else if (characteristicUuid == uuidProgress) {
+            progress = characteristic;
           } else {
             for (int i = 0; i < uuidSamples.length; i++) {
               if (characteristicUuid == uuidSamples[i]) {
@@ -131,6 +142,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         authChallengeFromPeripheral,
         authResponseFromPeripheral,
         centralAuthenticated,
+        progress,
       ];
       if (readCharacteristics.any((char) => char == null || !char.properties.read)
         || writeCharacteristics.any((char) => char == null || !char.properties.write)) {
@@ -190,10 +202,20 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         }
       }
 
+      // Get sample count
+      await acknowledgement!.write([1]);
+      int sampleCount = 0;
+      {
+        List<int> progressValue = await progress!.read();
+        for (int i = 0; i < progressValue.length; i++) {
+          sampleCount |= progressValue[i] << (8 * i);
+        }
+      }
+
       // Read sensor data
+      int samplesRead = 0;
       int sampleCharacteristicIndex = 0;
       List<List<int>> values = [];
-      await acknowledgement!.write([1]);
       while (true) {
         BluetoothCharacteristic sampleCharacteristic = sampleData[sampleCharacteristicIndex]!;
         List<int> value = await sampleCharacteristic.read();
@@ -207,18 +229,30 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         if (value.every((byte) => byte == 0)) {
           break;
         }
-
+        
         values.add(value);
+
+        while (value.length % ChildDeviceRepository.bytesPerSample != 0) {
+          value.removeLast();
+        }
+        samplesRead += value.length ~/ ChildDeviceRepository.bytesPerSample;
+        emit(ChildDeviceSyncingState(state, (samplesRead / sampleCount).clamp(0, 1)));
       }
 
       // Send samples to repository
       for (List<int> value in values) {
         await ChildDeviceRepository.parseAndSaveSamples(childName, value, childId);
       }
+
+      emit(ChildDeviceSyncSuccessState(state));
     } catch (e) {
       emit(ChildDeviceErrorState(state, "An error occurred: $e"));
     } finally {
-      await device.disconnect();
+      try {
+        await device.disconnect();
+      } catch (e) {
+        // Ignore
+      }
     }
   }
 }

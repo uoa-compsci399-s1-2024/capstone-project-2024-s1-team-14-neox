@@ -21,6 +21,7 @@ class BluetoothPanel extends StatelessWidget {
           context.read<AllChildProfileCubit>().updateDeviceRemoteId(
               childId: state.childId,
               deviceRemoteId: state.deviceRemoteId);
+
         } else if (state is ChildDeviceDisconnectState) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Unpaired'),
@@ -28,10 +29,17 @@ class BluetoothPanel extends StatelessWidget {
           ));
           context.read<AllChildProfileCubit>().deleteDeviceRemoteId(
               childId: state.childId);
+
         } else if (state is ChildDeviceErrorState) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.errorMessage),
             duration: const Duration(seconds: 2),
+          ));
+
+        } else if (state is ChildDeviceSyncSuccessState) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Sync complete"),
+            duration: Duration(seconds: 2),
           ));
         }
       },
@@ -65,10 +73,11 @@ class BluetoothPanel extends StatelessWidget {
               ],
             );
           }
+
           return Column(
             children: [
               ElevatedButton(
-                onPressed: () => context.read<ChildDeviceCubit>().onSyncPressed(
+                onPressed: () async => await context.read<ChildDeviceCubit>().onSyncPressed(
                   childName: state.childName,
                   childId: state.childId,
                   deviceRemoteId: state.deviceRemoteId,
