@@ -91,6 +91,7 @@ export const handler = async (event) => {
     return maybeEarlyErrorResp;
   }
   const samples = reqBody.samples;
+  console.log(`got ${samples.length} samples`);
 
   let errors = [];
   for (let i=0; i<samples.length; i++) {
