@@ -168,7 +168,7 @@ class ChildEntity {
   
 
   static Future<void> syncAllChildData() async{
-    ChildApiService.postData(2);
+    ChildApiService.postData(3);
   }
 
 
