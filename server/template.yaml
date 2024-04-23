@@ -489,6 +489,7 @@ Resources:
       CodeUri: lambda/functions/action-samples-add/
       Handler: index.handler
       Runtime: nodejs20.x
+      Timeout: 30  # caller can send lots of samples
       Layers:
         - !Ref LayerDepsJS
         - !Ref LayerCACertificates
