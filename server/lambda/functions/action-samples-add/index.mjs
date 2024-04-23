@@ -54,7 +54,7 @@ export const handler = async (event) => {
     maybeEarlyErrorResp.body = JSON.stringify({
       errors: [
         {
-          response: resolvedResource,
+          resource: resolvedResource,
           status: 400,
           message: "missing or empty request body",
         }
@@ -66,7 +66,7 @@ export const handler = async (event) => {
     maybeEarlyErrorResp.body = JSON.stringify({
       errors: [
         {
-          response: resolvedResource,
+          resource: resolvedResource,
           status: 400,
           message: "missing or empty request body",
         }
@@ -78,7 +78,7 @@ export const handler = async (event) => {
     maybeEarlyErrorResp.body = JSON.stringify({
       errors: [
         {
-          response: resolvedResource,
+          resource: resolvedResource,
           status: 400,
           message: "missing `samples` property in request body",
         }
@@ -90,7 +90,7 @@ export const handler = async (event) => {
     maybeEarlyErrorResp.body = JSON.stringify({
       errors: [
         {
-          response: resolvedResource,
+          resource: resolvedResource,
           status: 400,
           message: "samples property in request body must be an array",
         }
