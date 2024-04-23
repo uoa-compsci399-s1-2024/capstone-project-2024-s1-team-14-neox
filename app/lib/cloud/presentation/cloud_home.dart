@@ -13,6 +13,7 @@ class CloudHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
+
       create: (context) => LoginCubit(AuthenticationRepository()),
       child: BlocConsumer<LoginCubit, LoginState>(
         listener: (context, state) {
@@ -21,7 +22,7 @@ class CloudHomeScreen extends StatelessWidget {
         builder: (context, state) {
           if (state.status.isLoading) {
             return const CircularProgressIndicator();
-          } else if (state.status.isLoginSuccess) {
+          } else if (state.status.isLoginSuccess ) {
             return BlocProvider(
               create: (context) => CloudSyncCubit(),
               child: SyncScreen(),

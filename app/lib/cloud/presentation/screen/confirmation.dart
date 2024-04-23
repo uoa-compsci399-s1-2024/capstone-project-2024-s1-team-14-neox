@@ -68,7 +68,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
   }
 
   void confirmCode(String email, String code){
-    AWSServices().confirmUser();
+    AWSServices().confirm(email, code);
     MaterialPageRoute(builder: (context) => LoginScreen());
   }
 }
