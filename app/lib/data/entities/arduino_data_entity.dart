@@ -70,7 +70,9 @@ class ArduinoDataEntity {
         childId: Value(childId));
   }
 
+
   ChildData toChildData(String serverId) {
+
     return ChildData(
       timestamp: datetime.toIso8601String(),
       childId:  serverId,
@@ -157,12 +159,14 @@ class ArduinoDataEntity {
 // FOR TESTING PURPOSE DELETE LATER //////////////////////////////
 //////////////////////////////////////////////////////////////////
 
+
 static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
     int childId) async {
   final List<ArduinoDataEntity> dataList = [];
 
   // Sample data for testing
   for (int i = 0; i < 10; i++) {
+
 
 
     Random gen = Random();
@@ -175,6 +179,7 @@ static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
       uv: 5,
       light: 100,
       datetime: randomDate,
+
       accel: Int16List.fromList([1, 2, 3]),
       serverClass: 1,
       appClass: 2,
@@ -184,5 +189,6 @@ static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
   }
 
   return dataList;
+
 }
 }
