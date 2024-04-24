@@ -209,7 +209,6 @@ The schema for response bodies from every status code (except 204 of course, and
 ```
 where:
 
-- the content and type of `API_VERSION` is currently unspecified (maybe int or maybe string); and
 - the schema for `CONTENT` will differ depending on the API action and status code.
 
 ### Schema for error responses
