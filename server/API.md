@@ -142,14 +142,16 @@ https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-att
 - given_name
 - middle_name
 - nickname
+- gender
 
 ### Users (ie, everyone except children)
 
-- family_name
-- given_name
+- family_name (required)
+- given_name (required)
 - middle_name
 - nickname
-- email
+- email (required)
+- phone_number ???
 
 ## Authentication (SUBJECT TO CHANGE)
 
