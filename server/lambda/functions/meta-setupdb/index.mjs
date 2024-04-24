@@ -1,5 +1,6 @@
 import {
   connectToDB,
+  ID_LEN,
   PERSONAL_INFO_CHILD_GENDER_OPTIONS,
 } from "/opt/nodejs/lib.mjs";
 import pg from "pg";
@@ -14,8 +15,7 @@ DROP TABLE IF EXISTS children;
 DROP TABLE IF EXISTS parents;
 
 CREATE TABLE parents (
-       -- id INTEGER NOT NULL PRIMARY KEY,
-       id VARCHAR(50) NOT NULL PRIMARY KEY,
+       id CHAR(${ID_LEN}) NOT NULL PRIMARY KEY,
        -- don't care about parents' birthdate
        family_name TEXT,
        given_name TEXT,
@@ -26,8 +26,8 @@ CREATE TABLE parents (
 
 CREATE TYPE gender AS ENUM (${PERSONAL_INFO_CHILD_GENDER_OPTIONS.map(pg.escapeLiteral).join(', ')});
 CREATE TABLE children (
-       id VARCHAR(50) NOT NULL PRIMARY KEY,
-       parent_id VARCHAR(50) NOT NULL,
+       id CHAR(${ID_LEN}) NOT NULL PRIMARY KEY,
+       parent_id CHAR(${ID_LEN}) NOT NULL,
        birthdate DATE,
        family_name TEXT,
        given_name TEXT,
@@ -38,10 +38,9 @@ CREATE TABLE children (
 );
 
 CREATE TABLE samples (
-       -- id INTEGER NOT NULL PRIMARY KEY,
        -- Use timestamptz alias for TIMESTAMP WITH TIMEZONE because there were syntax errors when I sent the query to the DB in RDS
        "timestamp" TIMESTAMPTZ NOT NULL,
-       child_id VARCHAR(50) NOT NULL,
+       child_id CHAR(${ID_LEN}) NOT NULL,
        uv INTEGER NOT NULL,
        CONSTRAINT uv_range CHECK (uv >= 0),
        light INTEGER NOT NULL,
