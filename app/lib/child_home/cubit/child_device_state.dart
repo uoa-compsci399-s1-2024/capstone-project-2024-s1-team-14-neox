@@ -49,12 +49,12 @@ class ChildDeviceLoadingState extends ChildDeviceState {
 }
 
 class ChildDeviceConnectState extends ChildDeviceState {
-  ChildDeviceConnectState(ChildDeviceState childDeviceState, String newDeviceRemoteId) : super(
+  ChildDeviceConnectState(ChildDeviceState childDeviceState, String deviceRemoteId, String authorisationCode) : super(
     childId: childDeviceState.childId,
     childName: childDeviceState.childName,
     birthDate: childDeviceState.birthDate,
-    deviceRemoteId: newDeviceRemoteId,
-    authorisationCode: childDeviceState.authorisationCode,
+    deviceRemoteId: deviceRemoteId,
+    authorisationCode: authorisationCode,
   );
 }
 

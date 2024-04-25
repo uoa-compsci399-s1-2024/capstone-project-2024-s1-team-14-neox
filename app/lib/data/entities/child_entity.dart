@@ -124,6 +124,12 @@ class ChildEntity {
         .write(ChildrenCompanion(deviceRemoteId: Value(deviceRemoteId)));
   }
 
+  static Future<void> updateAuthorisationCode(
+      int childId, String code) async {
+    AppDb db = AppDb.instance();
+    await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
+        .write(ChildrenCompanion(authorisationCode: Value(code)));
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   // DELETE //////////////////////////////////////////////////////////////////

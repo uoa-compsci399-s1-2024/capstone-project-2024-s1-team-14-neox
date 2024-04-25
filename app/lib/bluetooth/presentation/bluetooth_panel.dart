@@ -23,10 +23,13 @@ class BluetoothPanel extends StatelessWidget {
           context.read<AllChildProfileCubit>().updateDeviceRemoteId(
               childId: state.childId,
               deviceRemoteId: state.deviceRemoteId);
+          context.read<AllChildProfileCubit>().updateAuthorisationCode(
+              childId: state.childId,
+              authorisationCode: state.authorisationCode);
 
         } else if (state is ChildDeviceDisconnectState) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Unpaired'),
+            content: Text('Unpaired device'),
             duration: Duration(seconds: 2),
           ));
           context.read<AllChildProfileCubit>().deleteDeviceRemoteId(
@@ -35,7 +38,7 @@ class BluetoothPanel extends StatelessWidget {
         } else if (state is ChildDeviceErrorState) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.errorMessage),
-            duration: const Duration(seconds: 2),
+            duration: const Duration(seconds: 4),
           ));
 
         } else if (state is ChildDeviceSyncSuccessState) {
@@ -95,7 +98,7 @@ class BluetoothPanel extends StatelessWidget {
                   childName: state.childName,
                   childId: state.childId,
                   deviceRemoteId: state.deviceRemoteId,
-                  authorisationCode: "verysecure",//state.authorisationCode,
+                  authorisationCode: state.authorisationCode,
                 ),
                 child: const Text("Sync device"),
               ),

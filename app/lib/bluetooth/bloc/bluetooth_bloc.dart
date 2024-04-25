@@ -11,6 +11,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
   BluetoothBloc() : super(const BluetoothIdleState(scanResults: [])) {
     on<BluetoothScanStarted>(_wrapCatch(_onBluetoothScanStart));
     on<BluetoothConnectPressed>(_wrapCatch(_onBluetoothConnectPressed));
+    on<BluetoothAuthCodeEntered>(_wrapCatch(_onBluetoothAuthCodeEntered));
   }
 
   Future<void> Function(Event, Emitter<BluetoothState>)
@@ -61,13 +62,26 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
       FlutterBluePlus.stopScan();
     }
 
-    emit(BluetoothConnectLoadingState(scanResults: state.scanResults));
+    emit(BluetoothAuthCodeInputState(
+      scanResults: state.scanResults,
+      deviceRemoteId: event.deviceRemoteId
+    ));
+  }
+
+  Future<void> _onBluetoothAuthCodeEntered(
+      BluetoothAuthCodeEntered event, Emitter<BluetoothState> emit) async {
+    emit(BluetoothConnectLoadingState(
+      scanResults: state.scanResults,
+      deviceRemoteId: event.deviceRemoteId,
+      authorisationCode: event.authorisationCode
+    ));
     BluetoothDevice device = BluetoothDevice.fromId(event.deviceRemoteId);
 
     await device.connect(mtu: 23);
     emit(BluetoothConnectSuccessState(
       scanResults: state.scanResults,
       newDeviceRemoteId: device.remoteId.str,
+      newAuthorisationCode: event.authorisationCode
     ));
 
     // Don't hold up other devices from connecting.

@@ -7,25 +7,51 @@ import '../tiles/scan_result_tile.dart';
 
 class ScanScreen extends StatelessWidget {
   final String name;
-  const ScanScreen({super.key, required this.name});
+  ScanScreen({super.key, required this.name});
+  
+  final TextEditingController _textFieldController = TextEditingController();
 
-  //TODO might need to dispose BlocProvider.value bloc?
-
-  void showSuccessDialog(BuildContext context) {
-    showDialog(
+  Future<void> _showAuthInputDialog(BuildContext context, { required void Function(String) action }) async {
+    return showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
-          content: const Text(
-            'Pair Success',
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Enter 10-digit Authentication Code'),
+              Text(
+                'See the device manual for the code.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
           ),
-          actions: [
+          content: TextField(
+            controller: _textFieldController,
+            decoration: const InputDecoration(hintText: "0123456789"),
+          ),
+          actions: <Widget>[
             ElevatedButton(
-              child: const Text('Return to Home'),
+              child: const Text('CANCEL'),
               onPressed: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
+                Navigator.pop(context);
               },
             ),
+            ValueListenableBuilder(valueListenable: _textFieldController, builder: (context, value, child) {
+              if (value.text.trim().length != 10) {
+                return const ElevatedButton(
+                  onPressed: null,
+                  child: Text('OK'),
+                );
+              }
+              return ElevatedButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  action(_textFieldController.text.trim());
+                  Navigator.pop(context);
+                },
+              );
+            }),
           ],
         );
       },
@@ -46,7 +72,10 @@ class ScanScreen extends StatelessWidget {
               duration: const Duration(seconds: 2),
             ));
           } else if (state is BluetoothConnectSuccessState) {
-            context.read<ChildDeviceCubit>().onChildDeviceConnectPressed(state.newDeviceRemoteId);
+            context.read<ChildDeviceCubit>().onChildDeviceConnectPressed(
+              state.newDeviceRemoteId,
+              state.newAuthorisationCode,
+            );
             Navigator.of(context).popUntil((route) => route.isFirst);
           }
         },
@@ -64,7 +93,15 @@ class ScanScreen extends StatelessWidget {
             ...state.scanResults
               .map((r) => ScanResultTile(
                 result: r,
-                onConnect: () => context.read<BluetoothBloc>().add(BluetoothConnectPressed(deviceRemoteId: r.device.remoteId.str)),
+                onConnect: () => _showAuthInputDialog(
+                  context,
+                  action: (authCode) {
+                    context.read<BluetoothBloc>().add(BluetoothAuthCodeEntered(
+                      deviceRemoteId: r.device.remoteId.str,
+                      authorisationCode: authCode,
+                    ));
+                  },
+                ),
                 loading: state is BluetoothConnectLoadingState
               )),
           ]);

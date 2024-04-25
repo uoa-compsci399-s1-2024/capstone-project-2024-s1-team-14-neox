@@ -38,7 +38,9 @@ class ScanResultTile extends StatelessWidget {
         const SizedBox(
           width: 25,
           height: 25,
-          child: CircularProgressIndicator()
+          child: CircularProgressIndicator(
+            color: Colors.white,
+          )
         )
         : const Text('PAIR'),
     );

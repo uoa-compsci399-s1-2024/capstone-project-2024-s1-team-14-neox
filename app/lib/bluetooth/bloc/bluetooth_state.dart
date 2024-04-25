@@ -14,13 +14,29 @@ class BluetoothScanLoadingState extends BluetoothState {
   const BluetoothScanLoadingState({ required super.scanResults });
 }
 
+class BluetoothAuthCodeInputState extends BluetoothState {
+  final String deviceRemoteId;
+  const BluetoothAuthCodeInputState({ required super.scanResults, required this.deviceRemoteId });
+}
+
 class BluetoothConnectLoadingState extends BluetoothState {
-  const BluetoothConnectLoadingState({ required super.scanResults });
+  final String deviceRemoteId;
+  final String authorisationCode;
+  const BluetoothConnectLoadingState({
+    required super.scanResults,
+    required this.deviceRemoteId,
+    required this.authorisationCode
+  });
 }
 
 class BluetoothConnectSuccessState extends BluetoothState {
   final String newDeviceRemoteId;
-  const BluetoothConnectSuccessState({ required super.scanResults, required this.newDeviceRemoteId });
+  final String newAuthorisationCode;
+  const BluetoothConnectSuccessState({
+    required super.scanResults,
+    required this.newDeviceRemoteId,
+    required this.newAuthorisationCode
+  });
 }
 
 class BluetoothErrorState extends BluetoothState {
