@@ -17,14 +17,14 @@ class InputField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(20.0),
       child: TextFormField(
         controller: controller,
         obscureText: isPassword,
         decoration: InputDecoration(
           focusedBorder: OutlineInputBorder(
             borderSide: BorderSide(color: Colors.black),
-            borderRadius: BorderRadius.circular(5.5),
+            borderRadius: BorderRadius.circular(15),
           ),
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
