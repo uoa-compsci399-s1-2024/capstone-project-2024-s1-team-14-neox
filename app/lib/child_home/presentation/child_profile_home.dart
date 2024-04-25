@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
+import '../../theme/theme_provider.dart';
 import '../cubit/all_child_profile_cubit.dart';
 import '../cubit/child_device_cubit.dart';
 import 'screens/create_child_profile_screen.dart';
@@ -25,6 +28,12 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Your profiles"),
+      ),
+      drawer: Drawer(
+        child: Center(child: CupertinoSwitch(value: Provider.of<ThemeProvider>(context).isDarkMode,
+            onChanged: (value) => Provider.of<ThemeProvider>(context, listen: false).toggleTheme()) ,
+
+        ),
       ),
       body: BlocConsumer<AllChildProfileCubit, AllChildProfileState>(
         listener: (context, state) {
