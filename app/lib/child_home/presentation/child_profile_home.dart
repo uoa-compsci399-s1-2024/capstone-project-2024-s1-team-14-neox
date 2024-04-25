@@ -1,3 +1,4 @@
+import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -50,6 +51,7 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
                 ...state.profiles.map(
                   (profile) => BlocProvider(
                     create: (_) => ChildDeviceCubit(
+                      repo: context.read<ChildDeviceRepository>(),
                       childId: profile.childId,
                       childName: profile.childName,
                       birthDate: profile.birthDate,

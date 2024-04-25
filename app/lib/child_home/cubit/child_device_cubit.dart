@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_repository.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,14 +10,18 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 part 'child_device_state.dart';
 
 class ChildDeviceCubit extends Cubit<ChildDeviceState> {
+  ChildDeviceRepository _repo;
+
   ChildDeviceCubit({
+    required ChildDeviceRepository repo,
     required int childId,
     required String childName,
     required DateTime birthDate,
     required String deviceRemoteId,
     required String authorisationCode,
-  })
-  : super(ChildDeviceIdleState(ChildDeviceState(
+  }) : 
+    _repo = repo,
+    super(ChildDeviceIdleState(ChildDeviceState(
       childId: childId,
       childName: childName,
       birthDate: birthDate,
@@ -24,14 +29,13 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       authorisationCode: authorisationCode,
     )));
 
-  void onChildDeviceConnectPressed(String deviceRemoteId) {
-    emit(ChildDeviceConnectState(state, deviceRemoteId));
+  void onChildDeviceConnectPressed(String deviceRemoteId, String authorisationCode) {
+    emit(ChildDeviceConnectState(state, deviceRemoteId, authorisationCode));
   }
 
   void onChildDeviceDisconnectPressed() {
     emit(ChildDeviceDisconnectState(state));
   }
-  
 
   static List<int> _solveAuthChallenge(List<int> challenge, List<int> key) {
     if (challenge.length != 32) {
@@ -152,7 +156,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
 
       // Authenticate us
       if (authorisationCode.length != 10 || authorisationCode.codeUnits.any((c) => c >= 128)) {
-        emit(ChildDeviceErrorState(state, "Invalid authorisation code"));
+        emit(ChildDeviceErrorState(state, "Invalid authorisation code format."));
         return;
       }
       List<int> key = [...authorisationCode.codeUnits];
@@ -187,11 +191,11 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
             emit(ChildDeviceErrorState(state, "Device authentication timed out."));
             return;
           }
-        };
+        }
 
         List<int> weAreAuthenticated = await centralAuthenticated!.read();
         if (weAreAuthenticated.isEmpty || weAreAuthenticated[0] == 0) {
-          emit(ChildDeviceErrorState(state, "Failed to authenticate phone. Check the password and try again."));
+          emit(ChildDeviceErrorState(state, "Failed to authenticate. Check the password and pair again with the correct password."));
           return;
         }
 
@@ -216,6 +220,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       int samplesRead = 0;
       int sampleCharacteristicIndex = 0;
       List<List<int>> values = [];
+      emit(ChildDeviceSyncingState(state, 0));
       while (true) {
         BluetoothCharacteristic sampleCharacteristic = sampleData[sampleCharacteristicIndex]!;
         List<int> value = await sampleCharacteristic.read();
@@ -241,7 +246,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
 
       // Send samples to repository
       for (List<int> value in values) {
-        await ChildDeviceRepository.parseAndSaveSamples(childName, value, childId);
+        await _repo.parseAndSaveSamples(childName, value, childId);
       }
 
       emit(ChildDeviceSyncSuccessState(state));

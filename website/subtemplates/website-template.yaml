@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: SAM template for one instance of web interface
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  ProjectOrg:
+    Description: "Organisation that runs the website (used for bucket name -> website URL)"
+    Type: String
+    Default: neox
+    MinLength: 1
+    MaxLength: 255
+    AllowedPattern: "^[a-zA-Z][-a-zA-Z0-9]*$"
+  ParentStackName:
+    Description: "Name of parent stack (used for bucket name -> website URL)"
+    Type: String
+    MinLength: 1
+    MaxLength: 255
+    AllowedPattern: "^[a-zA-Z][-a-zA-Z0-9]*$"
+  Environment:
+    Description: The environment in which to run the stack (needed for CORS)
+    Type: String
+    AllowedValues:
+      - dev
+      - prod
+  UseCase:
+    Description: "Which team will use the website instance (prod is no team, it's a releasable 'product')"
+    Type: String
+    AllowedValues:
+      - app
+      - website
+      - server
+      - all
+      - prod
+      - ml
+
+Rules:
+  ProdUseCaseMeansProdEnv:
+    RuleCondition:
+      Fn::Equals: [ !Ref UseCase, prod ]
+    Assertions:
+      - Assert:
+          Fn::Equals: [ !Ref Environment, prod ]
+        AssertionDescription: Prod use case implies prod environment
+  # Can't check length of derived BucketName since CloudFormation stack declarations don't allow arithmetic in conditions.
+
+Resources:
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    # Make sure to delete all objects in bucket first.
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      BucketName: !Sub "${ProjectOrg}-${ParentStackName}-${UseCase}-${Environment}"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        # We're a single-page web app so just use the default error page from AWS.
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub "${WebsiteBucket.Arn}/*"
+Outputs:
+  WebsiteBucketS3Name:
+    Description: Name of S3 bucket for website
+    Value: !Ref WebsiteBucket
+  WebsiteURL:
+    Description: URL for website (unencrypted)
+    Value: !GetAtt WebsiteBucket.WebsiteURL

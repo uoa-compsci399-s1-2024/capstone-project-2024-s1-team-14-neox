@@ -1,59 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
-class ScanResultTile extends StatefulWidget {
-  const ScanResultTile(
-      {super.key, required this.result, this.onConnect});
+class ScanResultTile extends StatelessWidget {
+  const ScanResultTile({super.key, required this.result, required this.onConnect, required this.loading});
 
   final ScanResult result;
-  final VoidCallback? onConnect;
-
-  @override
-  State<ScanResultTile> createState() => _ScanResultTileState();
-}
-
-class _ScanResultTileState extends State<ScanResultTile> {
-  String getNiceHexArray(List<int> bytes) {
-    return '[${bytes.map((i) => i.toRadixString(16).padLeft(2, '0')).join(', ')}]';
-  }
-
-  String getNiceManufacturerData(List<List<int>> data) {
-    return data
-        .map((val) => getNiceHexArray(val))
-        .join(', ')
-        .toUpperCase();
-  }
-
-  String getNiceServiceData(Map<Guid, List<int>> data) {
-    return data.entries
-        .map((v) => '${v.key}: ${getNiceHexArray(v.value)}')
-        .join(', ')
-        .toUpperCase();
-  }
-
-  String getNiceServiceUuids(List<Guid> serviceUuids) {
-    return serviceUuids.join(', ').toUpperCase();
-  }
+  final VoidCallback onConnect;
+  final bool loading;
 
   Widget _buildTitle(BuildContext context) {
-    if (widget.result.device.platformName.isNotEmpty) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            widget.result.device.platformName,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text(
-            widget.result.device.remoteId.str,
-            style: Theme.of(context).textTheme.bodySmall,
-          )
-        ],
-      );
-    } else {
-      return Text(widget.result.device.remoteId.str);
-    }
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          result.device.platformName,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          "ID: ${result.device.remoteId.str}",
+          style: Theme.of(context).textTheme.bodySmall,
+        )
+      ],
+    );
   }
 
   Widget _buildConnectButton(BuildContext context) {
@@ -62,8 +31,18 @@ class _ScanResultTileState extends State<ScanResultTile> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
-      onPressed: widget.onConnect,
-      child: const Text('PAIR'),
+      onPressed: () {
+        onConnect();
+      },
+      child: loading ?
+        const SizedBox(
+          width: 25,
+          height: 25,
+          child: CircularProgressIndicator(
+            color: Colors.white,
+          )
+        )
+        : const Text('PAIR'),
     );
   }
 

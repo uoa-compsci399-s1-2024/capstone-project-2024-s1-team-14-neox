@@ -44,7 +44,7 @@ class ChildDeviceRepository {
     return fetchChildProfiles();
   }
 
-  static Future<void> parseAndSaveSamples(
+  Future<void> parseAndSaveSamples(
       String childName, List<int> bytes, int childId) async {
     while (bytes.length % bytesPerSample != 0) {
       bytes.removeLast();

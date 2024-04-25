@@ -6,6 +6,10 @@ import {
   SecretsManagerClient,
   GetSecretValueCommand,
 } from "@aws-sdk/client-secrets-manager";
+// The docs show the import this way for some reason.
+const {
+  randomInt,
+} = await import("node:crypto");
 import fs from "node:fs";
 import process from "node:process";
 import pg from 'pg';
@@ -126,3 +130,15 @@ const ISO8601_FORMAT_DATETIME = "yyyy-MM-dd'T'HH:mm:ss";
 export const DATETIME_FORMAT_UTC = `${ISO8601_FORMAT_DATETIME}XXXXX`;  // use "Z" for UTC 0
 export const DATETIME_FORMAT_WITHOFFSET = `${ISO8601_FORMAT_DATETIME}xxxxx`;  // use +00:00 for UTC 0
 export const DATETIME_OUTPUT_FORMAT = DATETIME_FORMAT_UTC;
+
+const MIN_ID_INT = 0;
+const MAX_ID_INT_EXCLUSIVE = 1_000_000;
+export const ID_LEN = 9;
+export function generateID()
+{
+  const n = randomInt(MIN_ID_INT, MAX_ID_INT_EXCLUSIVE);
+  const strN = n + "";
+  return strN.padStart(ID_LEN, "0");
+}
+
+export const TEMP_PARENT_ID = '1';

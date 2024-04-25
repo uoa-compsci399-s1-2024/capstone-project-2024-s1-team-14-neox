@@ -1,0 +1,162 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: SAM template for all instances of web interface
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  ProjectOrg:
+    Description: "Organisation that runs the website (used for bucket name -> website URL)"
+    Type: String
+    Default: neox
+    MinLength: 1
+    MaxLength: 255
+    AllowedPattern: "^[a-zA-Z][-a-zA-Z0-9]*$"
+
+  # There is no specific boolean datatype in Cloudformation
+  StartAllDevInstance:
+    Description: Whether to start a developer website instance for all teams
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  # There is no specific boolean datatype in Cloudformation
+  StartProdInstance:
+    Description: Whether to start a prod website instance
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+
+Conditions:
+  ShouldStartAllDevInstance: !Equals
+    - !Ref StartAllDevInstance
+    - true
+  ShouldStartProdInstance: !Equals
+    - !Ref StartProdInstance
+    - true
+
+Resources:
+  # Server team instances
+  ServerDevInstance:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: subtemplates/website-template.yaml
+      Parameters:
+        ProjectOrg: !Ref ProjectOrg
+        ParentStackName: !Ref 'AWS::StackName'
+        UseCase: server
+        Environment: dev
+
+  # Website team instances
+  WebsiteDevInstance:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: subtemplates/website-template.yaml
+      Parameters:
+        ProjectOrg: !Ref ProjectOrg
+        ParentStackName: !Ref 'AWS::StackName'
+        UseCase: website
+        Environment: dev
+
+  # App team instances
+  AppDevInstance:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: subtemplates/website-template.yaml
+      Parameters:
+        ProjectOrg: !Ref ProjectOrg
+        ParentStackName: !Ref 'AWS::StackName'
+        UseCase: app
+        Environment: dev
+
+  AllDevInstance:
+    Type: AWS::CloudFormation::Stack
+    Condition: ShouldStartAllDevInstance
+    Properties:
+      TemplateURL: subtemplates/website-template.yaml
+      Parameters:
+        ProjectOrg: !Ref ProjectOrg
+        ParentStackName: !Ref 'AWS::StackName'
+        UseCase: all
+        Environment: dev
+
+  MlDevInstance:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: subtemplates/website-template.yaml
+      Parameters:
+        ProjectOrg: !Ref ProjectOrg
+        ParentStackName: !Ref 'AWS::StackName'
+        UseCase: ml
+        Environment: dev
+
+  ProdInstance:
+    Type: AWS::CloudFormation::Stack
+    Condition: ShouldStartProdInstance
+    Properties:
+      TemplateURL: subtemplates/website-template.yaml
+      Parameters:
+        ProjectOrg: !Ref ProjectOrg
+        ParentStackName: !Ref 'AWS::StackName'
+        UseCase: prod
+        Environment: prod
+
+Outputs:
+  ServerDevS3Name:
+    Value: !GetAtt ServerDevInstance.Outputs.WebsiteBucketS3Name
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-server-dev-bucket"
+  ServerDevURL:
+    Value: !GetAtt ServerDevInstance.Outputs.WebsiteURL
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-server-dev-website"
+
+  WebsiteDevS3Name:
+    Value: !GetAtt WebsiteDevInstance.Outputs.WebsiteBucketS3Name
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-website-dev-bucket"
+  WebsiteDevURL:
+    Value: !GetAtt WebsiteDevInstance.Outputs.WebsiteURL
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-website-dev-website"
+
+  AppDevS3Name:
+    Value: !GetAtt AppDevInstance.Outputs.WebsiteBucketS3Name
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-app-dev-bucket"
+  AppDevURL:
+    Value: !GetAtt AppDevInstance.Outputs.WebsiteURL
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-app-dev-website"
+
+  AllDevS3Name:
+    Condition: ShouldStartAllDevInstance
+    Value: !GetAtt AllDevInstance.Outputs.WebsiteBucketS3Name
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-all-dev-bucket"
+  AllDevURL:
+    Condition: ShouldStartAllDevInstance
+    Value: !GetAtt AllDevInstance.Outputs.WebsiteURL
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-all-dev-website"
+
+  MlDevS3Name:
+    Value: !GetAtt MlDevInstance.Outputs.WebsiteBucketS3Name
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-ml-dev-bucket"
+  MlDevURL:
+    Value: !GetAtt MlDevInstance.Outputs.WebsiteURL
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-ml-dev-website"
+
+  ProdS3Name:
+    Condition: ShouldStartProdInstance
+    Value: !GetAtt ProdInstance.Outputs.WebsiteBucketS3Name
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-prod-prod-bucket"
+  ProdURL:
+    Condition: ShouldStartProdInstance
+    Value: !GetAtt ProdInstance.Outputs.WebsiteURL
+    Export:
+      Name: !Sub "${ProjectOrg}-${AWS::StackName}-prod-prod-website"

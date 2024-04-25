@@ -40,34 +40,45 @@ void main() async{
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  Widget _buildLoadingOverlay({ required Widget child }) {
-    return Material(
-      color: Colors.transparent,
-      child: LoaderOverlay(
-        useDefaultLoading: false,
-        overlayColor: Colors.black.withOpacity(0.5),
-        overlayWidgetBuilder: (progress) {
-          return Center(
-            child: Card(
-              color: Colors.white,
-              elevation: 0,
-              shadowColor: Colors.transparent,
-              child: Padding(padding: EdgeInsets.fromLTRB(50, 30, 50, 30), child: Column(
+  Widget _buildLoadingOverlay(BuildContext context, { required Widget child }) {
+    return LoaderOverlay(
+      useDefaultLoading: false,
+      disableBackButton: true,
+      overlayColor: Colors.black.withOpacity(0.5),
+      overlayWidgetBuilder: (progress) {
+        String progressText = "Preparing Sync...";
+        if (progress != null) {
+          progressText = progress < 1
+            ? "Syncing... ${(progress * 100).round()}%"
+            : "Finishing sync...";
+        }
+
+        return Center(
+          child: Card(
+            color: Colors.white,
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(50, 30, 50, 30),
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: CircularProgressIndicator(value: progress)
+                  ),
                   Text(
-                    progress == null ? "Authenticating..." : "Syncing ... ${(progress * 100).round()}%",
-                    style: const TextStyle(color: Colors.deepPurple, fontSize: 20)
+                    progressText,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
-              )),
+              ),
             ),
-          );
-        },
-        child: child,
-      )
+          ),
+        );
+      },
+      child: child,
     );
   }
 
@@ -90,7 +101,7 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
             useMaterial3: true,
           ),
-          home: _buildLoadingOverlay(child: const MyHomePage(title: 'Neox')),
+          home: _buildLoadingOverlay(context, child: const MyHomePage(title: 'Neox')),
         ),
       ),
     );
