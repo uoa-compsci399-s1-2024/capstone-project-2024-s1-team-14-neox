@@ -83,7 +83,7 @@ class ChildDeviceRepository {
           light: light,
           datetime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
           accel: Int16List.fromList([accelX, accelY, accelZ]),
-          appClass: 1,
+          appClass: appClass,
 
         ),
       );
