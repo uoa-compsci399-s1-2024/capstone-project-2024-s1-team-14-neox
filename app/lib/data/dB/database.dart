@@ -44,4 +44,17 @@ class AppDb extends _$AppDb {
   Future<void> customStatement(String sql, [List<dynamic>? args]) async {
     await executor.runSelect(sql, args ?? []);
   }
+
+
+  Future<void> exportInto(File file) async {
+    // Make sure the directory of the target file exists
+    await file.parent.create(recursive: true);
+
+    // Override an existing backup, sqlite expects the target file to be empty
+    if (file.existsSync()) {
+      file.deleteSync();
+    }
+
+    await customStatement('VACUUM INTO ?', [file.path]);
+  }
 }

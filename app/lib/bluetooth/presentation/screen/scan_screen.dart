@@ -1,58 +1,58 @@
+import 'package:capstone_project_2024_s1_team_14_neox/child_home/cubit/child_device_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/bluetooth_bloc.dart';
 import '../tiles/scan_result_tile.dart';
-import '../tiles/system_device_tile.dart';
 
 class ScanScreen extends StatelessWidget {
   final String name;
-  const ScanScreen({super.key, required this.name});
+  ScanScreen({super.key, required this.name});
+  
+  final TextEditingController _textFieldController = TextEditingController();
 
-  //TODO might need to dispose BlocProvider.value bloc?
-
-  void showSuccessDialog(BuildContext context) {
-    showDialog(
+  Future<void> _showAuthInputDialog(BuildContext context, { required void Function(String) action }) async {
+    return showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
-          content: const Text(
-            'Pair Success',
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Enter 10-digit Authentication Code'),
+              Text(
+                'See the device manual for the code.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
           ),
-          actions: [
+          content: TextField(
+            controller: _textFieldController,
+            decoration: const InputDecoration(hintText: "0123456789"),
+          ),
+          actions: <Widget>[
             ElevatedButton(
-              child: const Text('Return to Home'),
+              child: const Text('CANCEL'),
               onPressed: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
+                Navigator.pop(context);
               },
             ),
+            ValueListenableBuilder(valueListenable: _textFieldController, builder: (context, value, child) {
+              if (value.text.trim().length != 10) {
+                return const ElevatedButton(
+                  onPressed: null,
+                  child: Text('OK'),
+                );
+              }
+              return ElevatedButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  action(_textFieldController.text.trim());
+                  Navigator.pop(context);
+                },
+              );
+            }),
           ],
-        );
-      },
-    );
-  }
-
-  Widget buildScanButton(BuildContext context) {
-    return BlocBuilder<BluetoothBloc, BluetoothState>(
-      builder: (context, state) {
-        if (state.status.isScanLoading) {
-          return FloatingActionButton(
-            onPressed: () =>
-                context.read<BluetoothBloc>().add(BluetoothScanStopPressed()),
-            backgroundColor: Colors.red,
-            child: const Icon(Icons.stop),
-          );
-        } else if (state.status.isConnectLoading || state.status.isDisconnectLoading) {
-          return FloatingActionButton(
-          onPressed: () =>
-              context.read<BluetoothBloc>().add(BluetoothScanStartPressed()),
-          child: const CircularProgressIndicator(),
-        );
-        }
-        return FloatingActionButton(
-          onPressed: () =>
-              context.read<BluetoothBloc>().add(BluetoothScanStartPressed()),
-          child: const Text("SCAN"),
         );
       },
     );
@@ -66,49 +66,47 @@ class ScanScreen extends StatelessWidget {
       ),
       body: BlocConsumer<BluetoothBloc, BluetoothState>(
         listener: (context, state) {
-          if (state.status.isConnectSuccess) {
-            showSuccessDialog(context);
+          if (state is BluetoothErrorState) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(state.errorMessage),
+              duration: const Duration(seconds: 2),
+            ));
+          } else if (state is BluetoothConnectSuccessState) {
+            context.read<ChildDeviceCubit>().onChildDeviceConnectPressed(
+              state.newDeviceRemoteId,
+              state.newAuthorisationCode,
+            );
+            Navigator.of(context).popUntil((route) => route.isFirst);
           }
         },
         builder: (context, state) {
+          if (state.scanResults.isEmpty) {
+            return Center(
+              child: Text(
+                'No devices found',
+                style: Theme.of(context).textTheme.bodyMedium,
+              )
+            );
+          }
+
           return ListView(children: [
-            Text(state.systemDevices.isEmpty ? "" : "Discovered devices"),
-            ...state.systemDevices
-                .map(
-                  (d) => SystemDeviceTile(
-                    device: d,
-                    onConnect: () => context.read<BluetoothBloc>().add(
-                          BluetoothConnectPressed(
-                              deviceRemoteId: d.remoteId.str),
-                        ),
-                    onDisconnect: () => context.read<BluetoothBloc>().add(
-                          BluetoothDisconnectPressed(
-                              deviceRemoteId: d.remoteId.str),
-                        ),
-                  ),
-                )
-                .toList(),
-            Text(state.scanResults.isEmpty ? "" : "New devices"),
             ...state.scanResults
-                .map(
-                  (r) => ScanResultTile(
-                    result: r,
-                    onConnect: () => context.read<BluetoothBloc>().add(
-                          BluetoothConnectPressed(
-                              deviceRemoteId: r.device.remoteId.str),
-                        ),
-                    onDisconnect: () => context.read<BluetoothBloc>().add(
-                          BluetoothDisconnectPressed(
-                              deviceRemoteId: r.device.remoteId.str),
-                        ),
-                  ),
-                )
-                .toList(),
+              .map((r) => ScanResultTile(
+                result: r,
+                onConnect: () => _showAuthInputDialog(
+                  context,
+                  action: (authCode) {
+                    context.read<BluetoothBloc>().add(BluetoothAuthCodeEntered(
+                      deviceRemoteId: r.device.remoteId.str,
+                      authorisationCode: authCode,
+                    ));
+                  },
+                ),
+                loading: state is BluetoothConnectLoadingState
+              )),
           ]);
         },
       ),
-      floatingActionButton: buildScanButton(context),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

@@ -21,9 +21,9 @@ class $ChildrenTable extends Children
   static const VerificationMeta _serverIdMeta =
       const VerificationMeta('serverId');
   @override
-  late final GeneratedColumn<int> serverId = GeneratedColumn<int>(
+  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
       'server_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -115,7 +115,7 @@ class $ChildrenTable extends Children
       authorisationCode: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}authorisation_code'])!,
       serverId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}server_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}server_id'])!,
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
     );
@@ -129,7 +129,7 @@ class $ChildrenTable extends Children
 
 class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
   final Value<int> id;
-  final Value<int> serverId;
+  final Value<String> serverId;
   final Value<String> name;
   final Value<DateTime> birthDate;
   final Value<String> deviceRemoteId;
@@ -144,7 +144,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
   });
   ChildrenCompanion.insert({
     this.id = const Value.absent(),
-    required int serverId,
+    required String serverId,
     required String name,
     required DateTime birthDate,
     required String deviceRemoteId,
@@ -156,7 +156,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
         authorisationCode = Value(authorisationCode);
   static Insertable<ChildEntity> custom({
     Expression<int>? id,
-    Expression<int>? serverId,
+    Expression<String>? serverId,
     Expression<String>? name,
     Expression<DateTime>? birthDate,
     Expression<String>? deviceRemoteId,
@@ -174,7 +174,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
 
   ChildrenCompanion copyWith(
       {Value<int>? id,
-      Value<int>? serverId,
+      Value<String>? serverId,
       Value<String>? name,
       Value<DateTime>? birthDate,
       Value<String>? deviceRemoteId,
@@ -196,7 +196,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
       map['id'] = Variable<int>(id.value);
     }
     if (serverId.present) {
-      map['server_id'] = Variable<int>(serverId.value);
+      map['server_id'] = Variable<String>(serverId.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);

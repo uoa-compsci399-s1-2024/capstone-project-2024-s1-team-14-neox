@@ -4,7 +4,9 @@ import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 import 'package:drift/drift.dart';
 import 'dart:convert';
 
+import '../../server/child_data.dart';
 import 'child_entity.dart';
+import 'dart:math';
 
 @UseRowClass(ArduinoDataEntity)
 class ArduinoDatas extends Table {
@@ -46,14 +48,14 @@ class ArduinoDataEntity {
 
   ArduinoDataEntity(
       {this.id,
-      this.name,
-      this.uv,
-      this.light,
-      required this.datetime,
-      this.accel,
-      this.appClass = -1,
-      this.serverClass = -1,
-      required this.childId});
+        this.name,
+        this.uv,
+        this.light,
+        required this.datetime,
+        this.accel,
+        this.appClass = -1,
+        this.serverClass = -1,
+        required this.childId});
 
   ArduinoDatasCompanion toCompanion() {
     return ArduinoDatasCompanion(
@@ -66,6 +68,17 @@ class ArduinoDataEntity {
         appClass: Value(appClass),
         serverClass: Value(serverClass),
         childId: Value(childId));
+  }
+
+
+  ChildData toChildData(String serverId) {
+
+    return ChildData(
+      timestamp: datetime.toIso8601String(),
+      childId:  serverId,
+      uv: uv!,
+      light: light!,
+    );
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -102,7 +115,7 @@ class ArduinoDataEntity {
       int childId) async {
     final db = AppDb.instance();
     final query = db.select(db.arduinoDatas)
-      ..where((tbl) => tbl.id.equals(childId));
+      ..where((tbl) => tbl.childId.equals(childId));
     return query.get();
   }
 
@@ -115,21 +128,30 @@ class ArduinoDataEntity {
             .get();
     return arduinoDataEntityList;
   }
+
+  static Future<Map<DateTime, int>> getDailyOutdoorMinutesForChildId(
+      int childId) async {
+    AppDb db = AppDb.instance();
+    List<ArduinoDataEntity> entityList = await (db.select(db.arduinoDatas)
+          ..where((tbl) => tbl.childId.equals(childId))
+          ..where((tbl) => tbl.appClass.equals(1))
+          )
+        .get();
+    return {DateTime.now() : entityList.length};
+  }
   ////////////////////////////////////////////////////////////////////////////
   // UPDATE //////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
 
   static Future<void> updateAppClass(int id, int appClass) async {
     final db = AppDb.instance();
-    await (db.update(db.arduinoDatas)
-      ..where((tbl) => tbl.id.equals(id)))
+    await (db.update(db.arduinoDatas)..where((tbl) => tbl.id.equals(id)))
         .write(ArduinoDatasCompanion(appClass: Value(appClass)));
   }
 
   static Future<void> updateServerClass(int id, int serverClass) async {
     final db = AppDb.instance();
-    await (db.update(db.arduinoDatas)
-      ..where((tbl) => tbl.id.equals(id)))
+    await (db.update(db.arduinoDatas)..where((tbl) => tbl.id.equals(id)))
         .write(ArduinoDatasCompanion(serverClass: Value(serverClass)));
   }
 
@@ -137,24 +159,36 @@ class ArduinoDataEntity {
 // FOR TESTING PURPOSE DELETE LATER //////////////////////////////
 //////////////////////////////////////////////////////////////////
 
-// static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
-//     int childId) async {
-//   final List<ArduinoDataEntity> dataList = [];
-//
-//   // Sample data for testing
-//   for (int i = 0; i < 10; i++) {
-//     final data = ArduinoDataEntity(
-//       uv: 5,
-//       light: 100,
-//       datetime: DateTime.now(),
-//       accel: Int16List.fromList([1, 2, 3]),
-//       serverClass: 1,
-//       appClass: 2,
-//       childId: childId,
-//     );
-//     dataList.add(data);
-//   }
-//
-//   return dataList;
-// }
+
+static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
+    int childId) async {
+  final List<ArduinoDataEntity> dataList = [];
+
+  // Sample data for testing
+  for (int i = 0; i < 10; i++) {
+
+
+
+    Random gen = Random();
+    int range = 5 * 365; // 5 years in days
+
+    DateTime today = DateTime.now();
+    DateTime randomDate = today.subtract(Duration(days: gen.nextInt(range)));
+
+    final data = ArduinoDataEntity(
+      uv: 5,
+      light: 100,
+      datetime: randomDate,
+
+      accel: Int16List.fromList([1, 2, 3]),
+      serverClass: 1,
+      appClass: 2,
+      childId: childId,
+    );
+    dataList.add(data);
+  }
+
+  return dataList;
+
+}
 }

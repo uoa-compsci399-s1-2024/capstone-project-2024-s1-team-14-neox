@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bluetooth/bloc/bluetooth_bloc.dart';
 import '../../../bluetooth/presentation/bluetooth_panel.dart';
-import '../../../dashboard/domain/dashboard_repository.dart';
 import '../../cubit/all_child_profile_cubit.dart';
 import '../../cubit/child_device_cubit.dart';
 
@@ -48,49 +47,20 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
             ),
           ),
           BlocConsumer<ChildDeviceCubit, ChildDeviceState>(
-              listener: (context, state) {
-            // if (state.status.isPairSuccess) {
-            //   ScaffoldMessenger.of(context)
-            //     ..hideCurrentSnackBar()
-            //     ..showSnackBar(
-            //       SnackBar(
-            //         content: Text(state.message),
-            //       ),
-            //     );
-            /*} else*/ if (state.status.isUnpairSuccess) {
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                  ),
-                );
-            } else if (state.status.isFailure) {
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                  ),
-                );
-            }
-          }, builder: (context, state) {
-            return BlocProvider(
-              create: (_) => BluetoothBloc(),
-              child: const BluetoothPanel(),
-            );
-          }),
-          ElevatedButton(
-            onPressed: () => DashboardRepository.createRandomDataFromDate(
-              context.read<ChildDeviceCubit>().state.childId,
-              DateTime.now(),
-            ),
-            child: Text("add random data"),
+            listener: (context, state) {
+            },
+            builder: (context, state) {
+              return BlocProvider(
+                create: (_) => BluetoothBloc(),
+                child: const BluetoothPanel(),
+              );
+            },
           ),
-          OutlinedButton(onPressed: () => context.read<AllChildProfileCubit>().deleteChildProfile(
-            context.read<ChildDeviceCubit>().state.childId,
-          ), child: Text("Remove child profile")),
-
+          OutlinedButton(
+            onPressed: () => context.read<AllChildProfileCubit>()
+              .deleteChildProfile(context.read<ChildDeviceCubit>().state.childId),
+            child: const Text("Remove child profile")
+          ),
         ],
       ),
     );
