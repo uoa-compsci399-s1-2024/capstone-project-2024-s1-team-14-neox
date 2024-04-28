@@ -19,16 +19,6 @@ class BluetoothAuthCodeInputState extends BluetoothState {
   const BluetoothAuthCodeInputState({ required super.scanResults, required this.deviceRemoteId });
 }
 
-class BluetoothConnectLoadingState extends BluetoothState {
-  final String deviceRemoteId;
-  final String authorisationCode;
-  const BluetoothConnectLoadingState({
-    required super.scanResults,
-    required this.deviceRemoteId,
-    required this.authorisationCode
-  });
-}
-
 class BluetoothConnectSuccessState extends BluetoothState {
   final String newDeviceRemoteId;
   final String newAuthorisationCode;

@@ -46,7 +46,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     });
 
     await FlutterBluePlus.startScan(
-      withKeywords: ["Neox"],
+      withServices: [Guid("ba5c0000-243e-4f78-ac25-69688a1669b4")],
       timeout: const Duration(seconds: 15),
     );
     await Future.delayed(const Duration(seconds: 15));
@@ -70,22 +70,10 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
 
   Future<void> _onBluetoothAuthCodeEntered(
       BluetoothAuthCodeEntered event, Emitter<BluetoothState> emit) async {
-    emit(BluetoothConnectLoadingState(
-      scanResults: state.scanResults,
-      deviceRemoteId: event.deviceRemoteId,
-      authorisationCode: event.authorisationCode
-    ));
-    BluetoothDevice device = BluetoothDevice.fromId(event.deviceRemoteId);
-
-    await device.connect(mtu: 23);
     emit(BluetoothConnectSuccessState(
       scanResults: state.scanResults,
-      newDeviceRemoteId: device.remoteId.str,
+      newDeviceRemoteId: event.deviceRemoteId,
       newAuthorisationCode: event.authorisationCode
     ));
-
-    // Don't hold up other devices from connecting.
-    // Get our deviceRemoteId and finish.
-    await device.disconnect();
   }
 }

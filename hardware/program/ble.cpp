@@ -63,6 +63,7 @@ static BLECharacteristic authChallengeFromCentral   ("c03b7267-dcfa-4525-8521-1b
 static BLECharacteristic authResponseFromPeripheral ("750d5d43-96c4-4f5c-8ce1-fdb44a150336", BLERead | BLEWrite | BLEEncryption, 32, true);
 static BLECharacteristic centralAuthenticated       ("776edbca-a020-4d86-a5e8-25eb87e82554", BLERead, 1, true);
 
+static void getBLEAddress(uint8_t* address); // Returns a 6 byte array
 static void sha256(const uint8_t* value, uint8_t* hash); // Takes and returns a 32 byte array
 static void generateRandom(uint8_t* value); // Returns 32 byte array
 static void solveAuthChallenge(const uint8_t* challenge, uint8_t* solution);
@@ -84,7 +85,12 @@ void initializeBLE() {
     authChallengeFromCentral.setEventHandler(BLEWritten, onAuthChallengeFromCentral);
     BLE.setEventHandler(BLEConnected, onConnection);
 
+    uint8_t manufacturerData[8] = { 0xFF, 0xFF }; // 0xFFFF is the company id used for testing
+    getBLEAddress(manufacturerData + 2);
+    BLE.setManufacturerData(manufacturerData, sizeof(manufacturerData));
+    BLE.setAdvertisedService(sensorSamplesService);
     BLE.setLocalName("Neox Sens 1.0");
+
     ts.setValue(0);
     sensorSamplesService.addCharacteristic(samples_1);
     sensorSamplesService.addCharacteristic(samples_2);
@@ -102,6 +108,26 @@ void initializeBLE() {
     
     BLE.addService(sensorSamplesService);
     BLE.advertise();
+}
+
+void getBLEAddress(uint8_t* address) {
+  String s = BLE.address();
+  for (int i = 0; i < 18;) {
+    if (s[i] <= '9') {
+      *address = (s[i] - '0') * 16;
+    } else {
+      *address = (s[i] - 'a' + 10) * 16;
+    }
+    i++;
+    
+    if (s[i] <= '9') {
+      *address |= (s[i] - '0');
+    } else {
+      *address |= (s[i] - 'a' + 10);
+    }
+    i += 2;
+    address++;
+  }
 }
 
 void checkConnection() {

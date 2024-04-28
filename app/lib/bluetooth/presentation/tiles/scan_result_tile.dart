@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class ScanResultTile extends StatelessWidget {
-  const ScanResultTile({super.key, required this.result, required this.onConnect, required this.loading});
+  const ScanResultTile({super.key, required this.result, required this.onConnect});
 
   final ScanResult result;
   final VoidCallback onConnect;
-  final bool loading;
+
+  String _formatDeviceRemoteId(List<int> data) {
+    return data.map((e) => e.toRadixString(16).toUpperCase().padLeft(2, '0')).join(':');
+  }
 
   Widget _buildTitle(BuildContext context) {
     return Column(
@@ -18,7 +21,7 @@ class ScanResultTile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         Text(
-          "ID: ${result.device.remoteId.str}",
+          "ID: ${_formatDeviceRemoteId(result.advertisementData.manufacturerData.values.firstOrNull ?? [])}",
           style: Theme.of(context).textTheme.bodySmall,
         )
       ],
@@ -34,15 +37,7 @@ class ScanResultTile extends StatelessWidget {
       onPressed: () {
         onConnect();
       },
-      child: loading ?
-        const SizedBox(
-          width: 25,
-          height: 25,
-          child: CircularProgressIndicator(
-            color: Colors.white,
-          )
-        )
-        : const Text('PAIR'),
+      child: const Text('PAIR'),
     );
   }
 

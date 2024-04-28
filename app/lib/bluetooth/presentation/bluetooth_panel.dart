@@ -16,7 +16,7 @@ class BluetoothPanel extends StatelessWidget {
       listener: (context, state) {
         if (state is ChildDeviceConnectState) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Pairing success'),
+            content: Text('Paired device'),
             duration: Duration(seconds: 2),
             backgroundColor: Colors.lightBlue,
           ));
