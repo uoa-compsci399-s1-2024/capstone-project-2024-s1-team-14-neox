@@ -55,8 +55,8 @@ class ChildApiService {
     }
   }
 
-  static Future<String> registerChild()async {
-    print('hello');
+  static Future<String> registerChild() async {
+    print('Register success');
     Dio dio = Dio();
     const url = '$apiUrl/children';
     var response = await dio.post(url);

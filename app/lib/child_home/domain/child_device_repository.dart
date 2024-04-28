@@ -23,25 +23,31 @@ class ChildDeviceRepository {
 
   Future<List<ChildDeviceModel>> createChildProfile(
       String name, DateTime birthDate) async {
-    ChildEntity.saveSingleChildEntityFromParameters(name, birthDate);
+    await ChildEntity.saveSingleChildEntityFromParameters(name, birthDate);
 
-    return fetchChildProfiles();
+    return await fetchChildProfiles();
   }
 
   Future<List<ChildDeviceModel>> deleteChildProfile(int childId) async {
-    ChildEntity.deleteChild(childId);
-    return fetchChildProfiles();
+    await ChildEntity.deleteChild(childId);
+    return await fetchChildProfiles();
   }
 
   Future<List<ChildDeviceModel>> updateChildDeviceRemoteID(
       int childId, String deviceRemoteId) async {
-    ChildEntity.updateRemoteDeviceId(childId, deviceRemoteId);
-    return fetchChildProfiles();
+    await ChildEntity.updateRemoteDeviceId(childId, deviceRemoteId);
+    return await fetchChildProfiles();
+  }
+
+  Future<List<ChildDeviceModel>> updateChildAuthenticationCode(
+      int childId, String authorisationCode) async {
+    await ChildEntity.updateAuthorisationCode(childId, authorisationCode);
+    return await fetchChildProfiles();
   }
 
   Future<List<ChildDeviceModel>> deleteChildDeviceRemoteID(int childId) async {
-    ChildEntity.deleteDeviceForChild(childId);
-    return fetchChildProfiles();
+    await ChildEntity.deleteDeviceForChild(childId);
+    return await fetchChildProfiles();
   }
 
   Future<void> parseAndSaveSamples(

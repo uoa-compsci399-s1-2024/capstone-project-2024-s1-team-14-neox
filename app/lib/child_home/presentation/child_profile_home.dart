@@ -29,6 +29,15 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
       ),
       body: BlocConsumer<AllChildProfileCubit, AllChildProfileState>(
         listener: (context, state) {
+          // if (state.status.isAdding) {
+          //   Navigator.push(
+          //               context,
+          //               MaterialPageRoute(
+          //                   builder: (context) =>
+          //                       const CreateChildProfileScreen()),
+          //             );
+
+          // }
           if (state.status.isAddSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -36,14 +45,24 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
                 backgroundColor: Colors.lightBlue,
               ),
             );
+          // } else if (state.status.isDeleteSuccess) {
+          //   ScaffoldMessenger.of(context).showSnackBar(
+          //     SnackBar(
+          //       content: Text(state.message),
+          //       backgroundColor: Colors.lightBlue,
+          //     ),
+          //   );
           }
         },
         builder: (context, state) {
+          print("state change occured");
+          print(state);
           if (state.status.isLoading) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
+
           return Container(
             child: PageView(
               scrollDirection: Axis.horizontal,
@@ -55,8 +74,10 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
                       childId: profile.childId,
                       childName: profile.childName,
                       birthDate: profile.birthDate,
-                      deviceRemoteId: profile.deviceRemoteId ?? "", // Change ?? to ! and make deviceRemoteId nonnullable.
-                      authorisationCode: profile.authorisationCode ?? "", // Same here
+                      deviceRemoteId: profile.deviceRemoteId ??
+                          "", // Change ?? to ! and make deviceRemoteId nonnullable.
+                      authorisationCode:
+                          profile.authorisationCode ?? "", // Same here
                     ),
                     child: const ChildProfileTile(),
                   ),
