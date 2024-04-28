@@ -5,7 +5,7 @@
 #include "rtc.h"
 #include "ble.h"
 
-static const unsigned int SERIAL_BAUD_RATE = 9600;
+static const int SERIAL_BAUD_RATE = 9600;
 static const uint32_t POLL_INTERVAL_MS = (uint32_t)60 * 1000; // 1 minute
 static const uint8_t UV_SENSOR_PIN = A6;
 static const uint8_t LIGHT_SENSOR_PIN = A7;
@@ -19,9 +19,13 @@ void setup()
   pinMode(A1, OUTPUT);
   digitalWrite(A0, LOW);
   digitalWrite(A1, HIGH);
-
+  
   Serial.begin(SERIAL_BAUD_RATE);
-  //while (!Serial);
+  // Wait for serial to become ready.
+  // Do not use `while(!Serial){}` because
+  // we do not always want serial.
+  delay(1000);
+
   Wire.begin();
   eepromBegin();
   initializeBLE();
