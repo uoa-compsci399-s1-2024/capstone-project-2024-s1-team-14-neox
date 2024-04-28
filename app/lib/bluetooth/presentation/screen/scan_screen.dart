@@ -97,16 +97,19 @@ class ScanScreen extends StatelessWidget {
                   context,
                   action: (authCode) {
                     context.read<BluetoothBloc>().add(BluetoothAuthCodeEntered(
-                      deviceRemoteId: r.device.remoteId.str,
+                      deviceRemoteId: _formatRemoteDeviceId(r.advertisementData.manufacturerData.values.firstOrNull ?? []),
                       authorisationCode: authCode,
                     ));
                   },
-                ),
-                loading: state is BluetoothConnectLoadingState
+                )
               )),
           ]);
         },
       ),
     );
+  }
+
+  static String _formatRemoteDeviceId(List<int> bytes) {
+    return bytes.map((b) => b.toInt()).join(' ');
   }
 }

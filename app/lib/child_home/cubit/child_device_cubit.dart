@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:io';
 
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_repository.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity.dart';
@@ -51,6 +52,34 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
 
     return sha256.convert(combined).bytes;
   }
+  
+  static String _formatRemoteDeviceId(List<int> bytes) {
+    return bytes.map((b) => b.toInt()).join(' ');
+  }
+
+  Future<BluetoothDevice?> _getBluetoothDevice(String deviceRemoteId) async {
+    if (FlutterBluePlus.isScanningNow) {
+      await FlutterBluePlus.stopScan();
+    }
+
+    await FlutterBluePlus.startScan(
+      withServices: [Guid("ba5c0000-243e-4f78-ac25-69688a1669b4")],
+      timeout: const Duration(seconds: 15),
+    );
+    
+    try {
+      await for (List<ScanResult> scanResults in FlutterBluePlus.scanResults.timeout(const Duration(seconds: 15))) {
+        scanResults.retainWhere((r) => deviceRemoteId == _formatRemoteDeviceId(r.advertisementData.manufacturerData.values.firstOrNull ?? []));
+        if (scanResults.isNotEmpty) {
+          return scanResults.first.device;
+        }
+      }
+    } finally {
+      await FlutterBluePlus.stopScan();
+    }
+
+    return null;
+  }
 
   Future<void> onSyncPressed({
     required String childName,
@@ -58,9 +87,25 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     required String deviceRemoteId,
     required String authorisationCode
   }) async {
-    emit(ChildDeviceSyncingState(state, null));
-
-    BluetoothDevice device = BluetoothDevice.fromId(deviceRemoteId);
+    BluetoothDevice? device;
+    try {
+      if (FlutterBluePlus.adapterStateNow != BluetoothAdapterState.on) {
+        if (Platform.isAndroid) {
+          await FlutterBluePlus.turnOn();
+        }
+      }
+      emit(ChildDeviceSyncingState(state, null));
+      device = await _getBluetoothDevice(deviceRemoteId);
+    } catch (e) {
+      emit(ChildDeviceErrorState(state, "Failed to turn on Bluetooth: $e"));
+      return;
+    }
+    
+    if (device == null) {
+      emit(ChildDeviceErrorState(state, "Scan did not find device."));
+      return;
+    }
+    
     try {
       await device.connect(mtu: 23);
     } catch (e) {
