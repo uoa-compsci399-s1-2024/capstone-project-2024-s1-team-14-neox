@@ -76,7 +76,11 @@ class AllChildProfileCubit extends Cubit<AllChildProfileState> {
   }
 
   Future<void> updateAuthorisationCode({required int childId, required String authorisationCode }) async {
-    ChildEntity.updateAuthorisationCode(childId, authorisationCode);
+    final childDeviceProfiles = await _childDeviceRepository.updateChildAuthenticationCode(childId, authorisationCode);
+    emit(state.copyWith(
+        status: AllChildProfileStatus.updateSuccess,
+        profiles: childDeviceProfiles,
+        message: "<you shouldn't see this>"));
   }
 
     Future<void> deleteDeviceRemoteId(

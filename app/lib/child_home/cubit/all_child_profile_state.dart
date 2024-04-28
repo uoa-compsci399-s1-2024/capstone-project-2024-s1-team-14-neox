@@ -42,5 +42,5 @@ class AllChildProfileState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [status, profiles, message];
+  List<Object?> get props => [status, ...profiles, message];
 }
