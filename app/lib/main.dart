@@ -5,7 +5,8 @@ import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/register_screen.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/sync_screen.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/services/aws_cognito.dart';
-
+import 'package:capstone_project_2024_s1_team_14_neox/theme/theme_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/dashboard/presentation/dashboard_home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,8 +33,11 @@ void main() async{
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true); // Used to log BLE
   await dotenv.load();
   AWSServices().initializeStorage();
-  runApp(const MyApp());
-
+  runApp(ChangeNotifierProvider(
+      create: (context) => ThemeProvider(),
+  child: const MyApp(),
+  ),
+  );
 }
 
 
@@ -135,38 +139,45 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
   ];
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: body[currentPageIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentPageIndex,
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentPageIndex = index;
-          });
-        },
-        // Icon and labels for the screes to navigate to
-        destinations: const <Widget>[
-          NavigationDestination(
-            icon: Icon(Icons.face),
-            label: "Home",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.dashboard),
-            label: "Dashboard",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.cloud_upload),
-            label: "Cloud",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.table_chart),
-            label: "Database",
-          ),
-        ],
+    return MaterialApp(
+      theme: Provider
+          .of<ThemeProvider>(context)
+          .themeData,
+      home: Scaffold(
+
+        body: body[currentPageIndex],
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: currentPageIndex,
+          onDestinationSelected: (int index) {
+            setState(() {
+              currentPageIndex = index;
+            });
+          },
+          // Icon and labels for the screes to navigate to
+          destinations: const <Widget>[
+            NavigationDestination(
+              icon: Icon(Icons.face),
+              label: "Home",
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.dashboard),
+              label: "Dashboard",
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.cloud_upload),
+              label: "Cloud",
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.table_chart),
+              label: "Database",
+            ),
+          ],
+        ),
       ),
     );
   }
-}
 
+}
