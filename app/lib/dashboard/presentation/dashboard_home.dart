@@ -1,7 +1,8 @@
-import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+
+import '../../../child_home/domain/child_device_model.dart';
 import '../../child_home/cubit/all_child_profile_cubit.dart';
 import '../cubit/daily_cubit.dart';
 import '../cubit/dashboard_cubit.dart';
