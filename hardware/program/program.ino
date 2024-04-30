@@ -53,6 +53,8 @@ static void readSample()
   sample.timestamp = readRTC();
   sample.uv = analogRead(UV_SENSOR_PIN);
   sample.light = analogRead(LIGHT_SENSOR_PIN);
+  Serial.print(sample.uv); Serial.print(", ");
+  Serial.print(sample.light); Serial.print(", ");
   sample.acceleration = readIMU();
   sample.color = readTCS();
   eepromPushSample(&sample);

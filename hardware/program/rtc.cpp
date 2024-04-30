@@ -16,5 +16,6 @@ std::array<uint8_t, 4> readRTC() {
     uint8_t third_bytes = epoch >> 16;
     uint8_t fourth_bytes = epoch >> 24;
     std::array<uint8_t, 4> output = {first_bytes, second_bytes, third_bytes, fourth_bytes};
+    Serial.print(epoch); Serial.print(", ");
     return output;
 }
