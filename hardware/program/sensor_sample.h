@@ -17,8 +17,9 @@ struct SensorSample {
   uint16_t uv;
   uint16_t light;
   Acceleration acceleration;
+  std::array<uint16_t, 5> color;
 };
 
-static_assert(sizeof(SensorSample) == 14, "SensorSample struct layout assertion failed.");
+static_assert(sizeof(SensorSample) == 24, "SensorSample struct layout assertion failed.");
 
 #endif

@@ -4,6 +4,7 @@
 #include "imu.h"
 #include "rtc.h"
 #include "ble.h"
+#include "tcs.h"
 
 static const int SERIAL_BAUD_RATE = 9600;
 static const uint32_t POLL_INTERVAL_MS = (uint32_t)60 * 1000; // 1 minute
@@ -21,9 +22,6 @@ void setup()
   digitalWrite(A1, HIGH);
   
   Serial.begin(SERIAL_BAUD_RATE);
-  // Wait for serial to become ready.
-  // Do not use `while(!Serial){}` because
-  // we do not always want serial.
   delay(1000);
 
   Wire.begin();
@@ -31,7 +29,7 @@ void setup()
   initializeBLE();
   initializeIMU();
   initializeRTC();
-  
+  initializeTCS();
   //uint8_t key[32] = "verysecure";
   //eepromFactoryReset(key);
 }
@@ -56,5 +54,6 @@ static void readSample()
   sample.uv = analogRead(UV_SENSOR_PIN);
   sample.light = analogRead(LIGHT_SENSOR_PIN);
   sample.acceleration = readIMU();
+  sample.color = readTCS();
   eepromPushSample(&sample);
 }
