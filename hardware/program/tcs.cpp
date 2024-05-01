@@ -20,11 +20,11 @@ std::array<uint16_t, 5> readTCS() {
   lux = tcs.calculateLux(r, g, b);
 
   std::array<uint16_t, 5> output = {r, g, b, colorTemp, lux};
-  Serial.print(r); Serial.print(", ");
-  Serial.print(g); Serial.print(", ");
-  Serial.print(b); Serial.print(", ");
-  Serial.print(c); Serial.print(", ");
-  Serial.print(colorTemp); Serial.print(", ");
-  Serial.println(lux); 
+  Serial.print("Red: ");Serial.print(r); Serial.print(", ");
+  Serial.print("Green: ");Serial.print(g); Serial.print(", ");
+  Serial.print("Blue: ");Serial.print(b); Serial.print(", ");
+  Serial.print("Clear: ");Serial.print(c); Serial.print(", ");
+  Serial.print("Temp: ");Serial.print(colorTemp); Serial.print(", ");
+  Serial.print("Lux (Digital): ");Serial.println(lux); 
   return output;
 }

@@ -25,8 +25,8 @@ Acceleration readIMU() {
     acc.x = (int16_t)(x / 4.0f * 0x7FFF);
     acc.y = (int16_t)(y / 4.0f * 0x7FFF);
     acc.z = (int16_t)(z / 4.0f * 0x7FFF);
-    Serial.print(acc.x);Serial.print(", ");
-    Serial.print(acc.y);Serial.print(", ");
-    Serial.print(acc.z);Serial.print(", ");
+    Serial.print("x: ");Serial.print(acc.x);Serial.print(", ");
+    Serial.print("y: ");Serial.print(acc.y);Serial.print(", ");
+    Serial.print("z: ");Serial.print(acc.z);Serial.print(", ");
     return acc;
 }

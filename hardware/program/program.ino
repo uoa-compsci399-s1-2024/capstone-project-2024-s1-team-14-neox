@@ -7,7 +7,7 @@
 #include "tcs.h"
 
 static const int SERIAL_BAUD_RATE = 9600;
-static const uint32_t POLL_INTERVAL_MS = (uint32_t)60 * 1000; // 1 minute
+static const uint32_t POLL_INTERVAL_MS = (uint32_t)1000; // 1 minute
 static const uint8_t UV_SENSOR_PIN = A6;
 static const uint8_t LIGHT_SENSOR_PIN = A7;
 
@@ -53,8 +53,8 @@ static void readSample()
   sample.timestamp = readRTC();
   sample.uv = analogRead(UV_SENSOR_PIN);
   sample.light = analogRead(LIGHT_SENSOR_PIN);
-  Serial.print(sample.uv); Serial.print(", ");
-  Serial.print(sample.light); Serial.print(", ");
+  Serial.print("UV: ");Serial.print(sample.uv); Serial.print(", ");
+  Serial.print("light: ");Serial.print(sample.light); Serial.print(", ");
   sample.acceleration = readIMU();
   sample.color = readTCS();
   eepromPushSample(&sample);
