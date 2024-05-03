@@ -12,9 +12,8 @@ import logo from './data/neox.svg';
 
 //Auth related imports
 import { awsExports } from './aws-exports';
-import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
-import { Auth, Amplify } from "aws-amplify";
+import { Auth, Amplify,Hub } from "aws-amplify";
 
 Amplify.configure({
   Auth: {
@@ -23,17 +22,6 @@ Amplify.configure({
     userPoolWebClientId: awsExports.USER_POOL_APP_CLIENT_ID
   }
 });
-
-async function handleSignOut(toggleButton) {
-  try {
-    await Auth.signOut();
-    console.log('Sign-out successful.');
-    window.location.href = '/sign-in';
-    toggleButton(true);
-  } catch (error) {
-    console.error('Error signing out:', error);
-  }
-}
 
 function App() {
 
@@ -47,6 +35,42 @@ function App() {
     setJwtToken(token);
   };
 
+const handleSignOut = async () => {
+  try {
+    await Auth.signOut();
+    console.log('Sign-out successful.');
+    window.location.href = '/sign-in';
+    toggleButton(true);
+  } catch (error) {
+    console.error('Error signing out:', error);
+  }
+};
+
+useEffect(() => {
+  // Clear authentication tokens upon component mount
+  Amplify.Auth.signOut();
+}, []);
+
+  
+const listener = (data) => {
+  switch (data?.payload?.event) {
+    case 'signIn':
+      toggleButton(false);
+      console.log('user signed in');
+      break;
+    case 'signUp':
+      //toggleButton(false);
+      console.log('user signed up');
+      break;
+    case 'signOut':
+      toggleButton(true);
+      console.log('user signed out');
+      break;
+  }
+};
+
+Hub.listen('auth', listener);
+
   return (
     <div className="Background">
 
@@ -54,12 +78,12 @@ function App() {
         <div className="App">
           <nav className="navbar navbar-expand-lg navbar-light fixed-top">
             <div className="container">
-              <Link className="navbar-brand" to={'/Home'}>NEOX</Link>
+              <Link to={'/Home'} className="navbar-brand">   <img src={logo} alt="NEOX Logo" width="30px" /> NEOX LABS</Link>
 
                 <ul className="nav">
                   {showButton &&<li className="nav-item"><Link className="nav-link" to={'/sign-in'}>Login</Link></li>}
                   {!showButton &&<li className="nav-item"><Link className="nav-link" to={'/display-chart'}>Child Data</Link></li>}
-                  {!showButton && ( <li className="nav-item"> <Link className="nav-link" onClick={() => { handleSignOut(toggleButton(true));}} to={'/sign-in'}>Logout</Link></li>)}
+                  {!showButton && ( <li className="nav-item"> <Link className="nav-link" onClick={() => { handleSignOut();}} to={'/sign-in'}>Logout</Link></li>)}
                 </ul>
 
             </div>
