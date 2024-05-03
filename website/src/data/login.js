@@ -9,9 +9,6 @@ import { awsExports } from '../aws-exports';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { Auth, Amplify, Logger, Hub  } from "aws-amplify";
-// probably useless import { toggleClass } from 'rsuite/esm/DOMHelper';
-
-
 
 Amplify.configure({
   Auth: {
@@ -22,34 +19,9 @@ Amplify.configure({
 });
 
 const Login = ({ toggleButton, handleJwtToken }) => {
-
-    const logger = new Logger('Logger', 'INFO');
-    const listener = (data) => {
-      switch (data.payload.event) {
-        case 'signIn':
-          //logger.info('user signed in');
-          toggleButton(false);
-          break;
-        case 'signUp':
-          //logger.info('user signed up');
-          break;
-        case 'signOut':
-          //logger.info('user signed out')
-          toggleButton(true);;
-          break;
-        case 'signIn_failure':
-          //logger.info('user sign in failed');
-          break;
-        case 'configured':
-          //logger.info('the Auth module is configured');
-          break;
-        default:
-          logger.error('Something went wrong, look at data object', data);
-      }
-    }
-    Hub.listen('auth', listener);
-
     const [jwtToken, setJwtToken] = useState('');
+    const logger = new Logger('Logger', 'INFO');
+
 
     useEffect(() => {
         fetchJwtToken();
@@ -67,8 +39,18 @@ const Login = ({ toggleButton, handleJwtToken }) => {
           console.log('Error fetching JWT token:', error);
         }
       };
+    
+
+    const handleStateChange = (state) => {
+      if (state === 'signUp') {
+      // Trigger toggleButton when changing from signIn to signUp
+      toggleButton(false);
+        console.log('Transitioned from signIn to signUp');
+      }
+    };
+    
     return (
-        <Authenticator initialState='signIn'
+        <Authenticator initialState='signIn' onStateChange={handleStateChange}
         components={{
             SignUp: {
             FormFields() {
