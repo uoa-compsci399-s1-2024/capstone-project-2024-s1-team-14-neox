@@ -5,8 +5,13 @@
 #include "rtc.h"
 #include "ble.h"
 
+<<<<<<< Updated upstream:hardware/hardware.ino
 static const unsigned int SERIAL_BAUD_RATE = 9600;
 static const uint32_t POLL_INTERVAL_MS = (uint32_t)60 * 1000; // 1 minute
+=======
+static const int SERIAL_BAUD_RATE = 9600;
+static const uint32_t POLL_INTERVAL_MS = (uint32_t)2 * 1000; // 1 minute
+>>>>>>> Stashed changes:hardware/program/program.ino
 static const uint8_t UV_SENSOR_PIN = A6;
 static const uint8_t LIGHT_SENSOR_PIN = A7;
 
@@ -43,6 +48,8 @@ void loop()
     readSample();
   }
   checkConnection();
+
+
 }
 
 static void readSample()
@@ -50,7 +57,17 @@ static void readSample()
   SensorSample sample = { 0 };
   sample.timestamp = readRTC();
   sample.uv = analogRead(UV_SENSOR_PIN);
+  Serial.print(sample.uv);
+  Serial.print(",");
   sample.light = analogRead(LIGHT_SENSOR_PIN);
+<<<<<<< Updated upstream:hardware/hardware.ino
   sample.acceleration = readIMU();
+=======
+  Serial.print(sample.light);
+  Serial.print(",");
+  sample.acceleration = readIMU(); 
+  sample.color = readTCS();
+>>>>>>> Stashed changes:hardware/program/program.ino
   eepromPushSample(&sample);
+  Serial.println(",");
 }
