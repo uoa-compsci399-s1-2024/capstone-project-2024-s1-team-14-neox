@@ -137,6 +137,9 @@ https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-att
 
 ### Children
 
+All fields are optional.  Researchers only really want `birthdate`
+since age is a relevant predictor for progression of myopia.
+
 - `birthdate`
 - `family_name`
 - `given_name`
