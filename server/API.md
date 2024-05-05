@@ -124,8 +124,8 @@ to be cleared?
 - `timestamp`: String of ISO8601-formatted datetime with seconds
   resolution and timezone.  If timezone is UTC 0, then it must be
   specified either as `Z` OR an offset of `+00:00`.
-- `uv`: Numeric value of UV exposure (TODO units).
-- `light`: Numeric value of light exposure (TODO units).
+- `uv`: Non-negative integer value of UV exposure (TODO units).
+- `light`: Non-negative integer value of light exposure (TODO units).
 - `acceleration`: UNDECIDED: Three-element numeric array for device acceleration
   where the first element is the `x` component, second is `y`, and
   third is `z`.
