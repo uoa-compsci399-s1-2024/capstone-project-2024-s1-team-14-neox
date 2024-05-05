@@ -723,9 +723,38 @@ Server returns 403.
 - TODO: Maybe the results should be returned in "pages" (AKA
   "pagination").
 - Automatically sort results by date.
-- Asking for samples to be classified would make a call to the
-  classifier (ML or something else).  This would slow down the
-  response time.
+
+### Classify samples (GET) (`/classifications/{childID}`)
+
+#### Flow
+
+##### 1. User sends GET request with query parameters for:
+
+- Same filters as sample search action
+- Some classifier options
+
+##### 2a. If authorised
+
+User receives:
+
+``` json
+{
+	"data": [
+		{"timestamp": ..., "outside": BOOL},
+		...
+	]
+}
+```
+
+##### 2b. If not authorised OR no such child
+
+Server returns 403.
+
+#### Details
+
+- TODO: Maybe the results should be returned in "pages" (AKA
+  "pagination").
+- Automatically sort results by date.
 
 ## Some rejected approaches
 
