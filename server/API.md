@@ -504,8 +504,6 @@ These fields are optional:
 
 - `name`: name of study
 - `description`
-- `institute` (NOTE: the author (Gabriel) doesn't know what this
-  refers to, I was just told to include it)
 
 #### If authorised AND study ID unique:
 
