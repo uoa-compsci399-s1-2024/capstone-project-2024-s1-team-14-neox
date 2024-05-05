@@ -123,7 +123,16 @@ void eepromGetBLEAuthKey(uint8_t* key);
 void eepromSetBLEAuthKey(const uint8_t* key);
 
 /*
- * Reset the sample buffer and BLE authentication key.
+ * Save/load the RTC time.
+ */
+void eepromSaveRTCTime(uint32_t epochTime);
+uint32_t eepromLoadRTCTime();
+
+/*
+ * Performs the following:
+ * - Clears the sample buffer.
+ * - Sets the BLE authentication key.
+ * - Sets the RTC time to the build time.
  */
 void eepromFactoryReset(const uint8_t* bleAuthKey);
 

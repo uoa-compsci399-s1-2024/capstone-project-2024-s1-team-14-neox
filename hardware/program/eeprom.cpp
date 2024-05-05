@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <SparkFun_External_EEPROM.h>
 #include "eeprom.h"
+#include "build_time.h"
 
 
 static const uint32_t EEPROM_SIZE_KBIT = 256;
@@ -49,6 +50,7 @@ static ExternalEEPROM eeprom;
 static SampleBuffer sampleBuffer;
 static TempSampleBuffer tempSampleBuffer;
 static EEPROMAddress authKey;
+static EEPROMAddress rtcTime;
 static AtomicTransaction atomicTransaction;
 
 
@@ -63,6 +65,10 @@ void eepromBegin()
 
   allocatedLen = 0;
 
+  atomicTransaction.address = eepromAllocateUint32();
+  atomicTransaction.value = eepromAllocateUint32();
+  atomicTransaction.pending = eepromAllocateUint32();
+
   sampleBuffer.bufferAddress = eepromAllocate(SAMPLE_BUFFER_MAX_SIZE_BYTES);
   sampleBuffer.tail = eepromAllocateUint32();
   sampleBuffer.len = eepromAllocateUint32();
@@ -71,11 +77,10 @@ void eepromBegin()
   tempSampleBuffer.len = 0;
   
   authKey = eepromAllocate(32);
+  rtcTime = eepromAllocateUint32();
 
-  atomicTransaction.address = eepromAllocateUint32();
-  atomicTransaction.value = eepromAllocateUint32();
-  atomicTransaction.pending = eepromAllocateUint32();
-
+  // If the Arduino locks up, try temporarily removing this call
+  // to resumeAtomicTransaction. It may be trying to resume garbage.
   resumeAtomicTransaction();
 }
 
@@ -262,8 +267,17 @@ void eepromSetBLEAuthKey(const uint8_t* key) {
   eepromWrite(authKey, key, 32);
 }
 
+void eepromSaveRTCTime(uint32_t epochTime) {
+  eepromAtomicWriteUint32(rtcTime, epochTime);
+}
+
+uint32_t eepromLoadRTCTime() {
+  return eepromReadUint32(rtcTime);
+}
+
 void eepromFactoryReset(const uint8_t* bleAuthKey) {
   eepromClear();
   eepromSetBLEAuthKey(bleAuthKey);
+  eepromSaveRTCTime(__TIME_UNIX__);
   Serial.println("Factory reset complete.");
 }
