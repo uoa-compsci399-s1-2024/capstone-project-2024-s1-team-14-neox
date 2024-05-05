@@ -266,6 +266,13 @@ class $ArduinoDatasTable extends ArduinoDatas
   late final GeneratedColumn<DateTime> datetime = GeneratedColumn<DateTime>(
       'datetime', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _ageMeta = const VerificationMeta('age');
+  @override
+  late final GeneratedColumn<DateTime> age = GeneratedColumn<DateTime>(
+      'age', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: true,
+      $customConstraints: 'REFERENCES child(age)');
   static const VerificationMeta _accelXMeta = const VerificationMeta('accelX');
   @override
   late final GeneratedColumn<int> accelX = GeneratedColumn<int>(
@@ -293,6 +300,21 @@ class $ArduinoDatasTable extends ArduinoDatas
   late final GeneratedColumn<int> appClass = GeneratedColumn<int>(
       'app_class', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _redMeta = const VerificationMeta('red');
+  @override
+  late final GeneratedColumn<int> red = GeneratedColumn<int>(
+      'red', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _greenMeta = const VerificationMeta('green');
+  @override
+  late final GeneratedColumn<int> green = GeneratedColumn<int>(
+      'green', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _blueMeta = const VerificationMeta('blue');
+  @override
+  late final GeneratedColumn<int> blue = GeneratedColumn<int>(
+      'blue', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -300,11 +322,15 @@ class $ArduinoDatasTable extends ArduinoDatas
         uv,
         light,
         datetime,
+        age,
         accelX,
         accelY,
         accelZ,
         serverClass,
-        appClass
+        appClass,
+        red,
+        green,
+        blue
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -342,6 +368,12 @@ class $ArduinoDatasTable extends ArduinoDatas
     } else if (isInserting) {
       context.missing(_datetimeMeta);
     }
+    if (data.containsKey('age')) {
+      context.handle(
+          _ageMeta, age.isAcceptableOrUnknown(data['age']!, _ageMeta));
+    } else if (isInserting) {
+      context.missing(_ageMeta);
+    }
     if (data.containsKey('accel_x')) {
       context.handle(_accelXMeta,
           accelX.isAcceptableOrUnknown(data['accel_x']!, _accelXMeta));
@@ -374,6 +406,24 @@ class $ArduinoDatasTable extends ArduinoDatas
     } else if (isInserting) {
       context.missing(_appClassMeta);
     }
+    if (data.containsKey('red')) {
+      context.handle(
+          _redMeta, red.isAcceptableOrUnknown(data['red']!, _redMeta));
+    } else if (isInserting) {
+      context.missing(_redMeta);
+    }
+    if (data.containsKey('green')) {
+      context.handle(
+          _greenMeta, green.isAcceptableOrUnknown(data['green']!, _greenMeta));
+    } else if (isInserting) {
+      context.missing(_greenMeta);
+    }
+    if (data.containsKey('blue')) {
+      context.handle(
+          _blueMeta, blue.isAcceptableOrUnknown(data['blue']!, _blueMeta));
+    } else if (isInserting) {
+      context.missing(_blueMeta);
+    }
     return context;
   }
 
@@ -395,6 +445,12 @@ class $ArduinoDatasTable extends ArduinoDatas
           .read(DriftSqlType.int, data['${effectivePrefix}app_class'])!,
       serverClass: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}server_class'])!,
+      green: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}green'])!,
+      blue: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}blue'])!,
+      red: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}red'])!,
       childId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}child_id'])!,
     );
@@ -412,22 +468,30 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
   final Value<int> uv;
   final Value<int> light;
   final Value<DateTime> datetime;
+  final Value<DateTime> age;
   final Value<int> accelX;
   final Value<int> accelY;
   final Value<int> accelZ;
   final Value<int> serverClass;
   final Value<int> appClass;
+  final Value<int> red;
+  final Value<int> green;
+  final Value<int> blue;
   const ArduinoDatasCompanion({
     this.id = const Value.absent(),
     this.childId = const Value.absent(),
     this.uv = const Value.absent(),
     this.light = const Value.absent(),
     this.datetime = const Value.absent(),
+    this.age = const Value.absent(),
     this.accelX = const Value.absent(),
     this.accelY = const Value.absent(),
     this.accelZ = const Value.absent(),
     this.serverClass = const Value.absent(),
     this.appClass = const Value.absent(),
+    this.red = const Value.absent(),
+    this.green = const Value.absent(),
+    this.blue = const Value.absent(),
   });
   ArduinoDatasCompanion.insert({
     this.id = const Value.absent(),
@@ -435,31 +499,43 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     required int uv,
     required int light,
     required DateTime datetime,
+    required DateTime age,
     required int accelX,
     required int accelY,
     required int accelZ,
     required int serverClass,
     required int appClass,
+    required int red,
+    required int green,
+    required int blue,
   })  : childId = Value(childId),
         uv = Value(uv),
         light = Value(light),
         datetime = Value(datetime),
+        age = Value(age),
         accelX = Value(accelX),
         accelY = Value(accelY),
         accelZ = Value(accelZ),
         serverClass = Value(serverClass),
-        appClass = Value(appClass);
+        appClass = Value(appClass),
+        red = Value(red),
+        green = Value(green),
+        blue = Value(blue);
   static Insertable<ArduinoDataEntity> custom({
     Expression<int>? id,
     Expression<int>? childId,
     Expression<int>? uv,
     Expression<int>? light,
     Expression<DateTime>? datetime,
+    Expression<DateTime>? age,
     Expression<int>? accelX,
     Expression<int>? accelY,
     Expression<int>? accelZ,
     Expression<int>? serverClass,
     Expression<int>? appClass,
+    Expression<int>? red,
+    Expression<int>? green,
+    Expression<int>? blue,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -467,11 +543,15 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
       if (uv != null) 'uv': uv,
       if (light != null) 'light': light,
       if (datetime != null) 'datetime': datetime,
+      if (age != null) 'age': age,
       if (accelX != null) 'accel_x': accelX,
       if (accelY != null) 'accel_y': accelY,
       if (accelZ != null) 'accel_z': accelZ,
       if (serverClass != null) 'server_class': serverClass,
       if (appClass != null) 'app_class': appClass,
+      if (red != null) 'red': red,
+      if (green != null) 'green': green,
+      if (blue != null) 'blue': blue,
     });
   }
 
@@ -481,22 +561,30 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
       Value<int>? uv,
       Value<int>? light,
       Value<DateTime>? datetime,
+      Value<DateTime>? age,
       Value<int>? accelX,
       Value<int>? accelY,
       Value<int>? accelZ,
       Value<int>? serverClass,
-      Value<int>? appClass}) {
+      Value<int>? appClass,
+      Value<int>? red,
+      Value<int>? green,
+      Value<int>? blue}) {
     return ArduinoDatasCompanion(
       id: id ?? this.id,
       childId: childId ?? this.childId,
       uv: uv ?? this.uv,
       light: light ?? this.light,
       datetime: datetime ?? this.datetime,
+      age: age ?? this.age,
       accelX: accelX ?? this.accelX,
       accelY: accelY ?? this.accelY,
       accelZ: accelZ ?? this.accelZ,
       serverClass: serverClass ?? this.serverClass,
       appClass: appClass ?? this.appClass,
+      red: red ?? this.red,
+      green: green ?? this.green,
+      blue: blue ?? this.blue,
     );
   }
 
@@ -518,6 +606,9 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     if (datetime.present) {
       map['datetime'] = Variable<DateTime>(datetime.value);
     }
+    if (age.present) {
+      map['age'] = Variable<DateTime>(age.value);
+    }
     if (accelX.present) {
       map['accel_x'] = Variable<int>(accelX.value);
     }
@@ -533,6 +624,15 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     if (appClass.present) {
       map['app_class'] = Variable<int>(appClass.value);
     }
+    if (red.present) {
+      map['red'] = Variable<int>(red.value);
+    }
+    if (green.present) {
+      map['green'] = Variable<int>(green.value);
+    }
+    if (blue.present) {
+      map['blue'] = Variable<int>(blue.value);
+    }
     return map;
   }
 
@@ -544,11 +644,15 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
           ..write('uv: $uv, ')
           ..write('light: $light, ')
           ..write('datetime: $datetime, ')
+          ..write('age: $age, ')
           ..write('accelX: $accelX, ')
           ..write('accelY: $accelY, ')
           ..write('accelZ: $accelZ, ')
           ..write('serverClass: $serverClass, ')
-          ..write('appClass: $appClass')
+          ..write('appClass: $appClass, ')
+          ..write('red: $red, ')
+          ..write('green: $green, ')
+          ..write('blue: $blue')
           ..write(')'))
         .toString();
   }
