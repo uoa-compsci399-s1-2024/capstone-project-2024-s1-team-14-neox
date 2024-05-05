@@ -1,6 +1,8 @@
 import {
   connectToDB,
+  PERSONAL_INFO_CHILD_GENDER_OPTIONS,
 } from "/opt/nodejs/lib.mjs";
+import pg from "pg";
 
 let db = await connectToDB();
 
@@ -22,6 +24,7 @@ CREATE TABLE parents (
        email TEXT
 );
 
+CREATE TYPE gender AS ENUM (${PERSONAL_INFO_CHILD_GENDER_OPTIONS.map(pg.escapeLiteral).join(', ')});
 CREATE TABLE children (
        id VARCHAR(50) NOT NULL PRIMARY KEY,
        parent_id VARCHAR(50) NOT NULL,
@@ -30,6 +33,7 @@ CREATE TABLE children (
        given_name TEXT,
        middle_name TEXT,
        nickname TEXT,
+       gender GENDER,
        FOREIGN KEY (parent_id) REFERENCES parents (id)
 );
 
