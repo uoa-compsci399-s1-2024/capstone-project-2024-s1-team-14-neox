@@ -50,8 +50,8 @@ which it was recorded.
 For a given child, we will require that timestamps uniquely identify
 samples.  For example, if the server already has a sample with the
 timestamp `2024-04-10T22:49:48+12:00` for child A, and the client
-sends a *new* sample with the same timestamp[^1], then the server will
-reject that sample.
+sends a *new* sample with the same timestamp[^1] for child A, then the
+server will reject that sample.
 
 ## User Roles
 
