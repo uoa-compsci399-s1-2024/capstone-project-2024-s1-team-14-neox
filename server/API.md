@@ -126,9 +126,12 @@ to be cleared?
   specified either as `Z` OR an offset of `+00:00`.
 - `uv`: Non-negative integer value of UV exposure (TODO units).
 - `light`: Non-negative integer value of light exposure (TODO units).
-- `acceleration`: UNDECIDED: Three-element numeric array for device acceleration
-  where the first element is the `x` component, second is `y`, and
-  third is `z`.
+- `accel_x`: Signed integer value for the `x` component of the
+  acceleration experienced by the device.
+- `accel_y`: Signed integer value for the `y` component of the
+  acceleration experienced by the device.
+- `accel_z`: Signed integer value for the `z` component of the
+  acceleration experienced by the device.
 
 ## Note on personal info fields
 
