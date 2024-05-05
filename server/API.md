@@ -489,7 +489,7 @@ mandatory fields:
 {
 	"min_date": ...,
 	"max_date": ...,
-	"reference_number": ...,
+	"ethics_approval_code": ...,
 }
 ```
 
@@ -498,7 +498,7 @@ where:
 - `min_date` and `max_date` refer to the earliest and latest samples,
   respectively, to include in the study (note that all samples from
   any day in the period of the study are included).
-- `reference_number` is a unique string from ethics committee
+- `ethics_approval_code` is a unique string from ethics committee
 
 These fields are optional:
 
