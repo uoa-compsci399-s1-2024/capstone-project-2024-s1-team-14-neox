@@ -661,30 +661,61 @@ If sample already existing: error `status` will be 409 "Conflict".
 
 If sample sensor fields are invalid: error `status` will be 400 "Bad Request".
 
-### Search samples (GET) (`/samples`)
+### Search samples (GET) (`/samples/{childID}`)
 
 #### Flow
 
-1. User sends GET request with query parameters for:
-    - Filter by:
-        - min/max timestamp
-        - parent ID
-        - child ID
-		- (FUTURE: child device type/version)
-        - child name[^2] (fuzzy match?)
-    <!-- - Specify output format: -->
-    <!--     - sensor values only -->
-    <!--     - classified only (`outside` or `inside`) -->
-    <!--     - both of the above -->
-        <!-- - include parent ID -->
-        <!-- - include child name[^2] -->
-2. Upon success: user receives a JSON array in the `data` response
-   field where each element of the array is a JSON object containing
-   the sample fields.
+##### 1. User sends GET request with query parameters for:
+
+- Filter by:
+  - min/max timestamp
+  - (FUTURE: child device type/version)
+  - Specify output format:
+	- sensor values
+	- list of timestamps only
+
+##### 2a. If authorised and output format is sensor values
+
+User receives:
+
+``` json
+{
+	"data": [
+		{"timestamp": ..., ...},
+		...
+	]
+}
+```
+
+##### 2b. If authorised and output format is the list of timestamps only
+
+User receives a list of timestamps:
+
+``` json
+{
+	"data": [
+		TIMESTAMP_1,
+		TIMESTAMP_2,
+		...
+	]
+}
+```
+
+This is mainly for the app when the sample-adding requests timeout and
+thereby don't receive a response from server about which samples
+succeeded.
+
+Assuming the app knows the minimum and maximum timestamp of the
+sample-adding request which timed out, they can use the response from
+this action to mark the samples which successfully went onto the
+server (and thereby have their timestamp show up in the output).
+
+##### 2c. If not authorised OR no such child
+
+Server returns 403.
 
 #### Details
 
-- Filters are given in the query string.
 - FOR NOW: filters will be a simple AND, but it could be extended to
   allow arbitrary nesting of logical expressions (up to a limit).
   Maybe by having just one query parameter with special syntax like
@@ -731,9 +762,5 @@ do the same thing, but more generally.  The caller should just filter
 by device ID.
 
 [^1]: maybe because the child uses more than one device
-
-[^2]: NOTE: The clients want child names anonymised on backend or
-    encrypted (they said "hashed" but the way they used it implied
-    encryption)
 
 [^3]: TODO: is "session token" an accurate name?
