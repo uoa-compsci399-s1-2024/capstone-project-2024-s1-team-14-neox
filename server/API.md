@@ -113,17 +113,31 @@ operating the backend.
 
 ## Note on IDs
 
-Child IDs and user IDs (ie, parents, researchers, and clinicians) will
-be a 6-digit number all coming from the same "namespace".  In other
-words, a child ID and a user ID can't be the same.
+The client should treat IDs as an opaque string.
 
-The client should treat it as an opaque string, however.  The fact
-that it can be represented as an integer is an implementation detail.
+### Child IDs
+
+Child IDs will be a 9-digit number.  A regular expression to match
+such IDs is `^[0-9]{9}$`.
+
+### User IDs
+
+User IDs (ie, parents, researchers, and admins) will simply be the
+email address which the account was created with.  Why?  Because:
+
+1. the stakeholders are used to communicating via email, so it would
+   be easier if the email *is* the ID; and
+2. it would make the implementation of users simple in the backend
+   since a previous version of spec required child and user IDs to
+   come from the same "namespace" and thereby incur the complexity
+   associated with maintaining that uniqueness between quite different
+   entities (children don't have accounts; parents, researchers, and
+   admins have accounts).
 
 ### Privacy
 
-Although IDs aren't a secret, we will only share IDs to those who need
-it.
+Although child and user IDs aren't a secret, we will only share IDs to
+those who need it.
 
 ## Note on clinicians requesting access to sample data and personal info of a specific child
 
