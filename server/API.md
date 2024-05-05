@@ -55,24 +55,61 @@ reject that sample.
 
 ## User Roles
 
-- Parent:
-  - Can view only their own children's data.
-  - Can view their own personal info.
-  - Can view their children's personal info.
-  - Can view their own associations.
-  - Can view their children's associations.
-- Clinician:
-  - Can only view data of children they work with.
-  - Can view their own personal info.
-  - Can view the personal info of the children they work with.
-  - Can view their own associations.
-  - Can view the associations of the children they work with.
-  - Can request to become associated with a given child.
-- Researcher: Can only view anonymised data of children.
-- Admin (maybe for now just provided as lambdas to run?):
-  - Can register and delete users.
-  - Can add, delete, and modify a user's personal information.
-  - Can add, delete, and modify a user's associations???
+### Parent
+
+- Can create new children entities on server associated with
+  him/herself.
+- Can view and modify their own personal info.
+- Can view and modify their children's personal info.
+- Can view only their own children's sample data.
+- Can view the indoor/outdoor classifications only for the sample
+  data of their own children.
+- Can send samples associated with their children to the server.
+- Can view the list of their own children.
+- Can view the list of the studies their children are part of (by
+  specific child).
+- Can add and revoke consent for studies their children are part of
+  (by specific child).
+
+### Researcher
+
+- Can view the list of studies they are part of.
+- Can view anonymised sample data of all children in a given study
+  they have access to.
+- Can view *some* personal info fields of children in their studies
+  (inlined as a sample field):
+  - age (*not* date of birth)
+  - gender
+- Can only VIEW their own personal info (their accounts are made for
+  them).
+
+### Admin
+
+- Can create researcher accounts.
+- Can delete researcher accounts.
+- Can delete parent accounts.
+- Can delete researcher accounts.
+- Can view, patch, and replace their own personal information.
+- Can view, patch, and replace a researcher's personal information.
+- Can view, patch, and replace a parent's personal information.
+- Can create studies.
+- Can delete studies.
+- Can modify metadata of studies.
+- Can view list of researcher IDs.
+- Can view list of parent IDs.
+- Can view list of child IDs.
+- Can view list of child IDs for a parent.
+- Can view list of studies for a child.
+- Can view list of studies for a researcher.
+- Can view list of children, parents, researchers involved in a study.
+- Can *revoke* consent to a given study for a child.
+- Can add and remove access to a given study for a researcher.
+
+#### Note on creation
+
+Admin accounts can't be created or removed with the API.  For security
+reasons, they must only be created or removed by the sysadmin
+operating the backend.
 
 ## Note on IDs
 
@@ -132,6 +169,10 @@ to be cleared?
   acceleration experienced by the device.
 - `accel_z`: Signed integer value for the `z` component of the
   acceleration experienced by the device.
+
+### Additional sample fields when retrieving the samples for a study
+
+See the relevant permission for the researcher user role.
 
 ## Note on personal info fields
 
