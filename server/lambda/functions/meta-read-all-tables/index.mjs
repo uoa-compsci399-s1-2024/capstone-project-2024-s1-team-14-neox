@@ -5,11 +5,11 @@ import {
 let db = await connectToDB();
 
 export const handler = async (event) => {
-  const res_parents = await db.query("SELECT * FROM parents");
+  const res_users = await db.query("SELECT * FROM users");
   const res_children = await db.query("SELECT * FROM children");
   const res_samples = await db.query("SELECT * FROM samples");
   return {
-    parents: res_parents.rows,
+    users: res_users.rows,
     children: res_children.rows,
     samples: res_samples.rows,
   };

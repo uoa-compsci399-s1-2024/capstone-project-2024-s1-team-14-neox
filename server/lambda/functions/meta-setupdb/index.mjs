@@ -12,29 +12,24 @@ const CREATE_TABLES_TEXT = `
 
 DROP TABLE IF EXISTS samples;
 DROP TABLE IF EXISTS children;
-DROP TABLE IF EXISTS parents;
+DROP TABLE IF EXISTS users;
 
-CREATE TABLE parents (
-       id CHAR(${ID_LEN}) NOT NULL PRIMARY KEY,
-       -- don't care about parents' birthdate
-       family_name TEXT,
-       given_name TEXT,
-       middle_name TEXT,
-       nickname TEXT,
-       email TEXT
+-- We put all users in one table since a user may be admin AND researcher, derived from Cognito groups
+CREATE TABLE users (
+       id TEXT NOT NULL PRIMARY KEY
 );
 
 CREATE TYPE gender AS ENUM (${PERSONAL_INFO_CHILD_GENDER_OPTIONS.map(pg.escapeLiteral).join(', ')});
 CREATE TABLE children (
        id CHAR(${ID_LEN}) NOT NULL PRIMARY KEY,
-       parent_id CHAR(${ID_LEN}) NOT NULL,
+       parent_id TEXT NOT NULL,
        birthdate DATE,
        family_name TEXT,
        given_name TEXT,
        middle_name TEXT,
        nickname TEXT,
        gender GENDER,
-       FOREIGN KEY (parent_id) REFERENCES parents (id)
+       FOREIGN KEY (parent_id) REFERENCES users (id)
 );
 
 CREATE TABLE samples (

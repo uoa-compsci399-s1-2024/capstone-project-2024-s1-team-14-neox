@@ -39,11 +39,32 @@ Parameters:
     Type: Number
     Default: 5432
 
+  AdminsUserGroup:
+    Description: Name for Cognito user group of admins
+    Type: String
+    Default: admins
+  ResearchersUserGroup:
+    Description: Name for Cognito user group of researchers
+    Type: String
+    Default: researchers
+  ParentsUserGroup:
+    Description: Name for Cognito user group of parents
+    Type: String
+    Default: parents
+
   VpcCIDR:
     Description: Please enter the IP range (CIDR notation) for this VPC
     Type: String
     Default: 10.8.0.0/16
 
+  PublicSubnet1CIDR:
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
+    Type: String
+    Default: 10.8.10.0/24
+  PublicSubnet2CIDR:
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
+    Type: String
+    Default: 10.8.11.0/24
   PrivateSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
     Type: String
@@ -68,6 +89,31 @@ Rules:
           Fn::Equals: [ !Ref Environment, prod ]
         AssertionDescription: Prod use case implies prod environment
 
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Layers:
+      - !Ref LayerDepsJS
+      - !Ref LayerCACertificates
+    Environment:
+      Variables:
+        PGHOST: !GetAtt Database.Endpoint.Address
+        # Default PGDATABASE is the user which we will get from the SecretsManager Secret
+        PGPORT: !GetAtt Database.Endpoint.Port
+        DB_SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
+        SSL_CERT_FILE: /opt/global-bundle.pem
+        USERPOOL_ID: !GetAtt UserPool.UserPoolId
+        GROUPNAME_ADMINS: !Ref AdminsUserGroup
+        GROUPNAME_RESEARCHERS: !Ref ResearchersUserGroup
+        GROUPNAME_PARENTS: !Ref ParentsUserGroup
+    VpcConfig:
+      SecurityGroupIds:
+        - !Ref DBAccessSecurityGroup
+        - !Ref SecretsAccessSecurityGroup
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -78,9 +124,6 @@ Resources:
       Tags:
         - Key: Name
           Value: backend-vpc
-      # Tags:
-      #   - Key: Name
-      #     Value: !Ref EnvironmentName
   VPCFlowLog:
     Type: AWS::EC2::FlowLog
     UpdateReplacePolicy: Retain
@@ -122,6 +165,38 @@ Resources:
                   - logs:DescribeLogStreams
                 Resource: '*'
 
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: Internet Gateway
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PublicSubnet1CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: Public Subnet (AZ1)
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs  '' ]
+      CidrBlock: !Ref PublicSubnet2CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: Public Subnet (AZ2)
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -132,9 +207,6 @@ Resources:
       Tags:
         - Key: Name
           Value: Private Subnet (AZ1)
-      # Tags:
-      #   - Key: Name
-      #     Value: !Sub ${EnvironmentName} Private Subnet (AZ1)
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
@@ -145,9 +217,32 @@ Resources:
       Tags:
         - Key: Name
           Value: Private Subnet (AZ2)
-      # Tags:
-      #   - Key: Name
-      #     Value: !Sub ${EnvironmentName} Private Subnet (AZ2)
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Public Routes
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet2
+  # Use default network ACL for public subnets.
 
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
@@ -156,14 +251,26 @@ Resources:
       Tags:
         - Key: Name
           Value: Private Routes (AZ1)
-      # Tags:
-      #   - Key: Name
-      #     Value: !Sub ${EnvironmentName} Private Routes (AZ1)
   PrivateSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTable1
       SubnetId: !Ref PrivateSubnet1
+  NATGateway1:
+     Type: AWS::EC2::NatGateway
+     Properties:
+        AllocationId: !GetAtt NATGatewayEIP1.AllocationId
+        SubnetId: !Ref PublicSubnet1
+  NATGatewayEIP1:
+     Type: AWS::EC2::EIP
+     Properties:
+        Domain: vpc
+  RouteNATGateway1:
+     Type: AWS::EC2::Route
+     Properties:
+        RouteTableId: !Ref PrivateRouteTable1
+        DestinationCidrBlock: '0.0.0.0/0'
+        NatGatewayId: !Ref NATGateway1
   PrivateRouteTable2:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -171,14 +278,26 @@ Resources:
       Tags:
         - Key: Name
           Value: Private Routes (AZ2)
-      # Tags:
-      #   - Key: Name
-      #     Value: !Sub ${EnvironmentName} Private Routes (AZ2)
   PrivateSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
+  NATGateway2:
+     Type: AWS::EC2::NatGateway
+     Properties:
+        AllocationId: !GetAtt NATGatewayEIP2.AllocationId
+        SubnetId: !Ref PublicSubnet2
+  NATGatewayEIP2:
+     Type: AWS::EC2::EIP
+     Properties:
+        Domain: vpc
+  RouteNATGateway2:
+     Type: AWS::EC2::Route
+     Properties:
+        RouteTableId: !Ref PrivateRouteTable2
+        DestinationCidrBlock: '0.0.0.0/0'
+        NatGatewayId: !Ref NATGateway2
 
   NetworkACL:
     Type: AWS::EC2::NetworkAcl
@@ -270,6 +389,34 @@ Resources:
       PortRange:
         From: 443
         To: 443
+  OutboundHttpsNatRule:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref NetworkACL
+      RuleNumber: 200
+      Protocol: 6  # TCP
+      Egress: true
+      RuleAction: allow
+      CidrBlock: '0.0.0.0/0'
+      # # need to send requests to public internet through NAT gateways, which use ephemeral ports
+      # # See https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html#nacl-ephemeral-ports
+      PortRange:
+        From: 443
+        To: 443
+  InboundNatRule:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref NetworkACL
+      RuleNumber: 200
+      Protocol: 6  # TCP
+      Egress: false
+      RuleAction: allow
+      CidrBlock: '0.0.0.0/0'
+      # # need to receive responses from requests sent through NAT gateways, which use ephemeral ports
+      # # See https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html#nacl-ephemeral-ports
+      PortRange:
+        From: 1024
+        To: 65535
 
   LambdaRole:
     Type: AWS::IAM::Role
@@ -287,6 +434,8 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
         - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
+        # TODO: lock down cognito access to specific lambdas only AND to specific user pool
+        - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
       Policies:
         # It seems like the PolicyName (which is the "friendly name") must be unique within an account
         # https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html
@@ -301,6 +450,18 @@ Resources:
                 Condition:
                   StringEquals:
                     aws:sourceVpce: !Ref SecretsManagerVPCEndpoint
+        # for adding triggers to userpool
+        - PolicyName: !Sub "${AWS::StackName}-ManageLambdaPermissions"
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:AddPermission
+                  - lambda:RemovePermission
+                Resource: '*'
+
+  # TODO: set up vpc endpoint for lambda
 
   SecretsManagerVPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
@@ -392,6 +553,61 @@ Resources:
         - nodejs20.x
       # RetentionPolicy: Retain
 
+  # Auth stuff
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      EmailConfiguration:
+        EmailSendingAccount: COGNITO_DEFAULT
+      VerificationMessageTemplate:
+        DefaultEmailOption: CONFIRM_WITH_CODE
+      DeletionProtection: !If [ IsProd, ACTIVE, INACTIVE ]
+      # No device-remembering.
+      # No multi-factor auth for now.
+      Schema:
+        - Name: family_name
+          Required: true
+          Mutable: true
+        - Name: middle_name
+          Required: false
+          Mutable: true
+        - Name: given_name
+          Required: true
+          Mutable: true
+        - Name: nickname
+          Required: false
+          Mutable: true
+        - Name: email
+          Required: true
+          Mutable: false  # for now
+      # No SMS for now.
+  # For now, only one client BUT can make another if we need to differentiate between web and app clients
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !GetAtt UserPool.UserPoolId
+      ExplicitAuthFlows:
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_CUSTOM_AUTH
+        - ALLOW_ADMIN_USER_PASSWORD_AUTH
+  FuncCognitoPostConfirm:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/meta-cognito-postconfirm/
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
+      # Can't set trigger for userpool here because of circular dependencies.
   # API Gateway
   API:
     Type: AWS::Serverless::Api
@@ -404,6 +620,11 @@ Resources:
       # EVEN if Environment is dev.
       # Why the difference between Ref output and hardcoding it????
       StageName: dev
+      Auth:
+        DefaultAuthorizer: CognitoAuth
+        Authorizers:
+          CognitoAuth:
+            UserPoolArn: !GetAtt UserPool.Arn
       Cors:
         AllowOrigin: !If
           - IsProd
@@ -423,6 +644,7 @@ Resources:
               - "'*'"
         AllowMethods: "'OPTIONS, GET, POST, PUT, PATCH, DELETE'"
         AllowHeaders: "'Origin, Content-Type, Accept'"
+        AllowCredentials: true
       MethodSettings:
         - LoggingLevel: INFO
           MetricsEnabled: true
@@ -457,31 +679,13 @@ Resources:
     Properties:
       CodeUri: lambda/functions/action-samples-search/
       Handler: index.handler
-      Runtime: nodejs20.x
       Timeout: 30  # there can be loads of samples on server
-      Layers:
-        - !Ref LayerDepsJS
-        - !Ref LayerCACertificates
-      Environment:
-        Variables:
-          PGHOST: !GetAtt Database.Endpoint.Address
-          # Default PGDATABASE is the user which we will get from the SecretsManager Secret
-          PGPORT: !GetAtt Database.Endpoint.Port
-          DB_SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
-          SSL_CERT_FILE: /opt/global-bundle.pem
       Role: !GetAtt LambdaRole.Arn
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref DBAccessSecurityGroup
-          - !Ref SecretsAccessSecurityGroup
-        SubnetIds:
-          - !Ref PrivateSubnet1
-          - !Ref PrivateSubnet2
       Events:
         ApiEvent:
           Type: Api
           Properties:
-            Path: /samples
+            Path: /samples/{childID}
             Method: get
             RestApiId: !Ref API
   FuncSamplesAdd:
@@ -489,26 +693,8 @@ Resources:
     Properties:
       CodeUri: lambda/functions/action-samples-add/
       Handler: index.handler
-      Runtime: nodejs20.x
       Timeout: 30  # caller can send lots of samples
-      Layers:
-        - !Ref LayerDepsJS
-        - !Ref LayerCACertificates
-      Environment:
-        Variables:
-          PGHOST: !GetAtt Database.Endpoint.Address
-          # Default PGDATABASE is the user which we will get from the SecretsManager Secret
-          PGPORT: !GetAtt Database.Endpoint.Port
-          DB_SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
-          SSL_CERT_FILE: /opt/global-bundle.pem
       Role: !GetAtt LambdaRole.Arn
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref DBAccessSecurityGroup
-          - !Ref SecretsAccessSecurityGroup
-        SubnetIds:
-          - !Ref PrivateSubnet1
-          - !Ref PrivateSubnet2
       Events:
         ApiEvent:
           Type: Api
@@ -516,30 +702,12 @@ Resources:
             Path: /samples/{childID}
             Method: post
             RestApiId: !Ref API
-  FuncChildrenInfo:
+  FuncChildrenInfoFetch:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: lambda/functions/action-children-info/
-      Handler: index.handler
-      Runtime: nodejs20.x
-      Layers:
-        - !Ref LayerDepsJS
-        - !Ref LayerCACertificates
-      Environment:
-        Variables:
-          PGHOST: !GetAtt Database.Endpoint.Address
-          # Default PGDATABASE is the user which we will get from the SecretsManager Secret
-          PGPORT: !GetAtt Database.Endpoint.Port
-          DB_SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
-          SSL_CERT_FILE: /opt/global-bundle.pem
+      Handler: index.handler_fetch
       Role: !GetAtt LambdaRole.Arn
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref DBAccessSecurityGroup
-          - !Ref SecretsAccessSecurityGroup
-        SubnetIds:
-          - !Ref PrivateSubnet1
-          - !Ref PrivateSubnet2
       Events:
         GetEvent:
           Type: Api
@@ -547,6 +715,13 @@ Resources:
             Path: /children/{childID}/info
             Method: get
             RestApiId: !Ref API
+  FuncChildrenInfoModify:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-children-info/
+      Handler: index.handler_modify
+      Role: !GetAtt LambdaRole.Arn
+      Events:
         ReplaceEvent:
           Type: Api
           Properties:
@@ -564,25 +739,7 @@ Resources:
     Properties:
       CodeUri: lambda/functions/action-children-register/
       Handler: index.handler
-      Runtime: nodejs20.x
-      Layers:
-        - !Ref LayerDepsJS
-        - !Ref LayerCACertificates
-      Environment:
-        Variables:
-          PGHOST: !GetAtt Database.Endpoint.Address
-          # Default PGDATABASE is the user which we will get from the SecretsManager Secret
-          PGPORT: !GetAtt Database.Endpoint.Port
-          DB_SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
-          SSL_CERT_FILE: /opt/global-bundle.pem
       Role: !GetAtt LambdaRole.Arn
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref DBAccessSecurityGroup
-          - !Ref SecretsAccessSecurityGroup
-        SubnetIds:
-          - !Ref PrivateSubnet1
-          - !Ref PrivateSubnet2
       Events:
         ApiEvent:
           Type: Api
@@ -590,84 +747,59 @@ Resources:
             Path: /children
             Method: post
             RestApiId: !Ref API
+  FuncResearchersRegister:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-researchers-register/
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /researchers
+            Method: post
+            RestApiId: !Ref API
+  FuncMetaAdminsRegister:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/meta-admins-register/
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
   FuncMetaSetupDB:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: lambda/functions/meta-setupdb/
       Handler: index.handler
-      Runtime: nodejs20.x
-      Layers:
-        - !Ref LayerDepsJS
-        - !Ref LayerCACertificates
-      Environment:
-        Variables:
-          PGHOST: !GetAtt Database.Endpoint.Address
-          # Default PGDATABASE is the user which we will get from the SecretsManager Secret
-          PGPORT: !GetAtt Database.Endpoint.Port
-          DB_SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
-          SSL_CERT_FILE: /opt/global-bundle.pem
       Role: !GetAtt LambdaRole.Arn
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref DBAccessSecurityGroup
-          - !Ref SecretsAccessSecurityGroup
-        SubnetIds:
-          - !Ref PrivateSubnet1
-          - !Ref PrivateSubnet2
-  FuncMetaSetupTestData:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: lambda/functions/meta-setuptestdata/
-      Handler: index.handler
-      Runtime: nodejs20.x
-      Layers:
-        - !Ref LayerDepsJS
-        - !Ref LayerCACertificates
-      Environment:
-        Variables:
-          PGHOST: !GetAtt Database.Endpoint.Address
-          # Default PGDATABASE is the user which we will get from the SecretsManager Secret
-          PGPORT: !GetAtt Database.Endpoint.Port
-          DB_SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
-          SSL_CERT_FILE: /opt/global-bundle.pem
-      Role: !GetAtt LambdaRole.Arn
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref DBAccessSecurityGroup
-          - !Ref SecretsAccessSecurityGroup
-        SubnetIds:
-          - !Ref PrivateSubnet1
-          - !Ref PrivateSubnet2
   FuncMetaReadAllTables:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: lambda/functions/meta-read-all-tables/
       Handler: index.handler
-      Runtime: nodejs20.x
-      Layers:
-        - !Ref LayerDepsJS
-        - !Ref LayerCACertificates
+      Role: !GetAtt LambdaRole.Arn
+  FuncMetaSetupUserGroups:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/meta-setupusergroups/
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
+  FuncMetaSetupUserPool:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/meta-setupuserpool/
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
       Environment:
         Variables:
-          PGHOST: !GetAtt Database.Endpoint.Address
-          # Default PGDATABASE is the user which we will get from the SecretsManager Secret
-          PGPORT: !GetAtt Database.Endpoint.Port
-          DB_SECRET_ARN: !GetAtt Database.MasterUserSecret.SecretArn
-          SSL_CERT_FILE: /opt/global-bundle.pem
-      Role: !GetAtt LambdaRole.Arn
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref DBAccessSecurityGroup
-          - !Ref SecretsAccessSecurityGroup
-        SubnetIds:
-          - !Ref PrivateSubnet1
-          - !Ref PrivateSubnet2
+          USERPOOL_ID: !GetAtt UserPool.UserPoolId
+          USERPOOL_ARN: !GetAtt UserPool.Arn
+          POSTCONFIRM_TRIGGER_ARN: !GetAtt FuncCognitoPostConfirm.Arn
   LayerDepsJS:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: !Sub "${AWS::StackName}-layer-lib-js"
       Description: Common code and dependencies for JS lambda functions
-      # ContentUri: s3://proj-deploy-artifacts/layer-deps-js.zip
       ContentUri: lambda/layers/project-lib-js/
       CompatibleRuntimes:
         - nodejs20.x
@@ -679,9 +811,18 @@ Outputs:
     Description: A reference to the created VPC
     Value: !Ref VPC
 
+  PublicSubnets:
+    Description: A list of the public subnets
+    Value: !Join [ ",", [ !Ref PublicSubnet1, !Ref PublicSubnet2 ]]
   PrivateSubnets:
     Description: A list of the private subnets
     Value: !Join [ ",", [ !Ref PrivateSubnet1, !Ref PrivateSubnet2 ]]
+  PublicSubnet1:
+    Description: A reference to the public subnet in the 1st Availability Zone
+    Value: !Ref PublicSubnet1
+  PublicSubnet2:
+    Description: A reference to the public subnet in the 2nd Availability Zone
+    Value: !Ref PublicSubnet2
   PrivateSubnet1:
     Description: A reference to the private subnet in the 1st Availability Zone
     Value: !Ref PrivateSubnet1
@@ -737,3 +878,20 @@ Outputs:
           - IsLocalhostWebsite
           - !Sub "'http://localhost:${WebsiteLocalhostPort}'"
           - "'*'"
+
+  UserPoolId:
+    Value: !GetAtt UserPool.UserPoolId
+  AppClientId:
+    Value: !GetAtt UserPoolClient.ClientId
+  # Future proofing in case we want distinct clients for app and web interface.
+  WebClientId:
+    Value: !GetAtt UserPoolClient.ClientId
+  AdminsUserGroup:
+    Description: Group for users who have admin access
+    Value: !Ref AdminsUserGroup
+  ResearchersUserGroup:
+    Description: Group for users who are researchers
+    Value: !Ref ResearchersUserGroup
+  ParentsUserGroup:
+    Description: Group for users who are parents
+    Value: !Ref ParentsUserGroup

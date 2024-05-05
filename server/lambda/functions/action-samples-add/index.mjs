@@ -1,6 +1,9 @@
 import {
   addCorsHeaders,
   connectToDB,
+  authenticateUser,
+  AUTH_NONE,
+  AUTH_PARENT_OFCHILD,
   validateContentType,
   DATETIME_FORMAT_UTC,
   DATETIME_FORMAT_WITHOFFSET,
@@ -43,6 +46,21 @@ export const handler = async (event) => {
   const childID = event.pathParameters.childID;
   const resolvedResource = event.resource.replace("{childID}", encodeURIComponent(childID));
   console.log(`got child ID ${childID}`);
+
+  const auth = await authenticateUser(event, db, AUTH_PARENT_OFCHILD, {"childID": childID});
+  if (auth === AUTH_NONE) {
+    const response = {};
+    const body = {
+      errors: [{
+        resource: resolvedResource,
+        status: 403,
+        message: `child ID doesn't exist or user is not authorised to view their personal info`,
+      }]};
+    response.statusCode = body.errors[body.errors.length-1].status;
+    response.body = JSON.stringify(body);
+    addCorsHeaders(response);
+    return response;
+  }
 
   const maybeEarlyErrorResp = {
     statusCode: 400,

@@ -53,12 +53,70 @@ sam remote invoke --config-env <USECASE>-<ENVIRONMENT> FuncMetaSetupDB
 
 You can also use `FuncMetaSetupDB` to clear the DB.
 
-Since we don't have user auth yet, setup test users, children, and
-data:
+
+Now initialise the user pool:
 
 ``` shell
-sam remote invoke --config-env <USECASE>-<ENVIRONMENT> FuncMetaSetupTestData
+sam remote invoke --config-env <USECASE>-<ENVIRONMENT> FuncMetaSetupUserPool
+sam remote invoke --config-env <USECASE>-<ENVIRONMENT> FuncMetaSetupUserGroups
 ```
+
+To create an admin account (replace field names as you wish):
+
+``` shell
+sam remote invoke --config-env <USECASE>-<ENVIRONMENT> FuncMetaAdminsRegister --event '{"given_name": "John", "family_name": "Admin", "email": "john.admin@example.com"}'
+```
+
+Cognito will send a temporary password to that email.  When you first
+log in, Cognito will require you to first set a new password.  (Once
+the website is set up, you will be able to do this there.)
+
+You can get the user pool ID (`UserPoolId`) and client ID from the
+template stack outputs.  Use any client ID for now (`AppClientId` or
+`WebClientId`).
+
+To log in:
+
+``` shell
+aws cognito-idp admin-initiate-auth --user-pool-id "<POOL ID>" --client-id "<CLIENT ID>" --auth-flow ADMIN_USER_PASSWORD_AUTH --auth-parameters USERNAME="john.admin@example.com",PASSWORD='<PASSWORD FROM EMAIL>'
+```
+
+To respond to auth challenge on first login when Cognito requires you
+to set a new password for admin account, see
+<https://docs.aws.amazon.com/cognito/latest/developerguide/how-to-create-user-accounts.html#authentication-flow-for-create-user>.
+
+Copying verbatim from output of `aws cognito-idp respond-to-auth-challenge help`:
+
+```
+This example responds to  an  authorization  challenge  initiated  with
+initiate-auth. It is a response to the NEW_PASSWORD_REQUIRED challenge.
+It sets a password for user jane@example.com.
+
+Command:
+
+    aws cognito-idp respond-to-auth-challenge --client-id 3n4b5urk1ft4fl3mg5e62d9ado --challenge-name NEW_PASSWORD_REQUIRED --challenge-responses USERNAME=jane@example.com,NEW_PASSWORD="password" --session "SESSION_TOKEN"
+
+Output:
+
+    {
+      "ChallengeParameters": {},
+      "AuthenticationResult": {
+          "AccessToken": "ACCESS_TOKEN",
+          "ExpiresIn": 3600,
+          "TokenType": "Bearer",
+          "RefreshToken": "REFRESH_TOKEN",
+          "IdToken": "ID_TOKEN",
+          "NewDeviceMetadata": {
+              "DeviceKey": "us-west-2_fec070d2-fa88-424a-8ec8-b26d7198eb23",
+              "DeviceGroupKey": "-wt2ha1Zd"
+          }
+      }
+    }
+```
+
+Use the value of `AuthenticationResult.IdToken` in `Authorization: Bearer <Value of IdToken>`
+header when making API requests directly (rather than through app or
+website which does it for you).
 
 View all tables with:
 

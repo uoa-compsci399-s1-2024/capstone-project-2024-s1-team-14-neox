@@ -141,10 +141,135 @@ export function generateID()
   return strN.padStart(ID_LEN, "0");
 }
 
-export const TEMP_PARENT_ID = '1';
-
 export const PERSONAL_INFO_CHILD_GENDER_OPTIONS = [
   "male",
   "female",
   "other",
 ];
+
+// NOTE: If a user's groups are modified after a given token has been issued
+//       then the token is stale BUT these functions don't check for that.
+// NOTE: This is a security vulnerability IFF a user is removed from a privileged group after the user is fully set up.
+// BUT: The project doesn't require groups to be changeable.
+//      There are well-defined roles for specific people: parents and
+//      researchers are disjoint sets while researchers are a subset
+//      of admins (since Phil and John will be in both researchers and
+//      admins).
+function getUserGroups(event)
+{
+  return event.requestContext.authorizer.claims["cognito:groups"].split(",");
+}
+export function calledByAdmin(event)
+{
+  return getUserGroups(event).includes("admins");
+}
+export function calledByResearcher(event)
+{
+  return getUserGroups(event).includes("researchers");
+}
+export function calledByParent(event)
+{
+  return getUserGroups(event).includes("parents");
+}
+
+export function getDBUserIdFromEvent(event)
+{
+  return event.requestContext.authorizer.claims.email;
+}
+export function getCognitoUsernameFromEvent(event)
+{
+  return event.requestContext.authorizer.claims["cognito:username"];
+}
+
+export const AUTH_NONE = -1;
+export const AUTH_ALL = 2048;
+export const AUTH_ADMIN = 1;
+export const AUTH_SELF = 2;
+export const AUTH_PARENT_ANY = 4;
+export const AUTH_PARENT_OFCHILD = 8;
+// ...reserved...
+export const AUTH_RESEARCHER_ANY = 64;
+export const AUTH_RESEARCHER_OFSTUDY = 128;
+export const AUTH_RESEARCHER_OFSAMESTUDYASCHILD = 256;
+// ... any more granular (and one-off) permissions will be implemented by the caller
+
+// config is an object with the props (used only if needed):
+// - `childID`
+// - `studyID`
+// - `targetUserID` (needed for AUTH_SELF)
+// This function returns an integer matching the flag value matched (eg, AUTH_PARENT_ANY).
+// If `AUTH_ALL` is on, then this function is a no-op.
+// If none were matched, then `AUTH_NONE` is returned.
+export async function authenticateUser(event, db, flags, config)
+{
+  // NOTE: we compare result of bitwise AND using strict equality
+  // (===) since strict equality returns bool rather than a number.
+  if ((flags & AUTH_ALL) === AUTH_ALL) {
+    if (calledByAdmin(event) || calledByResearcher(event) || calledByParent(event)) {
+      console.log("auth: everyone OK");
+      return AUTH_ALL;
+    } else {
+      console.log("auth: everyone FAILED (user is not in a group)");
+      return AUTH_NONE;
+    }
+  }
+
+  if ((flags & AUTH_ADMIN) === AUTH_ADMIN) {
+    if (calledByAdmin(event)) {
+      console.log("auth: admin OK");
+      return AUTH_ADMIN;
+    }
+  }
+
+  if ((flags & AUTH_SELF) === AUTH_SELF) {
+    const callerID = getDBUserIdFromEvent(event);
+    if (callerID === config.targetUserID) {
+      console.log("auth: self-target OK");
+      return AUTH_SELF;
+    }
+  }
+
+  if ((flags & AUTH_PARENT_ANY) === AUTH_PARENT_ANY) {
+    if (calledByParent(event)) {
+      console.log("auth: any parent OK");
+      return AUTH_PARENT_ANY;
+    }
+  }
+  if (((flags & AUTH_PARENT_OFCHILD) === AUTH_PARENT_OFCHILD) && calledByParent(event)) {
+    const parentID = getDBUserIdFromEvent(event);
+    console.log(`checking if parent is parent of child (parentID: ${parentID}) (childID: ${config.childID})`);
+    const child_parentres = await db.query("SELECT parent_id FROM children WHERE id = $1", [config.childID]);
+    if (child_parentres.rows.length === 1 && child_parentres.rows[0].parent_id === parentID) {
+      console.log("auth: parent of this child OK");
+      return AUTH_PARENT_OFCHILD;
+    }
+  }
+
+  if ((flags & AUTH_RESEARCHER_ANY) === AUTH_RESEARCHER_ANY) {
+    if (calledByResearcher(event)) {
+      console.log("auth: any researcher OK");
+      return AUTH_RESEARCHER_ANY;
+    }
+  }
+  // if ((flags & AUTH_RESEARCHER_OFSTUDY) === AUTH_RESEARCHER_OFSTUDY) {
+  //   const researcherID = getDBUserIdFromEvent(event);
+  //   // also uses studyID
+  //   console.log(`checking if researcher is part of study (researcherID: ${researcherID}) (studyID: ${config.studyID})`);
+  //   const child_parentres = await db.query("SELECT parent_id FROM children WHERE id = $1", [config.childID]);
+  //   if (child_parentres.rows.length === 1 && child_parentres.rows[0].parent_id === parentID) {
+  //     return AUTH_RESEARCHER_OFSTUDY;
+  //   }
+  // }
+  // if ((flags & AUTH_RESEARCHER_OFSAMESTUDYASCHILD) === AUTH_RESEARCHER_OFSAMESTUDYASCHILD) {
+  //   const researcherID = getDBUserIdFromEvent(event);
+  //   // also uses studyID
+  //   console.log(`checking if researcher is part of study (researcherID: ${researcherID}) (studyID: ${config.studyID})`);
+  //   const child_parentres = await db.query("SELECT parent_id FROM children WHERE id = $1", [config.childID]);
+  //   if (child_parentres.rows.length === 1 && child_parentres.rows[0].parent_id === parentID) {
+  //     return AUTH_RESEARCHER_OFSAMESTUDYASCHILD;
+  //   }
+  // }
+
+  console.log("auth: FAILED");
+  return AUTH_NONE;
+}
