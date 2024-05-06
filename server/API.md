@@ -159,6 +159,10 @@ those who need it.
   colour sensed by the device.
 - `col_blue`: Unsigned integer value for the blue component of the
   colour sensed by the device.
+- `col_clear`: Unsigned integer value for the clear component of the
+  colour sensed by the device.
+- `col_temp`: Unsigned integer value for the temperature of the colour
+  sensed by the device (degrees Kelvin).
 
 ### Additional sample fields when retrieving the samples for a study
 
