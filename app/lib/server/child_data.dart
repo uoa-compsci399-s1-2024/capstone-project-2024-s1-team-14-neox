@@ -42,7 +42,6 @@ class ChildData {
       red: json['col_red'],
       green: json['col_green'],
       blue: json['col_blue'],
-      gender: json['gender'],
     );
   }
 
@@ -63,7 +62,6 @@ class ChildData {
       'col_red': red,
       'col_green': green,
       'col_blue': blue,
-      'gender': gender,
     };
   }
 
