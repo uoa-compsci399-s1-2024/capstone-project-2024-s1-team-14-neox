@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
@@ -103,10 +104,15 @@ class ArduinoDataEntity {
   ChildData toChildData(String serverId) {
 
     return ChildData(
+      accel_x: accel![0],
+      accel_y: accel![1],
+      accel_z: accel![2],
       timestamp: datetime.toIso8601String(),
       childId:  serverId,
       uv: uv!,
       light: light!,
+      c: c,
+      temp: temp,
     );
   }
 

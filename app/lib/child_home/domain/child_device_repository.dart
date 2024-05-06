@@ -22,8 +22,8 @@ class ChildDeviceRepository {
   // add child remote id
 
   Future<List<ChildDeviceModel>> createChildProfile(
-      String name, DateTime birthDate) async {
-    await ChildEntity.saveSingleChildEntityFromParameters(name, birthDate);
+      String name, DateTime birthDate, String gender) async {
+    await ChildEntity.saveSingleChildEntityFromParameters(name, birthDate, gender);
 
     return await fetchChildProfiles();
   }

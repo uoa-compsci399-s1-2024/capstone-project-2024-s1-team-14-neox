@@ -27,11 +27,11 @@ class AllChildProfileCubit extends Cubit<AllChildProfileState> {
     }
   }
 
-  Future<void> createChildProfile(String name, DateTime birthDate) async {
+  Future<void> createChildProfile(String name, DateTime birthDate, String gender) async {
     emit(state.copyWith(status: AllChildProfileStatus.loading));
     try {
       final List<ChildDeviceModel> childDeviceProfiles =
-          await _childDeviceRepository.createChildProfile(name, birthDate);
+          await _childDeviceRepository.createChildProfile(name, birthDate, gender);
       emit(state.copyWith(
         status: AllChildProfileStatus.addSuccess,
         profiles: childDeviceProfiles,

@@ -4,12 +4,22 @@ class ChildData {
   String childId;
   final int uv;
   final int light;
+  final int accel_x;
+  final int accel_y;
+  final int accel_z;
+  final int c;
+  final int temp;
 
   ChildData({
     required this.timestamp,
     required this.childId,
     required this.uv,
     required this.light,
+    required this.accel_x,
+    required this.accel_y,
+    required this.accel_z,
+    required this.c,
+    required this.temp,
   });
 
   factory ChildData.fromJson(Map<String, dynamic> json) {
@@ -18,6 +28,11 @@ class ChildData {
       childId: json['child_id'],
       uv: json['uv_index'],
       light: json['lux'],
+      accel_x: json['accel_x'],
+      accel_y: json['accel_y'],
+      accel_z: json['accel_z'],
+      c: json['c'],
+      temp: json['temp'],
     );
   }
 
@@ -34,33 +49,4 @@ class ChildData {
   }
 
 
-
-
-
-
-  static List<ChildData> getChildDataList(String id) {
-    List<ChildData> childDataList = [
-      ChildData(
-        timestamp: '2024-04-21T08:00:00',
-        childId: id,
-        uv: 5,
-        light: 100,
-      ),
-      ChildData(
-        timestamp: '2024-04-21T08:15:00',
-        childId: id,
-        uv: 6,
-        light: 110,
-      ),
-      ChildData(
-        timestamp: '2024-04-21T08:30:00',
-        childId: id,
-        uv: 4,
-        light: 90,
-      ),
-
-    ];
-
-    return childDataList;
-  }
 }
