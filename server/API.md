@@ -347,8 +347,7 @@ should go into query string.
 
 #### If not authorised OR no such child/parent/researcher:
 
-Return 403 response where the `resource` field of the error response
-is the same as the URI at which the action was invoked.
+Server will return 403.
 
 #### PUT/PATCH
 
