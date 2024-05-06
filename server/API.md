@@ -153,12 +153,12 @@ those who need it.
   acceleration experienced by the device.
 - `accel_z`: Signed integer value for the `z` component of the
   acceleration experienced by the device.
-- `col_red`: Unsigned integer value for the red component of the
-  colour sensed by the device.
-- `col_green`: Unsigned integer value for the green component of the
-  colour sensed by the device.
-- `col_blue`: Unsigned integer value for the blue component of the
-  colour sensed by the device.
+- `col_red`: Unsigned byte for the red component of the colour sensed
+  by the device.
+- `col_green`: Unsigned byte for the green component of the colour
+  sensed by the device.
+- `col_blue`: Unsigned byte for the blue component of the colour
+  sensed by the device.
 - `col_clear`: Unsigned integer value for the clear component of the
   colour sensed by the device.
 - `col_temp`: Unsigned integer value for the temperature of the colour
