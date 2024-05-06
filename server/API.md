@@ -88,7 +88,6 @@ server will reject that sample.
 - Can create researcher accounts.
 - Can delete researcher accounts.
 - Can delete parent accounts.
-- Can delete researcher accounts.
 - Can view, patch, and replace their own personal information.
 - Can view, patch, and replace a researcher's personal information.
 - Can view, patch, and replace a parent's personal information.
