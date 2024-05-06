@@ -37,6 +37,12 @@ class ArduinoDatas extends Table {
 
   IntColumn get blue => integer()();
 
+  IntColumn get c => integer()();
+
+  IntColumn get temp => integer()();
+
+
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -54,6 +60,8 @@ class ArduinoDataEntity {
   int red;
   int green;
   int blue;
+  int c;
+  int temp;
 
   ArduinoDataEntity(
       {this.id,
@@ -67,6 +75,8 @@ class ArduinoDataEntity {
         this.green = 0,
         this.blue = 0,
         this.red = 0,
+        this.c = 0,
+        this.temp = 0,
         required this.childId});
 
   ArduinoDatasCompanion toCompanion() {
@@ -82,7 +92,11 @@ class ArduinoDataEntity {
         red: Value(red),
         blue: Value(blue),
         green: Value(green),
-        childId: Value(childId));
+        childId: Value(childId),
+        temp: Value(temp),
+        c: Value(c),
+
+    );
   }
 
 
