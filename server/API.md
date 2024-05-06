@@ -500,9 +500,10 @@ mandatory fields:
 
 where:
 
-- `min_date` and `max_date` refer to the earliest and latest samples,
-  respectively, to include in the study (note that all samples from
-  any day in the period of the study are included).
+- `min_date` and `max_date` are ISO8601-formatted dates with timezone
+  which refer to the earliest and latest samples, respectively, to
+  include in the study (note that all samples from any day in the
+  period of the study are included).
 - `ethics_approval_code` is a unique string from ethics committee
 
 These fields are optional:
