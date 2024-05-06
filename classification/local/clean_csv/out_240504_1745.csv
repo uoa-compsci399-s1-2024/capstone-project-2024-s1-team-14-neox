@@ -1,4 +1,4 @@
-timestamp,uv,light,accelX,accelY,accelX,r,g,b,c,colorTemp,lux,,
+timestamp,uv,light,accelX,accelY,accelZ,r,g,b,c,colorTemp,lux,class,code
 1712470888,0,4,-989,2390,6814,127,112,125,230,5074,44,,
 1712470890,0,9,-1588,1625,6097,114,99,111,202,4985,38,,
 1712470892,1,4,-1864,-34,5263,129,112,123,227,4826,44,,
