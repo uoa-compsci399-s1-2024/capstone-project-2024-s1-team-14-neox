@@ -447,23 +447,17 @@ Server returns 403.
 
 ### Get list of studies a child/researcher is enrolled/collaborating in (GET) (`/<children OR researchers>/{ID}/studies`)
 
-#### If authorised AND such a child/researcher exists:
+#### Flow
 
-Server returns HTTP 200 response:
+##### 1. User sends GET request with query parameters for:
 
-``` json
-{
-	"data": {
-		"studies": [
-			{"id": STUDY_ID1},
-			{"id": STUDY_ID2},
-			...
-		],
-	}
-}
-```
+- Same filters as the global search on studies
 
-#### If not authorised OR no such child/researcher:
+##### 2a. If authorised AND such a child/researcher exists:
+
+Same success response as the success response of the global search on studies.
+
+##### 2b. If not authorised OR no such child/researcher:
 
 Server returns 403.
 
@@ -540,6 +534,33 @@ Server will return 404.
 #### If not authorised:
 
 Server will return 403.
+
+### Search studies (GET) (`/studies`)
+
+#### Flow
+
+##### 1. User sends GET request with query parameters for:
+
+- Filter by:
+  - min/max date
+  - ethics approval code
+
+##### 2a. If authorised
+
+User receives:
+
+``` json
+{
+	"data": [
+		{"id": STUDY_ID},
+		...
+	]
+}
+```
+
+##### 2b. If not authorised
+
+Server returns 403.
 
 ### Get info about study (GET) (`/studies/{studyID}/info`)
 
