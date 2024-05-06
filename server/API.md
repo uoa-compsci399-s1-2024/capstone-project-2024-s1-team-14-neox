@@ -94,6 +94,7 @@ server will reject that sample.
 - Can create studies.
 - Can delete studies.
 - Can modify metadata of studies.
+- Can list and search across all studies.
 - Can view list of researcher IDs.
 - Can view list of parent IDs.
 - Can view list of child IDs.
