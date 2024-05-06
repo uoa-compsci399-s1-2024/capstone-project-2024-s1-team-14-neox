@@ -146,7 +146,7 @@ those who need it.
   resolution and timezone.  If timezone is UTC 0, then it must be
   specified either as `Z` OR an offset of `+00:00`.
 - `uv`: Non-negative integer value of UV exposure (TODO units).
-- `light`: Non-negative integer value of light exposure (TODO units).
+- `light`: Non-negative integer value of light exposure (lux).
 - `accel_x`: Signed integer value for the `x` component of the
   acceleration experienced by the device.
 - `accel_y`: Signed integer value for the `y` component of the
