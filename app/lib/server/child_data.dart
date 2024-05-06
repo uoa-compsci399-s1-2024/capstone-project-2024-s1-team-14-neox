@@ -12,7 +12,6 @@ class ChildData {
   final int green;
   final int blue;
   final int red;
-  final String gender;
 
   ChildData({
     required this.timestamp,
@@ -27,7 +26,6 @@ class ChildData {
     required this.green,
     required this.red,
     required this.blue,
-    required this.gender,
   });
 
   factory ChildData.fromJson(Map<String, dynamic> json) {
