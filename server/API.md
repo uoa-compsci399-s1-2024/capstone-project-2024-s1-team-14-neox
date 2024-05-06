@@ -313,12 +313,12 @@ Server will return 403.
 Should be able to search by name, number of children, etc.  Filters
 should go into query string.
 
-### LOW PRIORITY: Search for researchers (GET) (`/children`)
+### LOW PRIORITY: Search for researchers (GET) (`/researchers`)
 
 Should be able to search by name, number of children, etc.  Filters
 should go into query string.
 
-### LOW PRIORITY: Search for children (GET) (`/researchers`)
+### LOW PRIORITY: Search for children (GET) (`/children`)
 
 Should be able to search by name, number of children, etc.  Filters
 should go into query string.
