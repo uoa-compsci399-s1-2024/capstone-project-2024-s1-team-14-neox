@@ -9,6 +9,10 @@ class ChildData {
   final int accel_z;
   final int c;
   final int temp;
+  final int green;
+  final int blue;
+  final int red;
+  final String gender;
 
   ChildData({
     required this.timestamp,
@@ -20,6 +24,10 @@ class ChildData {
     required this.accel_z,
     required this.c,
     required this.temp,
+    required this.green,
+    required this.red,
+    required this.blue,
+    required this.gender,
   });
 
   factory ChildData.fromJson(Map<String, dynamic> json) {
@@ -33,6 +41,10 @@ class ChildData {
       accel_z: json['accel_z'],
       c: json['c'],
       temp: json['temp'],
+      red: json['col_red'],
+      green: json['col_green'],
+      blue: json['col_blue'],
+      gender: json['gender'],
     );
   }
 
@@ -43,8 +55,17 @@ class ChildData {
     return {
       'timestamp': iso8601Timestamp,
       'child_id': childId,
-      'uv': uv,
-      'light': light,
+      'uv_index': uv,
+      'lux': light,
+      'accel_x': accel_x,
+      'accel_y': accel_y,
+      'accel_z': accel_z,
+      'clear': c,
+      'colourTemperature': temp,
+      'col_red': red,
+      'col_green': green,
+      'col_blue': blue,
+      'gender': gender,
     };
   }
 
