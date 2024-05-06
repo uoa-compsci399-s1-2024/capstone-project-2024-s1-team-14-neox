@@ -340,15 +340,16 @@ class $ArduinoDatasTable extends ArduinoDatas
   late final GeneratedColumn<int> blue = GeneratedColumn<int>(
       'blue', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _cMeta = const VerificationMeta('c');
+  static const VerificationMeta _clearMeta = const VerificationMeta('clear');
   @override
-  late final GeneratedColumn<int> c = GeneratedColumn<int>(
-      'c', aliasedName, false,
+  late final GeneratedColumn<int> clear = GeneratedColumn<int>(
+      'clear', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _tempMeta = const VerificationMeta('temp');
+  static const VerificationMeta _colourTemperatureMeta =
+      const VerificationMeta('colourTemperature');
   @override
-  late final GeneratedColumn<int> temp = GeneratedColumn<int>(
-      'temp', aliasedName, false,
+  late final GeneratedColumn<int> colourTemperature = GeneratedColumn<int>(
+      'colour_temperature', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [
@@ -365,8 +366,8 @@ class $ArduinoDatasTable extends ArduinoDatas
         red,
         green,
         blue,
-        c,
-        temp
+        clear,
+        colourTemperature
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -454,16 +455,19 @@ class $ArduinoDatasTable extends ArduinoDatas
     } else if (isInserting) {
       context.missing(_blueMeta);
     }
-    if (data.containsKey('c')) {
-      context.handle(_cMeta, c.isAcceptableOrUnknown(data['c']!, _cMeta));
-    } else if (isInserting) {
-      context.missing(_cMeta);
-    }
-    if (data.containsKey('temp')) {
+    if (data.containsKey('clear')) {
       context.handle(
-          _tempMeta, temp.isAcceptableOrUnknown(data['temp']!, _tempMeta));
+          _clearMeta, clear.isAcceptableOrUnknown(data['clear']!, _clearMeta));
     } else if (isInserting) {
-      context.missing(_tempMeta);
+      context.missing(_clearMeta);
+    }
+    if (data.containsKey('colour_temperature')) {
+      context.handle(
+          _colourTemperatureMeta,
+          colourTemperature.isAcceptableOrUnknown(
+              data['colour_temperature']!, _colourTemperatureMeta));
+    } else if (isInserting) {
+      context.missing(_colourTemperatureMeta);
     }
     return context;
   }
@@ -492,10 +496,10 @@ class $ArduinoDatasTable extends ArduinoDatas
           .read(DriftSqlType.int, data['${effectivePrefix}blue'])!,
       red: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}red'])!,
-      c: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}c'])!,
-      temp: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}temp'])!,
+      clear: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}clear'])!,
+      colourTemperature: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}colour_temperature'])!,
       childId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}child_id'])!,
     );
@@ -521,8 +525,8 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
   final Value<int> red;
   final Value<int> green;
   final Value<int> blue;
-  final Value<int> c;
-  final Value<int> temp;
+  final Value<int> clear;
+  final Value<int> colourTemperature;
   const ArduinoDatasCompanion({
     this.id = const Value.absent(),
     this.childId = const Value.absent(),
@@ -537,8 +541,8 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     this.red = const Value.absent(),
     this.green = const Value.absent(),
     this.blue = const Value.absent(),
-    this.c = const Value.absent(),
-    this.temp = const Value.absent(),
+    this.clear = const Value.absent(),
+    this.colourTemperature = const Value.absent(),
   });
   ArduinoDatasCompanion.insert({
     this.id = const Value.absent(),
@@ -554,8 +558,8 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     required int red,
     required int green,
     required int blue,
-    required int c,
-    required int temp,
+    required int clear,
+    required int colourTemperature,
   })  : childId = Value(childId),
         uv = Value(uv),
         light = Value(light),
@@ -568,8 +572,8 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
         red = Value(red),
         green = Value(green),
         blue = Value(blue),
-        c = Value(c),
-        temp = Value(temp);
+        clear = Value(clear),
+        colourTemperature = Value(colourTemperature);
   static Insertable<ArduinoDataEntity> custom({
     Expression<int>? id,
     Expression<int>? childId,
@@ -584,8 +588,8 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     Expression<int>? red,
     Expression<int>? green,
     Expression<int>? blue,
-    Expression<int>? c,
-    Expression<int>? temp,
+    Expression<int>? clear,
+    Expression<int>? colourTemperature,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -601,8 +605,8 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
       if (red != null) 'red': red,
       if (green != null) 'green': green,
       if (blue != null) 'blue': blue,
-      if (c != null) 'c': c,
-      if (temp != null) 'temp': temp,
+      if (clear != null) 'clear': clear,
+      if (colourTemperature != null) 'colour_temperature': colourTemperature,
     });
   }
 
@@ -620,8 +624,8 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
       Value<int>? red,
       Value<int>? green,
       Value<int>? blue,
-      Value<int>? c,
-      Value<int>? temp}) {
+      Value<int>? clear,
+      Value<int>? colourTemperature}) {
     return ArduinoDatasCompanion(
       id: id ?? this.id,
       childId: childId ?? this.childId,
@@ -636,8 +640,8 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
       red: red ?? this.red,
       green: green ?? this.green,
       blue: blue ?? this.blue,
-      c: c ?? this.c,
-      temp: temp ?? this.temp,
+      clear: clear ?? this.clear,
+      colourTemperature: colourTemperature ?? this.colourTemperature,
     );
   }
 
@@ -683,11 +687,11 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     if (blue.present) {
       map['blue'] = Variable<int>(blue.value);
     }
-    if (c.present) {
-      map['c'] = Variable<int>(c.value);
+    if (clear.present) {
+      map['clear'] = Variable<int>(clear.value);
     }
-    if (temp.present) {
-      map['temp'] = Variable<int>(temp.value);
+    if (colourTemperature.present) {
+      map['colour_temperature'] = Variable<int>(colourTemperature.value);
     }
     return map;
   }
@@ -708,8 +712,8 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
           ..write('red: $red, ')
           ..write('green: $green, ')
           ..write('blue: $blue, ')
-          ..write('c: $c, ')
-          ..write('temp: $temp')
+          ..write('clear: $clear, ')
+          ..write('colourTemperature: $colourTemperature')
           ..write(')'))
         .toString();
   }

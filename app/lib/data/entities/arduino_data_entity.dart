@@ -38,9 +38,9 @@ class ArduinoDatas extends Table {
 
   IntColumn get blue => integer()();
 
-  IntColumn get c => integer()();
+  IntColumn get clear => integer()();
 
-  IntColumn get temp => integer()();
+  IntColumn get colourTemperature => integer()();
 
 
 
@@ -61,8 +61,8 @@ class ArduinoDataEntity {
   int red;
   int green;
   int blue;
-  int c;
-  int temp;
+  int clear;
+  int colourTemperature ;
 
   ArduinoDataEntity(
       {this.id,
@@ -76,8 +76,8 @@ class ArduinoDataEntity {
         this.green = 0,
         this.blue = 0,
         this.red = 0,
-        this.c = 0,
-        this.temp = 0,
+        this.clear = 0,
+        this.colourTemperature  = 0,
         required this.childId});
 
   ArduinoDatasCompanion toCompanion() {
@@ -94,8 +94,8 @@ class ArduinoDataEntity {
         blue: Value(blue),
         green: Value(green),
         childId: Value(childId),
-        temp: Value(temp),
-        c: Value(c),
+        colourTemperature : Value(colourTemperature ),
+        clear: Value(clear),
 
     );
   }
@@ -111,8 +111,11 @@ class ArduinoDataEntity {
       childId:  serverId,
       uv: uv!,
       light: light!,
-      c: c,
-      temp: temp,
+      c: clear,
+      temp: colourTemperature,
+      green: green,
+      red: red,
+      blue: blue ,
     );
   }
 
