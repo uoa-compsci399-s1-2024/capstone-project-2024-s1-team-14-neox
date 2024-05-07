@@ -82,7 +82,7 @@ const predefinedBottomRanges = [
 ];
 
 
-export default function DisplayChart() {
+const DisplayChart = () => {
   //set startdate and enddate
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -233,3 +233,5 @@ export default function DisplayChart() {
     </div>
   );
 }
+
+export default DisplayChart;
