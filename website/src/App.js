@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'
 import Login from './data/login'
 import Home from './data/home'
-import PrivateRoutes from './data/PrivateRoute'
+import PrivateRoutes from './data/privateRoutes'
 import DisplayChart from './data/displayChart'
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import logo from './data/neox.svg';
@@ -78,8 +78,7 @@ Hub.listen('auth', listener);
         <div className="App">
           <nav className="navbar navbar-expand-lg navbar-light fixed-top">
             <div className="container">
-              <Link to={'/Home'} className="navbar-brand">   <img src={logo} alt="NEOX Logo" width="30px" /> NEOX LABS</Link>
-
+              <Link to={'/Home'} className="navbar-brand">   <img src={logo} alt="NEOX Logo" width="140px" /></Link>
                 <ul className="nav">
                   {showButton &&<li className="nav-item"><Link className="nav-link" to={'/sign-in'}>Login</Link></li>}
                   {!showButton &&<li className="nav-item"><Link className="nav-link" to={'/display-chart'}>Child Data</Link></li>}
