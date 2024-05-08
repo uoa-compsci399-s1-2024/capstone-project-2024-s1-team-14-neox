@@ -296,10 +296,9 @@ registered:
 
 Server will return HTTP status 204.
 
-The server will create a researcher account and generate a password
-for them.  FOR NOW: we don't provide any interfaces to reset password,
-so we won't require them to change their password after account
-creation.
+The server will create a researcher account and set a temporary
+password.  The researcher should reset this password within some
+number of days (TBD).
 
 Note that the ID of the researcher account is the email.
 
