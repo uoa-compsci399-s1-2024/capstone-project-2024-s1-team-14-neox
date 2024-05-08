@@ -491,7 +491,6 @@ mandatory fields:
 {
 	"min_date": ...,
 	"max_date": ...,
-	"ethics_approval_code": ...,
 }
 ```
 
@@ -501,7 +500,6 @@ where:
   which refer to the earliest and latest samples, respectively, to
   include in the study (note that all samples from any day in the
   period of the study are included).
-- `ethics_approval_code` is a unique string from ethics committee
 
 These fields are optional:
 
@@ -546,7 +544,6 @@ Server will return 403.
 
 - Filter by:
   - min/max date
-  - ethics approval code
 
 ##### 2a. If authorised
 
