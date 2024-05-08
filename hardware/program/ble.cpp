@@ -106,8 +106,10 @@ void initializeBLE() {
 
 void checkConnection() {
     BLEDevice central = BLE.central();
+    Serial.println("waiting");
     while (central.connected())
     {
+      Serial.println(central.address());
         if (authenticated) {
             updateValues();
         }
