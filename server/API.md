@@ -62,8 +62,6 @@ server will reject that sample.
 - Can view and modify their own personal info.
 - Can view and modify their children's personal info.
 - Can view only their own children's sample data.
-- Can view the indoor/outdoor classifications only for the sample
-  data of their own children.
 - Can send samples associated with their children to the server.
 - Can view the list of their own children.
 - Can view the list of the studies their children are part of (by
@@ -739,38 +737,6 @@ the relevant subheading in the notes for sample fields above).
 ##### 2b. If authorised BUT no such study:
 
 Server will return 404.
-
-### Classify samples (GET) (`/classifications/{childID}`)
-
-#### Flow
-
-##### 1. User sends GET request with query parameters for:
-
-- Same filters as sample search action
-- Some classifier options
-
-##### 2a. If authorised
-
-User receives:
-
-``` json
-{
-	"data": [
-		{"timestamp": ..., "outside": BOOL},
-		...
-	]
-}
-```
-
-##### 2b. If not authorised OR no such child
-
-Server returns 403.
-
-#### Details
-
-- TODO: Maybe the results should be returned in "pages" (AKA
-  "pagination").
-- Automatically sort results by date.
 
 ## Some rejected approaches
 
