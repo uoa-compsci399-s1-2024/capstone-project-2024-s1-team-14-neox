@@ -24,9 +24,14 @@
   background-color: #EEF2FA;
 }
 
+.spacer {
+  width: 100%;
+  height: 5%;
+}
 
 .App-logo {
-  width:170px;
+  margin-top : 5%;
+  width:150px;
 }
 
 .logoCard {
@@ -38,7 +43,6 @@
   justify-content: center;
 }
 
-
 .dataCard {
   background-color: white;
   border-radius: 0.5em;
@@ -47,11 +51,9 @@
 
 }
 
-
-
 .chartCard {
   border-radius: 25px;
-  width: 86%;
+  width: 87%;
   height: 50%;
   margin-left: 5%;
   margin-right: 5%;
@@ -73,7 +75,7 @@
 
 .clientCard {
   border-radius: 25px;
-  width: 25%;
+  width: 28%;
   height: 20%;
   margin-left: 5%;
   
