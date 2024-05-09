@@ -85,7 +85,7 @@ void eepromBegin()
 
 void eepromWrite(EEPROMAddress address, const uint8_t* buffer, uint32_t len)
 {
-  if (address >= EEPROM_SIZE_BYTES) {
+  if (address + len > EEPROM_SIZE_BYTES) {
     return;
   }
 
@@ -109,7 +109,7 @@ void eepromWriteUint32(EEPROMAddress address, uint32_t value)
 
 void eepromRead(EEPROMAddress address, uint8_t* buffer, uint32_t len)
 {
-  if (address >= EEPROM_SIZE_BYTES) {
+  if (address + len > EEPROM_SIZE_BYTES) {
     memset(buffer, 0, len);
     return;
   }
