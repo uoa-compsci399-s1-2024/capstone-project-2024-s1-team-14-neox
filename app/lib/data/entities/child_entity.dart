@@ -18,6 +18,8 @@ class Children extends Table {
   TextColumn get deviceRemoteId => text()();
 
   TextColumn get authorisationCode => text()();
+
+  TextColumn get gender => text()();
 }
 
 class ChildEntity {
@@ -27,11 +29,13 @@ class ChildEntity {
   String? deviceRemoteId;
   String? authorisationCode;
   String? serverId;
+  String gender;
 
   //TODO: deviceRemoteId is duplicated in child entity and arduino device entity
 
   ChildEntity(
       {required this.name,
+        required this.gender,
         required this.birthDate,
         this.deviceRemoteId,
         this.authorisationCode,
@@ -45,6 +49,7 @@ class ChildEntity {
       birthDate: Value(birthDate),
       deviceRemoteId: Value(deviceRemoteId ?? ''),
       authorisationCode: Value(authorisationCode ?? ''),
+      gender: Value(gender),
     );
   }
 
@@ -70,11 +75,12 @@ class ChildEntity {
   }
 
   static Future<void> saveSingleChildEntityFromParameters(
-      String name, DateTime birthDate) async {
+      String name, DateTime birthDate, String gender) async {
     String serverId = await ChildApiService.registerChild();
 
     ChildEntity childEntity = ChildEntity(
       name: name,
+      gender: gender,
       birthDate: birthDate,
       serverId:  serverId,
     );

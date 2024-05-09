@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
@@ -31,6 +32,18 @@ class ArduinoDatas extends Table {
 
   IntColumn get appClass => integer()();
 
+  IntColumn get red => integer()();
+
+  IntColumn get green => integer()();
+
+  IntColumn get blue => integer()();
+
+  IntColumn get clear => integer()();
+
+  IntColumn get colourTemperature => integer()();
+
+
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -45,6 +58,11 @@ class ArduinoDataEntity {
   int childId;
   int serverClass;
   int appClass;
+  int red;
+  int green;
+  int blue;
+  int clear;
+  int colourTemperature ;
 
   ArduinoDataEntity(
       {this.id,
@@ -55,6 +73,11 @@ class ArduinoDataEntity {
         this.accel,
         this.appClass = -1,
         this.serverClass = -1,
+        this.green = 0,
+        this.blue = 0,
+        this.red = 0,
+        this.clear = 0,
+        this.colourTemperature  = 0,
         required this.childId});
 
   ArduinoDatasCompanion toCompanion() {
@@ -67,17 +90,32 @@ class ArduinoDataEntity {
         accelZ: Value(accel?[2] ?? -1),
         appClass: Value(appClass),
         serverClass: Value(serverClass),
-        childId: Value(childId));
+        red: Value(red),
+        blue: Value(blue),
+        green: Value(green),
+        childId: Value(childId),
+        colourTemperature : Value(colourTemperature ),
+        clear: Value(clear),
+
+    );
   }
 
 
   ChildData toChildData(String serverId) {
 
     return ChildData(
+      accel_x: accel![0],
+      accel_y: accel![1],
+      accel_z: accel![2],
       timestamp: datetime.toIso8601String(),
       childId:  serverId,
       uv: uv!,
       light: light!,
+      clear: clear,
+      colourTemperature: colourTemperature,
+      green: green,
+      red: red,
+      blue: blue ,
     );
   }
 

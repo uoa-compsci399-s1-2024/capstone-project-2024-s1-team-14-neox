@@ -52,6 +52,7 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
               context.read<AllChildProfileCubit>().createChildProfile(
                     nameController.text.trim(),
                     DateTime.parse(dobController.text.trim()),
+                    "" // TODO: pass gender
                   );
               Navigator.of(context).pop();
             },

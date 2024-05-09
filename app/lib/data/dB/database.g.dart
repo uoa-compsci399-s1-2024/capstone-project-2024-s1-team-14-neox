@@ -47,9 +47,21 @@ class $ChildrenTable extends Children
   late final GeneratedColumn<String> authorisationCode =
       GeneratedColumn<String>('authorisation_code', aliasedName, false,
           type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _genderMeta = const VerificationMeta('gender');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, serverId, name, birthDate, deviceRemoteId, authorisationCode];
+  late final GeneratedColumn<String> gender = GeneratedColumn<String>(
+      'gender', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        serverId,
+        name,
+        birthDate,
+        deviceRemoteId,
+        authorisationCode,
+        gender
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -97,6 +109,12 @@ class $ChildrenTable extends Children
     } else if (isInserting) {
       context.missing(_authorisationCodeMeta);
     }
+    if (data.containsKey('gender')) {
+      context.handle(_genderMeta,
+          gender.isAcceptableOrUnknown(data['gender']!, _genderMeta));
+    } else if (isInserting) {
+      context.missing(_genderMeta);
+    }
     return context;
   }
 
@@ -108,6 +126,8 @@ class $ChildrenTable extends Children
     return ChildEntity(
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      gender: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}gender'])!,
       birthDate: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}birth_date'])!,
       deviceRemoteId: attachedDatabase.typeMapping.read(
@@ -134,6 +154,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
   final Value<DateTime> birthDate;
   final Value<String> deviceRemoteId;
   final Value<String> authorisationCode;
+  final Value<String> gender;
   const ChildrenCompanion({
     this.id = const Value.absent(),
     this.serverId = const Value.absent(),
@@ -141,6 +162,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
     this.birthDate = const Value.absent(),
     this.deviceRemoteId = const Value.absent(),
     this.authorisationCode = const Value.absent(),
+    this.gender = const Value.absent(),
   });
   ChildrenCompanion.insert({
     this.id = const Value.absent(),
@@ -149,11 +171,13 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
     required DateTime birthDate,
     required String deviceRemoteId,
     required String authorisationCode,
+    required String gender,
   })  : serverId = Value(serverId),
         name = Value(name),
         birthDate = Value(birthDate),
         deviceRemoteId = Value(deviceRemoteId),
-        authorisationCode = Value(authorisationCode);
+        authorisationCode = Value(authorisationCode),
+        gender = Value(gender);
   static Insertable<ChildEntity> custom({
     Expression<int>? id,
     Expression<String>? serverId,
@@ -161,6 +185,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
     Expression<DateTime>? birthDate,
     Expression<String>? deviceRemoteId,
     Expression<String>? authorisationCode,
+    Expression<String>? gender,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -169,6 +194,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
       if (birthDate != null) 'birth_date': birthDate,
       if (deviceRemoteId != null) 'device_remote_id': deviceRemoteId,
       if (authorisationCode != null) 'authorisation_code': authorisationCode,
+      if (gender != null) 'gender': gender,
     });
   }
 
@@ -178,7 +204,8 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
       Value<String>? name,
       Value<DateTime>? birthDate,
       Value<String>? deviceRemoteId,
-      Value<String>? authorisationCode}) {
+      Value<String>? authorisationCode,
+      Value<String>? gender}) {
     return ChildrenCompanion(
       id: id ?? this.id,
       serverId: serverId ?? this.serverId,
@@ -186,6 +213,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
       birthDate: birthDate ?? this.birthDate,
       deviceRemoteId: deviceRemoteId ?? this.deviceRemoteId,
       authorisationCode: authorisationCode ?? this.authorisationCode,
+      gender: gender ?? this.gender,
     );
   }
 
@@ -210,6 +238,9 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
     if (authorisationCode.present) {
       map['authorisation_code'] = Variable<String>(authorisationCode.value);
     }
+    if (gender.present) {
+      map['gender'] = Variable<String>(gender.value);
+    }
     return map;
   }
 
@@ -221,7 +252,8 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
           ..write('name: $name, ')
           ..write('birthDate: $birthDate, ')
           ..write('deviceRemoteId: $deviceRemoteId, ')
-          ..write('authorisationCode: $authorisationCode')
+          ..write('authorisationCode: $authorisationCode, ')
+          ..write('gender: $gender')
           ..write(')'))
         .toString();
   }
@@ -293,6 +325,32 @@ class $ArduinoDatasTable extends ArduinoDatas
   late final GeneratedColumn<int> appClass = GeneratedColumn<int>(
       'app_class', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _redMeta = const VerificationMeta('red');
+  @override
+  late final GeneratedColumn<int> red = GeneratedColumn<int>(
+      'red', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _greenMeta = const VerificationMeta('green');
+  @override
+  late final GeneratedColumn<int> green = GeneratedColumn<int>(
+      'green', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _blueMeta = const VerificationMeta('blue');
+  @override
+  late final GeneratedColumn<int> blue = GeneratedColumn<int>(
+      'blue', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _clearMeta = const VerificationMeta('clear');
+  @override
+  late final GeneratedColumn<int> clear = GeneratedColumn<int>(
+      'clear', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _colourTemperatureMeta =
+      const VerificationMeta('colourTemperature');
+  @override
+  late final GeneratedColumn<int> colourTemperature = GeneratedColumn<int>(
+      'colour_temperature', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -304,7 +362,12 @@ class $ArduinoDatasTable extends ArduinoDatas
         accelY,
         accelZ,
         serverClass,
-        appClass
+        appClass,
+        red,
+        green,
+        blue,
+        clear,
+        colourTemperature
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -374,6 +437,38 @@ class $ArduinoDatasTable extends ArduinoDatas
     } else if (isInserting) {
       context.missing(_appClassMeta);
     }
+    if (data.containsKey('red')) {
+      context.handle(
+          _redMeta, red.isAcceptableOrUnknown(data['red']!, _redMeta));
+    } else if (isInserting) {
+      context.missing(_redMeta);
+    }
+    if (data.containsKey('green')) {
+      context.handle(
+          _greenMeta, green.isAcceptableOrUnknown(data['green']!, _greenMeta));
+    } else if (isInserting) {
+      context.missing(_greenMeta);
+    }
+    if (data.containsKey('blue')) {
+      context.handle(
+          _blueMeta, blue.isAcceptableOrUnknown(data['blue']!, _blueMeta));
+    } else if (isInserting) {
+      context.missing(_blueMeta);
+    }
+    if (data.containsKey('clear')) {
+      context.handle(
+          _clearMeta, clear.isAcceptableOrUnknown(data['clear']!, _clearMeta));
+    } else if (isInserting) {
+      context.missing(_clearMeta);
+    }
+    if (data.containsKey('colour_temperature')) {
+      context.handle(
+          _colourTemperatureMeta,
+          colourTemperature.isAcceptableOrUnknown(
+              data['colour_temperature']!, _colourTemperatureMeta));
+    } else if (isInserting) {
+      context.missing(_colourTemperatureMeta);
+    }
     return context;
   }
 
@@ -395,6 +490,16 @@ class $ArduinoDatasTable extends ArduinoDatas
           .read(DriftSqlType.int, data['${effectivePrefix}app_class'])!,
       serverClass: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}server_class'])!,
+      green: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}green'])!,
+      blue: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}blue'])!,
+      red: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}red'])!,
+      clear: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}clear'])!,
+      colourTemperature: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}colour_temperature'])!,
       childId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}child_id'])!,
     );
@@ -417,6 +522,11 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
   final Value<int> accelZ;
   final Value<int> serverClass;
   final Value<int> appClass;
+  final Value<int> red;
+  final Value<int> green;
+  final Value<int> blue;
+  final Value<int> clear;
+  final Value<int> colourTemperature;
   const ArduinoDatasCompanion({
     this.id = const Value.absent(),
     this.childId = const Value.absent(),
@@ -428,6 +538,11 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     this.accelZ = const Value.absent(),
     this.serverClass = const Value.absent(),
     this.appClass = const Value.absent(),
+    this.red = const Value.absent(),
+    this.green = const Value.absent(),
+    this.blue = const Value.absent(),
+    this.clear = const Value.absent(),
+    this.colourTemperature = const Value.absent(),
   });
   ArduinoDatasCompanion.insert({
     this.id = const Value.absent(),
@@ -440,6 +555,11 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     required int accelZ,
     required int serverClass,
     required int appClass,
+    required int red,
+    required int green,
+    required int blue,
+    required int clear,
+    required int colourTemperature,
   })  : childId = Value(childId),
         uv = Value(uv),
         light = Value(light),
@@ -448,7 +568,12 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
         accelY = Value(accelY),
         accelZ = Value(accelZ),
         serverClass = Value(serverClass),
-        appClass = Value(appClass);
+        appClass = Value(appClass),
+        red = Value(red),
+        green = Value(green),
+        blue = Value(blue),
+        clear = Value(clear),
+        colourTemperature = Value(colourTemperature);
   static Insertable<ArduinoDataEntity> custom({
     Expression<int>? id,
     Expression<int>? childId,
@@ -460,6 +585,11 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     Expression<int>? accelZ,
     Expression<int>? serverClass,
     Expression<int>? appClass,
+    Expression<int>? red,
+    Expression<int>? green,
+    Expression<int>? blue,
+    Expression<int>? clear,
+    Expression<int>? colourTemperature,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -472,6 +602,11 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
       if (accelZ != null) 'accel_z': accelZ,
       if (serverClass != null) 'server_class': serverClass,
       if (appClass != null) 'app_class': appClass,
+      if (red != null) 'red': red,
+      if (green != null) 'green': green,
+      if (blue != null) 'blue': blue,
+      if (clear != null) 'clear': clear,
+      if (colourTemperature != null) 'colour_temperature': colourTemperature,
     });
   }
 
@@ -485,7 +620,12 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
       Value<int>? accelY,
       Value<int>? accelZ,
       Value<int>? serverClass,
-      Value<int>? appClass}) {
+      Value<int>? appClass,
+      Value<int>? red,
+      Value<int>? green,
+      Value<int>? blue,
+      Value<int>? clear,
+      Value<int>? colourTemperature}) {
     return ArduinoDatasCompanion(
       id: id ?? this.id,
       childId: childId ?? this.childId,
@@ -497,6 +637,11 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
       accelZ: accelZ ?? this.accelZ,
       serverClass: serverClass ?? this.serverClass,
       appClass: appClass ?? this.appClass,
+      red: red ?? this.red,
+      green: green ?? this.green,
+      blue: blue ?? this.blue,
+      clear: clear ?? this.clear,
+      colourTemperature: colourTemperature ?? this.colourTemperature,
     );
   }
 
@@ -533,6 +678,21 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     if (appClass.present) {
       map['app_class'] = Variable<int>(appClass.value);
     }
+    if (red.present) {
+      map['red'] = Variable<int>(red.value);
+    }
+    if (green.present) {
+      map['green'] = Variable<int>(green.value);
+    }
+    if (blue.present) {
+      map['blue'] = Variable<int>(blue.value);
+    }
+    if (clear.present) {
+      map['clear'] = Variable<int>(clear.value);
+    }
+    if (colourTemperature.present) {
+      map['colour_temperature'] = Variable<int>(colourTemperature.value);
+    }
     return map;
   }
 
@@ -548,7 +708,12 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
           ..write('accelY: $accelY, ')
           ..write('accelZ: $accelZ, ')
           ..write('serverClass: $serverClass, ')
-          ..write('appClass: $appClass')
+          ..write('appClass: $appClass, ')
+          ..write('red: $red, ')
+          ..write('green: $green, ')
+          ..write('blue: $blue, ')
+          ..write('clear: $clear, ')
+          ..write('colourTemperature: $colourTemperature')
           ..write(')'))
         .toString();
   }
