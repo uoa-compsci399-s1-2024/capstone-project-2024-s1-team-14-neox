@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 enum Error {
-  ERROR_EEPROM_BEGIN,
+  ERROR_EEPROM_BEGIN = 1,
   ERROR_EEPROM_READ,
   ERROR_EEPROM_WRITE,
   ERROR_EEPROM_ALLOC,
