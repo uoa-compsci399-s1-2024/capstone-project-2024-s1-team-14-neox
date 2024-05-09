@@ -1,4 +1,3 @@
-#include <Wire.h>
 #include <Adafruit_TCS34725.h>
 #include "tcs.h"
 
@@ -10,15 +9,12 @@ void initializeTCS() {
     Serial.print("TCS not found ... Check connection");
     while (1);
   }
+  // Save power
+  tcs.disable();
 }
 
-std::array<uint16_t, 5> readTCS() {
-  uint16_t r, g, b, c, colorTemp, lux;
-
-  tcs.getRawData(&r, &g, &b, &c);
-  colorTemp = tcs.calculateColorTemperature_dn40(r, g, b, c); 
-  lux = tcs.calculateLux(r, g, b);
-
-  std::array<uint16_t, 5> output = {r, g, b, colorTemp, lux};
-  return output;
+TCSData readTCS() {
+  TCSData data = { 0 };
+  tcs.getRawDataOneShot(&data.red, &data.green, &data.blue, &data.clear);
+  return data;
 }
