@@ -7,8 +7,8 @@ class ChildData {
   final int accel_x;
   final int accel_y;
   final int accel_z;
-  final int c;
-  final int temp;
+  final int clear;
+  final int colourTemperature;
   final int green;
   final int blue;
   final int red;
@@ -21,8 +21,8 @@ class ChildData {
     required this.accel_x,
     required this.accel_y,
     required this.accel_z,
-    required this.c,
-    required this.temp,
+    required this.clear,
+    required this.colourTemperature,
     required this.green,
     required this.red,
     required this.blue,
@@ -37,8 +37,8 @@ class ChildData {
       accel_x: json['accel_x'],
       accel_y: json['accel_y'],
       accel_z: json['accel_z'],
-      c: json['col_clear'],
-      temp: json['col_temp'],
+      clear: json['col_clear'],
+      colourTemperature: json['col_temp'],
       red: json['col_red'],
       green: json['col_green'],
       blue: json['col_blue'],
@@ -57,8 +57,8 @@ class ChildData {
       'accel_x': accel_x,
       'accel_y': accel_y,
       'accel_z': accel_z,
-      'col_clear': c,
-      'col_temp': temp,
+      'col_clear': clear,
+      'col_temp': colourTemperature,
       'col_red': red,
       'col_green': green,
       'col_blue': blue,
