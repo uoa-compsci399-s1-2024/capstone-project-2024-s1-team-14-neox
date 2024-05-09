@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:io';
 
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_repository.dart';
-import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -74,11 +74,11 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
           return scanResults.first.device;
         }
       }
+    } on TimeoutException {
+      return null;
     } finally {
       await FlutterBluePlus.stopScan();
     }
-
-    return null;
   }
 
   Future<void> onSyncPressed({
@@ -102,7 +102,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     }
     
     if (device == null) {
-      emit(ChildDeviceErrorState(state, "Scan did not find device."));
+      emit(ChildDeviceErrorState(state, "Device not found nearby."));
       return;
     }
     

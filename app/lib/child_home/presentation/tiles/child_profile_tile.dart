@@ -24,10 +24,30 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
 
   @override
   Widget build(BuildContext context) {
+    ChildDeviceState state = context.read<ChildDeviceCubit>().state;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Column(
         children: [
+          Row(children: [
+            Text(
+              state.childName,
+              style: const TextStyle(fontSize: 30)
+            ),
+            const SizedBox(width: 10),
+            IconButton(
+              onPressed: (){},
+              icon: const Icon(Icons.edit),
+            ),
+            const Spacer(),
+            BlocProvider(
+              create: (_) => BluetoothBloc(),
+              child: const BluetoothPanel(),
+            ),
+          ]),
+
+          const Spacer(),
           const Icon(
             Icons.face,
             size: 100,
