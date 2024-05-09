@@ -29,29 +29,6 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
       appBar: AppBar(
         title: const Text("Your profiles"),
       ),
-      drawer: Drawer(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 30.0),
-              child: Row(
-                children: [
-                  const Text("Dark Mode"),
-                  const SizedBox(width: 8),
-                  CupertinoSwitch(
-                    value: Provider.of<ThemeProvider>(context).isDarkMode,
-                    onChanged: (value) =>
-                        Provider.of<ThemeProvider>(context, listen: false)
-                            .toggleTheme(),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
       body: BlocConsumer<AllChildProfileCubit, AllChildProfileState>(
         listener: (context, state) {
           // if (state.status.isAdding) {
