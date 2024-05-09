@@ -1,14 +1,14 @@
 #include <Wire.h>
 #include <Adafruit_TCS34725.h>
 #include "tcs.h"
+#include "error.h"
 
 Adafruit_TCS34725 tcs(101);
 
 void initializeTCS() {
   if (!tcs.begin())
   {
-    Serial.print("TCS not found ... Check connection");
-    while (1);
+    showError(ERROR_TCS_BEGIN);
   }
 }
 
