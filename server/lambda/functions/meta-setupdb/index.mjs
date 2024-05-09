@@ -13,6 +13,7 @@ const CREATE_TABLES_TEXT = `
 DROP TABLE IF EXISTS samples;
 DROP TABLE IF EXISTS children;
 DROP TABLE IF EXISTS users;
+DROP TYPE IF EXISTS gender;
 
 -- We put all users in one table since a user may be admin AND researcher, derived from Cognito groups
 CREATE TABLE users (
