@@ -42,11 +42,3 @@ const Home = ({ isAdmin, showButton }) => {
 };
 
 export default Home;
-
-/*
-            <h1>Hello {familyName}!</h1>
-            <h2>Here are your studies:</h2>
-
-            <h2>Don't see a study?</h2>
-            <h2>Request acess to the admins.</h2>
-*/

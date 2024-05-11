@@ -7,6 +7,7 @@ import { Authenticator } from '@aws-amplify/ui-react';
 import '../App.css';
 import '@aws-amplify/ui-react/styles.css';
 import { Auth, Amplify, Logger, Hub  } from 'aws-amplify';
+import Popup from '../popup';
 
 Amplify.configure({
   Auth: {
@@ -17,103 +18,130 @@ Amplify.configure({
 });
 
 const Users = ({ toggleButton, handleJwtToken }) => {
-    const [jwtToken, setJwtToken] = useState('');
-    const logger = new Logger('Logger', 'INFO');
-    const [isSignedUp, setIsSignedUp] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
+  const [jwtToken, setJwtToken] = useState('');
+  const logger = new Logger('Logger', 'INFO');
+  const [isSignedUp, setIsSignedUp] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [isSuccessful, setIsSuccessful] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const togglePopup = () => {
+    setIsOpen(!isOpen);
+  }
 
 
-    useEffect(() => {
-        fetchJwtToken();
-    }, []);
+  useEffect(() => {
+      fetchJwtToken();
+  }, []);
+  
+  const fetchJwtToken = async () => {
+      try {
+          const currentUser = await Auth.currentAuthenticatedUser();
+          const session = await Auth.currentSession();
+          const token = session.getIdToken().getJwtToken();
+          setJwtToken(token);
+          handleJwtToken(token); // Pass jwtToken back to App.js
+
+      } catch (error) {
+          console.log('Error fetching JWT token:', error);
+      }
+      };
+
+    const handleSignUp = async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const email = formData.get('email');
+        const password = formData.get('password');
+        const firstName = formData.get('given_name');
+        const middleName = formData.get('middle_name');
+        const lastName = formData.get('family_name');
+        const nickname = formData.get('nickname');
     
-    const fetchJwtToken = async () => {
         try {
-            const currentUser = await Auth.currentAuthenticatedUser();
-            const session = await Auth.currentSession();
-            const token = session.getIdToken().getJwtToken();
-            setJwtToken(token);
-            handleJwtToken(token); // Pass jwtToken back to App.js
-
-        } catch (error) {
-            console.log('Error fetching JWT token:', error);
-        }
-        };
-
-        const handleSignUp = async (event) => {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const email = formData.get('email');
-            const password = formData.get('password');
-            const firstName = formData.get('given_name');
-            const middleName = formData.get('middle_name');
-            const lastName = formData.get('family_name');
-            const nickname = formData.get('nickname');
-        
-            try {
-              const { user } = await Auth.signUp({
-                username: email,
-                password,
-                attributes: {
-                  email,
-                  given_name: firstName,
-                  middle_name: middleName,
-                  family_name: lastName,
-                  nickname
-                }
-              });
-              console.log('user:', user);
-              setIsSignedUp(true);
-            } catch (error) {
-              console.log('Error signing up:', error);
-              setErrorMessage(error.message);
+          const { user } = await Auth.signUp({
+            username: email,
+            password,
+            attributes: {
+              email,
+              given_name: firstName,
+              middle_name: middleName,
+              family_name: lastName,
+              nickname
             }
-          };
+          });
+          console.log('user:', user);
+          setNewUserEmail(email);
+          setIsSignedUp(true);
+          setIsSuccessful(true);
+          togglePopup();
+        } catch (error) {
+          togglePopup();
+          setIsSuccessful(false);
+          setNewUserEmail(email);
+          setErrorMessage(error.message);
+          console.log('Error signing up:', error);
+        }
+      };
+    
+      if (isSignedUp) {
+        //return <Redirect to="/Home" />;
+      }
+    
+      return (
+        <div>
+        <form onSubmit={handleSignUp}>
+          <h1>Manage researchers</h1>
+          <br></br>
+          <h2>Create an account</h2>
+          <br></br>
+          <div className="mb-3">
+            <label>Email</label>
+            <input type="email" className="form-control" placeholder="Enter email" name="email" required />
+          </div>
+          <div className="mb-3">
+            <label>Password</label>
+            <input type="password" className="form-control" placeholder="Enter password" name="password" required />
+          </div>
+          <div className="mb-3">
+            <label>First name</label>
+            <input type="text" className="form-control" placeholder="" name="given_name" required />
+          </div>
+          <div className="mb-3">
+            <label>Middle name</label>
+            <input type="text" className="form-control" placeholder="" name="middle_name" required/>
+          </div>
+          <div className="mb-3">
+            <label>Last name</label>
+            <input type="text" className="form-control" placeholder="" name="family_name" required />
+          </div>
+          <div className="mb-3">
+            <label>Nickname</label>
+            <input type="text" className="form-control" placeholder="" name="nickname" required/>
+          </div>
+          <div className="d-grid">
+            <button type="submit" className="btn btn-primary">Create</button>
+          </div>
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
+        </form>
+        <br></br>
+        <h2>Registered researchers</h2>
         
-          if (isSignedUp) {
-            //return <Redirect to="/Home" />;
-          }
-        
-          return (
-            <div>
-            <form onSubmit={handleSignUp}>
-              <h1>Manage researchers</h1>
-              <br></br>
-              <h2>Create an account</h2>
-              <br></br>
-              <div className="mb-3">
-                <label>Email</label>
-                <input type="email" className="form-control" placeholder="Enter email" name="email" required />
-              </div>
-              <div className="mb-3">
-                <label>Password</label>
-                <input type="password" className="form-control" placeholder="Enter password" name="password" required />
-              </div>
-              <div className="mb-3">
-                <label>First name</label>
-                <input type="text" className="form-control" placeholder="" name="given_name" required />
-              </div>
-              <div className="mb-3">
-                <label>Middle name</label>
-                <input type="text" className="form-control" placeholder="" name="middle_name" required/>
-              </div>
-              <div className="mb-3">
-                <label>Last name</label>
-                <input type="text" className="form-control" placeholder="" name="family_name" required />
-              </div>
-              <div className="mb-3">
-                <label>Nickname</label>
-                <input type="text" className="form-control" placeholder="" name="nickname" required/>
-              </div>
-              <div className="d-grid">
-                <button type="submit" className="btn btn-primary">Create</button>
-              </div>
-              {errorMessage && <p className="error-message">{errorMessage}</p>}
-            </form>
-            <br></br>
-            <h2>Registered researchers</h2>
+        {isOpen && isSuccessful && <Popup
+          content={<>
+            <b>Account {newUserEmail} is successfully created!</b>
+          </>}
+          handleClose={togglePopup}
+        />}
 
-            </div>
+        {isOpen && !isSuccessful &&<Popup
+          content={<>
+            <b>Failed to create account {newUserEmail}.</b>
+            <p>Error: {errorMessage}</p>
+          </>}
+          handleClose={togglePopup}
+        />}
+        </div>
   );
 };
 

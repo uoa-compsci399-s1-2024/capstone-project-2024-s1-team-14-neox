@@ -20,7 +20,7 @@ Amplify.configure({
   }
 });
 
-const Users = ({ toggleButton, handleJwtToken }) => {
+const Create = ({ toggleButton, handleJwtToken }) => {
 
     //set startdate and enddate
     const [startDate, setStartDate] = useState(null);
@@ -132,4 +132,4 @@ const Users = ({ toggleButton, handleJwtToken }) => {
   );
 };
 
-export default Users;
+export default Create;
