@@ -138,3 +138,8 @@ button {
   overflow: hidden;
   outline: none;
 }
+
+/* Hides taps in Authenticator */
+.amplify-tabs {
+  display: none !important;
+}
