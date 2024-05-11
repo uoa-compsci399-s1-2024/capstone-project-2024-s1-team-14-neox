@@ -4,6 +4,7 @@ import { Redirect } from 'react-router-dom';
 import Login from './login';
 import Home from './home';
 import DisplayChart from './displayChart';
+import Users from './users';
 
 const PrivateRoutes = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
