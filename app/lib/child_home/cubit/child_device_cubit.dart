@@ -18,6 +18,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     required int childId,
     required String childName,
     required DateTime birthDate,
+    required String gender,
     required String deviceRemoteId,
     required String authorisationCode,
   }) : 
@@ -26,6 +27,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       childId: childId,
       childName: childName,
       birthDate: birthDate,
+      gender: gender,
       deviceRemoteId: deviceRemoteId,
       authorisationCode: authorisationCode,
     )));
@@ -54,7 +56,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
   }
   
   static String _formatRemoteDeviceId(List<int> bytes) {
-    return bytes.map((b) => b.toInt()).join(' ');
+    return bytes.map((e) => e.toRadixString(16).toUpperCase().padLeft(2, '0')).join(':');
   }
 
   Future<BluetoothDevice?> _getBluetoothDevice(String deviceRemoteId) async {
@@ -75,10 +77,11 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         }
       }
     } on TimeoutException {
-      return null;
+      // Do nothing
     } finally {
       await FlutterBluePlus.stopScan();
     }
+    return null;
   }
 
   Future<void> onSyncPressed({

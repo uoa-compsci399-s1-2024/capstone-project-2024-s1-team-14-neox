@@ -1,4 +1,5 @@
 import 'package:age_calculator/age_calculator.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/child_home/presentation/screens/create_child_profile_screen.dart';
 
 
 import 'package:flutter/material.dart';
@@ -37,7 +38,22 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
             ),
             const SizedBox(width: 10),
             IconButton(
-              onPressed: (){},
+              onPressed: (){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) {
+                      return BlocProvider.value(
+                        value: BlocProvider.of<AllChildProfileCubit>(context),
+                        child: BlocProvider.value(
+                          value: BlocProvider.of<ChildDeviceCubit>(context),
+                          child: const CreateChildProfileScreen(editing: true),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
               icon: const Icon(Icons.edit),
             ),
             const Spacer(),
@@ -46,41 +62,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
               child: const BluetoothPanel(),
             ),
           ]),
-
-          const Spacer(),
-          const Icon(
-            Icons.face,
-            size: 100,
-          ),
-          const Text("Name"),
-          Text(
-            context.read<ChildDeviceCubit>().state.childName,
-            style: const TextStyle(
-              fontSize: 30,
-            ),
-          ),
-          const Text("Age"),
-          Text(
-            calculateAge(context.read<ChildDeviceCubit>().state.birthDate),
-            style: const TextStyle(
-              fontSize: 30,
-            ),
-          ),
-          BlocConsumer<ChildDeviceCubit, ChildDeviceState>(
-            listener: (context, state) {
-            },
-            builder: (context, state) {
-              return BlocProvider(
-                create: (_) => BluetoothBloc(),
-                child: const BluetoothPanel(),
-              );
-            },
-          ),
-          OutlinedButton(
-            onPressed: () => context.read<AllChildProfileCubit>()
-              .deleteChildProfile(context.read<ChildDeviceCubit>().state.childId),
-            child: const Text("Remove child profile")
-          ),
+          
         ],
       ),
     );

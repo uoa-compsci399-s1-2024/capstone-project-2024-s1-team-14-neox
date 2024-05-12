@@ -147,6 +147,23 @@ class ChildEntity {
         .write(ChildrenCompanion(authorisationCode: Value(code)));
   }
 
+  static Future<void> updateChildDetails(
+    int childId,
+    String name,
+    DateTime birthDate,
+    String gender,
+    String authorisationCode,
+  ) async {
+    AppDb db = AppDb.instance();
+    await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
+        .write(ChildrenCompanion(
+          name: Value(name),
+          birthDate: Value(birthDate),
+          gender: Value(gender),
+          authorisationCode: Value(authorisationCode),
+        ));
+  }
+
   ////////////////////////////////////////////////////////////////////////////
   // DELETE //////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////

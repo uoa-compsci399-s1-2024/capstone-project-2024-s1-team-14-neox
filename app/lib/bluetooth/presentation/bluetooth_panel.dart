@@ -9,7 +9,7 @@ import 'screen/scan_screen.dart';
 
 class BluetoothPanel extends StatelessWidget {
   const BluetoothPanel({super.key});
-
+  
   @override
   Widget build(BuildContext context) {
     return BlocListener<ChildDeviceCubit, ChildDeviceState>(
@@ -26,14 +26,6 @@ class BluetoothPanel extends StatelessWidget {
           context.read<AllChildProfileCubit>().updateAuthorisationCode(
               childId: state.childId,
               authorisationCode: state.authorisationCode);
-
-        } else if (state is ChildDeviceDisconnectState) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Unpaired device'),
-            duration: Duration(seconds: 2),
-          ));
-          context.read<AllChildProfileCubit>().deleteDeviceRemoteId(
-              childId: state.childId);
 
         } else if (state is ChildDeviceErrorState) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(

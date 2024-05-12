@@ -4,6 +4,7 @@ class ChildDeviceState {
   final int childId;
   final String childName;
   final DateTime birthDate;
+  final String gender;
   final String deviceRemoteId;
   final String authorisationCode;
 
@@ -11,6 +12,7 @@ class ChildDeviceState {
     required this.childId,
     required this.childName,
     required this.birthDate,
+    required this.gender,
     required this.deviceRemoteId,
     required this.authorisationCode,
   });
@@ -21,6 +23,7 @@ class ChildDeviceIdleState extends ChildDeviceState {
     childId: childDeviceState.childId,
     childName: childDeviceState.childName,
     birthDate: childDeviceState.birthDate,
+    gender: childDeviceState.gender,
     deviceRemoteId: childDeviceState.deviceRemoteId,
     authorisationCode: childDeviceState.authorisationCode,
   );
@@ -33,6 +36,7 @@ class ChildDeviceErrorState extends ChildDeviceState {
     childId: childDeviceState.childId,
     childName: childDeviceState.childName,
     birthDate: childDeviceState.birthDate,
+    gender: childDeviceState.gender,
     deviceRemoteId: childDeviceState.deviceRemoteId,
     authorisationCode: childDeviceState.authorisationCode,
   );
@@ -43,6 +47,7 @@ class ChildDeviceLoadingState extends ChildDeviceState {
     childId: childDeviceState.childId,
     childName: childDeviceState.childName,
     birthDate: childDeviceState.birthDate,
+    gender: childDeviceState.gender,
     deviceRemoteId: childDeviceState.deviceRemoteId,
     authorisationCode: childDeviceState.authorisationCode,
   );
@@ -53,6 +58,7 @@ class ChildDeviceConnectState extends ChildDeviceState {
     childId: childDeviceState.childId,
     childName: childDeviceState.childName,
     birthDate: childDeviceState.birthDate,
+    gender: childDeviceState.gender,
     deviceRemoteId: deviceRemoteId,
     authorisationCode: authorisationCode,
   );
@@ -63,6 +69,7 @@ class ChildDeviceDisconnectState extends ChildDeviceState {
     childId: childDeviceState.childId,
     childName: childDeviceState.childName,
     birthDate: childDeviceState.birthDate,
+    gender: childDeviceState.gender,
     deviceRemoteId: "",
     authorisationCode: childDeviceState.authorisationCode,
   );
@@ -75,6 +82,7 @@ class ChildDeviceSyncingState extends ChildDeviceState {
     childId: childDeviceState.childId,
     childName: childDeviceState.childName,
     birthDate: childDeviceState.birthDate,
+    gender: childDeviceState.gender,
     deviceRemoteId: childDeviceState.deviceRemoteId,
     authorisationCode: childDeviceState.authorisationCode,
   );
@@ -85,6 +93,7 @@ class ChildDeviceSyncSuccessState extends ChildDeviceState {
     childId: childDeviceState.childId,
     childName: childDeviceState.childName,
     birthDate: childDeviceState.birthDate,
+    gender: childDeviceState.gender,
     deviceRemoteId: childDeviceState.deviceRemoteId,
     authorisationCode: childDeviceState.authorisationCode,
   );

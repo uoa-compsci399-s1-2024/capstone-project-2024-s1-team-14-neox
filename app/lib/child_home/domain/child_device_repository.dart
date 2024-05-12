@@ -45,6 +45,23 @@ class ChildDeviceRepository {
     return await fetchChildProfiles();
   }
 
+  Future<List<ChildDeviceModel>> updateChildDetails(
+    int childId,
+    String name,
+    DateTime birthDate,
+    String gender,
+    String authorisationCode,
+  ) async {
+    await ChildEntity.updateChildDetails(
+      childId,
+      name,
+      birthDate,
+      gender,
+      authorisationCode,
+    );
+    return await fetchChildProfiles();
+  }
+
   Future<List<ChildDeviceModel>> deleteChildDeviceRemoteID(int childId) async {
     await ChildEntity.deleteDeviceForChild(childId);
     return await fetchChildProfiles();
