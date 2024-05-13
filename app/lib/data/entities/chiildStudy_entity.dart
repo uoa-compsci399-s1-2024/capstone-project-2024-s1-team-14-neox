@@ -1,4 +1,5 @@
 import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/data/entities/chiildStudy_entity.dart';
 import 'package:drift/drift.dart';
 
 @UseRowClass(ChildStudyAssociationsEntity)
@@ -24,4 +25,37 @@ class ChildStudyAssociationsEntity {
       studyCode: Value(studyCode),
     );
   }
+
+  static Future<void> saveSingleChildStudy(int id, String code) async {
+    final db = AppDb.instance();
+    ChildStudyAssociationsEntity childStudyAssociationsEntity = ChildStudyAssociationsEntity(childId: id, studyCode: code);
+    await db.into(db.childStudy).insert(childStudyAssociationsEntity.toCompanion(), mode: InsertMode.insert);
+
+  }
+
+
+  static Future<void> deleteChildStudy(int childId, String studyCode) async {
+    final db = AppDb.instance();
+    await (db.delete(db.childStudy)
+      ..where((tbl) =>
+      tbl.childId.equals(childId) & tbl.studyCode.equals(studyCode)))
+        .go();
+  }
+
+  static Future<List<ChildStudyAssociationsEntity>> queryAllChildStudies() async {
+    final db = AppDb.instance();
+    List<ChildStudyAssociationsEntity> studyList =  await db.select(db.childStudy).get();
+    return studyList;
+  }
+
+  static Future<ChildStudyAssociationsEntity?> getChildStudyByIdAndCode(int childId, String studyCode) async {
+    final db = AppDb.instance();
+    return await (db.select(db.childStudy)
+      ..where((tbl) =>
+      tbl.childId.equals(childId) & tbl.studyCode.equals(studyCode)))
+        .getSingleOrNull();
+  }
+
 }
+
+
