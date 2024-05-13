@@ -52,6 +52,12 @@ class $ChildrenTable extends Children
   late final GeneratedColumn<String> gender = GeneratedColumn<String>(
       'gender', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _studyCodeMeta =
+      const VerificationMeta('studyCode');
+  @override
+  late final GeneratedColumn<String> studyCode = GeneratedColumn<String>(
+      'study_code', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -60,7 +66,8 @@ class $ChildrenTable extends Children
         birthDate,
         deviceRemoteId,
         authorisationCode,
-        gender
+        gender,
+        studyCode
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -115,6 +122,12 @@ class $ChildrenTable extends Children
     } else if (isInserting) {
       context.missing(_genderMeta);
     }
+    if (data.containsKey('study_code')) {
+      context.handle(_studyCodeMeta,
+          studyCode.isAcceptableOrUnknown(data['study_code']!, _studyCodeMeta));
+    } else if (isInserting) {
+      context.missing(_studyCodeMeta);
+    }
     return context;
   }
 
@@ -138,6 +151,8 @@ class $ChildrenTable extends Children
           .read(DriftSqlType.string, data['${effectivePrefix}server_id'])!,
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      studyCode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}study_code'])!,
     );
   }
 
@@ -155,6 +170,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
   final Value<String> deviceRemoteId;
   final Value<String> authorisationCode;
   final Value<String> gender;
+  final Value<String> studyCode;
   const ChildrenCompanion({
     this.id = const Value.absent(),
     this.serverId = const Value.absent(),
@@ -163,6 +179,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
     this.deviceRemoteId = const Value.absent(),
     this.authorisationCode = const Value.absent(),
     this.gender = const Value.absent(),
+    this.studyCode = const Value.absent(),
   });
   ChildrenCompanion.insert({
     this.id = const Value.absent(),
@@ -172,12 +189,14 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
     required String deviceRemoteId,
     required String authorisationCode,
     required String gender,
+    required String studyCode,
   })  : serverId = Value(serverId),
         name = Value(name),
         birthDate = Value(birthDate),
         deviceRemoteId = Value(deviceRemoteId),
         authorisationCode = Value(authorisationCode),
-        gender = Value(gender);
+        gender = Value(gender),
+        studyCode = Value(studyCode);
   static Insertable<ChildEntity> custom({
     Expression<int>? id,
     Expression<String>? serverId,
@@ -186,6 +205,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
     Expression<String>? deviceRemoteId,
     Expression<String>? authorisationCode,
     Expression<String>? gender,
+    Expression<String>? studyCode,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -195,6 +215,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
       if (deviceRemoteId != null) 'device_remote_id': deviceRemoteId,
       if (authorisationCode != null) 'authorisation_code': authorisationCode,
       if (gender != null) 'gender': gender,
+      if (studyCode != null) 'study_code': studyCode,
     });
   }
 
@@ -205,7 +226,8 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
       Value<DateTime>? birthDate,
       Value<String>? deviceRemoteId,
       Value<String>? authorisationCode,
-      Value<String>? gender}) {
+      Value<String>? gender,
+      Value<String>? studyCode}) {
     return ChildrenCompanion(
       id: id ?? this.id,
       serverId: serverId ?? this.serverId,
@@ -214,6 +236,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
       deviceRemoteId: deviceRemoteId ?? this.deviceRemoteId,
       authorisationCode: authorisationCode ?? this.authorisationCode,
       gender: gender ?? this.gender,
+      studyCode: studyCode ?? this.studyCode,
     );
   }
 
@@ -241,6 +264,9 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
     if (gender.present) {
       map['gender'] = Variable<String>(gender.value);
     }
+    if (studyCode.present) {
+      map['study_code'] = Variable<String>(studyCode.value);
+    }
     return map;
   }
 
@@ -253,7 +279,8 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
           ..write('birthDate: $birthDate, ')
           ..write('deviceRemoteId: $deviceRemoteId, ')
           ..write('authorisationCode: $authorisationCode, ')
-          ..write('gender: $gender')
+          ..write('gender: $gender, ')
+          ..write('studyCode: $studyCode')
           ..write(')'))
         .toString();
   }
