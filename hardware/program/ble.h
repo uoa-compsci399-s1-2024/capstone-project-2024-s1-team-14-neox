@@ -35,7 +35,7 @@ void fillCharacteristics();
 /*
  * Fills the amount of buffers needed to transmit all data on the eeprom.
  */
-void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData);
+void fillBuffers(uint32_t& currentSampleBufferIndex);
 
 /*
  * Keeps track of the current index in the sample buffer and the amount of data sent so far. If the update characteristic is written to, calls fillBuffers

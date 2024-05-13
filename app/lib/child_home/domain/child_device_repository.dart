@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
@@ -65,6 +66,14 @@ class ChildDeviceRepository {
   Future<List<ChildDeviceModel>> deleteChildDeviceRemoteID(int childId) async {
     await ChildEntity.deleteDeviceForChild(childId);
     return await fetchChildProfiles();
+  }
+
+  Future<int> getMostRecentSampleTimestamp(int childId) async {
+    List<ArduinoDataEntity> data = await ChildEntity.getAllDataForChild(childId);
+    if (data.isEmpty) {
+      return 0;
+    }
+    return data.map((e) => e.datetime.millisecondsSinceEpoch ~/ 1000).reduce(max);
   }
 
   Future<void> parseAndSaveSamples(
