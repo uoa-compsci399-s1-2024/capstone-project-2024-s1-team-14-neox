@@ -48,6 +48,23 @@ class ChildStudyAssociationsEntity {
     return studyList;
   }
 
+  static Future<List<ChildStudyAssociationsEntity>> getChildStudiesByChildId(int childId) async {
+    final db = AppDb.instance();
+    return await (db.select(db.childStudy)
+      ..where((tbl) =>
+          tbl.childId.equals(childId)))
+        .get();
+  }
+
+  static Future<List<ChildStudyAssociationsEntity>> getChildrenByStudyCode(String studyCode) async {
+    final db = AppDb.instance();
+    return await (db.select(db.childStudy)
+      ..where((tbl) =>
+          tbl.studyCode.equals(studyCode)))
+        .get();
+  }
+
+
   static Future<ChildStudyAssociationsEntity?> getChildStudyByIdAndCode(int childId, String studyCode) async {
     final db = AppDb.instance();
     return await (db.select(db.childStudy)
