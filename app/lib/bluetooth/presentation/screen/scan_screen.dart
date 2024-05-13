@@ -110,6 +110,6 @@ class ScanScreen extends StatelessWidget {
   }
 
   static String _formatRemoteDeviceId(List<int> bytes) {
-    return bytes.map((b) => b.toInt()).join(' ');
+    return bytes.map((e) => e.toRadixString(16).toUpperCase().padLeft(2, '0')).join(':');
   }
 }

@@ -1,4 +1,3 @@
-import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,13 +16,12 @@ class AllChildProfileCubit extends Cubit<AllChildProfileState> {
           await _childDeviceRepository.fetchChildProfiles();
       emit(state.copyWith(
           status: AllChildProfileStatus.fetchSuccess, profiles: profiles));
-    } on Exception catch (e) {
+    } catch (e) {
       emit(
         state.copyWith(
             status: AllChildProfileStatus.failure,
-            message: "The child profiles cannot be fetched."),
+            message: "The profiles cannot be fetched."),
       );
-      print("fetchChildProfiles: ${e.toString()}");
     }
   }
 
@@ -35,14 +33,34 @@ class AllChildProfileCubit extends Cubit<AllChildProfileState> {
       emit(state.copyWith(
         status: AllChildProfileStatus.addSuccess,
         profiles: childDeviceProfiles,
-        message: "The child profile has been added",
+        message: "The profile has been added",
       ));
-    } on Exception catch (e) {
-      print(e.toString());
+    } catch (e) {
       emit(state.copyWith(
           status: AllChildProfileStatus.failure,
-          message: "The child profile cannot be created."));
-      print(e.toString());
+          message: "The profile cannot be created."));
+    }
+  }
+
+  Future<void> updateChildProfile(int childId, String name, DateTime birthDate, String gender, String authorisationCode) async {
+    emit(state.copyWith(status: AllChildProfileStatus.loading));
+    try {
+      final List<ChildDeviceModel> childDeviceProfiles = await _childDeviceRepository.updateChildDetails(
+        childId,
+        name,
+        birthDate,
+        gender,
+        authorisationCode,
+      );
+      emit(state.copyWith(
+        status: AllChildProfileStatus.addSuccess,
+        profiles: childDeviceProfiles,
+        message: "The profile has been updated",
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+          status: AllChildProfileStatus.failure,
+          message: "The profile cannot be updated."));
     }
   }
 
@@ -52,13 +70,10 @@ class AllChildProfileCubit extends Cubit<AllChildProfileState> {
     try {
       childDeviceProfiles =
           await _childDeviceRepository.deleteChildProfile(childId);
-    } on Exception catch (e) {
-      print("execption occured: ${e.toString()}");
+    } catch (e) {
       emit(state.copyWith(
           status: AllChildProfileStatus.failure,
-          message: "The child profile cannot be deleted."));
-
-      print("deleteChildProfiles: ${e.toString()}");
+          message: "The profile cannot be deleted."));
     }
     await Future.delayed(
       const Duration(microseconds: 1000),
@@ -67,7 +82,7 @@ class AllChildProfileCubit extends Cubit<AllChildProfileState> {
           state.copyWith(
             status: AllChildProfileStatus.deleteSuccess,
             profiles: childDeviceProfiles,
-            message: "The child profile has been deleted",
+            message: "The profile has been deleted",
           ),
         );
       },
@@ -93,7 +108,7 @@ class AllChildProfileCubit extends Cubit<AllChildProfileState> {
     emit(state.copyWith(
         status: AllChildProfileStatus.updateSuccess,
         profiles: childDeviceProfiles,
-        message: "<you shouldn't see this>"));
+        message: "Successfully updated authentication code"));
   }
 
   Future<void> deleteDeviceRemoteId({required int childId}) async {

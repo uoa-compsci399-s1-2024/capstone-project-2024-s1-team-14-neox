@@ -29,29 +29,6 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
       appBar: AppBar(
         title: const Text("Your profiles"),
       ),
-      drawer: Drawer(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 30.0),
-              child: Row(
-                children: [
-                  const Text("Dark Mode"),
-                  const SizedBox(width: 8),
-                  CupertinoSwitch(
-                    value: Provider.of<ThemeProvider>(context).isDarkMode,
-                    onChanged: (value) =>
-                        Provider.of<ThemeProvider>(context, listen: false)
-                            .toggleTheme(),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
       body: BlocConsumer<AllChildProfileCubit, AllChildProfileState>(
         listener: (context, state) {
           // if (state.status.isAdding) {
@@ -80,8 +57,6 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
           }
         },
         builder: (context, state) {
-          print("state change occured");
-          print(state);
           if (state.status.isLoading) {
             return const Center(
               child: CircularProgressIndicator(),
@@ -94,16 +69,22 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
               children: [
                 ...state.profiles.map(
                   (profile) => BlocProvider(
-                    create: (_) => ChildDeviceCubit(
-                      repo: context.read<ChildDeviceRepository>(),
-                      childId: profile.childId,
-                      childName: profile.childName,
-                      birthDate: profile.birthDate,
-                      deviceRemoteId: profile.deviceRemoteId ??
-                          "", // Change ?? to ! and make deviceRemoteId nonnullable.
-                      authorisationCode:
-                          profile.authorisationCode ?? "", // Same here
-                    ),
+                    // We have a problem with our ChildDeviceCubit not updating when we change it.
+                    // This UniqueKey is a workaround which causes a new ChildDeviceCubit to be
+                    // created every time the build function runs.
+                    key: UniqueKey(),
+                    
+                    create: (_) {
+                      return ChildDeviceCubit(
+                        repo: context.read<ChildDeviceRepository>(),
+                        childId: profile.childId,
+                        childName: profile.childName,
+                        birthDate: profile.birthDate,
+                        gender: profile.gender,
+                        deviceRemoteId: profile.deviceRemoteId ?? "",
+                        authorisationCode: profile.authorisationCode ?? "",
+                      );
+                    },
                     child: const ChildProfileTile(),
                   ),
                 ),
@@ -116,7 +97,7 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                const CreateChildProfileScreen()),
+                                const CreateChildProfileScreen(editing: false)),
                       ),
                       child: const Icon(
                         Icons.add,

@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:io';
 
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_repository.dart';
-import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,6 +18,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     required int childId,
     required String childName,
     required DateTime birthDate,
+    required String gender,
     required String deviceRemoteId,
     required String authorisationCode,
   }) : 
@@ -26,6 +27,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       childId: childId,
       childName: childName,
       birthDate: birthDate,
+      gender: gender,
       deviceRemoteId: deviceRemoteId,
       authorisationCode: authorisationCode,
     )));
@@ -54,7 +56,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
   }
   
   static String _formatRemoteDeviceId(List<int> bytes) {
-    return bytes.map((b) => b.toInt()).join(' ');
+    return bytes.map((e) => e.toRadixString(16).toUpperCase().padLeft(2, '0')).join(':');
   }
 
   Future<BluetoothDevice?> _getBluetoothDevice(String deviceRemoteId) async {
@@ -74,10 +76,11 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
           return scanResults.first.device;
         }
       }
+    } on TimeoutException {
+      // Do nothing
     } finally {
       await FlutterBluePlus.stopScan();
     }
-
     return null;
   }
 
@@ -102,7 +105,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     }
     
     if (device == null) {
-      emit(ChildDeviceErrorState(state, "Scan did not find device."));
+      emit(ChildDeviceErrorState(state, "Device not found nearby."));
       return;
     }
     
