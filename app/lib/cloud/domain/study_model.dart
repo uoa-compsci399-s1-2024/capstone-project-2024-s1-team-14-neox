@@ -1,6 +1,5 @@
 //TODO study entity
 
-import 'package:capstone_project_2024_s1_team_14_neox/cloud/domain/participating_child_model.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/study_entity.dart';
 
 class StudyModel {

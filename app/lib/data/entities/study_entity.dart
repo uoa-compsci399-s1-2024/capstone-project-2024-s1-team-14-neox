@@ -46,11 +46,11 @@ class StudyEntity {
 //   // CREATE ///////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-  static Future<void> createStudy(StudyEntity Study) async {
+  static Future<void> createStudy(StudyEntity study) async {
     AppDb db = AppDb.instance();
     await db
         .into(db.study)
-        .insert(Study.toCompanion(), mode: InsertMode.insert);
+        .insert(study.toCompanion(), mode: InsertMode.insert);
   }
 
   ////////////////////////////////////////////////////////////////////////////
