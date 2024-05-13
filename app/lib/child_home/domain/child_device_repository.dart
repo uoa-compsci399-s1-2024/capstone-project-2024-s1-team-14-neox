@@ -7,7 +7,7 @@ import 'child_device_model.dart';
 import 'classifiers/xgboost.dart';
 
 class ChildDeviceRepository {
-  static const int bytesPerSample = 24;
+  static const int bytesPerSample = 20;
 
   // Fetch all children profiles
 
