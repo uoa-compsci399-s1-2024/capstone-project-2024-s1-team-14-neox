@@ -21,7 +21,7 @@ class Children extends Table {
 
   TextColumn get gender => text()();
 
-  TextColumn get studyCode => text()();
+
 }
 
 class ChildEntity {
@@ -32,7 +32,7 @@ class ChildEntity {
   String? authorisationCode;
   String? serverId;
   String gender;
-  String? studyCode;
+
 
   //TODO: deviceRemoteId is duplicated in child entity and arduino device entity
 
@@ -44,7 +44,7 @@ class ChildEntity {
       this.authorisationCode,
       this.serverId,
       this.id,
-      this.studyCode});
+      });
 
   ChildrenCompanion toCompanion() {
     return ChildrenCompanion(
@@ -54,7 +54,7 @@ class ChildEntity {
       deviceRemoteId: Value(deviceRemoteId ?? ''),
       authorisationCode: Value(authorisationCode ?? ''),
       gender: Value(gender),
-      studyCode: Value(studyCode ?? ''),
+
     );
   }
 
@@ -151,11 +151,9 @@ class ChildEntity {
         .write(ChildrenCompanion(authorisationCode: Value(code)));
   }
 
-  static Future<void> updateStudyCode(int childId, String studyCode) async {
-    AppDb db = AppDb.instance();
-    await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
-        .write(ChildrenCompanion(studyCode: Value(studyCode)));
-  }
+
+
+
 
   ////////////////////////////////////////////////////////////////////////////
   // DELETE //////////////////////////////////////////////////////////////////
