@@ -52,6 +52,6 @@ static void readSample()
   sample.timestamp = readRTC();
   sample.uv = analogRead(UV_SENSOR_PIN);
   sample.acceleration = readIMU();
-  sample.color = readTCS();
+  sample.tcsData = readTCS();
   eepromPushSample(&sample);
 }
