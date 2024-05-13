@@ -5,17 +5,30 @@ import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/study_entity.dart';
 
 class StudyRepository {
-  // fetch all studies from database
-  //api acton to services?
-  // https
-  // add child
 
-  Future<List<StudyModel>> fetchAllParticipatingStudies() async {
+
+  Future<List<StudyModel>> getAllParticipatingStudies() async {
     List<StudyEntity> entities = await StudyEntity.queryAllStudy();
     return entities.map((entity) => StudyModel.fromEntity(entity)).toList();
   }
 
+Future<List<ParticipatingChildModel>> getChildrenByStudyCode(String studyCode) async {
+    List<ChildStudyAssociationsEntity> associations = await ChildStudyAssociationsEntity.getChildrenByStudyCode(studyCode);
+    List<ParticipatingChildModel> children = [];
+    for (ChildStudyAssociationsEntity child in associations) {
+      ChildEntity? entity = await ChildEntity.queryChildById(child.childId);
+      children.add(ParticipatingChildModel.fromEntity(entity!));
+    }
+    return children;
+  }
+
   StudyModel fetchStudyFromServer(String studyCode) {
+    //RICK-API: 
+
+
+
+
+
     return StudyModel(
         studyCode: studyCode,
         name: "Name of study {studyCode}",
@@ -27,6 +40,11 @@ class StudyRepository {
 
   Future<List<StudyModel>> joinNewStudy(
       StudyModel study, List<int> childIds) async {
+        // RICK-API
+
+
+
+        
     await StudyEntity.createStudy(
       StudyEntity(
         name: study.name,
@@ -40,20 +58,25 @@ class StudyRepository {
     for (int id in childIds) {
       ChildStudyAssociationsEntity.saveSingleChildStudy(id, code);
     }
-    return fetchAllParticipatingStudies();
+    return getAllParticipatingStudies();
   }
 
   Future<List<StudyModel>> addChildToStudy(
       int childId, String studyCode) async {
+        //RICK-API
+
     ChildStudyAssociationsEntity.saveSingleChildStudy(childId, studyCode);
 
-    return fetchAllParticipatingStudies();
+    return getAllParticipatingStudies();
   }
 
   Future<List<StudyModel>> deleteChildFromStudy(
       int childId, String studyCode) async {
     ChildStudyAssociationsEntity.deleteChildStudy(childId, studyCode);
+    //RICK-API
 
-    return fetchAllParticipatingStudies();
+    return getAllParticipatingStudies();
   }
+
+
 }

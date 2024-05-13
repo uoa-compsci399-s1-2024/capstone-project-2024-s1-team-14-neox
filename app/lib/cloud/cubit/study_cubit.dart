@@ -12,10 +12,10 @@ class StudyCubit extends Cubit<StudyState> {
 
   // retrieveStudydetailsuisngcode id
 
-  void fetchAllParticipatingStudies() async {
+  void getAllParticipatingStudies() async {
     try {
       final List<StudyModel> studies = await 
-          _studyRepository.fetchAllParticipatingStudies();
+          _studyRepository.getAllParticipatingStudies();
 
       emit(state.copyWith(status: StudyStatus.fetchSuccess, studies: studies));
     } on Exception catch (e) {
