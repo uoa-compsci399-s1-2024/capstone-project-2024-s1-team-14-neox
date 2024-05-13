@@ -2,6 +2,7 @@
 #include <SparkFun_External_EEPROM.h>
 #include "eeprom.h"
 #include "build_time.h"
+#include "error.h"
 
 
 static const uint32_t EEPROM_SIZE_KBIT = 256;
@@ -11,6 +12,7 @@ static const uint32_t TEMP_SAMPLE_BUFFER_MAX_SIZE_ELEMS = 16;
 static const uint32_t SAMPLE_BUFFER_MAX_SIZE_BYTES = 0x4000; // 16 kilobytes
 static const uint32_t SAMPLE_BUFFER_MAX_SIZE_ELEMS = SAMPLE_BUFFER_MAX_SIZE_BYTES / sizeof(SensorSample);
 
+static const uint8_t DEFAULT_BLE_AUTH_KEY[32] = "0123456789";
 
 struct SampleBuffer
 {
@@ -42,8 +44,6 @@ static void resumeAtomicTransaction();
 static void pushTempSample(const SensorSample* sample);
 // Push all samples in the temporary sample buffer into the EEPROM.
 static void flushTempSamples();
-// Run an infinite loop doing nothing.
-static void freeze();
 
 static uint32_t allocatedLen;
 static ExternalEEPROM eeprom;
@@ -59,8 +59,7 @@ void eepromBegin()
   eeprom.setMemoryType(EEPROM_SIZE_KBIT);
   if (!eeprom.begin(0b1010000, Wire, 255))
   {
-    Serial.println("eepromBegin() failed. Check EEPROM connection.");
-    freeze();
+    showError(ERROR_EEPROM_BEGIN);
   }
 
   allocatedLen = 0;
@@ -86,16 +85,17 @@ void eepromBegin()
 
 void eepromWrite(EEPROMAddress address, const uint8_t* buffer, uint32_t len)
 {
+  if (address + len > EEPROM_SIZE_BYTES) {
+    return;
+  }
+
   while (len > 0)
   {
     uint16_t blockLen = len > 0xFFFF ? 0xFFFF : len;
     int error = eeprom.write(address, buffer, blockLen);
     if (error)
     {
-      // Error code from https://www.arduino.cc/reference/en/language/functions/communication/wire/endtransmission/
-      Serial.print("eeprom.write() failed with error ");
-      Serial.println(error);
-      freeze();
+      showError(ERROR_EEPROM_WRITE);
     }
     buffer += blockLen;
     len -= blockLen;
@@ -109,16 +109,18 @@ void eepromWriteUint32(EEPROMAddress address, uint32_t value)
 
 void eepromRead(EEPROMAddress address, uint8_t* buffer, uint32_t len)
 {
+  if (address + len > EEPROM_SIZE_BYTES) {
+    memset(buffer, 0, len);
+    return;
+  }
+
   while (len > 0)
   {
     uint16_t blockLen = len > 0xFFFF ? 0xFFFF : len;
     int error = eeprom.read(address, buffer, blockLen);
     if (error)
     {
-      // Error code from https://www.arduino.cc/reference/en/language/functions/communication/wire/endtransmission/
-      Serial.print("eeprom.read() failed with error ");
-      Serial.println(error);
-      freeze();
+      showError(ERROR_EEPROM_READ);
     }
     buffer += blockLen;
     len -= blockLen;
@@ -163,7 +165,7 @@ EEPROMAddress eepromAllocate(uint32_t len)
     Serial.print(" free, ");
     Serial.print(len);
     Serial.println(" requested.");
-    freeze();
+    showError(ERROR_EEPROM_ALLOC);
   }
 
   uint32_t address = allocatedLen;
@@ -251,16 +253,17 @@ static void resumeAtomicTransaction()
   }
 }
 
-static void freeze()
-{
-  while (true)
-  {
-    delay(1000);
-  }
-}
-
 void eepromGetBLEAuthKey(uint8_t* key) {
   eepromRead(authKey, key, 32);
+
+  // If the key is corrupt for whatever reason, perform a factory reset.
+  for (int i = 0; i < 32; i++) {
+    if ((i < 10 && key[i] == 0) || (i >= 10 && key[i] != 0)) {
+      Serial.println("BLE Authentication key is corrupt.");
+      eepromFactoryReset(DEFAULT_BLE_AUTH_KEY);
+      break;
+    }
+  }
 }
 
 void eepromSetBLEAuthKey(const uint8_t* key) {
@@ -276,6 +279,7 @@ uint32_t eepromLoadRTCTime() {
 }
 
 void eepromFactoryReset(const uint8_t* bleAuthKey) {
+  Serial.println("Performing factory reset...");
   eepromClear();
   eepromSetBLEAuthKey(bleAuthKey);
   eepromSaveRTCTime(__TIME_UNIX__);

@@ -6,7 +6,9 @@
 #include "rtc.h"
 #include "ble.h"
 #include "sensor_sample.h"
+#include "error.h"
 
+const uint32_t MAX_UNAUTH_TIME = 10 * 1000;
 const uint32_t maxDataPerCharacteristic = 512;
 const uint32_t dataPerCharacteristic = maxDataPerCharacteristic / sizeof(SensorSample) * sizeof(SensorSample);
 const uint32_t maxData = dataPerCharacteristic * 5;
@@ -56,6 +58,7 @@ byte buffer_5[maxDataPerCharacteristic];
  */
 static uint8_t authKey[32];
 static bool authenticated = false;
+static uint32_t connectTime = 0;
 
 static BLECharacteristic authChallengeFromPeripheral("9ab7d3df-a7b4-4858-8060-84a9adcf1420", BLERead, 32, true);
 static BLECharacteristic authResponseFromCentral    ("a90aa9a2-b186-4717-bc8d-f169eead75da", BLEWrite | BLEEncryption, 32, true);
@@ -74,9 +77,7 @@ static void onAuthChallengeFromCentral(BLEDevice central, BLECharacteristic char
 void initializeBLE() {
     if (!BLE.begin()) 
     {
-        Serial.println("BLE failed to initiate");
-        delay(500);
-        while(1);
+        showError(ERROR_BLE_BEGIN);
     }
 
     eepromGetBLEAuthKey(authKey);
@@ -134,12 +135,22 @@ void checkConnection() {
     BLEDevice central = BLE.central();
     while (central.connected())
     {
+        if (connectTime == 0) {
+            connectTime = millis();
+        }
+
+        if (!authenticated && millis() - connectTime >= MAX_UNAUTH_TIME) {
+            central.disconnect();
+            break;
+        }
+
         if (authenticated) {
             updateValues();
         }
     }
     currentSampleBufferIndex = 0;
     sentData = 0;
+    connectTime = 0;
 }
 
 void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {

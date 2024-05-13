@@ -2,13 +2,12 @@
 #include <stdint.h>
 #include <Arduino_LSM6DS3.h>
 #include "imu.h"
+#include "error.h"
 
 void initializeIMU() {
     if (!IMU.begin())
     {
-        Serial.println("IMU failed to initialise");
-        delay(500);
-        while(1);
+        showError(ERROR_IMU_BEGIN);
     }
 }
 
