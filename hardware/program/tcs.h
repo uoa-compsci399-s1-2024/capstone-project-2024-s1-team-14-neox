@@ -1,12 +1,16 @@
 #ifndef _TCS_H
 #define _TCS_H
 
-#include <array>
+struct TCSData {
+    uint16_t red;
+    uint16_t green;
+    uint16_t blue;
+    uint16_t clear;
+};
 
 // Initialise TCS, prints an error to serial if initialisation fails
 void initializeTCS();
 
-// Returns an array containing red, green, blue and clear channel values from the colour light sensor. Also returns brightness in lux and colour temperature in kelvin
-std::array<uint16_t, 5> readTCS();
+TCSData readTCS();
 
 #endif

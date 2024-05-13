@@ -7,7 +7,7 @@ import 'child_device_model.dart';
 import 'classifiers/xgboost.dart';
 
 class ChildDeviceRepository {
-  static const int bytesPerSample = 14;
+  static const int bytesPerSample = 20;
 
   // Fetch all children profiles
 
@@ -61,25 +61,29 @@ class ChildDeviceRepository {
         return;
       }
 
+      int readUint16() {
+        int value = bytes[i] | (bytes[i + 1] << 8);
+        i += 2;
+        return value;
+      }
+
       int timestamp = bytes[i] |
           (bytes[i + 1] << 8) |
           (bytes[i + 2] << 16) |
           (bytes[i + 3] << 24);
       i += 4;
-      int uv = bytes[i] | (bytes[i + 1] << 8);
-      i += 2;
-      int light = bytes[i] | (bytes[i + 1] << 8);
-      i += 2;
-      int accelX = bytes[i] | (bytes[i + 1] << 8);
-      i += 2;
-      int accelY = bytes[i] | (bytes[i + 1] << 8);
-      i += 2;
-      int accelZ = bytes[i] | (bytes[i + 1] << 8);
-      i += 2;
+      int uv = readUint16();
+      int accelX = readUint16(); // Although values are unsigned here,
+      int accelY = readUint16(); // acceleration is converted to signed
+      int accelZ = readUint16(); // in Int16List.fromList.
+      int red = readUint16();
+      int green = readUint16();
+      int blue = readUint16();
+      int clear = readUint16();
+      int light = _calculateLux(red, blue, green);
+      int colourTemperature = _calculateColourTemperature(red, blue, green, clear);
 
       int appClass = score([uv, light, accelX, accelY, accelZ])[1] > 0.7 ? 1 : 0;
-
-
 
       await ArduinoDataEntity.saveSingleArduinoDataEntity(
         ArduinoDataEntity(
@@ -89,13 +93,52 @@ class ChildDeviceRepository {
           light: light,
           datetime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
           accel: Int16List.fromList([accelX, accelY, accelZ]),
+          red: red,
+          green: green,
+          blue: blue,
+          clear: clear,
+          colourTemperature: colourTemperature,
           appClass: appClass,
-
         ),
       );
     }
   }
 
+  int _calculateLux(int r, int g, int b) {
+    return ((-0.32466 * r) + (1.57837 * g) + (-0.73191 * b))
+      .toInt()
+      .clamp(0, 0xFFFF);
+  }
+
+  int _calculateColourTemperature(int r, int g, int b, int c) {
+    const int integrationTime = 101;
+
+    if (c == 0) {
+      return 0;
+    }
+
+    int sat;
+    if ((256 - integrationTime) > 63) {
+      sat = 65535;
+    } else {
+      sat = 1024 * (256 - integrationTime);
+    }
+    if ((256 - integrationTime) <= 63) {
+      sat -= sat ~/ 4;
+    }
+    if (c >= sat) {
+      return 0;
+    }
+
+    int ir = (r + g + b > c) ? (r + g + b - c) ~/ 2 : 0;
+    int r2 = r - ir;
+    int b2 = b - ir;
+    if (r2 == 0) {
+      return 0;
+    }
+
+    return ((3810 * b2) ~/ r2 + 1391).clamp(0, 0xFFFF);
+  }
 
   //////////////////////////////////
   ///           CLOUD            ///
