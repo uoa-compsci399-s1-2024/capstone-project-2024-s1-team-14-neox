@@ -9,12 +9,10 @@ void initializeTCS() {
     Serial.print("TCS not found ... Check connection");
     while (1);
   }
-  // Save power
-  tcs.disable();
 }
 
 TCSData readTCS() {
   TCSData data = { 0 };
-  tcs.getRawDataOneShot(&data.red, &data.green, &data.blue, &data.clear);
+  tcs.getRawData(&data.red, &data.green, &data.blue, &data.clear);
   return data;
 }
