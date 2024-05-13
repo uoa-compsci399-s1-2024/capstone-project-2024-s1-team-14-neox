@@ -8,14 +8,14 @@ part 'study_state.dart';
 class StudyCubit extends Cubit<StudyState> {
   final StudyRepository _studyRepository;
 
-  StudyCubit(this._studyRepository) : super(const StudyState());
+  StudyCubit(this._studyRepository) : super(StudyState());
 
   // retrieveStudydetailsuisngcode id
 
-  void fetchParticipatingStudies() {
+  void fetchAllParticipatingStudies() async {
     try {
-      final List<StudyModel> studies =
-          _studyRepository.fetchParticipatingStudies();
+      final List<StudyModel> studies = await 
+          _studyRepository.fetchAllParticipatingStudies();
 
       emit(state.copyWith(status: StudyStatus.fetchSuccess, studies: studies));
     } on Exception catch (e) {
@@ -27,9 +27,9 @@ class StudyCubit extends Cubit<StudyState> {
     }
   }
 
-  void fetchNewStudy(String studyId) {
+  void fetchStudyFromServer(String studyId) {
     emit(state.copyWith(status: StudyStatus.loading));
-    StudyModel newStudy = _studyRepository.fetchNewStudy(studyId);
+    StudyModel newStudy = _studyRepository.fetchStudyFromServer(studyId);
 
     emit(state.copyWith(
       status: StudyStatus.fetchSuccess,
@@ -39,10 +39,10 @@ class StudyCubit extends Cubit<StudyState> {
 
   // addchild
 
-  void joinNewStudy(String studyId, List<String> childIds) {
+  void joinNewStudy(StudyModel study, List<int> childIds) async {
     emit(state.copyWith(status: StudyStatus.loading));
 
-    List<StudyModel> studies = _studyRepository.joinNewStudy(studyId);
+    List<StudyModel> studies = await _studyRepository.joinNewStudy(study, childIds);
 
     emit(state.copyWith(
         status: StudyStatus.addStudySuccess,
@@ -50,10 +50,10 @@ class StudyCubit extends Cubit<StudyState> {
         message: "You have successfully participated in the study"));
   }
 
-  void addChildToStudy(String studyId, String childId) {
+  void addChildToStudy(int childId, String studyCode) async {
     emit(state.copyWith(status: StudyStatus.loading));
 
-    List<StudyModel> studies = _studyRepository.addChildToStudy(studyId);
+    List<StudyModel> studies = await _studyRepository.addChildToStudy(childId, studyCode);
 
     emit(state.copyWith(
         status: StudyStatus.addChildSuccess,
@@ -61,10 +61,10 @@ class StudyCubit extends Cubit<StudyState> {
         message: "The child was successfully added to the study"));
   }
 
-  void deleteChildFromStudy(String studyId, String childId) {
+  void deleteChildFromStudy(int childId, String studyCode) async {
     emit(state.copyWith(status: StudyStatus.loading));
 
-    List<StudyModel> studies = _studyRepository.deleteChildFromStudy(studyId);
+    List<StudyModel> studies = await _studyRepository.deleteChildFromStudy(childId, studyCode);
 
     emit(state.copyWith(
         status: StudyStatus.deleteChildSuccess,

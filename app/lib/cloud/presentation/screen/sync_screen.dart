@@ -1,4 +1,5 @@
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/cubit/study_cubit.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/cloud/domain/study_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -40,16 +41,19 @@ class SyncScreen extends StatelessWidget {
             },
           ),
           BlocProvider(
-            create: StudyCubit(),
+            create: (context) => StudyCubit(StudyRepository()),
             child: Column(children: [
-              Row(children: [
-                Text("Research Studies"),
-                IconButton(
-                  iconSize: 32,
-                  icon: Icon(Icons.add),
-                  onPressed: null,
-                )
-              ]),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Participate in Research"),
+                  IconButton(
+                    iconSize: 32,
+                    icon: Icon(Icons.add),
+                    onPressed: null,
+                  )
+                ],
+              ),
               BlocBuilder<StudyCubit, StudyState>(
                 builder: (context, state) {
                   return ListView(

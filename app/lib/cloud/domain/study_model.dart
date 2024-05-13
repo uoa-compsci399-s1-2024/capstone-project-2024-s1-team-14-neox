@@ -1,25 +1,28 @@
 //TODO study entity
 
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/domain/participating_child_model.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/data/entities/study_entity.dart';
 
 class StudyModel {
-  final String studyId;
+  final String studyCode;
   final String name;
   final String description;
-  List<ParticipatingChildModel>? participants;
+  final DateTime startDate;
+  final DateTime endDate;
 
   StudyModel({
-    required this.studyId,
+    required this.studyCode,
     required this.name,
     required this.description,
+    required this.startDate,
+    required this.endDate,
   });
 
-
-  // TODO create from entity
-  factory StudyModel.fromEntity(var entity) => StudyModel(
-    studyId: entity.studyId,
-    name: entity.name,
-    description: entity.description,
-
-  );
+  factory StudyModel.fromEntity(StudyEntity entity) => StudyModel(
+        studyCode: entity.studyCode,
+        name: entity.name,
+        description: entity.description,
+        startDate: entity.startDate,
+        endDate: entity.endDate,
+      );
 }

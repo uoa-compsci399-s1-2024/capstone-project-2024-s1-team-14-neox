@@ -26,9 +26,9 @@ class ChildStudyAssociationsEntity {
     );
   }
 
-  static Future<void> saveSingleChildStudy(int id, String code) async {
+  static Future<void> saveSingleChildStudy(int childId, String studyCode) async {
     final db = AppDb.instance();
-    ChildStudyAssociationsEntity childStudyAssociationsEntity = ChildStudyAssociationsEntity(childId: id, studyCode: code);
+    ChildStudyAssociationsEntity childStudyAssociationsEntity = ChildStudyAssociationsEntity(childId: childId, studyCode: studyCode);
     await db.into(db.childStudy).insert(childStudyAssociationsEntity.toCompanion(), mode: InsertMode.insert);
 
   }
