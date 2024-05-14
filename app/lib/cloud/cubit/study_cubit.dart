@@ -22,17 +22,19 @@ class StudyCubit extends Cubit<StudyState> {
       emit(
         state.copyWith(
             status: StudyStatus.failure,
-            message: "The child profiles cannot be fetched."),
+            message: e.toString()),
       );
     }
   }
+
+  
 
   void fetchStudyFromServer(String studyId) {
     emit(state.copyWith(status: StudyStatus.loading));
     StudyModel newStudy = _studyRepository.fetchStudyFromServer(studyId);
 
     emit(state.copyWith(
-      status: StudyStatus.fetchSuccess,
+      status: StudyStatus.fetchStudySuccess,
       newStudy: newStudy,
     ));
   }
@@ -49,27 +51,20 @@ class StudyCubit extends Cubit<StudyState> {
         studies: studies,
         message: "You have successfully participated in the study"));
   }
-
-  void addChildToStudy(int childId, String studyCode) async {
+  void withdrawStudy(String studyCode) async {
     emit(state.copyWith(status: StudyStatus.loading));
 
-    List<StudyModel> studies = await _studyRepository.addChildToStudy(childId, studyCode);
+    List<StudyModel> studies = await _studyRepository.deleteStudy(studyCode);
 
     emit(state.copyWith(
-        status: StudyStatus.addChildSuccess,
+        status: StudyStatus.deleteStudySuccess,
         studies: studies,
-        message: "The child was successfully added to the study"));
+        message: "You have successfully opted out from the study"));
   }
 
-  void deleteChildFromStudy(int childId, String studyCode) async {
-    emit(state.copyWith(status: StudyStatus.loading));
-
-    List<StudyModel> studies = await _studyRepository.deleteChildFromStudy(childId, studyCode);
-
-    emit(state.copyWith(
-        status: StudyStatus.deleteChildSuccess,
-        studies: studies,
-        message: "The child was successfully added to the study"));
+  
+  void testCubit() {
+    print("test" + DateTime.now().toString());
   }
   // deletechild
 }

@@ -3,6 +3,7 @@ part of 'study_cubit.dart';
 enum StudyStatus {
   loading,
   fetchSuccess,
+  fetchStudySuccess,
   addStudySuccess,
   addChildSuccess,
   deleteStudySuccess,
@@ -14,6 +15,7 @@ enum StudyStatus {
 extension StudyStatusX on StudyStatus {
   bool get isLoading => this == StudyStatus.loading;
   bool get isFetchSuccess => this == StudyStatus.fetchSuccess;
+  bool get isFetchStudySuccess => this == StudyStatus.fetchStudySuccess;
   bool get isAddStudySuccess => this == StudyStatus.addStudySuccess;
   bool get isAddChildSuccess => this == StudyStatus.addChildSuccess;
   bool get isDeleteStudySuccess => this == StudyStatus.deleteStudySuccess;
@@ -25,9 +27,9 @@ class StudyState extends Equatable {
   final StudyStatus status;
   final List<StudyModel> studies;
   final String message;
-  StudyModel? newStudy;
+  final StudyModel? newStudy;
 
-  StudyState({
+  const StudyState({
     this.status = StudyStatus.loading,
     this.studies = const <StudyModel>[],
     this.message = "",
