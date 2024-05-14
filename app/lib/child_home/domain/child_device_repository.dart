@@ -97,8 +97,8 @@ class ChildDeviceRepository {
       int green = readUint16();
       int blue = readUint16();
       int clear = readUint16();
-      int light = _calculateLux(red, blue, green);
-      int colourTemperature = _calculateColourTemperature(red, blue, green, clear);
+      int light = _calculateLux(red, green, blue);
+      int colourTemperature = _calculateColourTemperature(red, green, blue, clear);
 
       int appClass = score([uv, light, accelX, accelY, accelZ])[1] > 0.7 ? 1 : 0;
 
