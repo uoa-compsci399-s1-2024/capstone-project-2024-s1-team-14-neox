@@ -21,6 +21,9 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     required String gender,
     required String deviceRemoteId,
     required String authorisationCode,
+    required int outdoorTimeToday,
+    required int outdoorTimeWeek,
+    required int outdoorTimeMonth,
   }) : 
     _repo = repo,
     super(ChildDeviceIdleState(ChildDeviceState(
@@ -30,6 +33,9 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       gender: gender,
       deviceRemoteId: deviceRemoteId,
       authorisationCode: authorisationCode,
+      outdoorTimeToday: outdoorTimeToday,
+      outdoorTimeWeek: outdoorTimeWeek,
+      outdoorTimeMonth: outdoorTimeMonth,
     )));
 
   void onChildDeviceConnectPressed(String deviceRemoteId, String authorisationCode) {
