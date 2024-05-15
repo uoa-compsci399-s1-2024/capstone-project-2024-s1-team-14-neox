@@ -1,7 +1,7 @@
 import 'dart:math';
 import '../../data/entities/arduino_data_entity.dart';
 
-class DashboardRepository {
+class StatisticsRepository {
   static Map<int, Map<DateTime, int>> database = {};
 
   static void createRandomDataFromDate(int childId, DateTime date) {

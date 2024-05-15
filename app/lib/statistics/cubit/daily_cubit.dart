@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../domain/dashboard_repository.dart';
+import '../domain/statistics_repository.dart';
 
 part 'daily_state.dart';
 
@@ -14,7 +14,7 @@ class DailyCubit extends Cubit<DailyState> {
 
     emit(state.copyWith(
       status: DailyStatus.success,
-      summary: await DashboardRepository.getDailyOutdoorMinutes(childId),
+      summary: await StatisticsRepository.getDailyOutdoorMinutes(childId),
     ));
   }
 }
