@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 import '../../cubit/daily_cubit.dart';
-import '../../cubit/dashboard_cubit.dart';
+import '../../cubit/statistics_cubit.dart';
 
 class DailyPanel extends StatefulWidget {
   const DailyPanel({super.key});
@@ -17,10 +17,10 @@ class _DailyPanelState extends State<DailyPanel> {
   //TODO rebuild only when focus view is the current view
   @override
   Widget build(BuildContext context) {
-    return BlocListener<DashboardCubit, DashboardState>(
+    return BlocListener<StatisticsCubit, StatisticsState>(
       listener: (context, state) {
         context.read<DailyCubit>().onGetDataForChildId(
-              context.read<DashboardCubit>().state.focusChildId,
+              context.read<StatisticsCubit>().state.focusChildId,
             );
       },
       child: BlocBuilder<DailyCubit, DailyState>(
