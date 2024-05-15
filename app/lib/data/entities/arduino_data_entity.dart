@@ -9,7 +9,6 @@ import '../../server/child_data.dart';
 import 'child_entity.dart';
 import 'dart:math';
 
-
 @UseRowClass(ArduinoDataEntity)
 class ArduinoDatas extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -43,8 +42,6 @@ class ArduinoDatas extends Table {
 
   IntColumn get colourTemperature => integer()();
 
-
-
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -63,60 +60,57 @@ class ArduinoDataEntity {
   int green;
   int blue;
   int clear;
-  int colourTemperature ;
+  int colourTemperature;
 
   ArduinoDataEntity(
       {this.id,
-        this.name,
-        this.uv,
-        this.light,
-        required this.datetime,
-        this.accel,
-        this.appClass = -1,
-        this.serverClass = -1,
-        this.green = 0,
-        this.blue = 0,
-        this.red = 0,
-        this.clear = 0,
-        this.colourTemperature  = 0,
-        required this.childId});
+      this.name,
+      this.uv,
+      this.light,
+      required this.datetime,
+      this.accel,
+      this.appClass = -1,
+      this.serverClass = -1,
+      this.green = 0,
+      this.blue = 0,
+      this.red = 0,
+      this.clear = 0,
+      this.colourTemperature = 0,
+      required this.childId});
 
   ArduinoDatasCompanion toCompanion() {
     return ArduinoDatasCompanion(
-        uv: Value(uv ?? -1),
-        light: Value(light ?? -1),
-        datetime: Value(datetime),
-        accelX: Value(accel?[0] ?? -1),
-        accelY: Value(accel?[1] ?? -1),
-        accelZ: Value(accel?[2] ?? -1),
-        appClass: Value(appClass),
-        serverClass: Value(serverClass),
-        red: Value(red),
-        blue: Value(blue),
-        green: Value(green),
-        childId: Value(childId),
-        colourTemperature : Value(colourTemperature ),
-        clear: Value(clear),
-
+      uv: Value(uv ?? -1),
+      light: Value(light ?? -1),
+      datetime: Value(datetime),
+      accelX: Value(accel?[0] ?? -1),
+      accelY: Value(accel?[1] ?? -1),
+      accelZ: Value(accel?[2] ?? -1),
+      appClass: Value(appClass),
+      serverClass: Value(serverClass),
+      red: Value(red),
+      blue: Value(blue),
+      green: Value(green),
+      childId: Value(childId),
+      colourTemperature: Value(colourTemperature),
+      clear: Value(clear),
     );
   }
 
-
   ChildData toChildData(String serverId) {
-
     return ChildData(
       accel_x: (accel != null && accel!.length > 0) ? accel![0] : -1,
       accel_y: (accel != null && accel!.length > 1) ? accel![1] : -1,
       accel_z: (accel != null && accel!.length > 2) ? accel![2] : -1,
       timestamp: datetime.toIso8601String(),
-      childId:  serverId,
+      childId: serverId,
       uv: uv!,
       light: light!,
       clear: clear,
       colourTemperature: colourTemperature,
       green: green,
       red: red,
-      blue: blue ,
+      blue: blue,
     );
   }
 
@@ -173,10 +167,9 @@ class ArduinoDataEntity {
     AppDb db = AppDb.instance();
     List<ArduinoDataEntity> entityList = await (db.select(db.arduinoDatas)
           ..where((tbl) => tbl.childId.equals(childId))
-          ..where((tbl) => tbl.appClass.equals(1))
-          )
+          ..where((tbl) => tbl.appClass.equals(1)))
         .get();
-    return {DateTime.now() : entityList.length};
+    return {DateTime.now(): entityList.length};
   }
 
   // Function to get the oldest datetime from the database
@@ -216,44 +209,37 @@ class ArduinoDataEntity {
         .write(ArduinoDatasCompanion(serverClass: Value(serverClass)));
   }
 
-
   ////////////////////////////////////////////////////////////////////////////
   // GRAPHS //////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
 
-
-  static Future<List<ArduinoDataEntity>> queryArduinoDataByDateRange(
-      DateTime startDate,
-      DateTime endDate,
-      ) async {
+  static Future<List<ArduinoDataEntity>> queryArduinoDataForChildByDateRange(
+      DateTime startDate, DateTime endDate, int childId) async {
     final db = AppDb.instance();
     final query = db.select(db.arduinoDatas)
+      ..where((tbl) => tbl.childId.equals(childId))
       ..where((tbl) => tbl.datetime.isBetweenValues(startDate, endDate));
 
     return query.get();
   }
 
-
   static int countSamplesWithAppClass1(List<ArduinoDataEntity> dataList) {
     return dataList.where((data) => data.appClass == 1).length;
   }
 
-
   static Future<Map<DateTime, int>> countSamplesByDay(
-      DateTime startTime,
-      DateTime endTime,
-      ) async {
+      DateTime startTime, DateTime endTime, int childId) async {
     final Map<DateTime, int> result = {};
 
-
-    for (var day = startTime; day.isBefore(endTime); day = day.add(Duration(days: 1))) {
-
+    for (var day = startTime;
+        day.isBefore(endTime);
+        day = day.add(Duration(days: 1))) {
       final startOfDay = DateTime(day.year, day.month, day.day);
-      final endOfDay = startOfDay.add(Duration(days: 1)).subtract(Duration(seconds: 1));
+      final endOfDay =
+          startOfDay.add(Duration(days: 1)).subtract(Duration(seconds: 1));
 
-
-      final dataList = await queryArduinoDataByDateRange(startOfDay, endOfDay);
-
+      final dataList = await queryArduinoDataForChildByDateRange(
+          startOfDay, endOfDay, childId);
 
       result[startOfDay] = countSamplesWithAppClass1(dataList);
     }
@@ -262,20 +248,18 @@ class ArduinoDataEntity {
   }
 
   static Future<Map<DateTime, int>> countSamplesByHour(
-      DateTime startTime,
-      DateTime endTime,
-      ) async {
+      DateTime startTime, DateTime endTime, int childId) async {
     final Map<DateTime, int> result = {};
 
-
-    for (var hour = startTime; hour.isBefore(endTime); hour = hour.add(Duration(hours: 1))) {
-
+    for (var hour = startTime;
+        hour.isBefore(endTime);
+        hour = hour.add(Duration(hours: 1))) {
       final startOfHour = DateTime(hour.year, hour.month, hour.day, hour.hour);
-      final endOfHour = startOfHour.add(Duration(hours: 1)).subtract(Duration(seconds: 1));
+      final endOfHour =
+          startOfHour.add(Duration(hours: 1)).subtract(Duration(seconds: 1));
 
-
-      final dataList = await queryArduinoDataByDateRange(startOfHour, endOfHour);
-
+      final dataList = await queryArduinoDataForChildByDateRange(
+          startOfHour, endOfHour, childId);
 
       result[startOfHour] = countSamplesWithAppClass1(dataList);
     }
@@ -283,17 +267,9 @@ class ArduinoDataEntity {
     return result;
   }
 
-
-
-
-
-
-
 ///////////////////////////////////////////////////////////////////
 // FOR TESTING PURPOSE DELETE LATER //////////////////////////////
 //////////////////////////////////////////////////////////////////
-
-
 
   static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
       int childId) async {
@@ -320,9 +296,4 @@ class ArduinoDataEntity {
 
     return dataList;
   }
-
-
-
-
-
 }
