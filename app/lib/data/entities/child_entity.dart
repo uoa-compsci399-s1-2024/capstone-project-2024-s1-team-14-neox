@@ -191,6 +191,13 @@ class ChildEntity {
   //////////////////////////////////
 
   static Future<void> syncAllChildData() async {
-    ChildApiService.postData(1);
+
+    var children = await ChildEntity.queryAllChildren();
+    for(final child in children) {
+      int? id = child.id;
+      print(id);
+      ChildApiService.postData(1);
+    }
+
   }
 }
