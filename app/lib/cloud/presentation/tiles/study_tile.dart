@@ -45,6 +45,32 @@ class StudyTile extends StatelessWidget {
     );
   }
 
+  void _showWithdrawConfirmDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (innerContext) => AlertDialog(
+        title: const Padding(
+          padding: EdgeInsets.all(10),
+          child: Text('Withdraw from study?'),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(innerContext),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              onStudyDelete();
+              Navigator.pop(innerContext);
+              Navigator.pop(context);
+            },
+            child: const Text("Confirm"),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showBottomSheetDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -75,10 +101,7 @@ class StudyTile extends StatelessWidget {
                   const Divider(height: 50),
               
                   ElevatedButton(
-                    onPressed: () {
-                      onStudyDelete();
-                      Navigator.pop(context);
-                    },
+                    onPressed: () => _showWithdrawConfirmDialog(context),
                     child: const Text("Withdraw from study"),
                   ),
 
