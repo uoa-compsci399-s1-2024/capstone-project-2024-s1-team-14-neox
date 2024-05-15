@@ -306,6 +306,10 @@ Note that the ID of the researcher account is the email.
 
 Server will return HTTP status 400.
 
+#### If authorised BUT user already exists
+
+Server will return HTTP status 409.
+
 #### If not authorised
 
 Server will return 403.
