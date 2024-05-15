@@ -298,7 +298,7 @@ Server will return HTTP status 204.
 
 The server will create a researcher account and set a temporary
 password.  The researcher should reset this password within some
-number of days (TBD).
+number of days (Cognito default is 7).
 
 Note that the ID of the researcher account is the email.
 
