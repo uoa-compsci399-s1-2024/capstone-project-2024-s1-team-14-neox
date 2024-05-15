@@ -4,7 +4,6 @@ import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/tiles/study_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../cubit/cloud_sync_cubit.dart';
 
@@ -21,7 +20,7 @@ class SyncScreen extends StatelessWidget {
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Join a New Study'),
+                const Text('Join a new study'),
                 Text(
                   'Enter the study code.',
                   style: Theme.of(context).textTheme.bodySmall,
@@ -30,17 +29,17 @@ class SyncScreen extends StatelessWidget {
             ),
             content: TextField(
               controller: _textFieldController,
-              decoration: const InputDecoration(hintText: "Enter code"),
+              decoration: const InputDecoration(hintText: "Study code"),
             ),
             actions: [
-              OutlinedButton(
-                child: const Text('CANCEL'),
+              ElevatedButton(
+                child: const Text('Cancel'),
                 onPressed: () {
                   Navigator.pop(context);
                 },
               ),
               ElevatedButton(
-                child: const Text('JOIN'),
+                child: const Text('Join'),
                 onPressed: () {
                   onStudyFetch(_textFieldController.text.toLowerCase().trim());
                   _textFieldController.clear();
