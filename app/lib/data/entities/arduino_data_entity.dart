@@ -9,6 +9,7 @@ import '../../server/child_data.dart';
 import 'child_entity.dart';
 import 'dart:math';
 
+
 @UseRowClass(ArduinoDataEntity)
 class ArduinoDatas extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -193,40 +194,113 @@ class ArduinoDataEntity {
         .write(ArduinoDatasCompanion(serverClass: Value(serverClass)));
   }
 
+
+  ////////////////////////////////////////////////////////////////////////////
+  // GRAPHS //////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
+
+
+  static Future<List<ArduinoDataEntity>> queryArduinoDataByDateRange(
+      DateTime startDate,
+      DateTime endDate,
+      ) async {
+    final db = AppDb.instance();
+    final query = db.select(db.arduinoDatas)
+      ..where((tbl) => tbl.datetime.isBetweenValues(startDate, endDate));
+
+    return query.get();
+  }
+
+
+  static int countSamplesWithAppClass1(List<ArduinoDataEntity> dataList) {
+    return dataList.where((data) => data.appClass == 1).length;
+  }
+
+
+  static Future<Map<DateTime, int>> countSamplesByDay(
+      DateTime startTime,
+      DateTime endTime,
+      ) async {
+    final Map<DateTime, int> result = {};
+
+
+    for (var day = startTime; day.isBefore(endTime); day = day.add(Duration(days: 1))) {
+
+      final startOfDay = DateTime(day.year, day.month, day.day);
+      final endOfDay = startOfDay.add(Duration(days: 1)).subtract(Duration(seconds: 1));
+
+
+      final dataList = await queryArduinoDataByDateRange(startOfDay, endOfDay);
+
+
+      result[startOfDay] = countSamplesWithAppClass1(dataList);
+    }
+
+    return result;
+  }
+
+  static Future<Map<DateTime, int>> countSamplesByHour(
+      DateTime startTime,
+      DateTime endTime,
+      ) async {
+    final Map<DateTime, int> result = {};
+
+
+    for (var hour = startTime; hour.isBefore(endTime); hour = hour.add(Duration(hours: 1))) {
+
+      final startOfHour = DateTime(hour.year, hour.month, hour.day, hour.hour);
+      final endOfHour = startOfHour.add(Duration(hours: 1)).subtract(Duration(seconds: 1));
+
+
+      final dataList = await queryArduinoDataByDateRange(startOfHour, endOfHour);
+
+
+      result[startOfHour] = countSamplesWithAppClass1(dataList);
+    }
+
+    return result;
+  }
+
+
+
+
+
+
+
 ///////////////////////////////////////////////////////////////////
 // FOR TESTING PURPOSE DELETE LATER //////////////////////////////
 //////////////////////////////////////////////////////////////////
 
 
-static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
-    int childId) async {
-  final List<ArduinoDataEntity> dataList = [];
 
-  // Sample data for testing
-  for (int i = 0; i < 10; i++) {
+  static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
+      int childId) async {
+    final List<ArduinoDataEntity> dataList = [];
 
+    // Sample data for testing
+    DateTime dateTime = DateTime.now().subtract(Duration(days: 2));
+    Random random = Random();
+    for (int i = 0; i < 300; i++) {
+      // Increment datetime by 1 minute
+      dateTime = dateTime.add(Duration(minutes: 1));
 
+      final data = ArduinoDataEntity(
+        uv: 5,
+        light: 100,
+        datetime: dateTime,
+        accel: Int16List.fromList([1, 2, 3]),
+        serverClass: 1,
+        appClass: random.nextInt(2), // Generates either 0 or 1 randomly
+        childId: childId,
+      );
+      dataList.add(data);
+    }
 
-    Random gen = Random();
-    int range = 5 * 365; // 5 years in days
-
-    DateTime today = DateTime.now();
-    DateTime randomDate = today.subtract(Duration(days: gen.nextInt(range)));
-
-    final data = ArduinoDataEntity(
-      uv: 5,
-      light: 100,
-      datetime: randomDate,
-
-      accel: Int16List.fromList([1, 2, 3]),
-      serverClass: 1,
-      appClass: 2,
-      childId: childId,
-    );
-    dataList.add(data);
+    return dataList;
   }
 
-  return dataList;
 
-}
+
+
+
 }

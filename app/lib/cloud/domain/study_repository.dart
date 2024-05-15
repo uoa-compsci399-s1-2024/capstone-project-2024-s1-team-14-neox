@@ -1,6 +1,6 @@
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/domain/participating_child_model.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/domain/study_model.dart';
-import 'package:capstone_project_2024_s1_team_14_neox/data/entities/chiildStudy_entity.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/data/entities/childStudy_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/study_entity.dart';
 

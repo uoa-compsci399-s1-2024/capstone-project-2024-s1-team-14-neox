@@ -17,7 +17,6 @@ class Study extends Table {
   DateTimeColumn get endDate => dateTime()();
 }
 
-
 class StudyEntity {
   int? id;
   String name;
@@ -26,19 +25,22 @@ class StudyEntity {
   DateTime endDate;
   String studyCode;
 
-  StudyEntity({this.id, required this.name, required this.description, required this.startDate,
-  required this.endDate, required this.studyCode});
+  StudyEntity(
+      {this.id,
+      required this.name,
+      required this.description,
+      required this.startDate,
+      required this.endDate,
+      required this.studyCode});
 
-   StudyCompanion toCompanion() {
+  StudyCompanion toCompanion() {
     return StudyCompanion(
-      name: Value(name),
-      description: Value(description),
-      startDate: Value(startDate),
-      endDate: Value(endDate),
-      studyCode: Value(studyCode)
-    );
-   }
-
+        name: Value(name),
+        description: Value(description),
+        startDate: Value(startDate),
+        endDate: Value(endDate),
+        studyCode: Value(studyCode));
+  }
 
 // QUERIES
 
@@ -59,7 +61,7 @@ class StudyEntity {
   static Future<StudyEntity?> queryStudyByCode(String studyCode) async {
     AppDb db = AppDb.instance();
     StudyEntity? child = await (db.select(db.study)
-      ..where((tbl) => tbl.studyCode.equals(studyCode)))
+          ..where((tbl) => tbl.studyCode.equals(studyCode)))
         .getSingleOrNull();
 
     return child;
@@ -77,7 +79,7 @@ class StudyEntity {
 
   static Future<void> deleteStudy(String studyCode) async {
     AppDb db = AppDb.instance();
-    await (db.delete(db.study)..where((tbl) => tbl.studyCode.equals(studyCode))).go();
+    await (db.delete(db.study)..where((tbl) => tbl.studyCode.equals(studyCode)))
+        .go();
   }
-
 }
