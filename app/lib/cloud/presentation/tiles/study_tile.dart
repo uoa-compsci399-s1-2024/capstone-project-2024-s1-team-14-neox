@@ -1,19 +1,18 @@
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/cubit/participants_cubit.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/domain/study_model.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/domain/study_repository.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/tiles/study_info_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 class StudyTile extends StatelessWidget {
   final StudyModel study;
   final VoidCallback onStudyDelete;
 
   // TODO pass function to add and delete children, like how you will do for scan in bluetooth bloc
-  const StudyTile(
-      {super.key, required this.study, required this.onStudyDelete});
+  const StudyTile({super.key, required this.study, required this.onStudyDelete});
 
-  Widget buildParticipationList(BuildContext context, ParticipantsState state) {
+  Widget _buildParticipationList(BuildContext context, ParticipantsState state) {
     return Column(
       children: [
         const Text(
@@ -46,29 +45,6 @@ class StudyTile extends StatelessWidget {
     );
   }
 
-  Widget _buildStudyContent(BuildContext context, { required bool flexible }) {
-    Widget description = Text(
-      study.description,
-      overflow: TextOverflow.fade,
-      style: const TextStyle(fontSize: 16),
-      textAlign: TextAlign.center,
-    );
-    return Column(
-      children: [
-        Text(
-          study.name,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        Text(
-          "Running period ${DateFormat("d MMMM yyyy").format(study.startDate)} ~ ${DateFormat("d MMMM yyyy").format(study.endDate)}",
-          style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-        ),
-        const SizedBox(height: 10),
-        flexible ? Flexible(child: description) : description,
-      ],
-    );
-  }
-
   void _showBottomSheetDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -80,7 +56,7 @@ class StudyTile extends StatelessWidget {
               padding: const EdgeInsets.all(40),
               child: Column(
                 children: [
-                  _buildStudyContent(context, flexible: false),
+                  StudyInfoTile(study),
               
                   const Divider(height: 50),
                   
@@ -91,7 +67,7 @@ class StudyTile extends StatelessWidget {
                         if (state.status.isLoading) {
                           return const CircularProgressIndicator();
                         }
-                        return buildParticipationList(context, state);
+                        return _buildParticipationList(context, state);
                       },
                     ),
                   ),
@@ -131,7 +107,7 @@ class StudyTile extends StatelessWidget {
           child: SizedBox(
             height: 200,
             width: 300,
-            child: _buildStudyContent(context, flexible: true),
+            child: StudyInfoTile(study, flexible: true),
           ),
         ),
       ),
