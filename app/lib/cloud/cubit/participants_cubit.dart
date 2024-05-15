@@ -44,14 +44,14 @@ class ParticipantsCubit extends Cubit<ParticipantsState> {
             status: ParticipantsStatus.failure, message: e.toString()),
       );
     }
+
     notParticipating.addAll(allChildren.where(
         (c1) => participating.every((c2) => c1.childId != c2.childId)));
-    print(allChildren);
-    print(participating);
-    print(notParticipating);
+
     emit(
       state.copyWith(
         status: ParticipantsStatus.success,
+        allChildren: allChildren,
         participating: participating,
         notParticipating: notParticipating,
       ),

@@ -1,10 +1,7 @@
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/cubit/participants_cubit.dart';
-import 'package:capstone_project_2024_s1_team_14_neox/cloud/domain/participating_child_model.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/domain/study_model.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/domain/study_repository.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
@@ -16,51 +13,106 @@ class StudyTile extends StatelessWidget {
   const StudyTile(
       {super.key, required this.study, required this.onStudyDelete});
 
-  Widget buildParticipating(
-      BuildContext context, List<ParticipatingChildModel> participating) {
+  Widget buildParticipationList(BuildContext context, ParticipantsState state) {
     return Column(
       children: [
-        Text("Current participants"),
-        ...participating.map((child) => Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  child.childName,
-                  style: TextStyle(fontSize: 24),
-                ),
-                IconButton(
-                    iconSize: 32,
-                    onPressed: () => context
-                        .read<ParticipantsCubit>()
-                        .deleteChildFromStudy(child.childId, study.studyCode),
-                    icon: const Icon(Icons.delete_outline))
-              ],
-            ))
+        const Text(
+          "Participants",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        ...state.allChildren.map((child) => Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              child.childName,
+              style: const TextStyle(fontSize: 18),
+            ),
+            state.participating.any((other) => other.childId == child.childId)
+              ? IconButton(
+                iconSize: 32,
+                onPressed: () => context
+                  .read<ParticipantsCubit>()
+                  .deleteChildFromStudy(child.childId, study.studyCode),
+                icon: const Icon(Icons.remove))
+              : IconButton(
+                iconSize: 32,
+                onPressed: () => context
+                  .read<ParticipantsCubit>()
+                  .addChildToStudy(child.childId, study.studyCode),
+                icon: const Icon(Icons.add)),
+          ],
+        ))
       ],
     );
   }
 
-  Widget buildNotParticipating(
-      BuildContext context, List<ParticipatingChildModel> notParticipating) {
+  Widget _buildStudyContent(BuildContext context, { required bool flexible }) {
+    Widget description = Text(
+      study.description,
+      overflow: TextOverflow.fade,
+      style: const TextStyle(fontSize: 16),
+      textAlign: TextAlign.center,
+    );
     return Column(
       children: [
-        Text("Add a participant"),
-        ...notParticipating.map((child) => Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  child.childName,
-                  style: TextStyle(fontSize: 24),
-                ),
-                IconButton(
-                    iconSize: 32,
-                    onPressed: () => context
-                        .read<ParticipantsCubit>()
-                        .addChildToStudy(child.childId, study.studyCode),
-                    icon: const Icon(Icons.add))
-              ],
-            ))
+        Text(
+          study.name,
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        Text(
+          "Running period ${DateFormat("d MMMM yyyy").format(study.startDate)} ~ ${DateFormat("d MMMM yyyy").format(study.endDate)}",
+          style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+        ),
+        const SizedBox(height: 10),
+        flexible ? Flexible(child: description) : description,
       ],
+    );
+  }
+
+  void _showBottomSheetDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) {
+        return Wrap(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(40),
+              child: Column(
+                children: [
+                  _buildStudyContent(context, flexible: false),
+              
+                  const Divider(height: 50),
+                  
+                  BlocProvider(
+                    create: (_) => ParticipantsCubit(context.read<StudyRepository>())..getParticipatingStatus(study.studyCode),
+                    child: BlocBuilder<ParticipantsCubit, ParticipantsState>(
+                      builder: (context, state) {
+                        if (state.status.isLoading) {
+                          return const CircularProgressIndicator();
+                        }
+                        return buildParticipationList(context, state);
+                      },
+                    ),
+                  ),
+                  
+                  const Divider(height: 50),
+              
+                  ElevatedButton(
+                    onPressed: () {
+                      onStudyDelete();
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Withdraw from study"),
+                  ),
+
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -73,87 +125,13 @@ class StudyTile extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(40),
-        onTap: () => showModalBottomSheet(
-          context: context,
-          builder: (_) {
-            return SizedBox(
-              height: 800,
-              child: Column(
-                children: [
-                  Text(
-                    study.name,
-                    style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-                  ),
-                  Flexible(
-                    child: Text(
-                      study.description,
-                      overflow: TextOverflow.fade,
-                      style: const TextStyle(fontSize: 16.0),
-                    ),
-                  ),
-                  Text("${DateFormat("dd MMMM yyyy").format(study.startDate)}~${DateFormat("dd MMMM yyyy").format(study.endDate)}",
-                    style: const TextStyle(fontSize: 16.0),
-                  ),
-                  BlocProvider(
-                    create: (_) => ParticipantsCubit(context.read<StudyRepository>())..getParticipatingStatus(study.studyCode),
-                    child: BlocBuilder<ParticipantsCubit, ParticipantsState>(
-                      builder: (context, state) {
-                        if (state.status.isLoading) {
-                          return const CircularProgressIndicator();
-                        }
-                        return Column(
-                          children: [
-                            if (state.participating.isNotEmpty)
-                              buildParticipating(context, state.participating),
-                            if (state.notParticipating.isNotEmpty)
-                              buildNotParticipating(context, state.notParticipating),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        onStudyDelete();
-                        Navigator.pop(context);
-                      },
-                      child: Text("Withdraw"))
-                ],
-              ),
-            );
-          },
-        ),
-
+        onTap: () => _showBottomSheetDialog(context),
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: SizedBox(
             height: 200,
             width: 300,
-            child: Column(
-              children: [
-                Text(
-                  study.name,
-                  style: const TextStyle(
-                      fontSize: 24.0, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  "${DateFormat("dd MMMM yyyy").format(study.startDate)} ~ ${DateFormat("dd MMMM yyyy").format(study.endDate)}",
-                  style: const TextStyle(
-                    fontSize: 16.0,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Flexible(
-                  child: Text(
-                    study.description,
-                    overflow: TextOverflow.fade,
-                    style: const TextStyle(fontSize: 16.0),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
+            child: _buildStudyContent(context, flexible: true),
           ),
         ),
       ),

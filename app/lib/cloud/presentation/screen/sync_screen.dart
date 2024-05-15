@@ -82,47 +82,53 @@ class SyncScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(40, 40, 40, 0),
             child: Column(
               children: [
-                Row(
-                  children: [
-                    const Text(
-                      "Sync your data to the cloud",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(40),
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(30),
+                    child: Row(
+                      children: [
+                        const Text(
+                          "Sync your data to the cloud",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
 
-                    const Spacer(),
-                
-                    // BlocBuilder<CloudSyncCubit, CloudSyncState>(
-                    //   builder: (context, state) {
-                    //     if (state.lastSynced == null) {
-                    //       return const Text("Last synced: never");
-                    //     }
-                    //     return Text("Last synced: ${DateFormat('yyyy-MM-dd - kk:mm:ss').format(state.lastSynced!)}");
-                    //   },
-                    // ),
+                        const Spacer(),
                     
-                    // const Spacer(),
-                    
-                    ElevatedButton(
-                      onPressed: () => context.read<CloudSyncCubit>().syncAllChildData(),
-                      child: BlocBuilder<CloudSyncCubit, CloudSyncState>(
-                        builder: (context, state) {
-                          if (state.status.isLoading) {
-                            return const CircularProgressIndicator();
-                          }
-                          return const Icon(Icons.cloud_upload, color: Colors.black);
-                        },
-                      ),
+                        // BlocBuilder<CloudSyncCubit, CloudSyncState>(
+                        //   builder: (context, state) {
+                        //     if (state.lastSynced == null) {
+                        //       return const Text("Last synced: never");
+                        //     }
+                        //     return Text("Last synced: ${DateFormat('yyyy-MM-dd - kk:mm:ss').format(state.lastSynced!)}");
+                        //   },
+                        // ),
+                        
+                        // const Spacer(),
+                        
+                        ElevatedButton(
+                          onPressed: () => context.read<CloudSyncCubit>().syncAllChildData(),
+                          child: BlocBuilder<CloudSyncCubit, CloudSyncState>(
+                            builder: (context, state) {
+                              if (state.status.isLoading) {
+                                return const CircularProgressIndicator();
+                              }
+                              return const Icon(Icons.cloud_upload, color: Colors.black);
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
 
-                const Divider(
-                  thickness: 1,
-                  height: 80,
-                ),
+                const Divider(height: 80),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -185,7 +191,7 @@ class SyncScreen extends StatelessWidget {
                 BlocBuilder<StudyCubit, StudyState>(
                   builder: (context, state) {
                     if (state.studies.isEmpty) {
-                      return const Text("You are not participating in any studies");
+                      return Container();
                     }
                     return Expanded(
                       child: ListView(
@@ -193,7 +199,7 @@ class SyncScreen extends StatelessWidget {
                         children: [
                           ...state.studies.map(
                             (s) => Padding(
-                              padding: const EdgeInsets.all(20),
+                              padding: const EdgeInsets.symmetric(vertical: 20),
                               child: StudyTile(
                                 study: s,
                                 onStudyDelete: () => context.read<StudyCubit>().withdrawStudy(s.studyCode),
