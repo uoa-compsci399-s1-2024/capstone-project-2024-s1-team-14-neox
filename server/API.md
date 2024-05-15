@@ -192,14 +192,11 @@ since age is a relevant predictor for progression of myopia.
 - `email` (required)
 - `phone_number` ???
 
-## Authentication (SUBJECT TO CHANGE)
+## Authentication
 
-Use HTTP authentication: use the `Authorization` header.
-
-For OAuth, we use `Authorization: Bearer <TOKEN>`
-(<https://stackoverflow.com/questions/17334276/oauth2-0-how-to-pass-access-token>).
-
-Otherwise, use HTTP cookies.
+First authenticate with Cognito using the Cognito API.  Then add the
+token to the `Authorization` header as `Authorization: Bearer <TOKEN>`
+in every API action.
 
 ## Note on status codes
 
