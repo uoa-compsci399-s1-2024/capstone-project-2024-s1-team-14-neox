@@ -719,15 +719,368 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
   }
 }
 
+class $StudyTable extends Study with TableInfo<$StudyTable, StudyEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StudyTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _studyCodeMeta =
+      const VerificationMeta('studyCode');
+  @override
+  late final GeneratedColumn<String> studyCode = GeneratedColumn<String>(
+      'study_code', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _startDateMeta =
+      const VerificationMeta('startDate');
+  @override
+  late final GeneratedColumn<DateTime> startDate = GeneratedColumn<DateTime>(
+      'start_date', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _endDateMeta =
+      const VerificationMeta('endDate');
+  @override
+  late final GeneratedColumn<DateTime> endDate = GeneratedColumn<DateTime>(
+      'end_date', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, studyCode, name, description, startDate, endDate];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'study';
+  @override
+  VerificationContext validateIntegrity(Insertable<StudyEntity> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('study_code')) {
+      context.handle(_studyCodeMeta,
+          studyCode.isAcceptableOrUnknown(data['study_code']!, _studyCodeMeta));
+    } else if (isInserting) {
+      context.missing(_studyCodeMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(_startDateMeta,
+          startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta));
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('end_date')) {
+      context.handle(_endDateMeta,
+          endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta));
+    } else if (isInserting) {
+      context.missing(_endDateMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StudyEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StudyEntity(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      startDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}start_date'])!,
+      endDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}end_date'])!,
+      studyCode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}study_code'])!,
+    );
+  }
+
+  @override
+  $StudyTable createAlias(String alias) {
+    return $StudyTable(attachedDatabase, alias);
+  }
+}
+
+class StudyCompanion extends UpdateCompanion<StudyEntity> {
+  final Value<int> id;
+  final Value<String> studyCode;
+  final Value<String> name;
+  final Value<String> description;
+  final Value<DateTime> startDate;
+  final Value<DateTime> endDate;
+  const StudyCompanion({
+    this.id = const Value.absent(),
+    this.studyCode = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.endDate = const Value.absent(),
+  });
+  StudyCompanion.insert({
+    this.id = const Value.absent(),
+    required String studyCode,
+    required String name,
+    required String description,
+    required DateTime startDate,
+    required DateTime endDate,
+  })  : studyCode = Value(studyCode),
+        name = Value(name),
+        description = Value(description),
+        startDate = Value(startDate),
+        endDate = Value(endDate);
+  static Insertable<StudyEntity> custom({
+    Expression<int>? id,
+    Expression<String>? studyCode,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<DateTime>? startDate,
+    Expression<DateTime>? endDate,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (studyCode != null) 'study_code': studyCode,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (startDate != null) 'start_date': startDate,
+      if (endDate != null) 'end_date': endDate,
+    });
+  }
+
+  StudyCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? studyCode,
+      Value<String>? name,
+      Value<String>? description,
+      Value<DateTime>? startDate,
+      Value<DateTime>? endDate}) {
+    return StudyCompanion(
+      id: id ?? this.id,
+      studyCode: studyCode ?? this.studyCode,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (studyCode.present) {
+      map['study_code'] = Variable<String>(studyCode.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<DateTime>(startDate.value);
+    }
+    if (endDate.present) {
+      map['end_date'] = Variable<DateTime>(endDate.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StudyCompanion(')
+          ..write('id: $id, ')
+          ..write('studyCode: $studyCode, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChildStudyTable extends ChildStudy
+    with TableInfo<$ChildStudyTable, ChildStudyAssociationsEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChildStudyTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _childIdMeta =
+      const VerificationMeta('childId');
+  @override
+  late final GeneratedColumn<int> childId = GeneratedColumn<int>(
+      'child_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _studyCodeMeta =
+      const VerificationMeta('studyCode');
+  @override
+  late final GeneratedColumn<String> studyCode = GeneratedColumn<String>(
+      'study_code', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [childId, studyCode];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'child_study';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ChildStudyAssociationsEntity> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('child_id')) {
+      context.handle(_childIdMeta,
+          childId.isAcceptableOrUnknown(data['child_id']!, _childIdMeta));
+    } else if (isInserting) {
+      context.missing(_childIdMeta);
+    }
+    if (data.containsKey('study_code')) {
+      context.handle(_studyCodeMeta,
+          studyCode.isAcceptableOrUnknown(data['study_code']!, _studyCodeMeta));
+    } else if (isInserting) {
+      context.missing(_studyCodeMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {childId, studyCode};
+  @override
+  ChildStudyAssociationsEntity map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChildStudyAssociationsEntity(
+      childId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}child_id'])!,
+      studyCode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}study_code'])!,
+    );
+  }
+
+  @override
+  $ChildStudyTable createAlias(String alias) {
+    return $ChildStudyTable(attachedDatabase, alias);
+  }
+}
+
+class ChildStudyCompanion
+    extends UpdateCompanion<ChildStudyAssociationsEntity> {
+  final Value<int> childId;
+  final Value<String> studyCode;
+  final Value<int> rowid;
+  const ChildStudyCompanion({
+    this.childId = const Value.absent(),
+    this.studyCode = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ChildStudyCompanion.insert({
+    required int childId,
+    required String studyCode,
+    this.rowid = const Value.absent(),
+  })  : childId = Value(childId),
+        studyCode = Value(studyCode);
+  static Insertable<ChildStudyAssociationsEntity> custom({
+    Expression<int>? childId,
+    Expression<String>? studyCode,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (childId != null) 'child_id': childId,
+      if (studyCode != null) 'study_code': studyCode,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ChildStudyCompanion copyWith(
+      {Value<int>? childId, Value<String>? studyCode, Value<int>? rowid}) {
+    return ChildStudyCompanion(
+      childId: childId ?? this.childId,
+      studyCode: studyCode ?? this.studyCode,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (childId.present) {
+      map['child_id'] = Variable<int>(childId.value);
+    }
+    if (studyCode.present) {
+      map['study_code'] = Variable<String>(studyCode.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChildStudyCompanion(')
+          ..write('childId: $childId, ')
+          ..write('studyCode: $studyCode, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDb extends GeneratedDatabase {
   _$AppDb(QueryExecutor e) : super(e);
   late final $ChildrenTable children = $ChildrenTable(this);
   late final $ArduinoDatasTable arduinoDatas = $ArduinoDatasTable(this);
+  late final $StudyTable study = $StudyTable(this);
+  late final $ChildStudyTable childStudy = $ChildStudyTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [children, arduinoDatas];
+  List<DatabaseSchemaEntity> get allSchemaEntities =>
+      [children, arduinoDatas, study, childStudy];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [

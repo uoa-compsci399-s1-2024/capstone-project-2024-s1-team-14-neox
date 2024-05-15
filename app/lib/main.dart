@@ -130,12 +130,12 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> body = [
     const ChildHomeScreen(),
     const DashboardHome(),
-    const CloudHomeScreen(),
+    CloudHomeScreen(),
     const DatabaseViewer(),
     const RegisterScreen(),
     const LoginScreen(),
     const ConfirmationPage(email: ''),
-    const SyncScreen(),
+    SyncScreen(),
 
 
   ];
