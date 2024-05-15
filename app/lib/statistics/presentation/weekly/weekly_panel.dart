@@ -1,8 +1,8 @@
-import 'package:capstone_project_2024_s1_team_14_neox/dashboard/cubit/weekly_cubit.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/cubit/weekly_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubit/dashboard_cubit.dart';
+import '../../cubit/statistics_cubit.dart';
 import 'weekly_bar_graph/weekly_bar_graph.dart';
 
 class WeeklyPanel extends StatefulWidget {
@@ -25,17 +25,17 @@ class _WeeklyPanelState extends State<WeeklyPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<DashboardCubit, DashboardState>(
+    return BlocListener<StatisticsCubit, StatisticsState>(
       listener: (context, state) {
         context.read<WeeklyCubit>().onGetDataForChildId(
-              context.read<DashboardCubit>().state.focusChildId,
+              context.read<StatisticsCubit>().state.focusChildId,
             );
       },
       child: Column(
         children: [
           ElevatedButton(
             onPressed: () => context.read<WeeklyCubit>().onGetDataForChildId(
-                  context.read<DashboardCubit>().state.focusChildId,
+                  context.read<StatisticsCubit>().state.focusChildId,
                 ),
             child: Text("Refresh"),
           ),
