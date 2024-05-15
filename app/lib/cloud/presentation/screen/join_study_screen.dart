@@ -22,6 +22,7 @@ class _JoinStudyScreenState extends State<JoinStudyScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Join study"),
+        scrolledUnderElevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(40, 40, 40, 0),
