@@ -196,7 +196,7 @@ class ChildEntity {
     for(final child in children) {
       int? id = child.id;
       print(id);
-      ChildApiService.postData(1);
+      ChildApiService.postData(id!);
     }
 
   }
