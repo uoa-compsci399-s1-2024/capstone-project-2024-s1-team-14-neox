@@ -103,7 +103,6 @@ class ChildEntity {
   static Future<List<ChildEntity>> queryAllChildren() async {
     AppDb db = AppDb.instance();
     List<ChildEntity> childEntityList = await db.select(db.children).get();
-    ChildApiService.fetchChildrenData();
     return childEntityList;
   }
 
@@ -130,27 +129,6 @@ class ChildEntity {
   }
 
 
-// Function to get the oldest datetime from the database
-  static Future<DateTime?> getOldestDateTime() async {
-    final db = AppDb.instance();
-    final query = await (db.select(db.arduinoDatas)
-      ..orderBy([(tbl) => OrderingTerm(expression: tbl.datetime, mode: OrderingMode.asc)])
-      ..limit(1));
-
-    final result = await query.getSingleOrNull();
-    return result?.datetime;
-  }
-
-// Function to get the newest datetime from the database
-  static Future<DateTime?> getNewestDateTime() async {
-    final db = AppDb.instance();
-    final query = await (db.select(db.arduinoDatas)
-      ..orderBy([(tbl) => OrderingTerm(expression: tbl.datetime, mode: OrderingMode.desc)])
-      ..limit(1));
-
-    final result = await query.getSingleOrNull();
-    return result?.datetime;
-  }
 
 
 
