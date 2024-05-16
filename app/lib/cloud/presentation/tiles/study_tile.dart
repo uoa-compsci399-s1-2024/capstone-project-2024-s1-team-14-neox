@@ -19,6 +19,12 @@ class StudyTile extends StatelessWidget {
           "Participants",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
+
+        if (state.allChildren.isEmpty) ...const [
+          Text("No profiles no show."),
+          Text("Add profiles to participate in the study from the home tab."),
+        ],
+
         ...state.allChildren.map((child) => Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

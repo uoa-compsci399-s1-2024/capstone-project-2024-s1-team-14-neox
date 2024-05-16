@@ -46,6 +46,17 @@ class _JoinStudyScreenState extends State<JoinStudyScreen> {
                         if (state.status.isLoading) {
                           return const CircularProgressIndicator();
                         }
+                        
+                        if (state.allChildren.isEmpty) {
+                          return const Column(
+                            children: [
+                              Text("No profiles no show."),
+                              Text("Add profiles to participate in the study from the home tab."),
+                              SizedBox(height: 30),
+                            ],
+                          );
+                        }
+
                         return Column(
                           children: state.notParticipating.map((child) {
                             if (!participatingChildId.containsKey(child.childId)) {

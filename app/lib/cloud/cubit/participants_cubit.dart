@@ -24,6 +24,7 @@ class ParticipantsCubit extends Cubit<ParticipantsState> {
     emit(
       ParticipantsState(
         status: ParticipantsStatus.success,
+        allChildren: allChildren,
         notParticipating: allChildren,
       ),
     );
