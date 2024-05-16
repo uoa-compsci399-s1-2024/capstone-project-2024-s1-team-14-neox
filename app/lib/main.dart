@@ -11,7 +11,7 @@ import 'package:capstone_project_2024_s1_team_14_neox/settings/presentation/sett
 import 'package:capstone_project_2024_s1_team_14_neox/theme/theme_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
-import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/dashboard_home.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/statistics_home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -149,7 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // Screens to navigate to
   List<Widget> body = [
     const ChildHomeScreen(),
-    const DashboardHome(),
+    const StatisticsHome(),
     const CloudHomeScreen(),
     SettingsScreen(),
     const DatabaseViewer(),
@@ -182,8 +182,8 @@ class _MyHomePageState extends State<MyHomePage> {
               label: "Home",
             ),
             NavigationDestination(
-              icon: Icon(Icons.dashboard),
-              label: "Dashboard",
+              icon: Icon(Icons.bar_chart),
+              label: "Statistics",
             ),
             NavigationDestination(
               icon: Icon(Icons.cloud),
