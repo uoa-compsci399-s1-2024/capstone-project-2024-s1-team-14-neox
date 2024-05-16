@@ -128,6 +128,11 @@ class ChildEntity {
     return data;
   }
 
+
+
+
+
+
   ////////////////////////////////////////////////////////////////////////////
   // UPDATE //////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
@@ -191,6 +196,12 @@ class ChildEntity {
   //////////////////////////////////
 
   static Future<void> syncAllChildData() async {
-    ChildApiService.postData(3);
+
+    var children = await ChildEntity.queryAllChildren();
+    for(final child in children) {
+      int? id = child.id;
+      ChildApiService.postData(id!);
+    }
+
   }
 }

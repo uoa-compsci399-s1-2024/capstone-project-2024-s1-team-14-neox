@@ -105,9 +105,9 @@ class ArduinoDataEntity {
   ChildData toChildData(String serverId) {
 
     return ChildData(
-      accel_x: accel![0],
-      accel_y: accel![1],
-      accel_z: accel![2],
+      accel_x: (accel != null && accel!.length > 0) ? accel![0] : -1,
+      accel_y: (accel != null && accel!.length > 1) ? accel![1] : -1,
+      accel_z: (accel != null && accel!.length > 2) ? accel![2] : -1,
       timestamp: datetime.toIso8601String(),
       childId:  serverId,
       uv: uv!,
@@ -177,6 +177,28 @@ class ArduinoDataEntity {
           )
         .get();
     return {DateTime.now() : entityList.length};
+  }
+
+  // Function to get the oldest datetime from the database
+  static Future<DateTime?> getOldestDateTime() async {
+    final db = AppDb.instance();
+    final query = await (db.select(db.arduinoDatas)
+      ..orderBy([(tbl) => OrderingTerm(expression: tbl.datetime, mode: OrderingMode.asc)])
+      ..limit(1));
+
+    final result = await query.getSingleOrNull();
+    return result?.datetime;
+  }
+
+// Function to get the newest datetime from the database
+  static Future<DateTime?> getNewestDateTime() async {
+    final db = AppDb.instance();
+    final query = await (db.select(db.arduinoDatas)
+      ..orderBy([(tbl) => OrderingTerm(expression: tbl.datetime, mode: OrderingMode.desc)])
+      ..limit(1));
+
+    final result = await query.getSingleOrNull();
+    return result?.datetime;
   }
   ////////////////////////////////////////////////////////////////////////////
   // UPDATE //////////////////////////////////////////////////////////////////
