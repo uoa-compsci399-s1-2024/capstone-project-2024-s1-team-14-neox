@@ -1,4 +1,5 @@
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_model.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/statistics_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -11,14 +12,14 @@ import 'daily/daily_panel.dart';
 import 'monthly/monthly_panel.dart';
 import 'weekly/weekly_panel.dart';
 
-class DashboardHome extends StatefulWidget {
-  const DashboardHome({super.key});
+class StatisticsHome extends StatefulWidget {
+  const StatisticsHome({super.key});
 
   @override
-  State<DashboardHome> createState() => DashboardHomeState();
+  State<StatisticsHome> createState() => StatisticsHomeState();
 }
 
-class DashboardHomeState extends State<DashboardHome>
+class StatisticsHomeState extends State<StatisticsHome>
     with TickerProviderStateMixin {
   //with TickerProviderStateMixin needed for animation
   ChildDeviceModel? _selectedChildProfile;
@@ -33,7 +34,7 @@ class DashboardHomeState extends State<DashboardHome>
   }
 
 //https://github.com/felangel/bloc/issues/1131
-//  Could not find the correct Provider<StatisticsCubit> above this Dashboard Widget
+//  Could not find the correct Provider<StatisticsCubit> above this Statistics Widget
 // Caused by accessing the bloc from the same BuildContext used to provide it
   @override
   Widget build(BuildContext context) {
@@ -89,19 +90,22 @@ class DashboardHomeState extends State<DashboardHome>
             controller: _tabController,
           ),
         ),
-        body: MultiBlocProvider(
-          providers: [
-            BlocProvider(create: (_) => DailyCubit()),
-            BlocProvider(create: (_) => WeeklyCubit()),
-            BlocProvider(create: (_) => MonthlyCubit()),
-          ],
-          child: TabBarView(
-            controller: _tabController,
-            children: const [
-              DailyPanel(),
-              WeeklyPanel(),
-              MonthlyPanel(),
+        body: RepositoryProvider(
+          create: (context) => StatisticsRepository(),
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (_) => DailyCubit(context.read<StatisticsRepository>())),
+              BlocProvider(create: (_) => WeeklyCubit(context.read<StatisticsRepository>())),
+              BlocProvider(create: (_) => MonthlyCubit(context.read<StatisticsRepository>())),
             ],
+            child: TabBarView(
+              controller: _tabController,
+              children: const [
+                DailyPanel(),
+                WeeklyPanel(),
+                MonthlyPanel(),
+              ],
+            ),
           ),
         ),
       ),

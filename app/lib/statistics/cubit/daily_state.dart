@@ -16,23 +16,23 @@ extension DailyStatusX on DailyStatus {
 
 class DailyState extends Equatable {
   final DailyStatus status;
-  final Map<DateTime, int>? summary;
+  final List<SingleWeekHourlyStatsModel> dailyStats;
 
   const DailyState({
     this.status = DailyStatus.initial,
-    this.summary,
+    this.dailyStats = const [],
   });
 
   DailyState copyWith({
     DailyStatus? status,
-    Map<DateTime, int>? summary,
+    List<SingleWeekHourlyStatsModel>? dailyStats,
   }) {
     return DailyState(
       status: status ?? this.status,
-      summary: summary ?? this.summary,
+      dailyStats: dailyStats ?? this.dailyStats,
     );
   }
 
   @override
-  List<Object?> get props => [status, summary];
+  List<Object?> get props => [status, dailyStats];
 }

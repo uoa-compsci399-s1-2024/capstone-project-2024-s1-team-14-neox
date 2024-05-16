@@ -6,7 +6,8 @@ import '../domain/statistics_repository.dart';
 part 'weekly_state.dart';
 
 class WeeklyCubit extends Cubit<WeeklyState> {
-  WeeklyCubit()
+  StatisticsRepository _statisticsRepository;
+  WeeklyCubit(this._statisticsRepository)
       : super(WeeklyState());
 
   Future<void> onGetDataForChildId(int childId) async {
