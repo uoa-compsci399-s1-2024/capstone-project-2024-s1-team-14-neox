@@ -51,8 +51,10 @@ To initialise the database:
 sam remote invoke --config-env <USECASE>-<ENVIRONMENT> FuncMetaSetupDB
 ```
 
-You can also use `FuncMetaSetupDB` to clear the DB.
-
+You can also use `FuncMetaSetupDB` to clear the DB.  But to clear only
+the samples, use `FuncMetaClearSamples` which is helpful if there are
+users already set up since resetting all the whole DB would desync the
+DB and Cognito.
 
 Now initialise the user pool:
 

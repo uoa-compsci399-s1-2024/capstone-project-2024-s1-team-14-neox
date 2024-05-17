@@ -772,6 +772,12 @@ Resources:
       CodeUri: lambda/functions/meta-setupdb/
       Handler: index.handler
       Role: !GetAtt LambdaRole.Arn
+  FuncMetaClearSamples:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/meta-clearsamples/
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
   FuncMetaReadAllTables:
     Type: AWS::Serverless::Function
     Properties:
