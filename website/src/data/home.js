@@ -41,4 +41,21 @@ const Home = ({ isAdmin, showButton }) => {
     );
 };
 
-export default Home;
+export default class Home extends Component {
+    render() {
+        return (
+            <div className="home-body">
+                <div id="home-titles">
+                    <h1>Welcome Phil! </h1>
+                    <Button isFullWidth={false} variation="primary" size="Large" onClick={() => alert("something")}> Create Study</Button>
+                </div>
+                <div id="studies-title">
+                    <h3>Studies</h3>
+                </div>
+                <StudyCard/>
+                <StudyCard/>
+                <StudyCard/>                   
+            </div>
+        )
+    }
+}

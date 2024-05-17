@@ -143,3 +143,42 @@ button {
 .amplify-tabs {
   display: none !important;
 }
+
+.home-body {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-left: 50%;
+  transform: translate(-50%);
+}
+
+#home-titles {
+  display: block;
+  margin-left: 50%;
+  transform: translate(-50%);
+
+  text-align: center;
+}
+
+#studies-title {
+  margin-top: 50px;
+}
+
+#study-card {
+  display: block;
+  max-width: 50%;
+  text-align: left;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 25px;
+}
+
+.auth-wrapper {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.auth-inner {
+  margin-top: 10%;
+}
