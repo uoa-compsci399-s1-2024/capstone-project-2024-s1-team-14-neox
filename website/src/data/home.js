@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import { Auth } from 'aws-amplify';
+import { Button, Card } from '@aws-amplify/ui-react';
+import { Navigate } from 'react-router-dom';
 
 
 const Home = ({ isAdmin, showButton }) => {
@@ -20,42 +22,50 @@ const Home = ({ isAdmin, showButton }) => {
         fetchFamilyName();
     }, []);
 
-    return (
-        isAdmin ? (
-            <div>
-                <h1>Hello {familyName}!</h1>
-                <h2>You are an admin of Neox Labs</h2>
-                <div className="d-grid">
-                    <Link to="/create" className="btn btn-primary">Start a new study</Link>
-                </div>
-            </div>
-        ) : (
-            <div>
-                <h1>Hello {familyName}!</h1>
-                <h2>Here are your studies:</h2>
-    
-                <h2>Don't see a study?</h2>
-                <h2>Request access to the admins.</h2>
+    function studyCard() {
+        return (
+            <div class="study-card">
+                <Card variation="elevated">
+                    <div class="study-title">
+                        <h3>Study title</h3>
+                    </div>
+                    <h5>Description: </h5>
+                    <h5>Approval Date: </h5>
+                    <h5>Number of Participants: </h5>
+                    <h5>Researchers: </h5>
+                    <button class="button" size="large" isFullWidth={false} colorTheme='info' loadingText="" onClick={() => alert('something')}>Download CSV</button>
+                    {!isAdmin ? (
+                        <Button class="button" size="large" isFullWidth={false} colorTheme='info' loadingText="" onClick={() => alert('something')}>Manage Researchers</Button>
+                    ) : (null)}
+                </Card>
             </div>
         )
+    }  
+
+    return (
+        <div class="home-body">
+            <h1>Welcome {familyName}!</h1>
+            {isAdmin ? (
+                <div>
+                    <h4>Admin</h4>
+                    <div className="d-grid">
+                        <Link to="/create" className="btn btn-primary">Start a new study</Link>
+                    </div>
+                </div>
+            ):(null)}
+            <div class="studies">
+                <h3>Active Studies</h3>
+                {studyCard()}
+                
+            </div>
+            {!isAdmin ? (
+                <div class="non-admin">
+                    <p>Don't see a study?</p>
+                    <p>Request access from the admins</p>
+                </div>
+            ): (null)}
+        </div>
     );
 };
 
-export default class Home extends Component {
-    render() {
-        return (
-            <div className="home-body">
-                <div id="home-titles">
-                    <h1>Welcome Phil! </h1>
-                    <Button isFullWidth={false} variation="primary" size="Large" onClick={() => alert("something")}> Create Study</Button>
-                </div>
-                <div id="studies-title">
-                    <h3>Studies</h3>
-                </div>
-                <StudyCard/>
-                <StudyCard/>
-                <StudyCard/>                   
-            </div>
-        )
-    }
-}
+export default Home;

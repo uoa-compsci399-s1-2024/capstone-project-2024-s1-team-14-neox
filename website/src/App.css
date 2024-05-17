@@ -150,23 +150,21 @@ button {
   text-align: center;
   margin-left: 50%;
   transform: translate(-50%);
+  top:10%;
+  position: relative;
 }
 
-#home-titles {
-  display: block;
-  margin-left: 50%;
-  transform: translate(-50%);
-
+.study-title {
   text-align: center;
 }
 
-#studies-title {
-  margin-top: 50px;
+.studies {
+  margin-top: 10%;
 }
 
-#study-card {
+.study-card {
   display: block;
-  max-width: 50%;
+  max-width: 80%;
   text-align: left;
   margin-left: auto;
   margin-right: auto;
@@ -174,11 +172,28 @@ button {
 }
 
 .auth-wrapper {
-  display: block;
+  height: 80%;
   width: 100%;
-  height: 100%;
 }
 
 .auth-inner {
-  margin-top: 10%;
+  height: 100%;
+  width: 100%;
+}
+
+.d-grid {
+  width: 30%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.non-admin {
+  margin-top: 5%;
+}
+
+.button {
+  width: 50%;
+  margin-top: 15px;
+  border: blue;
+  border-block-width: 15px;
 }
