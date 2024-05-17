@@ -53,7 +53,7 @@ export const handler = async (event) => {
     for (let i=0; i<res.rows.length; i++) {
       res.rows[i].timestamp = format(res.rows[i].timestamp, DATETIME_OUTPUT_FORMAT);
     }
-    response.body = JSON.stringify(res.rows);
+    response.body = JSON.stringify({data: res.rows});
     console.log(`returning ${res.rows.length} samples`);
   }
 
