@@ -1,10 +1,13 @@
 
 // import 'package:capstone_project_2024_s1_team_14_neox/analysis/bloc/analysis_result_bloc.dart';
+import 'dart:core';
+
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/confirmation.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/login_screen.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/register_screen.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/sync_screen.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/services/aws_cognito.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/settings/presentation/settings_screen.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/theme/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/dashboard/presentation/dashboard_home.dart';
@@ -14,6 +17,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 
@@ -21,7 +25,6 @@ import 'package:loader_overlay/loader_overlay.dart';
 // Import bottom navigation screens
 import 'child_home/domain/child_device_repository.dart';
 import 'child_home/presentation/child_profile_home.dart';
-import 'cloud/cubit/cloud_sync_cubit.dart';
 import 'cloud/presentation/cloud_home.dart';
 
 
@@ -33,16 +36,32 @@ void main() async{
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true); // Used to log BLE
   await dotenv.load();
   AWSServices().initializeStorage();
-  runApp(ChangeNotifierProvider(
+  await App.initSharedPreferences();
+  runApp(
+    ChangeNotifierProvider(
       create: (context) => ThemeProvider(),
-  child: const MyApp(),
-  ),
+      child: const App(),
+    ),
   );
 }
 
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class App extends StatelessWidget {
+  static late SharedPreferences sharedPreferences;
+
+  static Future<void> initSharedPreferences() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    if (sharedPreferences.getInt("daily_target") == null) {
+      sharedPreferences.setInt("daily_target", 120);
+    }
+  }
+
+  static Future<void> resetSharedPreferences() async {
+    await sharedPreferences.clear();
+    await initSharedPreferences();
+  }
+  
+  const App({super.key});
 
   Widget _buildLoadingOverlay(BuildContext context, { required Widget child }) {
     return LoaderOverlay(
@@ -130,14 +149,13 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> body = [
     const ChildHomeScreen(),
     const DashboardHome(),
-    CloudHomeScreen(),
+    const CloudHomeScreen(),
+    SettingsScreen(),
     const DatabaseViewer(),
     const RegisterScreen(),
     const LoginScreen(),
     const ConfirmationPage(email: ''),
     SyncScreen(),
-
-
   ];
 
   @override
@@ -167,8 +185,12 @@ class _MyHomePageState extends State<MyHomePage> {
               label: "Dashboard",
             ),
             NavigationDestination(
-              icon: Icon(Icons.cloud_upload),
+              icon: Icon(Icons.cloud),
               label: "Cloud",
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.settings),
+              label: "Settings",
             ),
             NavigationDestination(
               icon: Icon(Icons.table_chart),
