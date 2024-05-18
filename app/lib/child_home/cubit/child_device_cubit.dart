@@ -217,7 +217,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         acknowledgement,
         authResponseFromCentral,
         authChallengeFromCentral,
-        authResponseFromPeripheral,
+        // authResponseFromPeripheral,
       ];
       List<BluetoothCharacteristic?> readCharacteristics = [
         ...sampleData,
@@ -235,6 +235,20 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         emit(ChildDeviceErrorState(state, "Service missing characteristics"));
         await device.disconnect();
         return;
+      }
+
+      if (authResponseFromPeripheral != null) {
+        final subscription =
+            authResponseFromPeripheral.lastValueStream.listen((value) {
+          print("FIX line 245 changed RespPeri $value");
+          // lastValueStream` is updated:
+          //   - anytime read() is called
+          //   - anytime write() is called
+          //   - anytime a notification arrives (if subscribed)
+          //   - also when first listened to, it re-emits the last value for convenience.
+        });
+// cleanup: cancel subscription when disconnected
+        device.cancelWhenDisconnected(subscription);
       }
 
       // Authenticate us
@@ -266,8 +280,8 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       // Authenticate them
       {
         print("FIX 262 start auth response from peripheral");
-        await authResponseFromPeripheral!
-            .write(List.generate(32, (_) => 0), allowLongWrite: true);
+        // await authResponseFromPeripheral!
+        //     .write(List.generate(32, (_) => 9), allowLongWrite: true);
         print("FIX 265 RespPeri 750 write finsh auth response from peripheral");
 
         List<int> challenge =
@@ -294,7 +308,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         while (true) {
           print("FIX 276 authenticate attepmt $attempts");
 
-          response = await authResponseFromPeripheral.read();
+          response = await authResponseFromPeripheral!.read();
 
           print(
               "FIX 278 RespPeri 750 ${authResponseFromPeripheral.characteristicUuid}");

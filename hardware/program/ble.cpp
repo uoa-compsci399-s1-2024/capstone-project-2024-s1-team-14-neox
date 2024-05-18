@@ -63,7 +63,7 @@ static uint32_t connectTime = 0;
 static BLECharacteristic authChallengeFromPeripheral("9ab7d3df-a7b4-4858-8060-84a9adcf1420", BLERead, 32, true);
 static BLECharacteristic authResponseFromCentral    ("a90aa9a2-b186-4717-bc8d-f169eead75da", BLEWrite | BLEEncryption, 32, true);
 static BLECharacteristic authChallengeFromCentral   ("c03b7267-dcfa-4525-8521-1bc31c08c312", BLEWrite | BLEEncryption, 32, true);
-static BLECharacteristic authResponseFromPeripheral ("750d5d43-96c4-4f5c-8ce1-fdb44a150336", BLERead | BLEWrite | BLEEncryption, 32, true);
+static BLECharacteristic authResponseFromPeripheral ("750d5d43-96c4-4f5c-8ce1-fdb44a150336", BLERead | BLEEncryption, 32, true);
 static BLECharacteristic centralAuthenticated       ("776edbca-a020-4d86-a5e8-25eb87e82554", BLERead, 1, true);
 
 static void getBLEAddress(uint8_t* address); // Returns a 6 byte array
@@ -359,6 +359,17 @@ static void onConnection(BLEDevice central) {
     Serial.print("\n");
   };
   Serial.println("on Connection called");
+
+// uint8_t randomWrite[32];
+//   generateRandom(randomWrite);
+//   Serial.print("RespPeri 9ab ");
+//   print(randomWrite);
+//   delay(1000);
+
+
+
+
+
   authenticated = false; //should be faluse
 
   uint8_t falsy = 0;
