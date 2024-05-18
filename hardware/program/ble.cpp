@@ -8,7 +8,7 @@
 #include "sensor_sample.h"
 #include "error.h"
 
-const uint32_t MAX_UNAUTH_TIME = 10 * 1000;
+const uint32_t MAX_UNAUTH_TIME = 100 * 1000;
 const uint32_t maxDataPerCharacteristic = 512;
 const uint32_t dataPerCharacteristic = maxDataPerCharacteristic / sizeof(SensorSample) * sizeof(SensorSample);
 const uint32_t maxData = dataPerCharacteristic * 5;
@@ -57,7 +57,7 @@ byte buffer_5[maxDataPerCharacteristic];
  * Authentication properties
  */
 static uint8_t authKey[32];
-static bool authenticated = false;
+static bool authenticated = false; // should be false
 static uint32_t connectTime = 0;
 
 static BLECharacteristic authChallengeFromPeripheral("9ab7d3df-a7b4-4858-8060-84a9adcf1420", BLERead, 32, true);
@@ -75,12 +75,15 @@ static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic chara
 static void onAuthChallengeFromCentral(BLEDevice central, BLECharacteristic characteristic);
 
 void initializeBLE() {
+  Serial.println("Initialise BLE");
     if (!BLE.begin()) 
     {
+        Serial.println("BLE Begin");
         showError(ERROR_BLE_BEGIN);
     }
 
     eepromGetBLEAuthKey(authKey);
+    Serial.println("after eeprom get ble auth key");
 
     authResponseFromCentral.setEventHandler(BLEWritten, onAuthResponseFromCentral);
     authChallengeFromCentral.setEventHandler(BLEWritten, onAuthChallengeFromCentral);
@@ -88,11 +91,13 @@ void initializeBLE() {
 
     uint8_t manufacturerData[8] = { 0xFF, 0xFF }; // 0xFFFF is the company id used for testing
     getBLEAddress(manufacturerData + 2);
+        Serial.println("after get ble address");
     BLE.setManufacturerData(manufacturerData, sizeof(manufacturerData));
     BLE.setAdvertisedService(sensorSamplesService);
     BLE.setLocalName("Neox Sens 1.0");
 
     ts.setValue(0);
+    
     sensorSamplesService.addCharacteristic(samples_1);
     sensorSamplesService.addCharacteristic(samples_2);
     sensorSamplesService.addCharacteristic(samples_3);
@@ -106,9 +111,10 @@ void initializeBLE() {
     sensorSamplesService.addCharacteristic(centralAuthenticated);
     sensorSamplesService.addCharacteristic(ts);
     sensorSamplesService.addCharacteristic(progress);
-    
+        Serial.println("after adding characteristics");
     BLE.addService(sensorSamplesService);
     BLE.advertise();
+        Serial.println("INITITALISE after ble advertise");
 }
 
 void getBLEAddress(uint8_t* address) {
@@ -131,16 +137,37 @@ void getBLEAddress(uint8_t* address) {
   }
 }
 
+static int checkConnectionCallCount = 0;
+static int updateValuesCallCount = 0;
+static int centralConnectedCount = 0;
+static int MAX_COUNT = 100000;
+static bool WHILE_PRINTS = false;
+
 void checkConnection() {
+  checkConnectionCallCount++;
+  if (checkConnectionCallCount > MAX_COUNT && WHILE_PRINTS ) {
+    Serial.print(checkConnectionCallCount);
+    Serial.print(" ");
+    Serial.print(millis());
+      Serial.println(" CHECK CONNECTION: function called");
+      checkConnectionCallCount = 0;
+  }
     BLEDevice central = BLE.central();
     while (central.connected())
     {
+          centralConnectedCount++;
+  if (centralConnectedCount >  MAX_COUNT && WHILE_PRINTS) {
+    Serial.print(millis());
+      Serial.println(" CENTRAL CONNECTED");
+      centralConnectedCount = 0;
+  }
         if (connectTime == 0) {
             connectTime = millis();
         }
 
         if (!authenticated && millis() - connectTime >= MAX_UNAUTH_TIME) {
             central.disconnect();
+            Serial.println("disconnect after max unauth time");
             break;
         }
 
@@ -270,6 +297,13 @@ void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
 }
 
 void updateValues() {
+    updateValuesCallCount++;
+  if (updateValuesCallCount > MAX_COUNT && WHILE_PRINTS ) {
+      Serial.println("update values called");
+      updateValuesCallCount = 0;
+  }
+
+
     uint32_t samplesToSend = eepromGetSampleBufferLength();
     if (ts.written())
     {
@@ -308,6 +342,7 @@ static void generateRandom(uint8_t* value) {
 }
 
 static void solveAuthChallenge(const uint8_t* challenge, uint8_t* solution) {
+  Serial.println("solveAuthChallenge entered");
   uint8_t buffer[32];
   for (int i = 0; i < sizeof(buffer); i++) {
     buffer[i] = challenge[i] ^ authKey[i];
@@ -316,35 +351,29 @@ static void solveAuthChallenge(const uint8_t* challenge, uint8_t* solution) {
 }
 
 static void onConnection(BLEDevice central) {
-  authenticated = false;
+    auto print = [](uint8_t* arr) {
+    for (int i = 0; i < 32; i++) {
+      Serial.print(arr[i]);
+      Serial.print(" ");
+    }
+    Serial.print("\n");
+  };
+  Serial.println("on Connection called");
+  authenticated = false; //should be faluse
 
   uint8_t falsy = 0;
   centralAuthenticated.writeValue(&falsy, sizeof(falsy));
 
   uint8_t challengeFromPeripheral[32];
   generateRandom(challengeFromPeripheral);
+  Serial.print("ChalPeri 9ab");
+  print(challengeFromPeripheral);
   authChallengeFromPeripheral.writeValue(challengeFromPeripheral, sizeof(challengeFromPeripheral));
 }
 
 static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic characteristic) {
-  uint8_t response[32];
-  authResponseFromCentral.readValue(response, sizeof(response));
-
-  uint8_t challenge[32];
-  authChallengeFromPeripheral.readValue(challenge, sizeof(challenge));
-
-  uint8_t expected[32];
-  solveAuthChallenge(challenge, expected);
-  if (memcmp(response, expected, sizeof(expected)) == 0) {
-    uint8_t truthy = 1;
-    centralAuthenticated.writeValue(&truthy, sizeof(truthy));
-    authenticated = true;
-  }
-
-  /*Serial.print("Authenticated status ");
-  Serial.println(authenticated);
-
-  auto print = [](uint8_t* arr) {
+  Serial.print("Auth response from central entered");
+    auto print = [](uint8_t* arr) {
     for (int i = 0; i < 32; i++) {
       Serial.print(arr[i]);
       Serial.print(" ");
@@ -352,19 +381,67 @@ static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic chara
     Serial.print("\n");
   };
 
-  print(authKey);
-  print(challenge);
+  uint8_t response[32];
+  authResponseFromCentral.readValue(response, sizeof(response));
+  Serial.print("RespCent a90");
   print(response);
-  print(expected);*/
+  uint8_t challenge[32];
+  authChallengeFromPeripheral.readValue(challenge, sizeof(challenge));
+
+  Serial.print("ChalPeri 9ab");
+  print(challenge);
+  uint8_t expected[32];
+  solveAuthChallenge(challenge, expected);
+  Serial.print("Solved challenge expected value");
+  print(expected);
+  if (memcmp(response, expected, sizeof(expected)) == 0) {
+    uint8_t truthy = 1;
+    centralAuthenticated.writeValue(&truthy, sizeof(truthy));
+    authenticated = true;
+      Serial.print("Auth response changed");
+  Serial.println(authenticated);
+  }
+
+  Serial.print("Authenticated status ");
+  Serial.println(authenticated);
+
+
+  // Serial.println("auth key");
+  // print(authKey);
+  // Serial.println("challenge");
+  // print(challenge);
+  // Serial.println("response");
+  // print(response);
+  // Serial.println("expected");
+  // print(expected);
+    Serial.println("Auth RESPONSE from central excited");
 }
 
 static void onAuthChallengeFromCentral(BLEDevice central, BLECharacteristic characteristic) {
+  auto print = [](uint8_t* arr) {
+    for (int i = 0; i < 32; i++) {
+      Serial.print(arr[i]);
+      Serial.print(" ");
+    }
+    Serial.print("\n");
+  
+  };
+  Serial.println("on auth challenge from central entered");
   uint8_t challenge[32];
   authChallengeFromCentral.readValue(challenge, sizeof(challenge));
+  Serial.println("ChalCent c03 ");
+  print(challenge);
 
   uint8_t response[32];
+  Serial.println();
   solveAuthChallenge(challenge, response);
+  Serial.println("Solve auth challenge finished");
   authResponseFromPeripheral.writeValue(response, sizeof(response));
+    Serial.println("RespPer 750 ");
+  print(response);
+
+
+  Serial.println("on auth challenge from central exited");
 }
 
 
