@@ -237,7 +237,6 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         return;
       }
 
-      print("FIX 240 authenticate us start");
       // Authenticate us
 
       if (authorisationCode.length != 10 ||
