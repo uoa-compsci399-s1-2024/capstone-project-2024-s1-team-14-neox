@@ -11,6 +11,9 @@ const CREATE_TABLES_TEXT = `
 -- NOTE: THERE SHOULD BE EXTERNAL AND INTERNAL IDs
 
 DROP TABLE IF EXISTS samples;
+DROP TABLE IF EXISTS studies;
+DROP TABLE IF EXISTS study_children;
+DROP TABLE IF EXISTS study_researchers;
 DROP TABLE IF EXISTS children;
 DROP TABLE IF EXISTS users;
 DROP TYPE IF EXISTS gender;
@@ -18,6 +21,29 @@ DROP TYPE IF EXISTS gender;
 -- We put all users in one table since a user may be admin AND researcher, derived from Cognito groups
 CREATE TABLE users (
        id TEXT NOT NULL PRIMARY KEY
+);
+
+CREATE TABLE studies (
+       id TEXT NOT NULL PRIMARY KEY,
+       min_date DATE NOT NULL,
+       max_date DATE NOT NULL,
+       name TEXT,
+       description TEXT,
+       CONSTRAINT date_interval CHECK (min_date <= max_date)
+);
+CREATE TABLE study_children (
+       study_id TEXT NOT NULL,
+       child_id TEXT NOT NULL,
+       PRIMARY KEY (study_id, child_id),
+       FOREIGN KEY (study_id) REFERENCES studies (id),
+       FOREIGN KEY (child_id) REFERENCES children (id)
+);
+CREATE TABLE study_researchers (
+       study_id TEXT NOT NULL,
+       researcher_id TEXT NOT NULL,
+       PRIMARY KEY (study_id, researcher_id),
+       FOREIGN KEY (study_id) REFERENCES studies (id),
+       FOREIGN KEY (researcher_id) REFERENCES users (id)
 );
 
 CREATE TYPE gender AS ENUM (${PERSONAL_INFO_CHILD_GENDER_OPTIONS.map(pg.escapeLiteral).join(', ')});
