@@ -273,7 +273,17 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       device.cancelWhenDisconnected(bsSubscription);
   print("FIX create android bond");
 // Force the bonding popup to show now (Android Only)
-      await device.createBond();
+        if (device.prevBondState == BluetoothBondState.none) {
+        await device.removeBond();
+        }
+
+      await device.createBond(timeout: 15);
+      await Future.delayed(const Duration(seconds: 1));
+      print("FIX countdown 3");
+      await Future.delayed(const Duration(seconds: 1));
+      print("FIX countdown 2");
+      await Future.delayed(const Duration(seconds: 1));
+      print("FIX countdown 1");
 
 
       // print("FIX 252 setup key $key");
@@ -371,6 +381,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       }
       print("FIX popup shown here //read sensor data");
       // Read sensor data
+       await Future.delayed(const Duration(seconds: 4));
       int samplesRead = 0;
       int sampleCharacteristicIndex = 0;
       List<List<int>> values = [];
