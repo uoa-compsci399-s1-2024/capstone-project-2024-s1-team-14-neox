@@ -524,10 +524,12 @@ mandatory fields:
 
 where:
 
-- `min_date` and `max_date` are ISO8601-formatted dates with timezone
-  which refer to the earliest and latest samples, respectively, to
-  include in the study (note that all samples from any day in the
-  period of the study are included).
+- `min_date` and `max_date` are `YYYY-MM-DD` dates which refer to the
+  earliest and latest samples, respectively, to include in the study
+  (note that all samples from any day [including the final day] in the
+  period of the study are included).  **Interpretation: UTC 0
+  datetimes where `min_date` has time `00:00:00Z` and `max_date` has
+  time `23:59:59Z`.**
 
 These fields are optional:
 
