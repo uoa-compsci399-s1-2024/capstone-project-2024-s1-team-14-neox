@@ -590,20 +590,49 @@ User receives:
 
 Server returns 403.
 
-### Get info about study (GET) (`/studies/{studyID}/info`)
+### Get/Replace/Update info about study (GET/PUT/PATCH) (`/studies/{studyID}/info`)
 
-#### If authorised for the specific study identified by `studyID`:
+#### If authorised for the specific study identified by `studyID` and such a study exists:
 
-Server will return 200 with the body being a JSON object containing
-the same fields (mandatory and optional) as the one you enter when
-creating the study:
+- GET: the `data` field of the response body will contain the metadata
+  of the study.  (on success: HTTP 200.)
+- PUT: server will completely replace the metadata of the study.  (on success: HTTP 204.)
+- PATCH: server will update only the metadata fields of the study.  (on success: HTTP 204.)
 
-``` json
+#### Metadata schema:
+
+```json
 {
-	"data": {
-		"<STUDY_FIELD_NAME>": "<STUDY_FIELD_VALUE>",
-		...
-	}
+	"<METADATA_FIELD_NAME>": "<METADATA_FIELD_VALUE>",
+	...
+}
+```
+
+#### PUT/PATCH
+
+If any metadata fields are invalid: return 400 response, where for
+each invalid field name/value:
+
+- the `resource` field of the object in `errors` will be:
+  - `/studies/{studyID}/info?fieldname={field}` when `field` is an
+    invalid field name
+  - `/studies/{studyID}/info?fieldvalue={field}` when the value of
+    `field` is invalid
+- `status` will be 400.
+
+No metadata fields will be updated so the client should correct the
+fields listed in the errors when they try again.  For example, if the
+client provided the `max_date` field but it was in the wrong format:
+
+```json
+{
+	"errors": [
+		{
+			"resource": "/studies/EYES24/info?fieldvalue=max_date",
+			"status": 400,
+			"message": "date must have timezone",
+		}
+	],
 }
 ```
 
