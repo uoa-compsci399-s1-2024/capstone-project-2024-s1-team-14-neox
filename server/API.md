@@ -136,6 +136,10 @@ email address which the account was created with.  Why?  Because:
    entities (children don't have accounts; parents, researchers, and
    admins have accounts).
 
+**Since user IDs are emails, note that you will need to URI-encode
+them when placing them in the URI (eg,
+`/parents/{uriEncode(parentID)}/children`)**
+
 ### Privacy
 
 Although child and user IDs aren't a secret, we will only share IDs to
