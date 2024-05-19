@@ -265,6 +265,17 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         key.add(0);
       }
 
+      final bsSubscription = device.bondState.listen((value) {
+        print("FIX bond subscription $value prev:${device?.prevBondState }");
+      });
+
+// cleanup: cancel subscription when disconnected
+      device.cancelWhenDisconnected(bsSubscription);
+  print("FIX create android bond");
+// Force the bonding popup to show now (Android Only)
+      await device.createBond();
+
+
       print("FIX 252 setup key $key");
       {
         print("FIX 254 start auth CHALLENGE from periphe");
@@ -400,11 +411,18 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     } finally {
       try {
         print("FIX 359 start disconnect");
+        // remove bond
+        if (device.prevBondState == BluetoothBondState.bonded) {
+
+        await device.removeBond();
+        }
+
         await device.disconnect();
         print("FIX 359 finsih disconnect");
       } catch (e) {
         print("FIX Last error catching ");
         print(e.toString);
+        emit(ChildDeviceErrorState(state, "An error occurred: $e"));
       }
     }
   }
