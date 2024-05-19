@@ -68,6 +68,8 @@ server will reject that sample.
   specific child).
 - Can add and revoke consent for studies their children are part of
   (by specific child).
+- Can view the list of researchers.
+- Can view the list of admins.
 
 ### Researcher
 
@@ -80,6 +82,8 @@ server will reject that sample.
   - gender
 - Can only VIEW their own personal info (their accounts are made for
   them).
+- Can view the list of researchers.
+- Can view the list of admins.
 
 ### Admin
 
@@ -93,13 +97,13 @@ server will reject that sample.
 - Can delete studies.
 - Can modify metadata of studies.
 - Can list and search across all studies.
-- Can view list of researcher IDs.
-- Can view list of parent IDs.
-- Can view list of child IDs.
-- Can view list of child IDs for a parent.
-- Can view list of studies for a child.
-- Can view list of studies for a researcher.
-- Can view list of children, parents, researchers involved in a study.
+- Can view the list of researchers.
+- Can view the list of parents.
+- Can view the list of children.
+- Can view the list of children for a parent.
+- Can view the list of studies for a child.
+- Can view the list of studies for a researcher.
+- Can view the list of children, parents, researchers involved in a study.
 - Can *revoke* consent to a given study for a child.
 - Can add and remove access to a given study for a researcher.
 
