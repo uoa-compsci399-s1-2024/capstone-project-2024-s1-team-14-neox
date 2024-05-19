@@ -136,7 +136,7 @@ function App() {
                 {!showButton && isAdmin && (
                   <Route path="/create" element={<Create/>} />
                 )}
-                {showButton && (
+                {!showButton && (
                   <Route path="/home" element={<Home isAdmin={isAdmin} showButton={showButton} />} />
                 )}
                 <Route path="/accessDenied" element={<AccessDenied/>} />
