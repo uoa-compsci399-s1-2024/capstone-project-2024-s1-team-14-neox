@@ -65,5 +65,9 @@ for user in PARENT1 PARENT2 RESEARCHER ADMIN; do
 		curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/$usertype" 2>/dev/null | head -n1
 		# echo ""
 	done
+
+	echo "$user: listing children of PARENT1"
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/parents/$EMAIL_PARENT1/children" 2>/dev/null | head -n1
+	# echo ""
 done
 

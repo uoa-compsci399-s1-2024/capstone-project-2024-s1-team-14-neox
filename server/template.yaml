@@ -702,6 +702,19 @@ Resources:
             Path: /samples/{childID}
             Method: post
             RestApiId: !Ref API
+  FuncParentsListChildren:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-parents-listchildren/
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        GetEvent:
+          Type: Api
+          Properties:
+            Path: /parents/{parentID}/children
+            Method: get
+            RestApiId: !Ref API
   FuncChildrenInfoFetch:
     Type: AWS::Serverless::Function
     Properties:
