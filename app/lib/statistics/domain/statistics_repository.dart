@@ -65,8 +65,14 @@ class StatisticsRepository {
     return {DateTime.now(): 0};
   }
 
-  static Future<Map<DateTime, int>> getDailyOutdoorMinutes(int childId) async {
-    return await ArduinoDataEntity.getDailyOutdoorMinutesForChildId(childId);
+  static Future<Map<DateTime, int>> getWeeklyOutdoorMinutes(int childId) async {
+    return await ArduinoDataEntity.countSamplesByDay(getMostRecentMonday() ,DateTime.now() , childId);
+  }
+
+  static DateTime getMostRecentMonday() {
+    final today = DateTime.now();
+    final daysSinceMonday = (today.weekday - DateTime.monday) % 7;
+    return today.subtract(Duration(days: daysSinceMonday));
   }
 
   // TODO
