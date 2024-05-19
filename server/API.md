@@ -320,10 +320,32 @@ Server will return 403.
 No filters for now, but any filters in future API specs should go into
 query string.
 
+Output schema:
+
+``` json
+{
+	"data": [
+		{"id": USERID},
+		...
+	]
+}
+```
+
 ### Search for researchers (GET) (`/researchers`)
 
 No filters for now, but any filters in future API specs should go into
 query string.
+
+Output schema:
+
+``` json
+{
+	"data": [
+		{"id": USERID},
+		...
+	]
+}
+```
 
 ### LOW PRIORITY: Search for children (GET) (`/children`)
 
