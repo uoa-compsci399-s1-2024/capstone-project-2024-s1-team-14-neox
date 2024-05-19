@@ -311,20 +311,20 @@ Server will return HTTP status 409.
 
 Server will return 403.
 
-### LOW PRIORITY: Search for parents (GET) (`/parents`)
+### Search for parents (GET) (`/parents`)
 
-Should be able to search by name, number of children, etc.  Filters
-should go into query string.
+No filters for now, but any filters in future API specs should go into
+query string.
 
-### LOW PRIORITY: Search for researchers (GET) (`/researchers`)
+### Search for researchers (GET) (`/researchers`)
 
-Should be able to search by name, number of children, etc.  Filters
-should go into query string.
+No filters for now, but any filters in future API specs should go into
+query string.
 
 ### LOW PRIORITY: Search for children (GET) (`/children`)
 
-Should be able to search by name, number of children, etc.  Filters
-should go into query string.
+No filters for now, but any filters in future API specs should go into
+query string.
 
 ### Get/Replace/Update personal info associated with a specific child/parent/researcher (GET/PUT/PATCH) (`/<children OR parents OR researchers>/{ID}/info`)
 
