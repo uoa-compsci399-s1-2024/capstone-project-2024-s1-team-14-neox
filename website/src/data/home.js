@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import { Auth } from 'aws-amplify';
-import { Button, Card } from '@aws-amplify/ui-react';
+import { Card } from '@aws-amplify/ui-react';
 import { Navigate } from 'react-router-dom';
 
 
@@ -26,17 +26,19 @@ const Home = ({ isAdmin, showButton }) => {
         return (
             <div class="study-card">
                 <Card variation="elevated">
-                    <div class="study-title">
-                        <h3>Study title</h3>
+                    <h5 style={{"text-align": "center", "font-style": "italic"}}>ID 123456</h5>
+                    <hr/>
+                    <h3 style={{"text-align": "center"}}>This is what the study title looks like</h3>
+                    <h5 style={{"text-align": "center", "padding-bottom": "2%"}}>The description of the study looks like this The description of the study looks like this The description of the study looks like this The description of the study looks like this The description of the study looks like this</h5>
+                    <h5><span class="card-titles">Period:</span> xx/xx/xx - xx/xx/xx </h5>
+                    <h5><span class="card-titles">Number of Participants:</span> x </h5>
+                    <h5><span class="card-titles bottom">Researchers:</span> Name Name, Name Name </h5>                  
+                    <div class="d-table-row gap-2 d-md-flex justify-content-md-end">
+                        <button type="button" class="btn btn-outline-primary">Download CSV</button>
+                        {isAdmin ? (
+                            <button type="button" class="btn btn-outline-primary" onClick={() => alert("Works!")}>Manage Researchers</button>
+                        ) : (null)}
                     </div>
-                    <h5>Description: </h5>
-                    <h5>Approval Date: </h5>
-                    <h5>Number of Participants: </h5>
-                    <h5>Researchers: </h5>
-                    <button class="button" size="large" isFullWidth={false} colorTheme='info' loadingText="" onClick={() => alert('something')}>Download CSV</button>
-                    {!isAdmin ? (
-                        <Button class="button" size="large" isFullWidth={false} colorTheme='info' loadingText="" onClick={() => alert('something')}>Manage Researchers</Button>
-                    ) : (null)}
                 </Card>
             </div>
         )
@@ -53,8 +55,12 @@ const Home = ({ isAdmin, showButton }) => {
                     </div>
                 </div>
             ):(null)}
+            <hr/>
             <div class="studies">
-                <h3>Active Studies</h3>
+                <h3>Current Studies</h3>
+                
+                {studyCard()}
+                {studyCard()}
                 {studyCard()}
                 
             </div>

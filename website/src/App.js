@@ -110,7 +110,7 @@ function App() {
 
       <Router>
         <div className="App">
-          <nav className="navbar navbar-expand-lg navbar-light fixed-top">
+          <nav className="navbar navbar-expand-lg navbar-light fixed-top" style={{"border-bottom": "solid", "background-color": "white"}}>            
             <div className="container">
             {showButton && <Link to={'/'} className="navbar-brand"><img src={logo} alt="NEOX Logo" width="140px" /></Link>}
             {!showButton && <Link to={'/home'} className="navbar-brand"><img src={logo} alt="NEOX Logo" width="140px" /></Link>}
@@ -121,7 +121,6 @@ function App() {
                   {!showButton && !isAdmin && <li className="nav-item"><Link className="nav-link" to={'/studyData'}>Study Data</Link></li>}
                   {!showButton && ( <li className="nav-item"> <Link className="nav-link" onClick={() => { handleSignOut();}} to={'/'}>Logout</Link></li>)}
                 </ul>
-
             </div>
           </nav>
           <div className="auth-wrapper">

@@ -1,7 +1,6 @@
 .App {
-  min-width: 960px;
-  max-width: 960px;
-  height: 100vh;
+  min-width: 100%;
+  max-width: 100%;
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -146,11 +145,12 @@ button {
 
 .home-body {
   display: block;
-  width: 100%;
+  width: 50%;
+  height: fit-content;
   text-align: center;
   margin-left: 50%;
   transform: translate(-50%);
-  top:10%;
+  margin-top:10%;
   position: relative;
 }
 
@@ -159,12 +159,13 @@ button {
 }
 
 .studies {
-  margin-top: 10%;
+  margin-top: 5%;
+  margin-bottom: 5%;
 }
 
 .study-card {
   display: block;
-  max-width: 80%;
+  max-width: 100%;
   text-align: left;
   margin-left: auto;
   margin-right: auto;
@@ -182,7 +183,7 @@ button {
 }
 
 .d-grid {
-  width: 30%;
+  width: 20%;
   margin-left: auto;
   margin-right: auto;
 }
@@ -191,9 +192,30 @@ button {
   margin-top: 5%;
 }
 
-.button {
-  width: 50%;
+.download-button {
+  width: 30%;
   margin-top: 15px;
-  border: blue;
-  border-block-width: 15px;
+  border: solid;
+  left: 10%;
+  position: relative;
+  border-width: 1px;
 }
+
+.manage-button {
+  width: 30%;
+  margin-top: 15px;
+  border: solid;
+  left: 30%;
+  position: relative;
+}
+
+.card-titles {
+  font-weight: bold;
+  color: #0d6efd;
+
+}
+
+.card-titles bottom {
+  padding-bottom: 10px;
+}
+
