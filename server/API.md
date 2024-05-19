@@ -460,13 +460,11 @@ Server returns HTTP 200 response:
 
 ``` json
 {
-	"data": {
-		"children": [
-			{"id": CHILD_ID1},
-			{"id": CHILD_ID2},
-			...
-		],
-	}
+	"data": [
+		{"id": CHILD_ID1},
+		{"id": CHILD_ID2},
+		...
+	],
 }
 ```
 
