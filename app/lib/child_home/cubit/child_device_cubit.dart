@@ -13,6 +13,11 @@ part 'child_device_state.dart';
 class ChildDeviceCubit extends Cubit<ChildDeviceState> {
   ChildDeviceRepository _repo;
 
+  // Sync fields
+  BluetoothDevice? device;
+  late StreamSubscription<BluetoothConnectionState> connectSubscription;
+late StreamSubscription<List<int>> respPeriSubscription;
+late StreamSubscription<BluetoothBondState> bsSubscription;
   ChildDeviceCubit({
     required ChildDeviceRepository repo,
     required int childId,
@@ -122,6 +127,22 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       return;
     }
 
+    // listen for disconnection
+    connectSubscription =
+        device.connectionState.listen((BluetoothConnectionState state) async {
+      print("FIX connectSubscription ${state.toString()}");
+    });
+
+// cleanup: cancel subscription when disconnected
+//   - [delayed] This option is only meant for `connectionState` subscriptions.
+//     When `true`, we cancel after a small delay. This ensures the `connectionState`
+//     listener receives the `disconnected` event.
+//   - [next] if true, the the stream will be canceled only on the *next* disconnection,
+//     not the current disconnection. This is useful if you setup your subscriptions
+//     before you connect.
+    device.cancelWhenDisconnected(connectSubscription,
+        delayed: true, next: true);
+
     print("FIX found device ${device.remoteId}");
 
     try {
@@ -174,7 +195,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       BluetoothCharacteristic? centralAuthenticated;
       BluetoothCharacteristic? progress;
       sampleData.length = uuidSamples.length;
-      print("FIX sicover services start");
+      print("FIX dicover services start");
       List<BluetoothService> services = await device.discoverServices();
       for (BluetoothService service in services) {
         if (service.uuid.toString().toLowerCase() != uuidSerivce) {
@@ -238,7 +259,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       }
 
       if (authResponseFromPeripheral != null) {
-        final subscription =
+        respPeriSubscription =
             authResponseFromPeripheral.lastValueStream.listen((value) {
           print("FIX line 245 changed RespPeri $value");
           // lastValueStream` is updated:
@@ -248,7 +269,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
           //   - also when first listened to, it re-emits the last value for convenience.
         });
 // cleanup: cancel subscription when disconnected
-        device.cancelWhenDisconnected(subscription);
+        device.cancelWhenDisconnected(respPeriSubscription);
       }
 
       // Authenticate us
@@ -265,26 +286,26 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         key.add(0);
       }
 
-      final bsSubscription = device.bondState.listen((value) {
-        print("FIX bond subscription $value prev:${device?.prevBondState }");
+    bsSubscription = device.bondState.listen((value) {
+        print("FIX bond subscription $value prev:${device?.prevBondState}");
       });
 
 // cleanup: cancel subscription when disconnected
       device.cancelWhenDisconnected(bsSubscription);
-  print("FIX create android bond");
+      print("FIX create android bond");
 // Force the bonding popup to show now (Android Only)
-        if (device.prevBondState == BluetoothBondState.none) {
+      if (device.prevBondState == BluetoothBondState.none) {
         await device.removeBond();
-        }
+      }
 
       await device.createBond(timeout: 15);
+      
       await Future.delayed(const Duration(seconds: 1));
       print("FIX countdown 3");
       await Future.delayed(const Duration(seconds: 1));
       print("FIX countdown 2");
       await Future.delayed(const Duration(seconds: 1));
       print("FIX countdown 1");
-
 
       // print("FIX 252 setup key $key");
       // {
@@ -381,7 +402,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       }
       print("FIX popup shown here //read sensor data");
       // Read sensor data
-       await Future.delayed(const Duration(seconds: 4));
+      await Future.delayed(const Duration(seconds: 4));
       int samplesRead = 0;
       int sampleCharacteristicIndex = 0;
       List<List<int>> values = [];
@@ -411,6 +432,11 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
             state, (samplesRead / sampleCount).clamp(0, 1)));
       }
 
+      print("FIX remove bond early");
+      await device.removeBond();
+
+      print("FIX finished removing bond");
+
       // Send samples to repository
       for (List<int> value in values) {
         await _repo.parseAndSaveSamples(childName, value, childId);
@@ -424,8 +450,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         print("FIX 359 start disconnect");
         // remove bond
         if (device.prevBondState == BluetoothBondState.bonded) {
-
-        await device.removeBond();
+          await device.removeBond();
         }
 
         await device.disconnect();
