@@ -59,5 +59,11 @@ for user in PARENT1 PARENT2 RESEARCHER ADMIN; do
 	echo "$user: POSTing samples for child"
 	curl -i -X POST -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/samples/$CHILDID" -H'content-type: application/json' -d "$("$(git rev-parse --show-toplevel)/server/generateXsamples" 1)" 2>/dev/null | head -n1
 	# echo ""
+
+	for usertype in parents researchers admins; do
+		echo "$user: listing user group $usertype"
+		curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/$usertype" 2>/dev/null | head -n1
+		# echo ""
+	done
 done
 

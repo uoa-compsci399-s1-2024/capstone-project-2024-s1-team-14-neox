@@ -766,6 +766,48 @@ Resources:
       CodeUri: lambda/functions/meta-admins-register/
       Handler: index.handler
       Role: !GetAtt LambdaRole.Arn
+  FuncParentsSearch:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-users-search/
+      Handler: index.handler_parents
+      Timeout: 10
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /parents
+            Method: get
+            RestApiId: !Ref API
+  FuncResearchersSearch:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-users-search/
+      Handler: index.handler_researchers
+      Timeout: 10
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /researchers
+            Method: get
+            RestApiId: !Ref API
+  FuncAdminsSearch:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-users-search/
+      Handler: index.handler_admins
+      Timeout: 10
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /admins
+            Method: get
+            RestApiId: !Ref API
   FuncMetaSetupDB:
     Type: AWS::Serverless::Function
     Properties:
