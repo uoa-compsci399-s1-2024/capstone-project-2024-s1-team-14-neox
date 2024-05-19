@@ -276,86 +276,86 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       await device.createBond();
 
 
-      print("FIX 252 setup key $key");
-      {
-        print("FIX 254 start auth CHALLENGE from periphe");
-        List<int> challenge = await authChallengeFromPeripheral!.read();
-        print("FIX ChalPeri 9ab $challenge");
-        print("FIX 256 start solve auth challenge");
-        List<int> response = _solveAuthChallenge(challenge, key);
-        print("FIX 258 RespCent a90 $response");
-        await authResponseFromCentral!.write(response, allowLongWrite: true);
-        print("FIX 260 finished auth response from central");
-      }
+      // print("FIX 252 setup key $key");
+      // {
+      //   print("FIX 254 start auth CHALLENGE from periphe");
+      //   List<int> challenge = await authChallengeFromPeripheral!.read();
+      //   print("FIX ChalPeri 9ab $challenge");
+      //   print("FIX 256 start solve auth challenge");
+      //   List<int> response = _solveAuthChallenge(challenge, key);
+      //   print("FIX 258 RespCent a90 $response");
+      //   await authResponseFromCentral!.write(response, allowLongWrite: true);
+      //   print("FIX 260 finished auth response from central");
+      // }
       print("FIX 262 authenticate them");
       // Authenticate them
-      {
-        print("FIX 262 start auth response from peripheral");
-        // await authResponseFromPeripheral!
-        //     .write(List.generate(32, (_) => 9), allowLongWrite: true);
-        print("FIX 265 RespPeri 750 write finsh auth response from peripheral");
+      // {
+      //   print("FIX 262 start auth response from peripheral");
+      //   // await authResponseFromPeripheral!
+      //   //     .write(List.generate(32, (_) => 9), allowLongWrite: true);
+      //   print("FIX 265 RespPeri 750 write finsh auth response from peripheral");
 
-        List<int> challenge =
-            List.generate(32, (index) => Random.secure().nextInt(256));
-        print("FIX 269 start auth challenge from central");
-        print("FIX 273 ChalCent c03 $challenge");
-        await authChallengeFromCentral!.write(challenge, allowLongWrite: true);
+      //   List<int> challenge =
+      //       List.generate(32, (index) => Random.secure().nextInt(256));
+      //   print("FIX 269 start auth challenge from central");
+      //   print("FIX 273 ChalCent c03 $challenge");
+      //   await authChallengeFromCentral!.write(challenge, allowLongWrite: true);
 
-        print("FIX 272 finsh auth challenge from central");
-        List<int> response;
-        int attempts = 0;
-        await Future.delayed(const Duration(seconds: 1));
+      //   print("FIX 272 finsh auth challenge from central");
+      //   List<int> response;
+      //   int attempts = 0;
+      //   await Future.delayed(const Duration(seconds: 1));
 
-        print("FIX <<<<READ FROM ALL CHARACTERISTICS");
-        for (int i = 0; i < readCharacteristics.length; i++) {
-          BluetoothCharacteristic? bChar = readCharacteristics[i];
-          if (bChar == null) {
-            print("FIX null characteristic does not exist");
-          } else {
-            print("FIX print for ${bChar.characteristicUuid}");
-            print("FIX values ${await bChar.read()}");
-          }
-        }
-        while (true) {
-          print("FIX 276 authenticate attepmt $attempts");
+      //   print("FIX <<<<READ FROM ALL CHARACTERISTICS");
+      //   for (int i = 0; i < readCharacteristics.length; i++) {
+      //     BluetoothCharacteristic? bChar = readCharacteristics[i];
+      //     if (bChar == null) {
+      //       print("FIX null characteristic does not exist");
+      //     } else {
+      //       print("FIX print for ${bChar.characteristicUuid}");
+      //       print("FIX values ${await bChar.read()}");
+      //     }
+      //   }
+      //   while (true) {
+      //     print("FIX 276 authenticate attepmt $attempts");
 
-          response = await authResponseFromPeripheral!.read();
+      //     response = await authResponseFromPeripheral!.read();
 
-          print(
-              "FIX 278 RespPeri 750 ${authResponseFromPeripheral.characteristicUuid}");
-          print("FIX 278 RespPeri 750  $response");
-          if (response.any((byte) => byte != 0)) {
-            print("FIX 281 check if bytes do not equal 0");
-            break;
-          }
+      //     print(
+      //         "FIX 278 RespPeri 750 ${authResponseFromPeripheral.characteristicUuid}");
+      //     print("FIX 278 RespPeri 750  $response");
+      //     if (response.any((byte) => byte != 0)) {
+      //       print("FIX 281 check if bytes do not equal 0");
+      //       break;
+      //     }
 
-          await Future.delayed(const Duration(seconds: 1));
-          attempts++;
-          if (attempts >= 10) {
-            print("FIX 286 authentication timed out");
-            emit(ChildDeviceErrorState(
-                state, "Device authentication timed out."));
-            await device.disconnect();
-            return;
-          }
-        }
+      //     await Future.delayed(const Duration(seconds: 1));
+      //     attempts++;
+      //     if (attempts >= 10) {
+      //       print("FIX 286 authentication timed out");
+      //       emit(ChildDeviceErrorState(
+      //           state, "Device authentication timed out."));
+      //       await device.disconnect();
+      //       return;
+      //     }
+      //   }
 
-        List<int> weAreAuthenticated = await centralAuthenticated!.read();
-        if (weAreAuthenticated.isEmpty || weAreAuthenticated[0] == 0) {
-          emit(ChildDeviceErrorState(state,
-              "Failed to authenticate. Check the password and pair again with the correct password."));
-          await device.disconnect();
-          return;
-        }
+      //   List<int> weAreAuthenticated = await centralAuthenticated!.read();
+      //   if (weAreAuthenticated.isEmpty || weAreAuthenticated[0] == 0) {
+      //     emit(ChildDeviceErrorState(state,
+      //         "Failed to authenticate. Check the password and pair again with the correct password."));
+      //     await device.disconnect();
+      //     return;
+      //   }
 
-        List<int> expectedResponse = _solveAuthChallenge(challenge, key);
-        if (!listEquals(response, expectedResponse)) {
-          emit(ChildDeviceErrorState(state,
-              "Failed to authenticate device. Check you are connecting to the right device."));
-          await device.disconnect();
-          return;
-        }
-      }
+      //   List<int> expectedResponse = _solveAuthChallenge(challenge, key);
+      //   if (!listEquals(response, expectedResponse)) {
+      //     emit(ChildDeviceErrorState(state,
+      //         "Failed to authenticate device. Check you are connecting to the right device."));
+      //     await device.disconnect();
+      //     return;
+      //   }
+      // }
       print("FIX 303 authnetication success");
 
       // Get sample count
