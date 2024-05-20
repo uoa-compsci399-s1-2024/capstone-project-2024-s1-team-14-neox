@@ -141,7 +141,7 @@ static int checkConnectionCallCount = 0;
 static int updateValuesCallCount = 0;
 static int centralConnectedCount = 0;
 static int MAX_COUNT = 100000;
-static bool WHILE_PRINTS = false;
+static bool WHILE_PRINTS = true;
 
 void checkConnection() {
   checkConnectionCallCount++;
@@ -166,6 +166,7 @@ void checkConnection() {
         }
 
         if (!authenticated && millis() - connectTime >= MAX_UNAUTH_TIME) {
+          Serial.println("Disconnect called line169");
             central.disconnect();
             Serial.println("disconnect after max unauth time");
             break;

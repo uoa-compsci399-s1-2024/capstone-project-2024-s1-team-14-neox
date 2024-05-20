@@ -70,7 +70,7 @@ late StreamSubscription<BluetoothBondState> bsSubscription;
     if (FlutterBluePlus.isScanningNow) {
       await FlutterBluePlus.stopScan();
     }
-
+print("FIX start scan");
     await FlutterBluePlus.startScan(
       withServices: [Guid("ba5c0000-243e-4f78-ac25-69688a1669b4")],
       timeout: const Duration(seconds: 15),
@@ -79,6 +79,7 @@ late StreamSubscription<BluetoothBondState> bsSubscription;
     try {
       await for (List<ScanResult> scanResults in FlutterBluePlus.scanResults
           .timeout(const Duration(seconds: 150))) {
+            print("FIX $scanResults");
         scanResults.retainWhere((r) =>
             deviceRemoteId ==
             _formatRemoteDeviceId(
@@ -132,6 +133,10 @@ late StreamSubscription<BluetoothBondState> bsSubscription;
         device.connectionState.listen((BluetoothConnectionState state) async {
       print("FIX connectSubscription ${state.toString()}");
     });
+
+        bsSubscription = device.bondState.listen((value) {
+        print("FIX bond subscription $value prev:${device?.prevBondState}");
+      });
 
 // cleanup: cancel subscription when disconnected
 //   - [delayed] This option is only meant for `connectionState` subscriptions.
@@ -286,17 +291,17 @@ late StreamSubscription<BluetoothBondState> bsSubscription;
         key.add(0);
       }
 
-    bsSubscription = device.bondState.listen((value) {
-        print("FIX bond subscription $value prev:${device?.prevBondState}");
-      });
+
 
 // cleanup: cancel subscription when disconnected
       device.cancelWhenDisconnected(bsSubscription);
-      print("FIX create android bond");
 // Force the bonding popup to show now (Android Only)
+print("FIX ${device.prevBondState}");
       if (device.prevBondState == BluetoothBondState.none) {
+        print("FIX remove bond if not none");
         await device.removeBond();
       }
+      print("FIX create android bond");
 
       await device.createBond(timeout: 15);
       
@@ -432,7 +437,7 @@ late StreamSubscription<BluetoothBondState> bsSubscription;
             state, (samplesRead / sampleCount).clamp(0, 1)));
       }
 
-      print("FIX remove bond early");
+      print("FIX remove bond early, current state: ${device.prevBondState}");
       await device.removeBond();
 
       print("FIX finished removing bond");
@@ -447,14 +452,14 @@ late StreamSubscription<BluetoothBondState> bsSubscription;
       emit(ChildDeviceErrorState(state, "An error occurred: $e"));
     } finally {
       try {
-        print("FIX 359 start disconnect");
+        // print("FIX 359 start disconnect");
         // remove bond
-        if (device.prevBondState == BluetoothBondState.bonded) {
-          await device.removeBond();
-        }
+        // if (device.prevBondState == BluetoothBondState.bonded) {
+        //   await device.removeBond();
+        // }
 
-        await device.disconnect();
-        print("FIX 359 finsih disconnect");
+        // await device.disconnect(queue: true);
+        // print("FIX 359 finsih disconnect");
       } catch (e) {
         print("FIX Last error catching ");
         print(e.toString);
