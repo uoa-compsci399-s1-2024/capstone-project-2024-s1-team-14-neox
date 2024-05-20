@@ -6,6 +6,7 @@ import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/sync_screen.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/services/aws_cognito.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/theme/theme_provider.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/dashboard/presentation/dashboard_home.dart';
 import 'package:flutter/material.dart';
@@ -170,10 +171,11 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icon(Icons.cloud_upload),
               label: "Cloud",
             ),
-            NavigationDestination(
-              icon: Icon(Icons.table_chart),
-              label: "Database",
-            ),
+            if (kDebugMode)
+              NavigationDestination(
+                icon: Icon(Icons.table_chart),
+                label: "Database",
+              ),
           ],
         ),
       ),
