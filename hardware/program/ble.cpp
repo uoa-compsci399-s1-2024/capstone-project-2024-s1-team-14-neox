@@ -17,6 +17,7 @@ uint32_t sentData = 0;
 
 BLEService sensorSamplesService("ba5c0000-243e-4f78-ac25-69688a1669b4");
 
+#define BLEEncryption 0
 /*
  * Data will be sent 5 BLE characteristics at a time. These characteristics will be updated dynamically (depending on how much data must be sent).
  */
