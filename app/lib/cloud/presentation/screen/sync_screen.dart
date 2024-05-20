@@ -4,7 +4,6 @@ import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/tiles/study_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../cubit/cloud_sync_cubit.dart';
 
@@ -21,7 +20,7 @@ class SyncScreen extends StatelessWidget {
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Join a New Study'),
+                const Text('Join a new study'),
                 Text(
                   'Enter the study code.',
                   style: Theme.of(context).textTheme.bodySmall,
@@ -30,17 +29,17 @@ class SyncScreen extends StatelessWidget {
             ),
             content: TextField(
               controller: _textFieldController,
-              decoration: const InputDecoration(hintText: "Enter code"),
+              decoration: const InputDecoration(hintText: "Study code"),
             ),
             actions: [
-              OutlinedButton(
-                child: const Text('CANCEL'),
+              ElevatedButton(
+                child: const Text('Cancel'),
                 onPressed: () {
                   Navigator.pop(context);
                 },
               ),
               ElevatedButton(
-                child: const Text('JOIN'),
+                child: const Text('Join'),
                 onPressed: () {
                   onStudyFetch(_textFieldController.text.toLowerCase().trim());
                   _textFieldController.clear();
@@ -71,149 +70,151 @@ class SyncScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Sync with Neox Cloud"),
+        title: const Text("Cloud"),
+        scrolledUnderElevation: 0,
       ),
-      body: Center(
-        child: Column(
-          children: [
-            Text("Securely store your data and gain insights"),
-            ElevatedButton(
-              onPressed: () =>
-                  context.read<CloudSyncCubit>().syncAllChildData(),
-              child: BlocBuilder<CloudSyncCubit, CloudSyncState>(
-                builder: (context, state) {
-                  if (state.status.isLoading) {
-                    return CircularProgressIndicator();
-                  }
-                  return Text("Sync Device");
-                },
-              ),
-            ),
-            BlocBuilder<CloudSyncCubit, CloudSyncState>(
-              builder: (context, state) {
-                if (state.lastSynced == null) {
-                  return Text("");
-                }
-                return Text(
-                    "Last synced: ${DateFormat('yyyy-MM-dd - kk:mm:ss').format(
-                  (state.lastSynced as DateTime),
-                )}");
-              },
-            ),
-            RepositoryProvider(
-              create: (context) => StudyRepository(),
-              child: BlocProvider(
-                create: (context) => StudyCubit(context.read<StudyRepository>())
-                  ..getAllParticipatingStudies(),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: RepositoryProvider(
+        create: (context) => StudyRepository(),
+        child: BlocProvider(
+          create: (context) => StudyCubit(context.read<StudyRepository>())..getAllParticipatingStudies(),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(40, 40, 40, 0),
+            child: Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(40),
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(30),
+                    child: Row(
                       children: [
-                        Text("Participate in Research"),
-
-                        BlocConsumer<StudyCubit, StudyState>(
-                          listener: (context, state) {
-                            if (state.status.isFetchStudySuccess) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) {
-                                  return RepositoryProvider.value(
-                                    value: context.read<StudyRepository>(),
-                                    child: BlocProvider.value(
-                                      value:
-                                          BlocProvider.of<StudyCubit>(context),
-                                      child: JoinStudyScreen(
-                                        study: state.newStudy!,
-                                      ),
-                                    ),
-                                  );
-                                }),
-                              );
-                            }
-                          },
-                          builder: (context, state) {
-                            if (state.status.isLoading) {
-                              return CircularProgressIndicator();
-                            }
-                            return IconButton(
-                              iconSize: 32,
-                              icon: const Icon(Icons.add),
-                              onPressed: () => _showStudyCodeInputDialog(
-                                  context, onStudyFetch: (s) {
-                                context
-                                    .read<StudyCubit>()
-                                    .fetchStudyFromServer(s);
-                              }),
-                            );
-                          },
+                        const Text(
+                          "Sync your data to the cloud",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        // onStudyFetch: (studyCode) => Navigator.push(
-                        // context,
-                        // MaterialPageRoute(builder: (_) {
-                        //   return BlocProvider.value(
-                        //     value: BlocProvider.of<StudyCubit>(context),
-                        //     child: JoinStudyScreen(studyCode: _textFieldController.text.toLowerCase().trim(),),
-                        //   );
-                        // }F
+
+                        const Spacer(),
+                    
+                        // BlocBuilder<CloudSyncCubit, CloudSyncState>(
+                        //   builder: (context, state) {
+                        //     if (state.lastSynced == null) {
+                        //       return const Text("Last synced: never");
+                        //     }
+                        //     return Text("Last synced: ${DateFormat('yyyy-MM-dd - kk:mm:ss').format(state.lastSynced!)}");
+                        //   },
+                        // ),
+                        
+                        // const Spacer(),
+                        
+                        ElevatedButton(
+                          onPressed: () => context.read<CloudSyncCubit>().syncAllChildData(),
+                          child: BlocBuilder<CloudSyncCubit, CloudSyncState>(
+                            builder: (context, state) {
+                              if (state.status.isLoading) {
+                                return const CircularProgressIndicator();
+                              }
+                              return const Icon(Icons.cloud_upload, color: Colors.black);
+                            },
+                          ),
+                        ),
                       ],
                     ),
-                    BlocBuilder<StudyCubit, StudyState>(
-                      builder: (context, state) {
-                        if (state.studies.isEmpty) {
-                          return Text(
-                              "You are not participating in any studies");
-                      
-                        }
-                        return SizedBox(
-                          height: 400,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: [
-                              ...state.studies.map(
-                                (s) => StudyTile(
-                                  study: s,
-                                  onStudyDelete: () =>
-                                      context.read<StudyCubit>().withdrawStudy(s.studyCode),
+                  ),
+                ),
+
+                const Divider(height: 80),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Participate in a study",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    BlocConsumer<StudyCubit, StudyState>(
+                      listener: (context, state) {
+                        if (state.status.isFetchStudySuccess) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) {
+                              return RepositoryProvider.value(
+                                value: context.read<StudyRepository>(),
+                                child: BlocProvider.value(
+                                  value:
+                                      BlocProvider.of<StudyCubit>(context),
+                                  child: JoinStudyScreen(
+                                    study: state.newStudy!,
+                                  ),
                                 ),
-                              ).toList(),
-                            ],
-                          ),
+                              );
+                            }),
+                          );
+                        }
+                      },
+                      builder: (context, state) {
+                        if (state.status.isLoading) {
+                          return const CircularProgressIndicator();
+                        }
+                        return IconButton(
+                          iconSize: 32,
+                          icon: const Icon(Icons.add),
+                          onPressed: () => _showStudyCodeInputDialog(
+                              context, onStudyFetch: (s) {
+                            context
+                                .read<StudyCubit>()
+                                .fetchStudyFromServer(s);
+                          }),
                         );
                       },
-                    )
+                    ),
+                    // onStudyFetch: (studyCode) => Navigator.push(
+                    // context,
+                    // MaterialPageRoute(builder: (_) {
+                    //   return BlocProvider.value(
+                    //     value: BlocProvider.of<StudyCubit>(context),
+                    //     child: JoinStudyScreen(studyCode: _textFieldController.text.toLowerCase().trim(),),
+                    //   );
+                    // }F
                   ],
                 ),
-              ),
+
+                BlocBuilder<StudyCubit, StudyState>(
+                  builder: (context, state) {
+                    if (state.studies.isEmpty) {
+                      return Container();
+                    }
+                    return Expanded(
+                      child: ListView(
+                        scrollDirection: Axis.vertical,
+                        children: [
+                          ...state.studies.map(
+                            (s) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              child: StudyTile(
+                                study: s,
+                                onStudyDelete: () => context.read<StudyCubit>().withdrawStudy(s.studyCode),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
-
-
-// SizedBox(height: 200),
-
-//           BlocProvider(
-//             create: (context) => StudyCubit(StudyRepository()),
-//             child: Column(children: [
-//               const Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   Text("Participate in Research"),
-//                   IconButton(
-//                     iconSize: 32,
-//                     icon: Icon(Icons.add),
-//                     onPressed: null,
-//                   )
-//                 ],
-//               ),
-//               BlocBuilder<StudyCubit, StudyState>(
-//                 builder: (context, state) {
-//                   return ListView(
-//                     scrollDirection: Axis.horizontal,
-//                   );
-//                 },
-//               ),

@@ -1,8 +1,6 @@
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_repository.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import '../cubit/all_child_profile_cubit.dart';
 import '../cubit/child_device_cubit.dart';
 import 'screens/create_child_profile_screen.dart';
@@ -26,7 +24,7 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Your profiles"),
+        title: const Text("Home"),
       ),
       body: BlocConsumer<AllChildProfileCubit, AllChildProfileState>(
         listener: (context, state) {
@@ -82,6 +80,9 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
                         gender: profile.gender,
                         deviceRemoteId: profile.deviceRemoteId ?? "",
                         authorisationCode: profile.authorisationCode ?? "",
+                        outdoorTimeToday: profile.outdoorTimeToday!,
+                        outdoorTimeWeek:  profile.outdoorTimeWeek!,
+                        outdoorTimeMonth: profile.outdoorTimeMonth!,
                       );
                     },
                     child: const ChildProfileTile(),

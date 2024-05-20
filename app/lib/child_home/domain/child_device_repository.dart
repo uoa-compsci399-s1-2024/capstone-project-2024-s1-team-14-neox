@@ -1,10 +1,10 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 
 import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
-import 'classifiers/xgboost.dart';
 
 class ChildDeviceRepository {
   static const int bytesPerSample = 20;
@@ -13,7 +13,16 @@ class ChildDeviceRepository {
 
   Future<List<ChildDeviceModel>> fetchChildProfiles() async {
     List<ChildEntity> entities = await ChildEntity.queryAllChildren();
-    return entities.map((child) => ChildDeviceModel.fromEntity(child)).toList();
+    List<ChildDeviceModel> models = entities.map((child) => ChildDeviceModel.fromEntity(child)).toList();
+    
+    Random rng = Random();
+    for (ChildDeviceModel model in models) {
+      model.outdoorTimeToday = rng.nextInt(200);
+      model.outdoorTimeWeek = rng.nextInt(200);
+      model.outdoorTimeMonth = rng.nextInt(200);
+    }
+    
+    return models;
   }
 
   // deletl child profile based on id
@@ -97,8 +106,8 @@ class ChildDeviceRepository {
       int green = readUint16();
       int blue = readUint16();
       int clear = readUint16();
-      int light = _calculateLux(red, blue, green);
-      int colourTemperature = _calculateColourTemperature(red, blue, green, clear);
+      int light = _calculateLux(red, green, blue);
+      int colourTemperature = _calculateColourTemperature(red, green, blue, clear);
 
       int appClass = score([uv, light, accelX, accelY, accelZ])[1] > 0.7 ? 1 : 0;
 

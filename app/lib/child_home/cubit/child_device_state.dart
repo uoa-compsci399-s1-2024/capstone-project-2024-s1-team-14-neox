@@ -7,6 +7,9 @@ class ChildDeviceState {
   final String gender;
   final String deviceRemoteId;
   final String authorisationCode;
+  final int outdoorTimeToday;
+  final int outdoorTimeWeek;
+  final int outdoorTimeMonth;
 
   const ChildDeviceState({
     required this.childId,
@@ -15,6 +18,9 @@ class ChildDeviceState {
     required this.gender,
     required this.deviceRemoteId,
     required this.authorisationCode,
+    required this.outdoorTimeToday,
+    required this.outdoorTimeWeek,
+    required this.outdoorTimeMonth,
   });
 }
 
@@ -26,6 +32,9 @@ class ChildDeviceIdleState extends ChildDeviceState {
     gender: childDeviceState.gender,
     deviceRemoteId: childDeviceState.deviceRemoteId,
     authorisationCode: childDeviceState.authorisationCode,
+    outdoorTimeToday: childDeviceState.outdoorTimeToday,
+    outdoorTimeWeek: childDeviceState.outdoorTimeWeek,
+    outdoorTimeMonth: childDeviceState.outdoorTimeMonth,
   );
 }
 
@@ -39,6 +48,9 @@ class ChildDeviceErrorState extends ChildDeviceState {
     gender: childDeviceState.gender,
     deviceRemoteId: childDeviceState.deviceRemoteId,
     authorisationCode: childDeviceState.authorisationCode,
+    outdoorTimeToday: childDeviceState.outdoorTimeToday,
+    outdoorTimeWeek: childDeviceState.outdoorTimeWeek,
+    outdoorTimeMonth: childDeviceState.outdoorTimeMonth,
   );
 }
 
@@ -50,6 +62,9 @@ class ChildDeviceLoadingState extends ChildDeviceState {
     gender: childDeviceState.gender,
     deviceRemoteId: childDeviceState.deviceRemoteId,
     authorisationCode: childDeviceState.authorisationCode,
+    outdoorTimeToday: childDeviceState.outdoorTimeToday,
+    outdoorTimeWeek: childDeviceState.outdoorTimeWeek,
+    outdoorTimeMonth: childDeviceState.outdoorTimeMonth,
   );
 }
 
@@ -61,6 +76,9 @@ class ChildDeviceConnectState extends ChildDeviceState {
     gender: childDeviceState.gender,
     deviceRemoteId: deviceRemoteId,
     authorisationCode: authorisationCode,
+    outdoorTimeToday: childDeviceState.outdoorTimeToday,
+    outdoorTimeWeek: childDeviceState.outdoorTimeWeek,
+    outdoorTimeMonth: childDeviceState.outdoorTimeMonth,
   );
 }
 
@@ -72,6 +90,9 @@ class ChildDeviceDisconnectState extends ChildDeviceState {
     gender: childDeviceState.gender,
     deviceRemoteId: "",
     authorisationCode: childDeviceState.authorisationCode,
+    outdoorTimeToday: childDeviceState.outdoorTimeToday,
+    outdoorTimeWeek: childDeviceState.outdoorTimeWeek,
+    outdoorTimeMonth: childDeviceState.outdoorTimeMonth,
   );
 }
 
@@ -85,6 +106,9 @@ class ChildDeviceSyncingState extends ChildDeviceState {
     gender: childDeviceState.gender,
     deviceRemoteId: childDeviceState.deviceRemoteId,
     authorisationCode: childDeviceState.authorisationCode,
+    outdoorTimeToday: childDeviceState.outdoorTimeToday,
+    outdoorTimeWeek: childDeviceState.outdoorTimeWeek,
+    outdoorTimeMonth: childDeviceState.outdoorTimeMonth,
   );
 }
 
@@ -96,5 +120,8 @@ class ChildDeviceSyncSuccessState extends ChildDeviceState {
     gender: childDeviceState.gender,
     deviceRemoteId: childDeviceState.deviceRemoteId,
     authorisationCode: childDeviceState.authorisationCode,
+    outdoorTimeToday: childDeviceState.outdoorTimeToday,
+    outdoorTimeWeek: childDeviceState.outdoorTimeWeek,
+    outdoorTimeMonth: childDeviceState.outdoorTimeMonth,
   );
 }
