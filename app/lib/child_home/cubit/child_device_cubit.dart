@@ -91,9 +91,6 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     required String authorisationCode
   }) async {
     BluetoothDevice? device;
-      late StreamSubscription<BluetoothConnectionState> connectSubscription;
-late StreamSubscription<List<int>> respPeriSubscription;
-late StreamSubscription<BluetoothBondState> bsSubscription;
     
     try {
       if (FlutterBluePlus.adapterStateNow != BluetoothAdapterState.on) {
@@ -119,10 +116,6 @@ late StreamSubscription<BluetoothBondState> bsSubscription;
       emit(ChildDeviceErrorState(state, "Failed to connect to device: $e"));
       return;
     }
-            bsSubscription = device.bondState.listen((value) {
-        print("FIX bond subscription $value prev:${device?.prevBondState}");
-      });
-       device.cancelWhenDisconnected(bsSubscription);
 
     const String uuidSerivce = "ba5c0000-243e-4f78-ac25-69688a1669b4";
     const List<String> uuidSamples = [
