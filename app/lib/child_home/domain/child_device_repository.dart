@@ -76,6 +76,14 @@ class ChildDeviceRepository {
     return await fetchChildProfiles();
   }
 
+  Future<int> getMostRecentSampleTimestamp(int childId) async {
+    List<ArduinoDataEntity> data = await ChildEntity.getAllDataForChild(childId);
+    if (data.isEmpty) {
+      return 0;
+    }
+    return data.map((e) => e.datetime.millisecondsSinceEpoch ~/ 1000).reduce(max);
+  }
+
   Future<void> parseAndSaveSamples(
       String childName, List<int> bytes, int childId) async {
     while (bytes.length % bytesPerSample != 0) {

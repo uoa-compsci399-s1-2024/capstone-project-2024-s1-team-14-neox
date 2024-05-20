@@ -13,7 +13,6 @@ const uint32_t maxDataPerCharacteristic = 512;
 const uint32_t dataPerCharacteristic = maxDataPerCharacteristic / sizeof(SensorSample) * sizeof(SensorSample);
 const uint32_t maxData = dataPerCharacteristic * 5;
 uint32_t currentSampleBufferIndex = 0;
-uint32_t sentData = 0;
 
 BLEService sensorSamplesService("ba5c0000-243e-4f78-ac25-69688a1669b4");
 
@@ -150,7 +149,6 @@ void checkConnection() {
         }
     }
     currentSampleBufferIndex = 0;
-    sentData = 0;
     connectTime = 0;
 }
 
@@ -181,7 +179,6 @@ void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
       right = mid - 1;
     }
   }
-  return;
 }
 
 void addSample(byte arr[maxDataPerCharacteristic], uint32_t& index, SensorSample sample) {
@@ -205,10 +202,9 @@ void fillCharacteristics() {
     samples_5.writeValue(buffer_5, maxDataPerCharacteristic);
 }
 
-void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
+void fillBuffers(uint32_t& currentSampleBufferIndex) {
     uint32_t bufferIndex = currentSampleBufferIndex;
-    uint32_t sent = sentData;
-    uint32_t bytesToSend = eepromGetSampleBufferLength() * sizeof(SensorSample) - sent;
+    uint32_t bytesToSend = (eepromGetSampleBufferLength() - currentSampleBufferIndex) * sizeof(SensorSample);
     uint32_t bytesInBuffers = 0;
     uint32_t index = 0;
 
@@ -259,13 +255,11 @@ void fillBuffers(uint32_t& currentSampleBufferIndex, uint32_t& sentData) {
             addSample(buffer_5, index, sample);
         }
 
-        sent += sizeof(SensorSample);
         bytesInBuffers += sizeof(SensorSample);
         bufferIndex++;
     }
     
     eepromUnlockSampleBuffer();
-    sentData = sent;
     currentSampleBufferIndex = bufferIndex;
     
 }
@@ -282,7 +276,7 @@ void updateValues() {
     {
         samplesToSend -= currentSampleBufferIndex;
         progress.writeValue(samplesToSend);
-        fillBuffers(currentSampleBufferIndex, sentData);
+        fillBuffers(currentSampleBufferIndex);
         fillCharacteristics();
         emptyBuffers();
     }
