@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/single_week_hourly_stats_model.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/single_year_daily_stats_model.dart';
 import 'package:path/path.dart';
 
 import '../../data/entities/arduino_data_entity.dart';
@@ -40,6 +41,28 @@ class StatisticsRepository {
   }
 
   // Weekly UI
+
+  // Monthly UI
+  Future<SingleYearDailyStatsModel> getSingleYearDailyStats(
+      int year, int childId) async {
+    Map<DateTime, Map<DateTime, int>> monthlyStats = {};
+    Map<DateTime, double> monthlyMean = {};
+
+    for (int month = 1; month < 13; month++) {
+      DateTime currentMonth = DateTime(year, month);
+    
+      Map<DateTime, int> dailyStats = await ArduinoDataEntity.countSamplesByDay(currentMonth, DateTime(year, month + 1), childId);
+      monthlyStats[currentMonth] = dailyStats;
+      monthlyMean[currentMonth] = dailyStats.values.reduce((value, element) => value + element) / dailyStats.length;
+    }
+    return SingleYearDailyStatsModel(
+      year: year,
+      monthlyStats: monthlyStats,
+      monthlyMean: monthlyMean,
+    );
+  }
+
+
 
 
 
