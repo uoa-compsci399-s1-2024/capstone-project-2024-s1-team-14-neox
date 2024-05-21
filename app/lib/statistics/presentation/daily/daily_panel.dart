@@ -33,13 +33,12 @@ class _DailyPanelState extends State<DailyPanel> {
         },
         child: Column(
           children: [
-            Text("Focus Day goes here"),
             BlocBuilder<DailyCubit, DailyState>(
               builder: (context, state) {
-                return SizedBox(
-                  height: 1000,
+                return Expanded(
                   child: PageView.builder(
                     // controller: _scrollController,
+                    reverse: true,
                     scrollDirection: Axis.horizontal,
                     itemCount: state.dailyStats.length,
                     itemBuilder: ((context, index) {
