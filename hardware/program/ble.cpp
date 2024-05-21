@@ -270,7 +270,11 @@ void updateValues() {
     {
       uint32_t timestamp;
       ts.readValue(timestamp);
-      findTSIndex(timestamp, currentSampleBufferIndex);
+      if (timestamp == 0) {
+        currentSampleBufferIndex = 0;
+      } else {
+        findTSIndex(timestamp, currentSampleBufferIndex);
+      }
     }
     if (update.written())
     {
