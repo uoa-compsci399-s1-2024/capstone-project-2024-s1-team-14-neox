@@ -1,5 +1,6 @@
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/presentation/screens/create_child_profile_screen.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/main.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
     int outdoorTimeToday = state.outdoorTimeToday;
     int outdoorTimeAvgWeek = state.outdoorTimeWeek;
     int outdoorTimeAvgMonth = state.outdoorTimeMonth;
+    int target = App.sharedPreferences.getInt("daily_target")!;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
@@ -105,7 +107,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
             context: context,
             radius: 180,
             lineWidth: 18,
-            percent: (outdoorTimeToday / 120).clamp(0, 1),
+            percent: (outdoorTimeToday / target).clamp(0, 1),
             center: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -113,7 +115,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                   "Today",
                   style: TextStyle(fontSize: 30),
                 ),
-                Text("$outdoorTimeToday / 120 minutes outdoors"),
+                Text("$outdoorTimeToday / $target minutes outdoors"),
               ],
             ),
           ),
@@ -127,7 +129,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                 context: context,
                 radius: 90,
                 lineWidth: 10,
-                percent: (outdoorTimeAvgWeek / 120).clamp(0, 1),
+                percent: (outdoorTimeAvgWeek / target).clamp(0, 1),
                 center: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -143,7 +145,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                 context: context,
                 radius: 90,
                 lineWidth: 10,
-                percent: (outdoorTimeAvgMonth / 120).clamp(0, 1),
+                percent: (outdoorTimeAvgMonth / target).clamp(0, 1),
                 center: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
