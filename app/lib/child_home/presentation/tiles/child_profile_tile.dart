@@ -100,67 +100,77 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
               },
               child: const Text("Generate data"),
             ),
-
-          const Spacer(),
           
-          OutdoorTimeProgressIndicator(
-            context: context,
-            radius: 180,
-            lineWidth: 18,
-            percent: (outdoorTimeToday / target).clamp(0, 1),
-            center: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Today",
-                  style: TextStyle(fontSize: 30),
-                ),
-                Text("$outdoorTimeToday / $target minutes outdoors"),
-              ],
+          Expanded(
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return Column(
+                  children: [
+                    const Spacer(),
+
+                    OutdoorTimeProgressIndicator(
+                      context: context,
+                      radius: constraints.maxWidth / 2 * 0.8,
+                      lineWidth: 18,
+                      percent: (outdoorTimeToday / target).clamp(0, 1),
+                      center: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Today",
+                            style: TextStyle(fontSize: 30),
+                          ),
+                          Text("$outdoorTimeToday / $target minutes outdoors"),
+                        ],
+                      ),
+                    ),
+              
+                    const Spacer(),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        OutdoorTimeProgressIndicator(
+                          context: context,
+                          radius: constraints.maxWidth / 4 * 0.8,
+                          lineWidth: 10,
+                          percent: (outdoorTimeAvgWeek / target).clamp(0, 1),
+                          center: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Past week",
+                                style: TextStyle(fontSize: 18),
+                              ),
+                              Text("$outdoorTimeAvgWeek mins/day"),
+                            ],
+                          ),
+                        ),
+                        OutdoorTimeProgressIndicator(
+                          context: context,
+                          radius: constraints.maxWidth / 4 * 0.8,
+                          lineWidth: 10,
+                          percent: (outdoorTimeAvgMonth / target).clamp(0, 1),
+                          center: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Past month",
+                                style: TextStyle(fontSize: 18),
+                              ),
+                              Text("$outdoorTimeAvgMonth mins/day"),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const Spacer(),
+                  ],
+                );
+              },
             ),
           ),
-          
-          const Spacer(),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              OutdoorTimeProgressIndicator(
-                context: context,
-                radius: 90,
-                lineWidth: 10,
-                percent: (outdoorTimeAvgWeek / target).clamp(0, 1),
-                center: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Past week",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    Text("$outdoorTimeAvgWeek mins/day"),
-                  ],
-                ),
-              ),
-              OutdoorTimeProgressIndicator(
-                context: context,
-                radius: 90,
-                lineWidth: 10,
-                percent: (outdoorTimeAvgMonth / target).clamp(0, 1),
-                center: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Past month",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    Text("$outdoorTimeAvgMonth mins/day"),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          
-          const Spacer(),
         ],
       ),
     );
