@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/classifiers/xgboost.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 
 import '../../data/entities/child_entity.dart';
@@ -174,11 +175,4 @@ class ChildDeviceRepository {
     return ((3810 * b2) ~/ r2 + 1391).clamp(0, 0xFFFF);
   }
 
-  //////////////////////////////////
-  ///           CLOUD            ///
-  //////////////////////////////////
-
-  static Future<void> syncAllChildData() async {
-    await ChildEntity.syncAllChildData();
-  }
 }
