@@ -105,7 +105,48 @@ function make_handler(actionId)
     switch (actionId) {
     case ACTION_FETCH: {
       // TODO
-      break;
+      let res;
+      try {
+        res = await db.query("SELECT * FROM studies WHERE id = $1", [p.studyID]);
+      } catch (e) {
+        throw e;
+      }
+      if (res.rows.length === 0) {
+        const noSuchStudyErrResp = {
+          statusCode: 404,
+          body: JSON.stringify({
+            errors: [{
+              resource: p.resolvedResource,
+              status: 404,
+              message: "study doesn't exist"
+            }],
+          }),
+        };
+        addCorsHeaders(noSuchStudyErrResp);
+        return noSuchStudyErrResp;
+      }
+
+      const fields = res.rows[0];
+      let deletedFields = [];
+      for (let f in fields) {
+        if (!(STUDY_METADATA_FIELDS.map(mf => mf.name).includes(f))) {
+          delete fields[f];
+          deletedFields.push(f);
+        }
+      }
+      console.log(`${p.studyID}: deleted the following fields before sending to caller: ${deletedFields}`);
+      if (fields.start_date != null) {
+        fields.start_date = format(fields.start_date, STUDY_DATE_FORMAT);
+      }
+      if (fields.end_date != null) {
+        fields.end_date = format(fields.end_date, STUDY_DATE_FORMAT);
+      }
+      const goodResp = {
+        statusCode: 200,
+        body: JSON.stringify({
+          data: fields,
+        }),
+      };
     }
     case ACTION_CREATE:
     case ACTION_MODIFY: {
@@ -115,10 +156,10 @@ function make_handler(actionId)
       let errors = [];
 
       // ensure all fields provided actually exist
-      for (let f of STUDY_METADATA_FIELDS.map(mf => mf.name)) {
-        if (!(STUDY_METADATA_FIELDS.map(mf => mf.name).includes(f))) {
+      for (let fname in study_info) {
+        if (!(STUDY_METADATA_FIELDS.map(mf => mf.name).includes(fname))) {
           errors.push({
-            resource: `${p.resolvedResource}?fieldname=${f}`,
+            resource: `${p.resolvedResource}?fieldname=${fname}`,
             status: 400,
             message: "bad field name"
           });
@@ -190,8 +231,15 @@ function make_handler(actionId)
             fieldNameParamOrder.push(fname);
             paramNum++;
           }
-          await db.query(`UPDATE studies SET ${sqlUpdateSetExpressions.join(', ')} WHERE id = $1`,
-                         [p.studyId].concat(fieldNameParamOrder.map(fname => fields[fname])));
+          let res = await db.query(`UPDATE studies SET ${sqlUpdateSetExpressions.join(', ')} WHERE id = $1 RETURNING`,
+                                   [p.studyID].concat(fieldNameParamOrder.map(fname => fields[fname])));
+          if (res.rows.length === 0) {
+            dbError = {
+              resource: p.resolvedResource,
+              status: 404,
+              message: "study doesn't exist",
+            };
+          }
           break;
         }
       } catch (e) {
@@ -213,11 +261,11 @@ function make_handler(actionId)
           const unhandledErrResp = {
             statusCode: 500,
             body: JSON.stringify({
-              errors: {
+              errors: [{
                 resource: p.resolvedResource,
                 status: 500,
                 message: "internal server error"
-              }
+              }]
             }),
           };
           addCorsHeaders(unhandledErrResp);
@@ -242,6 +290,7 @@ function make_handler(actionId)
       return goodResp;
     }
     }
+    assert(false, "an action did not return a response");
   });
 }
 
