@@ -1,12 +1,10 @@
 import 'dart:math';
 
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/single_week_hourly_stats_model.dart';
-import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/daily/bar_chart/hourly_individual_bar.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/daily/bar_chart/bar_chart_bar.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-import 'daily_individual_bar.dart';
 
 class DailyBarChart extends StatefulWidget {
   final SingleWeekHourlyStatsModel dailySummary;
@@ -18,130 +16,74 @@ class DailyBarChart extends StatefulWidget {
 }
 
 class _DailyBarChartState extends State<DailyBarChart> {
+  static const List<String> daysShort = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+  static const List<String> daysLong = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
   int maxValue = 0;
-  List<DailyIndividualBar> barData = [];
-  List<HourlyIndividualBar> monBarData = [];
-  List<HourlyIndividualBar> tueBarData = [];
-  List<HourlyIndividualBar> wedBarData = [];
-  List<HourlyIndividualBar> thuBarData = [];
-  List<HourlyIndividualBar> friBarData = [];
-  List<HourlyIndividualBar> satBarData = [];
-  List<HourlyIndividualBar> sunBarData = [];
+  List<BarChartBar> barData = [];
+  List<List<BarChartBar>> dayBreakdownBarData = [[], [], [], [], [], [], []];
+  int? selectedDay; // In range [0,6] or null for none
+
+  @override
+  void initState() {
+    initialiseBarData();
+    super.initState();
+  }
 
   void initialiseBarData() {
     int index = 0;
     barData = widget.dailySummary.dailySum.entries.map((e) {
       maxValue = max(maxValue, e.value);
-      return DailyIndividualBar(x: index++, y: e.value, date: e.key);
+      //return BarChartBar(x: index++, y: Random().nextInt(150), time: e.key);
+      return BarChartBar(x: index++, y: e.value, time: e.key);
     }).toList();
+
     widget.dailySummary.dailyStats.forEach((key, value) {
-      if (key.weekday == 1) {
-        int indexMon = 0;
-        monBarData = value.entries.map((e) {
-          return HourlyIndividualBar(x: indexMon++, y: e.value, hour: e.key);
-        }).toList();
-      } else if (key.weekday == 2) {
-        int indexTue = 0;
-        tueBarData = value.entries.map((e) {
-          return HourlyIndividualBar(x: indexTue++, y: e.value, hour: e.key);
-        }).toList();
-      } else if (key.weekday == 3) {
-        int indexWed = 0;
-        wedBarData = value.entries.map((e) {
-          return HourlyIndividualBar(x: indexWed++, y: e.value, hour: e.key);
-        }).toList();
-      } else if (key.weekday == 4) {
-        int indexThu = 0;
-        thuBarData = value.entries.map((e) {
-          return HourlyIndividualBar(x: indexThu++, y: e.value, hour: e.key);
-        }).toList();
-      } else if (key.weekday == 5) {
-        int indexFri = 0;
-        friBarData = value.entries.map((e) {
-          return HourlyIndividualBar(x: indexFri++, y: e.value, hour: e.key);
-        }).toList();
-      } else if (key.weekday == 6) {
-        int indexSat = 0;
-        satBarData = value.entries.map((e) {
-          return HourlyIndividualBar(x: indexSat++, y: e.value, hour: e.key);
-        }).toList();
-      } else {
-        int indexSun = 0;
-        sunBarData = value.entries.map((e) {
-          return HourlyIndividualBar(x: indexSun++, y: e.value, hour: e.key);
-        }).toList();
-      }
+      int index = 0;
+      dayBreakdownBarData[key.weekday - 1] = value.entries
+        //.map((e) => BarChartBar(x: index++, y: Random().nextInt(150), time: e.key))
+        .map((e) => BarChartBar(x: index++, y: e.value, time: e.key))
+        .toList();
     });
   }
 
   Widget _getDayBottomTitles(double value, TitleMeta meta) {
-    const textStyle = TextStyle(
-      color: Colors.grey,
-      fontSize: 14,
-    );
-    String text;
-    switch (value.toInt()) {
-      case 0:
-        text = "MON";
-        break;
-      case 1:
-        text = "TUE";
-        break;
-      case 2:
-        text = "WED";
-        break;
-      case 3:
-        text = "THU";
-        break;
-      case 4:
-        text = "FRI";
-        break;
-      case 5:
-        text = "SAT";
-        break;
-      case 6:
-        text = "SUN";
-        break;
-      default:
-        text = "";
-        break;
-    }
     return SideTitleWidget(
-        axisSide: meta.axisSide,
-        child: Text(
-          text,
-          style: textStyle,
-        ));
+      axisSide: meta.axisSide,
+      child: Text(
+        daysShort[value.toInt()],
+        style: const TextStyle(
+          color: Colors.grey,
+          fontSize: 14,
+        ),
+      ),
+    );
   }
 
   Widget _getHourBottomTitles(double value, TitleMeta meta) {
-    const textStyle = TextStyle(
-      color: Colors.grey,
-      fontSize: 14,
-    );
+    int val = value.toInt();
+    String half = val < 12 ? "AM" : "PM";
+
+    val %= 12;
+    if (val == 0) {
+      val = 12;
+    }
+
+    if (val % 3 != 0) {
+      return Container();
+    }
 
     return SideTitleWidget(
-        axisSide: meta.axisSide,
-        child: Text(
-          "${value}h",
-          style: textStyle,
-        ));
+      axisSide: meta.axisSide,
+      child: Text(
+        "$val$half",
+        style: const TextStyle(
+          color: Colors.grey,
+          fontSize: 14,
+        ),
+      ),
+    );
   }
-
-  // Widget _getDayBottomTitles(DateTime date, TitleMeta meta) {
-  //   const textStyle = TextStyle(
-  //     color: Colors.grey,
-  //     fontSize: 14,
-  //   );
-  //   String text = DateFormat("EEEE").format(date).substring(0, 3);
-  //   return SideTitleWidget(
-  //     axisSide: meta.axisSide,
-  //     child: Text(
-  //       text,
-  //       style: textStyle,
-  //     ),
-  //   );
-  // }
 
   Widget _getSideTitles(double value, TitleMeta meta) {
     return SideTitleWidget(
@@ -150,56 +92,82 @@ class _DailyBarChartState extends State<DailyBarChart> {
     );
   }
 
-  SizedBox _buildHourlyChart(List<HourlyIndividualBar> hourlyBarData) {
-    return SizedBox(
-      height: 100,
+  Widget _buildBarChart(
+    BuildContext context,
+    List<BarChartBar> barData,
+    {
+      required Widget Function(double value, TitleMeta meta) bottomTitles,
+      required Color Function(int day) barColour,
+      required int sideLabelCount,
+      Function(FlTouchEvent event, BarTouchResponse? response)? touchCallback,
+      double? barWidth,
+    })
+  {
+    double maxY = max(150, maxValue * 0.2); // TODO Set max depending on maximum of values in y
+    double interval = maxY / sideLabelCount;
+    
+    return Padding(
+      padding: const EdgeInsets.all(40),
       child: BarChart(
         BarChartData(
           minY: 0,
-          maxY: 60,
+          maxY: maxY,
+
           gridData: const FlGridData(show: false),
           borderData: FlBorderData(show: false),
+
           titlesData: FlTitlesData(
             show: true,
-            topTitles:
-                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles:
-                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            leftTitles:
-                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles: AxisTitles(
+              axisNameWidget: const Text("Time outdoors (mins)"),
+              sideTitles: SideTitles(
+                interval: interval,
+                showTitles: true,
+                reservedSize: 40,
+                getTitlesWidget: _getSideTitles,
+              ),
+            ),
+
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 interval: 1,
                 showTitles: true,
-                getTitlesWidget: ((value, meta) {
-                  return _getHourBottomTitles(value, meta);
-                }),
+                reservedSize: 40,
+                getTitlesWidget: bottomTitles,
               ),
             ),
           ),
-          barTouchData: BarTouchData(touchTooltipData: BarTouchTooltipData(
-            getTooltipItem: (
-              group,
-              groupIndex,
-              rod,
-              rodIndex,
-            ) {
-              return BarTooltipItem(
-                  "${group.x}h\n${rod.toY.toInt()} mins",
+
+          barGroups: barData
+            .map((data) => BarChartGroupData(
+              x: data.x,
+              barRods: [BarChartRodData(
+                toY: data.y.toDouble(),
+                width: barWidth,
+                borderRadius: const BorderRadius.all(Radius.zero),
+                color: barColour(data.x),
+              )],
+            ))
+            .toList(),
+
+          barTouchData: BarTouchData(
+            touchTooltipData: BarTouchTooltipData(
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                return BarTooltipItem(
+                  //"${DateFormat("dd MMMM").format(barData[group.x].time)}\n${rod.toY.toInt()} mins",
+                  "${rod.toY.toInt()} mins",
                   const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
-                  ));
-            },
-          )),
-          barGroups: hourlyBarData
-              .map(
-                (data) => BarChartGroupData(
-                    x: data.x,
-                    barRods: [BarChartRodData(toY: data.y.toDouble())]),
-              )
-              .toList(),
+                  ),
+                );
+              },
+            ),
+            touchCallback: touchCallback,
+          ),
         ),
       ),
     );
@@ -207,84 +175,74 @@ class _DailyBarChartState extends State<DailyBarChart> {
 
   @override
   Widget build(BuildContext context) {
-    initialiseBarData();
-    return Column(
-      children: [
-        Text("Daily outdoor time"),
-        Expanded(
-          child: BarChart(
-            BarChartData(
-              minY: 0,
-              maxY: max(
-                  150,
-                  maxValue *
-                      0.2), // TODO Set max depending on maximum of values in y
-              gridData: const FlGridData(show: false),
-              borderData: FlBorderData(show: false),
-              titlesData: FlTitlesData(
-                show: true,
-                topTitles:
-                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles:
-                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 40,
-                  getTitlesWidget: _getSideTitles,
-                )),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    interval: 1,
-                    showTitles: true,
-                    getTitlesWidget: ((value, meta) {
-                      return _getDayBottomTitles(value, meta);
-                    }),
-                  ),
-                ),
-              ),
-              barTouchData: BarTouchData(touchTooltipData: BarTouchTooltipData(
-                getTooltipItem: (
-                  group,
-                  groupIndex,
-                  rod,
-                  rodIndex,
-                ) {
-                  return BarTooltipItem(
-                      "${DateFormat("dd MMMM").format(barData[group.x].date)}\n${rod.toY.toInt()} mins",
-                      const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ));
-                },
-              )),
-              barGroups: barData
-                  .map(
-                    (data) => BarChartGroupData(
-                        x: data.x,
-                        barRods: [BarChartRodData(toY: data.y.toDouble())]),
-                  )
-                  .toList(),
+    DateTime startMonday = widget.dailySummary.startMondayDate;
+    DateTime endMonday = startMonday.add(const Duration(days: 6));
+    String heading = "${DateFormat("d MMMM").format(startMonday)} - ${DateFormat("d MMMM").format(endMonday)}";
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 40),
+      child: Column(
+        children: [
+          Text(
+            heading,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
           ),
-        ),
-        Text("Hourly breakdown"),
-        Text("Monday"),
-        _buildHourlyChart(monBarData),
-        Text("Tuesday"),
-        _buildHourlyChart(tueBarData),
-        Text("Wednesday"),
-        _buildHourlyChart(wedBarData),
-        Text("Thursday"),
-        _buildHourlyChart(thuBarData),
-        Text("Friday"),
-        _buildHourlyChart(friBarData),
-        Text("Saturday"),
-        _buildHourlyChart(satBarData),
-        Text("Sunday"),
-        _buildHourlyChart(sunBarData),
-      ],
+
+          Expanded(
+            flex: 2,
+            child: _buildBarChart(
+              context,
+              barData,
+              sideLabelCount: 10,
+              barWidth: 40,
+              bottomTitles: _getDayBottomTitles,
+              barColour: (day) {
+                if (selectedDay == null || selectedDay == day) {
+                  return Theme.of(context).primaryColor;
+                } else {
+                  return Theme.of(context).primaryColor.withOpacity(0.5);
+                }
+              },
+              touchCallback: (FlTouchEvent event, BarTouchResponse? response) {
+                if (event is FlTapDownEvent) {
+                  int? select = response?.spot?.touchedBarGroupIndex;
+                  if (select != selectedDay) {
+                    selectedDay = select;
+                    setState(() {});
+                  }
+                }
+              },
+            ),
+          ),
+          
+          if (selectedDay != null)
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                "${daysLong[selectedDay!]} ${DateFormat("d MMMM").format(startMonday.add(Duration(days: selectedDay!)))}",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+          if (selectedDay != null)
+            Expanded(
+              flex: 1,
+              child: _buildBarChart(
+                context,
+                dayBreakdownBarData[selectedDay!],
+                sideLabelCount: 5,
+                barColour: (_) => Theme.of(context).primaryColor,
+                bottomTitles: _getHourBottomTitles,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
