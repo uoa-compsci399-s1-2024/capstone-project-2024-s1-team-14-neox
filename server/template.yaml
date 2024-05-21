@@ -674,6 +674,51 @@ Resources:
         - 'arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs'
   # NOTE: the lambdas seem to be automatically integrated via lambda proxy integration
   # Lambda
+  FuncStudiesCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-create-get-modify/
+      Handler: index.handler_create
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /studies/{studyID}
+            Method: put
+            RestApiId: !Ref API
+  FuncStudiesInfoFetch:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-create-get-modify/
+      Handler: index.handler_fetch
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /studies/{studyID}/info
+            Method: get
+            RestApiId: !Ref API
+  FuncStudiesInfoModify:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-create-get-modify/
+      Handler: index.handler_modify
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ReplaceEvent:
+          Type: Api
+          Properties:
+            Path: /studies/{studyID}/info
+            Method: put
+            RestApiId: !Ref API
+        PartialUpdateEvent:
+          Type: Api
+          Properties:
+            Path: /studies/{studyID}/info
+            Method: patch
+            RestApiId: !Ref API
   FuncSamplesSearch:
     Type: AWS::Serverless::Function
     Properties:

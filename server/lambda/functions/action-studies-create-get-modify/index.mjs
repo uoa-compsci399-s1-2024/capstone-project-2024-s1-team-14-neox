@@ -33,6 +33,8 @@ const ACTION_CREATE = "create";
 const ACTION_FETCH = "fetch";
 const ACTION_MODIFY = "modify";
 
+const STUDYID_REGEX = /^[A-Za-z0-9]+$/;
+
 function readParams(event)
 {
   return {
@@ -44,8 +46,29 @@ function readParams(event)
 function make_handler(actionId)
 {
   return (async (event) => {
+    console.log(`action: ${actionId}`);
+    console.log(`http method: ${event.httpMethod.toUpperCase()}`)
     const p = readParams(event);
     console.log(`studyID: ${p.studyID}`);
+
+    // We check studyid format in JS and only upon creation so that
+    // the format can change without having to recreate the DB tables.
+    if (actionId === ACTION_CREATE) {
+      if (!(p.studyID.match(STUDYID_REGEX))) {
+        const badStudyIdErrResp = {
+          statusCode: 400,
+          body: JSON.stringify({
+            errors: [{
+              resource: p.resolvedResource,
+              status: 400,
+              message: `invalid study id, it must match the regular expression: ${STUDYID_REGEX}`,
+            }]
+          }),
+        };
+        addCorsHeaders(badStudyIdErrResp);
+        return badStudyIdErrResp;
+      }
+    }
 
     const authFlags = (() => {
       switch (actionID) {
@@ -77,7 +100,7 @@ function make_handler(actionId)
     case ACTION_FETCH: {
       let res;
       try {
-        res = await db.query("SELECT * FROM studies WHERE id = $1", [p.studyID]);
+        res = await db.query("SELECT * FROM studies WHERE upper(id) = upper($1)", [p.studyID]);
       } catch (e) {
         throw e;
       }
@@ -182,30 +205,30 @@ function make_handler(actionId)
       }
 
       let dbError = null;
+      let paramNum = 2;
+      // the order in the sql param list (needed since object key iteration order is indeterminate)
+      const sqlFields = [];
+      for (let fname in fields) {
+        sqlFields.push({
+          "column": pg.escapeIdentifier(fname),
+          "value": fields[fname],
+          "paramNum": paramNum,
+        });
+        paramNum++;
+      }
       try {
         switch (actionId) {
         case ACTION_CREATE: {
-          const columnsList = STUDY_METADATA_FIELDS.map(mf => pg.escapeIdentifier(mf.name)).join(", ");
-          // 1+i since PostgreSQL parameters start from 1
-          // n + (1+i) to put fields in PostgreSQL parameters *after* `n`
-          const queryFieldNumbers = Array(STUDY_METADATA_FIELDS.length).fill().map((_,i) => 1 + 1+i);
-          await = db.query(`
-            INSERT INTO studies (id, ${columnsList})
-            VALUES ($1, ${queryFieldNumbers.map(n => '$' + n).join(',')})`);
+          await db.query(`INSERT INTO studies (id, ${sqlFields.map(sf => sf.column).join(',')})
+                          VALUES (upper($1), ${sqlFields.map(sf => '$' + sf.paramNum).join(',')})`,
+                         [p.studyID].concat(sqlFields.map(sf => sf.value)));
           break;
         }
         case ACTION_MODIFY: {
-          const sqlUpdateSetExpressions = [];
-          let paramNum = 2;
-          // the order in the sql param list (needed since object key iteration order is indeterminate)
-          const fieldNameParamOrder = [];
-          for (let fname in fields) {
-            sqlUpdateSetExpressions.push(`${pg.escapeIdentifier(fname)} = $${paramNum}`);
-            fieldNameParamOrder.push(fname);
-            paramNum++;
-          }
-          let res = await db.query(`UPDATE studies SET ${sqlUpdateSetExpressions.join(', ')} WHERE id = $1 RETURNING`,
-                                   [p.studyID].concat(fieldNameParamOrder.map(fname => fields[fname])));
+          let res = await db.query(`UPDATE studies
+                                    SET ${sqlFields.map(sf => sf.column + ' = ' + '$' + sf.paramNum).join(', ')}
+                                    WHERE upper(id) = upper($1) RETURNING`,
+                                   [p.studyID].concat(sqlFields.map(sf => sf.value)));
           if (res.rows.length === 0) {
             dbError = {
               resource: p.resolvedResource,

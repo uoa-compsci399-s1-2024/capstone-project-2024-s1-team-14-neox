@@ -29,7 +29,9 @@ CREATE TABLE studies (
        max_date DATE NOT NULL,
        name TEXT,
        description TEXT,
-       CONSTRAINT date_interval CHECK (min_date <= max_date)
+       CONSTRAINT date_interval CHECK (min_date <= max_date),
+       -- Ensure all IDs are stored in uppercase
+       CONSTRAINT id_caps CHECK (id = upper(id)),
 );
 CREATE TABLE study_children (
        study_id TEXT NOT NULL,
