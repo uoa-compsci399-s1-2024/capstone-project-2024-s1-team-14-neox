@@ -126,7 +126,8 @@ const Users = ({ toggleButton, handleJwtToken }) => {
         </form>
         <br/>
         <h2 style={{"text-align": "center"}}>Registered researchers</h2>
-        
+        <li style={{"text-align": "center", "font-size": "2em"}}>N. Jones</li>
+
         {isOpen && isSuccessful && <Popup
           content={<>
             <b>Account {newUserEmail} is successfully created!</b>
