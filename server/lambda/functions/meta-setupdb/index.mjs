@@ -35,17 +35,17 @@ CREATE TABLE studies (
 );
 CREATE TABLE study_children (
        study_id TEXT NOT NULL,
-       child_id TEXT NOT NULL,
-       PRIMARY KEY (study_id, child_id),
+       participant_id TEXT NOT NULL,
+       PRIMARY KEY (study_id, participant_id),
        FOREIGN KEY (study_id) REFERENCES studies (id),
-       FOREIGN KEY (child_id) REFERENCES children (id)
+       FOREIGN KEY (participant_id) REFERENCES children (id)
 );
 CREATE TABLE study_researchers (
        study_id TEXT NOT NULL,
-       researcher_id TEXT NOT NULL,
-       PRIMARY KEY (study_id, researcher_id),
+       participant_id TEXT NOT NULL,
+       PRIMARY KEY (study_id, participant_id),
        FOREIGN KEY (study_id) REFERENCES studies (id),
-       FOREIGN KEY (researcher_id) REFERENCES users (id)
+       FOREIGN KEY (participant_id) REFERENCES users (id)
 );
 
 CREATE TYPE gender AS ENUM (${PERSONAL_INFO_CHILD_GENDER_OPTIONS.map(pg.escapeLiteral).join(', ')});
