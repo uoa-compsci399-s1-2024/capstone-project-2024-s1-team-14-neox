@@ -46,6 +46,16 @@ class StudyEntity {
         studyCode: Value(studyCode));
   }
 
+  factory StudyEntity.fromJson(Map<String, dynamic> json, String studyCode){
+    return StudyEntity(
+      name: json["name"],
+      description: json["description"],
+      startDate: json["startDate"],
+      endDate: json["endDate"],
+      studyCode: studyCode
+    );
+  }
+
 // QUERIES
 
 ///////////////////////////////////////////////////////////////
@@ -87,20 +97,20 @@ class StudyEntity {
         .go();
   }
 
-  static Future<List<String>> getAllStudyFromServer() async {
+  static getStudyFromServer(String studyCode) async {
 
     Dio dio = Dio();
     try {
-      Response response = await dio.get('$apiUrl/studies');
+      Response response = await dio.get('$apiUrl/studies/$studyCode');
 
 
       if (response.statusCode == 200) {
 
-        List<dynamic> studyData = response.data['data'];
+        var studyData = response.data;
 
-        List<String> studyIds = studyData.map<String>((study) => study['id']).toList();
+        StudyEntity study = StudyEntity.fromJson(studyData, studyCode);
+        StudyEntity.createStudy(study);
 
-        return studyIds;
       } else {
 
         print('Failed to fetch studies: ${response.statusCode}');
@@ -115,7 +125,5 @@ class StudyEntity {
     }
 
   }
-  static fetchStudyById() async{
-    // todo
-  }
+
 }
