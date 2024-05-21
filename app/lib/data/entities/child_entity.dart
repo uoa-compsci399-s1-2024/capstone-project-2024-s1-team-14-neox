@@ -76,13 +76,13 @@ class ChildEntity {
 
   static Future<void> saveSingleChildEntityFromParameters(
       String name, DateTime birthDate, String gender) async {
-    String serverId = await ChildApiService.registerChild();
+    //String serverId = await ChildApiService.registerChild();
 
     ChildEntity childEntity = ChildEntity(
       name: name,
       gender: gender,
       birthDate: birthDate,
-      serverId: serverId,
+      serverId: null,
     );
 
     AppDb db = AppDb.instance();
