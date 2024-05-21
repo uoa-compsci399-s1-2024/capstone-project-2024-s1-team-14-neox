@@ -809,11 +809,11 @@ Resources:
             Path: /children/{childID}/studies
             Method: get
             RestApiId: !Ref API
-  FuncSamplesSearch:
+  FuncSamplesSearchInChild:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: lambda/functions/action-samples-search/
-      Handler: index.handler
+      Handler: index.handler_child
       Timeout: 30  # there can be loads of samples on server
       Role: !GetAtt LambdaRole.Arn
       Events:
@@ -821,6 +821,20 @@ Resources:
           Type: Api
           Properties:
             Path: /samples/{childID}
+            Method: get
+            RestApiId: !Ref API
+  FuncSamplesSearchInStudy:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-samples-search/
+      Handler: index.handler_studies
+      Timeout: 30  # there can be loads of samples on server
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /studies/{studyID}/samples
             Method: get
             RestApiId: !Ref API
   FuncSamplesAdd:
