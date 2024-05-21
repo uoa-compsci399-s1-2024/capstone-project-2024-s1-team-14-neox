@@ -134,7 +134,7 @@ function App() {
                   <Route path="/users" element={<Users toggleButton={toggleButton} handleJwtToken={handleJwtToken} />} />
                 )}
                 {!showButton && isAdmin && (
-                  <Route path="/create" element={<Create/>} />
+                  <Route path="/create" element={<Create handleJwtToken={handleJwtToken}/>} />
                 )}
                 {!showButton && (
                   <Route path="/home" element={<Home isAdmin={isAdmin} showButton={showButton} />} />
