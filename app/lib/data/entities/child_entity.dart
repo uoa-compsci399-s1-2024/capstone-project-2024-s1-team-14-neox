@@ -76,13 +76,13 @@ class ChildEntity {
 
   static Future<void> saveSingleChildEntityFromParameters(
       String name, DateTime birthDate, String gender) async {
-    String serverId = await ChildApiService.registerChild();
+    // String serverId = await ChildApiService.registerChild();
 
     ChildEntity childEntity = ChildEntity(
       name: name,
       gender: gender,
       birthDate: birthDate,
-      serverId: serverId,
+      serverId: "",
     );
 
     AppDb db = AppDb.instance();
@@ -130,7 +130,14 @@ class ChildEntity {
         await ArduinoDataEntity.queryArduinoDataById(childId);
     return data;
   }
-  
+
+  static Future<List<ChildEntity>> queryChildNoServerId() async {
+    AppDb db = AppDb.instance();
+    return await (db.select(db.children)
+          ..where((tbl) => tbl.serverId.equals("")))
+        .get();
+  }
+
   ////////////////////////////////////////////////////////////////////////////
   // UPDATE //////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
@@ -165,6 +172,12 @@ class ChildEntity {
     ));
   }
 
+  static Future<void> updateServerId(int childId, String serverId) async {
+    AppDb db = AppDb.instance();
+    await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
+        .write(ChildrenCompanion(serverId: Value(serverId)));
+  }
+
   ////////////////////////////////////////////////////////////////////////////
   // DELETE //////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
@@ -194,12 +207,16 @@ class ChildEntity {
   //////////////////////////////////
 
   static Future<void> syncAllChildData() async {
-
-    var children = await ChildEntity.queryAllChildren();
-    for(final child in children) {
+    List<ChildEntity> noServerIdChildren = await ChildEntity.queryChildNoServerId();
+    for (final noServerIdChild in noServerIdChildren) {
+      String generatedServerId = await ChildApiService.registerChild();
+      ChildEntity.updateServerId(noServerIdChild.id!, generatedServerId);
+    }
+    List<ChildEntity> children = await ChildEntity.queryAllChildren();
+    for (final child in children) {
+      if (child.serverId == "") {}
       int? id = child.id;
       ChildApiService.postData(id!);
     }
-
   }
 }
