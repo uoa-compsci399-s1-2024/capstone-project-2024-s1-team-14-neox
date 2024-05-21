@@ -150,13 +150,13 @@ function make_handler(actionId)
     }
     case ACTION_CREATE:
     case ACTION_MODIFY: {
-      let study_info = JSON.parse(event.body);
-      console.log(`got fields: ${JSON.stringify(study_info)}`);
+      let fields = JSON.parse(event.body);
+      console.log(`got fields: ${JSON.stringify(fields)}`);
 
       let errors = [];
 
       // ensure all fields provided actually exist
-      for (let fname in study_info) {
+      for (let fname in fields) {
         if (!(STUDY_METADATA_FIELDS.map(mf => mf.name).includes(fname))) {
           errors.push({
             resource: `${p.resolvedResource}?fieldname=${fname}`,
