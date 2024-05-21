@@ -517,18 +517,18 @@ mandatory fields:
 
 ``` json
 {
-	"min_date": ...,
-	"max_date": ...,
+	"start_date": ...,
+	"end_date": ...,
 }
 ```
 
 where:
 
-- `min_date` and `max_date` are `YYYY-MM-DD` dates which refer to the
+- `start_date` and `end_date` are `YYYY-MM-DD` dates which refer to the
   earliest and latest samples, respectively, to include in the study
   (note that all samples from any day [including the final day] in the
   period of the study are included).  **Interpretation: UTC 0
-  datetimes where `min_date` has time `00:00:00Z` and `max_date` has
+  datetimes where `start_date` has time `00:00:00Z` and `end_date` has
   time `23:59:59Z`.**
 
 These fields are optional:
@@ -573,7 +573,7 @@ Server will return 403.
 ##### 1. User sends GET request with query parameters for:
 
 - Filter by:
-  - min/max date
+  - start/end date
 
 ##### 2a. If authorised
 
