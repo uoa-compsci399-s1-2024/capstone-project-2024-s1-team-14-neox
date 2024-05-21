@@ -66,7 +66,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
 
                   List<ArduinoDataEntity> randomData =
                       await ArduinoDataEntity.createSampleArduinoDataList(
-                          state.childId, DateTime.now(), 30);
+                          state.childId, DateTime.now(), 60);
                           print("Created data");
                   await ArduinoDataEntity.saveListOfArduinoDataEntity(
                       randomData);

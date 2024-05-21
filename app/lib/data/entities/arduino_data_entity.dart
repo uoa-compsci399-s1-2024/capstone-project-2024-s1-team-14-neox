@@ -221,6 +221,8 @@ class ArduinoDataEntity {
 
       result[startOfDay] = countSamplesWithAppClass1(dataList);
     }
+    print("Drift result");
+    print(result);
 
     return result;
   }

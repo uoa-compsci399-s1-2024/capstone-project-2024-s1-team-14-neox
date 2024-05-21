@@ -100,6 +100,14 @@ class MonthlyPanel extends StatelessWidget {
           children: [
             BlocBuilder<MonthlyCubit, MonthlyState>(
               builder: (context, state) {
+                print("State $state");
+                if (state.status.isInitial) {
+                  print("initial");
+                  return Text("Please select a child");
+                }
+                if (state.status.isLoading){
+                  return CircularProgressIndicator();
+                }
                 return SizedBox(
                   height: 300,
                   child: MonthlyBarChart(monthlySummary: state.monthlyStats!),
@@ -108,6 +116,13 @@ class MonthlyPanel extends StatelessWidget {
             ),
             BlocBuilder<MonthlyCubit, MonthlyState>(
               builder: (context, state) {
+                if (state.status.isInitial) {
+                  print("initial");
+                  return Text("");
+                }
+                if (state.status.isLoading){
+                  return CircularProgressIndicator();
+                }
                 return SizedBox(
                   height: 300,
                   child: PageView.builder(
