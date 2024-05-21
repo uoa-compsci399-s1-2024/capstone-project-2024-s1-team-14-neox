@@ -11,11 +11,14 @@ class DailyCubit extends Cubit<DailyState> {
   DailyCubit(this._statisticsRepository)
       : super(DailyState());
 
-  Future<void> onGetDataForChildId(int childId) async {
+  Future<void> onGetDataForChildId(queryDate, childId) async {
+    DateTime startMonday = queryDate.subtract(Duration(days: queryDate.weekday - 1));
     emit(state.copyWith(status: DailyStatus.loading));
-
+     List<SingleWeekHourlyStatsModel> newDailyStats = await  _statisticsRepository.getListOfHourlyStats(startMonday, 4, childId);
+  print(newDailyStats);
     emit(state.copyWith(
       status: DailyStatus.success,
+      dailyStats: newDailyStats + state.dailyStats
     ));
   }
 }

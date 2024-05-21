@@ -15,35 +15,42 @@ class DailyPanel extends StatefulWidget {
 }
 
 class _DailyPanelState extends State<DailyPanel> {
-
   final _scrollController = ScrollController();
+// @override
+//   void initState() {
+//     context.read<StatisticsCubit>().state.focusChildId;
+//     super.initState();
+//   }
   @override
   Widget build(BuildContext context) {
     return BlocListener<StatisticsCubit, StatisticsState>(
-      listener: (context, state) {
-        context.read<DailyCubit>().onGetDataForChildId(
-              context.read<StatisticsCubit>().state.focusChildId,
-            );
-      },
-      child: Column(
-        children: [
-          Text("Focus Day goes here"),
-          BlocBuilder<DailyCubit, DailyState>(
-        builder: (context, state) {
-          return ListView.builder(
-            controller: _scrollController,
-            scrollDirection: Axis.horizontal,
-            itemCount: state.dailyStats.length,
-            itemBuilder: ((context, index) {
-              return DailyBarChart(dailySummary: state.dailyStats[index]);
-            }),);
+        listener: (context, state) {
+          // print(context.read<Stat>)
+          context.read<DailyCubit>().onGetDataForChildId(
+                DateTime.now(),
+                context.read<StatisticsCubit>().state.focusChildId,
+              );
         },
-      ),
-        ],
-      )
-      
-      
-    );
+        child: Column(
+          children: [
+            Text("Focus Day goes here"),
+            BlocBuilder<DailyCubit, DailyState>(
+              builder: (context, state) {
+                return SizedBox(
+                  height: 300,
+                  child: PageView.builder(
+                    // controller: _scrollController,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: state.dailyStats.length,
+                    itemBuilder: ((context, index) {
+                      return DailyBarChart(dailySummary: state.dailyStats[index]);
+                    }),
+                  ),
+                );
+              },
+            ),
+          ],
+        ));
   }
 }
 

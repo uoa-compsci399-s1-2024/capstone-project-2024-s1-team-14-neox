@@ -91,12 +91,12 @@ class StatisticsHomeState extends State<StatisticsHome>
           ),
         ),
         body: RepositoryProvider(
-          create: (context) => StatisticsRepository(),
+          create: (_) => StatisticsRepository(),
           child: MultiBlocProvider(
             providers: [
-              BlocProvider(create: (_) => DailyCubit(context.read<StatisticsRepository>())),
-              BlocProvider(create: (_) => WeeklyCubit(context.read<StatisticsRepository>())),
-              BlocProvider(create: (_) => MonthlyCubit(context.read<StatisticsRepository>())),
+              BlocProvider(create: (context) => DailyCubit(context.read<StatisticsRepository>())),
+              BlocProvider(create: (context) => WeeklyCubit(context.read<StatisticsRepository>())),
+              BlocProvider(create: (context) => MonthlyCubit(context.read<StatisticsRepository>())),
             ],
             child: TabBarView(
               controller: _tabController,
