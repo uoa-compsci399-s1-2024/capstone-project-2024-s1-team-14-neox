@@ -37,7 +37,7 @@ class _DailyPanelState extends State<DailyPanel> {
             BlocBuilder<DailyCubit, DailyState>(
               builder: (context, state) {
                 return SizedBox(
-                  height: 300,
+                  height: 1000,
                   child: PageView.builder(
                     // controller: _scrollController,
                     scrollDirection: Axis.horizontal,
