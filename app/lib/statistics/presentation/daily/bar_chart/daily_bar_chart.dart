@@ -93,6 +93,7 @@ class _DailyBarChartState extends State<DailyBarChart> {
 
   @override
   Widget build(BuildContext context) {
+    initialiseBarData();
     return BarChart(
       BarChartData(
         minY: 0,
