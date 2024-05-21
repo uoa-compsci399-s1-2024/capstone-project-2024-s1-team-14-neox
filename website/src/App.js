@@ -59,10 +59,9 @@ function App() {
       console.error('Error signing out:', error);
     }
   };
-  
+
   useEffect(() => {
-    // Clear authentication tokens upon component mount
-    Amplify.Auth.signOut();
+    fetchJwtToken();
   }, []);
 
   const listener = (data) => {
@@ -90,7 +89,7 @@ function App() {
       const session = await Auth.currentSession();
       const token = session.getIdToken().getJwtToken();
       setJwtToken(token);
-      handleJwtToken(token); // Pass jwtToken back to App.js
+      handleJwtToken(token);
       console.log("user belongs to following groups: " + session.getIdToken().payload["cognito:groups"]);
       const groups = session.getIdToken().payload["cognito:groups"];
       if (groups && groups.includes("admins")) {
@@ -98,10 +97,15 @@ function App() {
       }else if (groups && groups.includes("researchers")){
         
       }else{
-        //handleUnauthorisedSignOut();
+        handleSignOut();
+        alert("The email does not exist");
       }
+      //console.log('token is ', token);
+      toggleButton(false);
     } catch (error) {
       console.log('Error fetching JWT token:', error);
+      toggleButton(true);
+      setIsAdmin(false);
     }
   };
 
@@ -115,6 +119,7 @@ function App() {
             {showButton && <Link to={'/'} className="navbar-brand"><img src={logo} alt="NEOX Logo" width="140px" /></Link>}
             {!showButton && <Link to={'/home'} className="navbar-brand"><img src={logo} alt="NEOX Logo" width="140px" /></Link>}
                 <ul className="nav">
+                  {!showButton && ( <li className="nav-item"> <Link className="nav-link" to={'/home'}>Home</Link></li>)}
                   {showButton &&<li className="nav-item"><Link className="nav-link" to={'/'}>Login</Link></li>}
                   {!showButton && isAdmin && <li className="nav-item"><Link className="nav-link" to={'/users'}>Users</Link></li>}
                   {!showButton && isAdmin && <li className="nav-item"><Link className="nav-link" to={'/create'}>New Study</Link></li>}
