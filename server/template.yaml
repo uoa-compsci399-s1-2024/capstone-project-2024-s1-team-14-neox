@@ -770,6 +770,45 @@ Resources:
             Path: /studies/{studyID}/participants
             Method: get
             RestApiId: !Ref API
+  FuncStudiesSearchGlobally:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-search/
+      Handler: index.handler_global
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /studies
+            Method: get
+            RestApiId: !Ref API
+  FuncStudiesSearchInResearchers:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-search/
+      Handler: index.handler_researchers
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /researchers/{researcherID}/studies
+            Method: get
+            RestApiId: !Ref API
+  FuncStudiesSearchInChildren:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-search/
+      Handler: index.handler_children
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /children/{childID}/studies
+            Method: get
+            RestApiId: !Ref API
   FuncSamplesSearch:
     Type: AWS::Serverless::Function
     Properties:
