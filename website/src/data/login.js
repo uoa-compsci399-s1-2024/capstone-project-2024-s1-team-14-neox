@@ -38,7 +38,7 @@ const Login = ({ toggleButton, handleJwtToken }) => {
           }}
           >
           {({ signOut, user}) => (
-              <Navigate to="/Home" />
+              <Navigate to="/home" />
           )}
         </Authenticator>
       </div>

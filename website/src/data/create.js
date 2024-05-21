@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 //Auth related imports
 import { awsExports } from '../aws-exports';
 import { Authenticator } from '@aws-amplify/ui-react';
@@ -35,12 +35,11 @@ const Create = ({ toggleButton, handleJwtToken }) => {
         }
     };
     
-
+    const navigate = useNavigate();
     const [jwtToken, setJwtToken] = useState('');
     const logger = new Logger('Logger', 'INFO');
     const [isSignedUp, setIsSignedUp] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-
 
     useEffect(() => {
         fetchJwtToken();
@@ -62,32 +61,15 @@ const Create = ({ toggleButton, handleJwtToken }) => {
         const handleSubmit = async (event) => {
             event.preventDefault();
             const formData = new FormData(event.target);
-            const email = formData.get('email');
-            const password = formData.get('password');
-            const firstName = formData.get('given_name');
-            const middleName = formData.get('middle_name');
-            const lastName = formData.get('family_name');
-            const nickname = formData.get('nickname');
-        
-            try {
-              const { user } = await Auth.signUp({
-                username: email,
-                password,
-                attributes: {
-                  email,
-                  given_name: firstName,
-                  middle_name: middleName,
-                  family_name: lastName,
-                  nickname
-                }
-              });
-              console.log('user:', user);
-              setIsSignedUp(true);
-            } catch (error) {
-              console.log('Error signing up:', error);
-              setErrorMessage(error.message);
-            }
+            const name = formData.get('name');
+            const id = formData.get('id');
+            const description = formData.get('description');
+            var data = [[name], [id], [description], [startDate], [endDate]];
+            localStorage.setItem('cards-demos', data )
+            navigate("/home");
           };
+
+          
         
           if (isSignedUp) {
             //return <Redirect to="/Home" />;
@@ -95,22 +77,22 @@ const Create = ({ toggleButton, handleJwtToken }) => {
         
           return (
             <div>
-            <form onSubmit={handleSubmit}>
-              <h2>Begin a new study</h2>
+            <form class="create-form" onSubmit={handleSubmit}>
+              <h2 style={{"text-align": "center"}}>Begin a new study</h2>
               <br></br>
               <div className="mb-3">
-                <label>Name</label>
+                <label>Study Name</label>
                 <input type="text" className="form-control" placeholder="" name="name" required />
               </div>
               <div className="mb-3">
-                <label>Institute</label>
-                <input type="text" className="form-control" placeholder="" name="institute" required />
+                <label>Study ID</label>
+                <input type="text" className="form-control" placeholder="" name="id" required/>
               </div>
-              <div className="mb-3">
-                <label>Reference Number</label>
-                <input type="text" className="form-control" placeholder="" name="referenceNumber" required/>
+              <div className="mb-3" style={{"height": "30%"}}>
+                <label>Description</label>
+                <input type="text" className="form-control" placeholder="" name="description" required />
               </div>
-              <div className="mb-3">
+              <div className="mb-3" style={{"text-align": "center"}}>
               <DateRangePicker
                 placeholder="Set Start and End Dates"
                 format="dd/MM/yyyy"
@@ -118,11 +100,11 @@ const Create = ({ toggleButton, handleJwtToken }) => {
                 onChange={handleDateChange}
               />
               </div>
-              <div className="d-grid">
-                <button type="submit" className="btn btn-primary">Create</button>
+              <div className="d-grid" style={{"width": "100%"}}>
+                <button type="submit" className="btn btn-primary" onClick={() => handleSubmit}>Create</button>
               </div>
               <br></br>
-              <div className="d-grid">
+              <div className="d-grid" style={{"width": "100%"}}>
                 <Link to="/" className="btn btn-primary">Back to Home</Link>
               </div>
               {errorMessage && <p className="error-message">{errorMessage}</p>}

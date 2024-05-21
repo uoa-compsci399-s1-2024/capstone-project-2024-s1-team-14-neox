@@ -90,8 +90,8 @@ const Users = ({ toggleButton, handleJwtToken }) => {
     
       return (
         <div>
-        <form onSubmit={handleSignUp}>
-          <h1>Manage researchers</h1>
+        <form onSubmit={handleSignUp} class="create-form">
+          <h1 style={{"text-align": "center"}}>Manage researchers</h1>
           <br></br>
           <h2>Create an account</h2>
           <br></br>
@@ -124,8 +124,8 @@ const Users = ({ toggleButton, handleJwtToken }) => {
           </div>
           {errorMessage && <p className="error-message">{errorMessage}</p>}
         </form>
-        <br></br>
-        <h2>Registered researchers</h2>
+        <br/>
+        <h2 style={{"text-align": "center"}}>Registered researchers</h2>
         
         {isOpen && isSuccessful && <Popup
           content={<>
