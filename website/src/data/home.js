@@ -46,11 +46,12 @@ const Home = ({ isAdmin, showButton }) => {
                     <h3 style={{"text-align": "center"}}>Miopia in Children</h3>
                     <h5 style={{"text-align": "center", "padding-bottom": "2%"}}>Exploring the relationship between outdoor time and Miopia progression in children </h5>
                     <h5><span class="card-titles">Period:</span> 21/05/24 - 21/06/24 </h5>
-                    <h5><span class="card-titles bottom">Researchers:</span> N. Jones </h5>                  
+                    <h5><span class="card-titles bottom">Researchers:</span></h5>                  
                     <div class="d-table-row gap-2 d-md-flex justify-content-md-end">
                         <button type="button" class="btn btn-outline-primary">Download CSV</button>
                         {isAdmin ? (
-                            <button type="button" class="btn btn-outline-primary" onClick={() => alert("Works!")}>Manage Researchers</button>
+                            <button type="button" class="btn btn-outline-primary" //onClick={() => alert("Works!")}
+                            >Manage Researchers</button>
                         ) : (null)}
                     </div>
                 </Card>
@@ -71,7 +72,8 @@ const Home = ({ isAdmin, showButton }) => {
                     <div class="d-table-row gap-2 d-md-flex justify-content-md-end">
                         <button type="button" class="btn btn-outline-primary">Download CSV</button>
                         {isAdmin ? (
-                            <button type="button" class="btn btn-outline-primary" onClick={() => alert("Works!")}>Manage Researchers</button>
+                            <button type="button" class="btn btn-outline-primary" //onClick={() => alert("Works!")}
+                            >Manage Researchers</button>
                         ) : (null)}
                     </div>
                 </Card>
@@ -100,12 +102,12 @@ const Home = ({ isAdmin, showButton }) => {
                 ): (null)}              
             </div>
             {isAdmin ? (
-                <div class="non-admin">
-                    <p>Don't see a study?</p>
-                    <p>Request access from the admins</p>
-                </div>
-            ): (null)}
-        </div>
+                null
+            ): (<div class="non-admin">
+                <p>Don't see a study?</p>
+                <p>Request access from the admins</p>
+                </div>)}
+            </div>
     );
 };
 

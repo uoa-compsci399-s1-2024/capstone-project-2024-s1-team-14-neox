@@ -77,9 +77,10 @@ const Create = ({ toggleButton, handleJwtToken }) => {
         
           return (
             <div>
-            <form class="create-form" onSubmit={handleSubmit}>
               <h2 style={{"text-align": "center"}}>Begin a new study</h2>
               <br></br>
+            <form class="create-form" onSubmit={handleSubmit}>
+              
               <div className="mb-3">
                 <label>Study Name</label>
                 <input type="text" className="form-control" placeholder="" name="name" required />
