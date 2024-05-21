@@ -8,4 +8,10 @@ class SingleWeekHourlyStatsModel {
     required this.dailyStats,
     required this.dailySum,
   });
+
+  @override
+  String toString() {
+  
+    return dailyStats.toString() + dailySum.toString();
+  }
 }

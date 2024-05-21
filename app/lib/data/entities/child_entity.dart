@@ -61,7 +61,7 @@ class ChildEntity {
     await db
         .into(db.children)
         .insert(childEntity.toCompanion(), mode: InsertMode.insert);
-    print(childEntity.name);
+    // print(childEntity.name);
   }
 
   static Future<void> saveListOfChildren(

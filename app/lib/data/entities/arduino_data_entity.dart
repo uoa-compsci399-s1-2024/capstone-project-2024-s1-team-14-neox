@@ -250,15 +250,15 @@ class ArduinoDataEntity {
 //////////////////////////////////////////////////////////////////
 
   static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
-      int childId) async {
+      int childId, DateTime startDate, int requiredDays) async {
     final List<ArduinoDataEntity> dataList = [];
 
     // Sample data for testing
-    DateTime dateTime = DateTime.now().subtract(Duration(days: 2));
+    DateTime dateTime = DateTime.now().subtract(Duration(days: requiredDays));
     Random random = Random();
-    for (int i = 0; i < 300; i++) {
+    for (int i = 0; i < requiredDays * 24 * 60 / 5 - 1; i += 5) {
       // Increment datetime by 1 minute
-      dateTime = dateTime.add(Duration(minutes: 1));
+      dateTime = dateTime.add(Duration(minutes: 5));
 
       final data = ArduinoDataEntity(
         uv: 5,
@@ -266,7 +266,7 @@ class ArduinoDataEntity {
         datetime: dateTime,
         accel: Int16List.fromList([1, 2, 3]),
         serverClass: 1,
-        appClass: random.nextInt(2), // Generates either 0 or 1 randomly
+        appClass: random.nextDouble() < 0.5 ? 0 : 1, // Generates either 0 or 1 randomly
         childId: childId,
       );
       dataList.add(data);

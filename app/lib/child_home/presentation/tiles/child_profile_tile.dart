@@ -1,6 +1,6 @@
 import 'package:age_calculator/age_calculator.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/presentation/screens/create_child_profile_screen.dart';
-
+import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,13 +32,10 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
       child: Column(
         children: [
           Row(children: [
-            Text(
-              state.childName,
-              style: const TextStyle(fontSize: 30)
-            ),
+            Text(state.childName, style: const TextStyle(fontSize: 30)),
             const SizedBox(width: 10),
             IconButton(
-              onPressed: (){
+              onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -61,8 +58,21 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
               create: (_) => BluetoothBloc(),
               child: const BluetoothPanel(),
             ),
+            
           ]),
-          
+          ElevatedButton(
+                onPressed: () async {
+                  // Generate random data
+
+                  List<ArduinoDataEntity> randomData =
+                      await ArduinoDataEntity.createSampleArduinoDataList(
+                          state.childId, DateTime.now(), 30);
+                          print("Created data");
+                  await ArduinoDataEntity.saveListOfArduinoDataEntity(
+                      randomData);
+                      print("inserted random data");
+                },
+                child: Text("Generate data")),
         ],
       ),
     );

@@ -13,6 +13,8 @@ part 'child_device_state.dart';
 class ChildDeviceCubit extends Cubit<ChildDeviceState> {
   ChildDeviceRepository _repo;
 
+  
+
   ChildDeviceCubit({
     required ChildDeviceRepository repo,
     required int childId,

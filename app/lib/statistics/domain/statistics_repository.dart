@@ -41,6 +41,8 @@ class StatisticsRepository {
 
   // Weekly UI
 
+
+
   // TODO Delete static functions
   static Map<int, Map<DateTime, int>> database = {};
 
