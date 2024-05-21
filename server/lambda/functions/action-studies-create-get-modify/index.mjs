@@ -43,17 +43,17 @@ function readParams(event)
   };
 }
 
-function make_handler(actionId)
+function make_handler(actionID)
 {
   return (async (event) => {
-    console.log(`action: ${actionId}`);
+    console.log(`action: ${actionID}`);
     console.log(`http method: ${event.httpMethod.toUpperCase()}`)
     const p = readParams(event);
     console.log(`studyID: ${p.studyID}`);
 
     // We check studyid format in JS and only upon creation so that
     // the format can change without having to recreate the DB tables.
-    if (actionId === ACTION_CREATE) {
+    if (actionID === ACTION_CREATE) {
       if (!(p.studyID.match(STUDYID_REGEX))) {
         const badStudyIdErrResp = {
           statusCode: 400,
@@ -96,7 +96,7 @@ function make_handler(actionId)
       return errResp;
     }
 
-    switch (actionId) {
+    switch (actionID) {
     case ACTION_FETCH: {
       let res;
       try {
@@ -162,9 +162,9 @@ function make_handler(actionId)
       }
 
       // check if all required fields are present
-      if (actionId === ACTION_CREATE ||
+      if (actionID === ACTION_CREATE ||
           // don't need all fields if just doing PATCH
-          (actionId === ACTION_MODIFY && event.httpMethod.toUpperCase() === "PUT")) {
+          (actionID === ACTION_MODIFY && event.httpMethod.toUpperCase() === "PUT")) {
         for (let f of STUDY_METADATA_FIELDS.filter(mf => mf.required).map(mf => mf.name)) {
           if (fields[f] == null) {
             errors.push({
@@ -217,7 +217,7 @@ function make_handler(actionId)
         paramNum++;
       }
       try {
-        switch (actionId) {
+        switch (actionID) {
         case ACTION_CREATE: {
           await db.query(`INSERT INTO studies (id, ${sqlFields.map(sf => sf.column).join(',')})
                           VALUES (upper($1), ${sqlFields.map(sf => '$' + sf.paramNum).join(',')})`,
@@ -241,7 +241,7 @@ function make_handler(actionId)
         }
       } catch (e) {
         if (e.code === UNIQUE_VIOLATION && e.constraint === "studies_pkey") {
-          assert(actionId === ACTION_CREATE);
+          assert(actionID === ACTION_CREATE);
           dbError = {
             resource: p.resolvedResource,
             status: 409,
