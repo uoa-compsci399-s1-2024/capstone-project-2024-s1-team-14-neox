@@ -193,10 +193,11 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icon(Icons.settings),
               label: "Settings",
             ),
-            NavigationDestination(
-              icon: Icon(Icons.table_chart),
-              label: "Database",
-            ),
+            if (kDebugMode)
+              NavigationDestination(
+                icon: Icon(Icons.table_chart),
+                label: "Database",
+              ),
 
           ],
         ),
