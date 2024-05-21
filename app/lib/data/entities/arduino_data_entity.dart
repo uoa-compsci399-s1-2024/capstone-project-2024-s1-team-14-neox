@@ -256,9 +256,9 @@ class ArduinoDataEntity {
     // Sample data for testing
     DateTime dateTime = DateTime.now().subtract(Duration(days: requiredDays));
     Random random = Random();
-    for (int i = 0; i < requiredDays * 24 * 60 / 5 - 1; i += 5) {
+    for (int i = 0; i < requiredDays * 24 * 60 / 5 - 1; i += 10) {
       // Increment datetime by 1 minute
-      dateTime = dateTime.add(Duration(minutes: 5));
+      dateTime = dateTime.add(Duration(minutes: 10));
 
       final data = ArduinoDataEntity(
         uv: 5,
