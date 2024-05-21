@@ -757,6 +757,19 @@ Resources:
             Path: /children/{childID}/studies/{studyID}
             Method: delete
             RestApiId: !Ref API
+  FuncStudiesListParticipants:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-listparticipants/
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /studies/{studyID}/participants
+            Method: get
+            RestApiId: !Ref API
   FuncSamplesSearch:
     Type: AWS::Serverless::Function
     Properties:
