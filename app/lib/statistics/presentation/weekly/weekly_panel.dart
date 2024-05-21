@@ -1,8 +1,8 @@
-import 'package:capstone_project_2024_s1_team_14_neox/statistics/cubit/weekly_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../cubit/statistics_cubit.dart';
+import '../../cubit/weekly_cubit.dart';
 import 'weekly_bar_graph/weekly_bar_graph.dart';
 
 class WeeklyPanel extends StatefulWidget {
@@ -13,44 +13,57 @@ class WeeklyPanel extends StatefulWidget {
 }
 
 class _WeeklyPanelState extends State<WeeklyPanel> {
-  // Methods
+  @override
+  void initState() {
+    super.initState();
+    _refreshGraphData();
+  }
 
-  // Set current day of interest
-  // Calculate number of days since today that is loaded in bloc
-  // Future builder for data in bar graph?
+  DateTime getMostRecentMonday() {
+    final today = DateTime.now();
+    final daysSinceMonday = (today.weekday - DateTime.monday) % 7;
+    return today.subtract(Duration(days: daysSinceMonday));
+  }
 
-  void refreshGraphData() {
-    //TODO refresh scroll down
+  void _refreshGraphData() {
+    final childId = context.read<StatisticsCubit>().state.focusChildId;
+
+    if (childId != null) {
+      context.read<WeeklyCubit>().onGetDataForChildId(childId);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<StatisticsCubit, StatisticsState>(
       listener: (context, state) {
-        context.read<WeeklyCubit>().onGetDataForChildId(
-              context.read<StatisticsCubit>().state.focusChildId,
-            );
+        _refreshGraphData();
       },
       child: Column(
         children: [
           ElevatedButton(
-            onPressed: () => context.read<WeeklyCubit>().onGetDataForChildId(
-                  context.read<StatisticsCubit>().state.focusChildId,
-                ),
-            child: Text("Refresh"),
+            onPressed: _refreshGraphData,
+            child: const Text("Refresh"),
           ),
-          BlocBuilder<WeeklyCubit, WeeklyState>(
-            builder: (context, state) {
-              // if (state.status.isInitial) {
-              //   return Text("Refresh to get data");
-              // }
-              return Expanded(
-                child: WeeklyBarGraph(
-                  dailySummary: state.summary ?? {DateTime.now(): 0},
-                  startDay: DateTime.now(),
-                ),
-              );
-            },
+          Expanded(
+            child: BlocBuilder<WeeklyCubit, WeeklyState>(
+              builder: (context, state) {
+                if (state.status == WeeklyStatus.initial) {
+                  return const Center(child: Text("Refresh to get data"));
+                } else if (state.status == WeeklyStatus.loading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state.status == WeeklyStatus.success) {
+                  return WeeklyBarGraph(
+                    dailySummary: state.summary!,
+                    startDay: getMostRecentMonday(),
+                  );
+                } else if (state.status == WeeklyStatus.failure) {
+                  return const Center(child: Text("Failed to load data"));
+                } else {
+                  return const Center(child: Text("Unknown state"));
+                }
+              },
+            ),
           ),
         ],
       ),

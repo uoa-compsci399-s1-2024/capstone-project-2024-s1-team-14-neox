@@ -41,74 +41,78 @@ class StatisticsHomeState extends State<StatisticsHome>
     return BlocProvider(
       create: (_) => StatisticsCubit(),
       child: Scaffold(
-        appBar: AppBar(
-          title: Text("Analysis"),
-          actions: [
-            BlocBuilder<StatisticsCubit, StatisticsState>(
-              builder: (context, state) {
-                return DropdownButton<ChildDeviceModel>(
-                  value: _selectedChildProfile,
-                  items: context
-                      .read<AllChildProfileCubit>()
-                      .state
-                      .profiles
-                      .map((profile) => DropdownMenuItem(
-                            value: profile,
-                            child: Column(
-                              children: [
-                                Text("Name: ${profile.childName}"),
-                                // Text(
-                                //     "Date of Birth: ${DateFormat('yyyy-MM-dd').format(profile.birthDate)}"),
-                              ],
-                            ),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedChildProfile = value;
-                    });
-                    context.read<StatisticsCubit>().onFocusChildChange(
-                          value!.childId, //NONNULLABLE Selection
-                        );
-                  },
-                );
-              },
-            ),
-          ],
-          bottom: TabBar(
-            indicatorSize: TabBarIndicatorSize.tab,
-            dividerColor: Colors.transparent,
-            indicator: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: BorderRadius.all(Radius.circular(10))),
-            labelColor: Colors.white,
-            tabs: const [
-              Tab(text: "Daily"),
-              Tab(text: "Weekly"),
-              Tab(text: "Monthly"),
+          appBar: AppBar(
+            title: Text("Analysis"),
+            actions: [
+              BlocBuilder<StatisticsCubit, StatisticsState>(
+                builder: (context, state) {
+                  return DropdownButton<ChildDeviceModel>(
+                    value: _selectedChildProfile,
+                    items: context
+                        .read<AllChildProfileCubit>()
+                        .state
+                        .profiles
+                        .map((profile) => DropdownMenuItem(
+                              value: profile,
+                              child: Column(
+                                children: [
+                                  Text("Name: ${profile.childName}"),
+                                  // Text(
+                                  //     "Date of Birth: ${DateFormat('yyyy-MM-dd').format(profile.birthDate)}"),
+                                ],
+                              ),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedChildProfile = value;
+                      });
+                      context.read<StatisticsCubit>().onFocusChildChange(
+                            value!.childId, //NONNULLABLE Selection
+                          );
+                    },
+                  );
+                },
+              ),
             ],
-            controller: _tabController,
-          ),
-        ),
-        body: RepositoryProvider(
-          create: (_) => StatisticsRepository(),
-          child: MultiBlocProvider(
-            providers: [
-              BlocProvider(create: (context) => DailyCubit(context.read<StatisticsRepository>())),
-              BlocProvider(create: (context) => WeeklyCubit(context.read<StatisticsRepository>())),
-              BlocProvider(create: (context) => MonthlyCubit(context.read<StatisticsRepository>())),
-            ],
-            child: TabBarView(
-              controller: _tabController,
-              children: const [
-                DailyPanel(),
-                WeeklyPanel(),
-                MonthlyPanel(),
+            bottom: TabBar(
+              indicatorSize: TabBarIndicatorSize.tab,
+              dividerColor: Colors.transparent,
+              indicator: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
+              labelColor: Colors.white,
+              tabs: const [
+                Tab(text: "Daily"),
+                Tab(text: "Weekly"),
+                Tab(text: "Monthly"),
               ],
+              controller: _tabController,
             ),
           ),
-        ),
-      ),
+          body: RepositoryProvider(
+              create: (_) => StatisticsRepository(),
+              child: MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                      create: (context) =>
+                          DailyCubit(context.read<StatisticsRepository>())),
+                  BlocProvider(
+                      create: (context) =>
+                          WeeklyCubit(context.read<StatisticsRepository>())),
+                  BlocProvider(
+                      create: (context) =>
+                          MonthlyCubit(context.read<StatisticsRepository>())),
+                ],
+                child: TabBarView(
+                  controller: _tabController,
+                  children: const [
+                    DailyPanel(),
+                    WeeklyPanel(),
+                    MonthlyPanel(),
+                  ],
+                ),
+              ))),
     );
   }
 }
