@@ -719,6 +719,44 @@ Resources:
             Path: /studies/{studyID}/info
             Method: patch
             RestApiId: !Ref API
+  FuncStudiesResearchersAddRemove:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-modifyparticipants/
+      Handler: index.handler_researchers
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ReplaceEvent:
+          Type: Api
+          Properties:
+            Path: /researchers/{researcherID}/studies/{studyID}
+            Method: put
+            RestApiId: !Ref API
+        PartialUpdateEvent:
+          Type: Api
+          Properties:
+            Path: /researchers/{researcherID}/studies/{studyID}
+            Method: delete
+            RestApiId: !Ref API
+  FuncStudiesChildrenAddRemove:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-modifyparticipants/
+      Handler: index.handler_children
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ReplaceEvent:
+          Type: Api
+          Properties:
+            Path: /children/{childID}/studies/{studyID}
+            Method: put
+            RestApiId: !Ref API
+        PartialUpdateEvent:
+          Type: Api
+          Properties:
+            Path: /children/{childID}/studies/{studyID}
+            Method: delete
+            RestApiId: !Ref API
   FuncSamplesSearch:
     Type: AWS::Serverless::Function
     Properties:
