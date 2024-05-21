@@ -48,7 +48,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
               child: const Text("Default"),
             ),
-            const Spacer(),
             ElevatedButton(
               onPressed: () => Navigator.pop(innerContext),
               child: const Text("Cancel"),
@@ -90,7 +89,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onPressed: () => Navigator.pop(innerContext),
               child: const Text("No"),
             ),
-            const Spacer(),
             ElevatedButton(
               onPressed: () {
                 setState(() {
