@@ -208,6 +208,17 @@ function make_handler(actionID)
       let paramNum = 2;
       // the order in the sql param list (needed since object key iteration order is indeterminate)
       const sqlFields = [];
+      if (actionID === ACTION_MODIFY && event.httpMethod.toUpperCase() === "PUT") {
+        const missingOptionalFields = [];
+        for (mf of STUDY_METADATA_FIELDS) {
+          if (fields[mf.name] === undefined) {
+            fields[mf.name] = null;
+            missingOptionalFields.push(mf.name);
+          }
+        }
+        console.log("adding missing (null) fields so that the action to replace study info resets missing fields to null");
+        console.log(`missing fields: ${JSON.stringify(missingOptionalFields)}`);
+      }
       for (let fname in fields) {
         sqlFields.push({
           "column": pg.escapeIdentifier(fname),
