@@ -337,7 +337,7 @@ class ArduinoDataEntity {
 //////////////////////////////////////////////////////////////////
 
   static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
-      int childId, DateTime startTime, DateTime endTime) async {
+      int childId, DateTime startTime, DateTime endTime, double threshold) async {
     List<ArduinoDataEntity> dataList = [];
     Random random = Random();
     int interval = 1; //Default 1 minute
@@ -352,7 +352,7 @@ class ArduinoDataEntity {
           datetime: time,
           accel: Int16List.fromList([1, 2, 3]),
           serverClass: 1,
-          appClass: random.nextDouble() < 0.9
+          appClass: random.nextDouble() > threshold
               ? 0
               : 1, // Generates either 0 or 1 randomly
           childId: childId,
