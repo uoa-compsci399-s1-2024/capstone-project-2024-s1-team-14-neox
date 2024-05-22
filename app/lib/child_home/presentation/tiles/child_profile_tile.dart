@@ -58,21 +58,23 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
               create: (_) => BluetoothBloc(),
               child: const BluetoothPanel(),
             ),
-            
           ]),
           ElevatedButton(
-                onPressed: () async {
-                  // Generate random data
-
+              onPressed: () async {
+                DateTime startTime = DateTime(2023, 1, 1);
+                DateTime endTime = DateTime(2024, 1, 1);
+                for (DateTime time = startTime;
+                    time.isBefore(endTime);
+                    time = time.add(Duration(days: 7))) {
+                  print("Creating week for: $time");
                   List<ArduinoDataEntity> randomData =
                       await ArduinoDataEntity.createSampleArduinoDataList(
-                          state.childId, DateTime.now(), 60);
-                          print("Created data");
+                          state.childId, time, time.add(Duration(days: 7)));
                   await ArduinoDataEntity.saveListOfArduinoDataEntity(
                       randomData);
-                      print("inserted random data");
-                },
-                child: Text("Generate data")),
+                }
+              },
+              child: Text("Generate data")),
         ],
       ),
     );

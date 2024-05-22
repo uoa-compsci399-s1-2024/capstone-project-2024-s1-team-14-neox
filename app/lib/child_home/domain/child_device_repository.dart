@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
+import 'package:flutter/material.dart';
 
 import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
@@ -23,7 +24,8 @@ class ChildDeviceRepository {
 
   Future<List<ChildDeviceModel>> createChildProfile(
       String name, DateTime birthDate, String gender) async {
-    await ChildEntity.saveSingleChildEntityFromParameters(name, birthDate, gender);
+    await ChildEntity.saveSingleChildEntityFromParameters(
+        name, birthDate, gender);
 
     return await fetchChildProfiles();
   }
@@ -69,6 +71,7 @@ class ChildDeviceRepository {
 
   Future<void> parseAndSaveSamples(
       String childName, List<int> bytes, int childId) async {
+    List<ArduinoDataEntity> samples = [];
     while (bytes.length % bytesPerSample != 0) {
       bytes.removeLast();
     }
@@ -98,33 +101,34 @@ class ChildDeviceRepository {
       int blue = readUint16();
       int clear = readUint16();
       int light = _calculateLux(red, blue, green);
-      int colourTemperature = _calculateColourTemperature(red, blue, green, clear);
+      int colourTemperature =
+          _calculateColourTemperature(red, blue, green, clear);
 
-      int appClass = score([uv, light, accelX, accelY, accelZ])[1] > 0.7 ? 1 : 0;
+      int appClass =
+          score([uv, light, accelX, accelY, accelZ])[1] > 0.7 ? 1 : 0;
 
-      await ArduinoDataEntity.saveSingleArduinoDataEntity(
-        ArduinoDataEntity(
-          name: childName,
-          childId: childId,
-          uv: uv,
-          light: light,
-          datetime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
-          accel: Int16List.fromList([accelX, accelY, accelZ]),
-          red: red,
-          green: green,
-          blue: blue,
-          clear: clear,
-          colourTemperature: colourTemperature,
-          appClass: appClass,
-        ),
-      );
+      samples.add(ArduinoDataEntity(
+        name: childName,
+        childId: childId,
+        uv: uv,
+        light: light,
+        datetime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
+        accel: Int16List.fromList([accelX, accelY, accelZ]),
+        red: red,
+        green: green,
+        blue: blue,
+        clear: clear,
+        colourTemperature: colourTemperature,
+        appClass: appClass,
+      ));
     }
+    await ArduinoDataEntity.saveListOfArduinoDataEntity(samples);
   }
 
   int _calculateLux(int r, int g, int b) {
     return ((-0.32466 * r) + (1.57837 * g) + (-0.73191 * b))
-      .toInt()
-      .clamp(0, 0xFFFF);
+        .toInt()
+        .clamp(0, 0xFFFF);
   }
 
   int _calculateColourTemperature(int r, int g, int b, int c) {

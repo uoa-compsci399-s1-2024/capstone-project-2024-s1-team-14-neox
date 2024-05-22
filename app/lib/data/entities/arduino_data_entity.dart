@@ -125,14 +125,25 @@ class ArduinoDataEntity {
         .into(db.arduinoDatas)
         .insertOnConflictUpdate(arduinoDataEntity.toCompanion());
   }
+  // 104 seconds to save 20160 samples
+  // static Future<void> saveListOfArduinoDataEntity(
+  //     List<ArduinoDataEntity> arduinoDataEntityList) async {
+  //   await Future.forEach(arduinoDataEntityList, (arduinoDataEntity) async {
+  //     await saveSingleArduinoDataEntity(arduinoDataEntity);
+  //     // print("saved");
+  //   });
+  // }
 
+  // Batch to speed up insertion
+  // 1.017 seconds to save 20160 samples
   static Future<void> saveListOfArduinoDataEntity(
       List<ArduinoDataEntity> arduinoDataEntityList) async {
-    await Future.forEach(arduinoDataEntityList, (arduinoDataEntity) async {
-      await saveSingleArduinoDataEntity(arduinoDataEntity);
+    AppDb db = AppDb.instance();
+    await db.batch((batch) {
+      batch.insertAll(
+          db.arduinoDatas, arduinoDataEntityList.map((e) => e.toCompanion()));
     });
   }
-
   ////////////////////////////////////////////////////////////////////////////
   // READ ////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
@@ -252,28 +263,28 @@ class ArduinoDataEntity {
 //////////////////////////////////////////////////////////////////
 
   static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
-      int childId, DateTime startDate, int requiredDays) async {
-    final List<ArduinoDataEntity> dataList = [];
-
-    // Sample data for testing
-    DateTime dateTime = DateTime.now().subtract(Duration(days: requiredDays));
+      int childId, DateTime startTime, DateTime endTime) async {
+    List<ArduinoDataEntity> dataList = [];
     Random random = Random();
-    for (int i = 0; i < requiredDays * 24 * 60 / 5 - 1; i += 10) {
-      // Increment datetime by 1 minute
-      dateTime = dateTime.add(Duration(minutes: 10));
-
-      final data = ArduinoDataEntity(
-        uv: 5,
-        light: 100,
-        datetime: dateTime,
-        accel: Int16List.fromList([1, 2, 3]),
-        serverClass: 1,
-        appClass: random.nextDouble() < 0.5 ? 0 : 1, // Generates either 0 or 1 randomly
-        childId: childId,
-      );
-      dataList.add(data);
+    int interval = 1; //Default 1 minute
+    for (DateTime time = startTime;
+        time.isBefore(endTime);
+        time = time.add(Duration(minutes: interval))) {
+      if (time.hour > 5 && time.hour < 22) { // only add if between 6am and 10pm
+        final data = ArduinoDataEntity(
+          uv: 5,
+          light: 100,
+          datetime: time,
+          accel: Int16List.fromList([1, 2, 3]),
+          serverClass: 1,
+          appClass: random.nextDouble() < 0.6
+              ? 0
+              : 1, // Generates either 0 or 1 randomly
+          childId: childId,
+        );
+        dataList.add(data);
+      }
     }
-
     return dataList;
   }
 }
