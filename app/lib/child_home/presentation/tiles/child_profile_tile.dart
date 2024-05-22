@@ -1,5 +1,7 @@
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/presentation/screens/create_child_profile_screen.dart';
-
+import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/main.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,6 +27,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
     int outdoorTimeToday = state.outdoorTimeToday;
     int outdoorTimeAvgWeek = state.outdoorTimeWeek;
     int outdoorTimeAvgMonth = state.outdoorTimeMonth;
+    int target = App.sharedPreferences.getInt("daily_target")!;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
@@ -84,67 +87,90 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
             create: (_) => BluetoothBloc(),
             child: const BluetoothPanel(),
           ),
-
-          const Spacer(),
           
-          OutdoorTimeProgressIndicator(
-            context: context,
-            radius: 180,
-            lineWidth: 18,
-            percent: (outdoorTimeToday / 120).clamp(0, 1),
-            center: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Today",
-                  style: TextStyle(fontSize: 30),
-                ),
-                Text("$outdoorTimeToday / 120 minutes outdoors"),
-              ],
+          if (kDebugMode)
+            ElevatedButton(
+              onPressed: () async {
+                List<ArduinoDataEntity> randomData = await ArduinoDataEntity.createSampleArduinoDataList(
+                  state.childId,
+                  DateTime.now(),
+                  30
+                );
+                await ArduinoDataEntity.saveListOfArduinoDataEntity(randomData);
+              },
+              child: const Text("Generate data"),
+            ),
+          
+          Expanded(
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return Column(
+                  children: [
+                    const Spacer(),
+
+                    OutdoorTimeProgressIndicator(
+                      context: context,
+                      radius: constraints.maxWidth / 2 * 0.8,
+                      lineWidth: 18,
+                      percent: (outdoorTimeToday / target).clamp(0, 1),
+                      center: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Today",
+                            style: TextStyle(fontSize: 30),
+                          ),
+                          Text("$outdoorTimeToday / $target minutes outdoors"),
+                        ],
+                      ),
+                    ),
+              
+                    const Spacer(),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        OutdoorTimeProgressIndicator(
+                          context: context,
+                          radius: constraints.maxWidth / 4 * 0.8,
+                          lineWidth: 10,
+                          percent: (outdoorTimeAvgWeek / target).clamp(0, 1),
+                          center: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Past week",
+                                style: TextStyle(fontSize: 18),
+                              ),
+                              Text("$outdoorTimeAvgWeek mins/day"),
+                            ],
+                          ),
+                        ),
+                        OutdoorTimeProgressIndicator(
+                          context: context,
+                          radius: constraints.maxWidth / 4 * 0.8,
+                          lineWidth: 10,
+                          percent: (outdoorTimeAvgMonth / target).clamp(0, 1),
+                          center: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Past month",
+                                style: TextStyle(fontSize: 18),
+                              ),
+                              Text("$outdoorTimeAvgMonth mins/day"),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const Spacer(),
+                  ],
+                );
+              },
             ),
           ),
-          
-          const Spacer(),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              OutdoorTimeProgressIndicator(
-                context: context,
-                radius: 90,
-                lineWidth: 10,
-                percent: (outdoorTimeAvgWeek / 120).clamp(0, 1),
-                center: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Past week",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    Text("$outdoorTimeAvgWeek mins/day"),
-                  ],
-                ),
-              ),
-              OutdoorTimeProgressIndicator(
-                context: context,
-                radius: 90,
-                lineWidth: 10,
-                percent: (outdoorTimeAvgMonth / 120).clamp(0, 1),
-                center: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Past month",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    Text("$outdoorTimeAvgMonth mins/day"),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          
-          const Spacer(),
         ],
       ),
     );

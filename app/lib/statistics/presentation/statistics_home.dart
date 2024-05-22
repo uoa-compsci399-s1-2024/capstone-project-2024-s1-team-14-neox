@@ -1,24 +1,25 @@
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_model.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/statistics_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../child_home/cubit/all_child_profile_cubit.dart';
 import '../cubit/daily_cubit.dart';
-import '../cubit/dashboard_cubit.dart';
+import '../cubit/statistics_cubit.dart';
 import '../cubit/monthly_cubit.dart';
 import '../cubit/weekly_cubit.dart';
 import 'daily/daily_panel.dart';
 import 'monthly/monthly_panel.dart';
 import 'weekly/weekly_panel.dart';
 
-class DashboardHome extends StatefulWidget {
-  const DashboardHome({super.key});
+class StatisticsHome extends StatefulWidget {
+  const StatisticsHome({super.key});
 
   @override
-  State<DashboardHome> createState() => DashboardHomeState();
+  State<StatisticsHome> createState() => StatisticsHomeState();
 }
 
-class DashboardHomeState extends State<DashboardHome>
+class StatisticsHomeState extends State<StatisticsHome>
     with TickerProviderStateMixin {
   //with TickerProviderStateMixin needed for animation
   ChildDeviceModel? _selectedChildProfile;
@@ -33,17 +34,17 @@ class DashboardHomeState extends State<DashboardHome>
   }
 
 //https://github.com/felangel/bloc/issues/1131
-//  Could not find the correct Provider<DashboardCubit> above this Dashboard Widget
+//  Could not find the correct Provider<StatisticsCubit> above this Statistics Widget
 // Caused by accessing the bloc from the same BuildContext used to provide it
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => DashboardCubit(),
+      create: (_) => StatisticsCubit(),
       child: Scaffold(
         appBar: AppBar(
           title: Text("Analysis"),
           actions: [
-            BlocBuilder<DashboardCubit, DashboardState>(
+            BlocBuilder<StatisticsCubit, StatisticsState>(
               builder: (context, state) {
                 return DropdownButton<ChildDeviceModel>(
                   value: _selectedChildProfile,
@@ -66,7 +67,7 @@ class DashboardHomeState extends State<DashboardHome>
                     setState(() {
                       _selectedChildProfile = value;
                     });
-                    context.read<DashboardCubit>().onFocusChildChange(
+                    context.read<StatisticsCubit>().onFocusChildChange(
                           value!.childId, //NONNULLABLE Selection
                         );
                   },
@@ -89,19 +90,22 @@ class DashboardHomeState extends State<DashboardHome>
             controller: _tabController,
           ),
         ),
-        body: MultiBlocProvider(
-          providers: [
-            BlocProvider(create: (_) => DailyCubit()),
-            BlocProvider(create: (_) => WeeklyCubit()),
-            BlocProvider(create: (_) => MonthlyCubit()),
-          ],
-          child: TabBarView(
-            controller: _tabController,
-            children: const [
-              DailyPanel(),
-              WeeklyPanel(),
-              MonthlyPanel(),
+        body: RepositoryProvider(
+          create: (_) => StatisticsRepository(),
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (context) => DailyCubit(context.read<StatisticsRepository>())),
+              BlocProvider(create: (context) => WeeklyCubit(context.read<StatisticsRepository>())),
+              BlocProvider(create: (context) => MonthlyCubit(context.read<StatisticsRepository>())),
             ],
+            child: TabBarView(
+              controller: _tabController,
+              children: const [
+                DailyPanel(),
+                WeeklyPanel(),
+                MonthlyPanel(),
+              ],
+            ),
           ),
         ),
       ),

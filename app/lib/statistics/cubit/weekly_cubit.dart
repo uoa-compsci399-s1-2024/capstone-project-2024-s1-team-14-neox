@@ -1,12 +1,14 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../domain/dashboard_repository.dart';
+import '../domain/statistics_repository.dart';
 
 part 'weekly_state.dart';
 
 class WeeklyCubit extends Cubit<WeeklyState> {
-  WeeklyCubit()
+  StatisticsRepository _statisticsRepository;
+  WeeklyCubit(this._statisticsRepository)
       : super(WeeklyState());
 
   Future<void> onGetDataForChildId(int childId) async {
@@ -14,7 +16,8 @@ class WeeklyCubit extends Cubit<WeeklyState> {
 
     emit(state.copyWith(
       status: WeeklyStatus.success,
-      summary: await DashboardRepository.getDailyOutdoorMinutes(childId),
+      summary: await StatisticsRepository.getWeeklyOutdoorMinutes(1),
+
     ));
   }
 }
