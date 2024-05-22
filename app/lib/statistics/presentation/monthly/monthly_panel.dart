@@ -134,7 +134,7 @@ class MonthlyPanel extends StatelessWidget {
                       DateTime month =
                           DateTime(state.focusYear, pageIndex + 1, 1);
                       return _buildCalendar(
-                          month, state.monthlyStats!.monthlyStats[month]);
+                          month, state.monthlyStats!.dailyStats[month]);
                     },
                   ),
                 );

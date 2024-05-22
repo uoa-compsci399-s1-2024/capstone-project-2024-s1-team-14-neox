@@ -15,7 +15,7 @@ class DailyCubit extends Cubit<DailyState> {
     DateTime startMonday = queryDate.subtract(Duration(days: queryDate.weekday - 1));
     emit(state.copyWith(status: DailyStatus.loading));
      List<SingleWeekHourlyStatsModel> newDailyStats = await  _statisticsRepository.getListOfHourlyStats(startMonday, 4, childId);
-  print(newDailyStats);
+  print(newDailyStats[0]);
     emit(state.copyWith(
       status: DailyStatus.success,
       dailyStats: newDailyStats + state.dailyStats

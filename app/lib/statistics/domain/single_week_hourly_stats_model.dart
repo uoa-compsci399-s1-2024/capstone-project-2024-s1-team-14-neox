@@ -14,6 +14,6 @@ class SingleWeekHourlyStatsModel {
   @override
   String toString() {
   
-    return startMondayDate.toString() + weeklyMean.toString();
+    return "$startMondayDate $hourlyStats $weeklyMean";
   }
 }

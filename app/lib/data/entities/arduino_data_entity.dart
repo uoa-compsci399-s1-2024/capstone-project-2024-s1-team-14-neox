@@ -352,7 +352,7 @@ class ArduinoDataEntity {
           datetime: time,
           accel: Int16List.fromList([1, 2, 3]),
           serverClass: 1,
-          appClass: random.nextDouble() < 0.6
+          appClass: random.nextDouble() < 0.9
               ? 0
               : 1, // Generates either 0 or 1 randomly
           childId: childId,

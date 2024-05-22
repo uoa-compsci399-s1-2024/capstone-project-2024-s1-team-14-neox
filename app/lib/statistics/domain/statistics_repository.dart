@@ -15,6 +15,7 @@ class StatisticsRepository {
       DateTime currentMonday = startMonday.subtract(Duration(days: 7 * i));
       result.add(await getSingleWeekHourlyStats(currentMonday, childId));
     }
+    print(result);
     return result;
   }
 

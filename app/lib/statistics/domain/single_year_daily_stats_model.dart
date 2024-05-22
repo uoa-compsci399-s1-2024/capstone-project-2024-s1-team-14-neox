@@ -12,6 +12,6 @@ class SingleYearDailyStatsModel{
   @override
   String toString() {
   
-    return dailyStats.toString() + monthlyMean.toString();
+    return "$monthlyMean";
   }
 }

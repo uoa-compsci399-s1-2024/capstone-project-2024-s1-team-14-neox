@@ -34,7 +34,7 @@ class _DailyBarChartState extends State<DailyBarChart> {
       maxValue = max(maxValue, e.value);
       return DailyIndividualBar(x: index++, y: e.value, date: e.key);
     }).toList();
-    widget.dailySummary.dailyStats.forEach((key, value) {
+    widget.dailySummary.hourlyStats.forEach((key, value) {
       if (key.weekday == 1) {
         int indexMon = 0;
         monBarData = value.entries.map((e) {

@@ -15,7 +15,7 @@ class MonthlyCubit extends Cubit<MonthlyState> {
     emit(state.copyWith(status: MonthlyStatus.loading));
     SingleYearDailyStatsModel newMonthlyStats =
         await _statisticsRepository.getSingleYearDailyStats(year, childId);
-        print(MonthlyCubit(_statisticsRepository));
+        print("inside monthly cubit $newMonthlyStats");
     emit(state.copyWith(
       status: MonthlyStatus.success,
       focusYear: year,
