@@ -827,7 +827,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: lambda/functions/action-samples-search/
-      Handler: index.handler_studies
+      Handler: index.handler_study
       Timeout: 30  # there can be loads of samples on server
       Role: !GetAtt LambdaRole.Arn
       Events:
