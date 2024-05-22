@@ -13,30 +13,29 @@ class StatisticsRepository {
 
     for (int i = 0; i < weekCount; i++) {
       DateTime currentMonday = startMonday.subtract(Duration(days: 7 * i));
-      result.add(await getSingleWeekDailyStats(currentMonday, childId));
+      result.add(await getSingleWeekHourlyStats(currentMonday, childId));
     }
     return result;
   }
 
-  Future<SingleWeekHourlyStatsModel> getSingleWeekDailyStats(
+  Future<SingleWeekHourlyStatsModel> getSingleWeekHourlyStats(
       DateTime startMonday, int childId) async {
-    Map<DateTime, Map<DateTime, int>> dailyStats = {};
     Map<DateTime, int> dailySum = {};
+    double weeklyMean = 0;
 
-    for (int weekday = 0; weekday < 7; weekday++) {
-      DateTime currentDay = startMonday.add(Duration(days: weekday));
-      Map<DateTime, int> hourlyStats =
-          await ArduinoDataEntity.countSamplesByHour(
-              currentDay, currentDay.add(const Duration(days: 1)), childId);
+    Map<DateTime, Map<DateTime, int>> hourlyStats = await ArduinoDataEntity.getSingleWeekHourlyStats(startMonday, childId);
 
-      dailyStats[currentDay] = hourlyStats;
-      dailySum[currentDay] =
-          hourlyStats.values.reduce((value, element) => value + element);
-    }
+    hourlyStats.forEach((key, value) {
+      dailySum[key] = value.values.reduce((value, element) => value + element);
+     });
+     weeklyMean = dailySum.values.reduce((value, element) => value + element) / 7;
+
+
     return SingleWeekHourlyStatsModel(
       startMondayDate: startMonday,
-      dailyStats: dailyStats,
+      hourlyStats: hourlyStats,
       dailySum: dailySum,
+      weeklyMean: weeklyMean,
     );
   }
 
@@ -45,19 +44,16 @@ class StatisticsRepository {
   // Monthly UI
   Future<SingleYearDailyStatsModel> getSingleYearDailyStats(
       int year, int childId) async {
-    Map<DateTime, Map<DateTime, int>> monthlyStats = {};
     Map<DateTime, double> monthlyMean = {};
 
-    for (int month = 1; month < 13; month++) {
-      DateTime currentMonth = DateTime(year, month);
-    
-      Map<DateTime, int> dailyStats = await ArduinoDataEntity.countSamplesByDay(currentMonth, DateTime(year, month + 1), childId);
-      monthlyStats[currentMonth] = dailyStats;
-      monthlyMean[currentMonth] = dailyStats.values.reduce((value, element) => value + element) / dailyStats.length;
-    }
+    Map<DateTime, Map<DateTime, int>> dailyStats = await ArduinoDataEntity.getSingleYearDailyStats(year, childId);
+
+    dailyStats.forEach((key, value) {
+      monthlyMean[key] = value.values.reduce((value, element) => value + element) / value.length;
+     });
     return SingleYearDailyStatsModel(
       year: year,
-      monthlyStats: monthlyStats,
+      dailyStats: dailyStats,
       monthlyMean: monthlyMean,
     );
   }
