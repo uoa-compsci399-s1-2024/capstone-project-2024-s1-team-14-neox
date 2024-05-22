@@ -279,15 +279,15 @@ class ArduinoDataEntity {
           DateTime(year, 1, 1), DateTime(year, 12, 31, 23, 59, 59)))
       ..where((tbl) => tbl.appClass.equals(1));
     List<ArduinoDataEntity> dataList = await query.get();
-    dataList.forEach((element) {
-      int year = element.datetime.year;
-      int month = element.datetime.month;
-      int day = element.datetime.day;
+    for (ArduinoDataEntity sample in dataList) {
+      int year = sample.datetime.year;
+      int month = sample.datetime.month;
+      int day = sample.datetime.day;
       dailyStats[DateTime(year, month, 1)]![DateTime(year, month, day)] =
           (dailyStats[DateTime(year, month, 1)]![DateTime(year, month, day)] ??
                   0) +
               1;
-    });
+    }
     return dailyStats;
   }
 
@@ -337,7 +337,10 @@ class ArduinoDataEntity {
 //////////////////////////////////////////////////////////////////
 
   static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
-      int childId, DateTime startTime, DateTime endTime, double threshold) async {
+      int childId,
+      DateTime startTime,
+      DateTime endTime,
+      double threshold) async {
     List<ArduinoDataEntity> dataList = [];
     Random random = Random();
     int interval = 1; //Default 1 minute
