@@ -74,7 +74,7 @@ class MonthlyPanel extends StatelessWidget {
                     ),
                   ),
                   if (dailyStats![date] != null && dailyStats[date]! >= 120)
-                    ImageIcon(AssetImage("assets/icon-small.png"))
+                    Image.asset("assets/icon-small.png")
                 ],
               ),
             ),
@@ -89,21 +89,24 @@ class MonthlyPanel extends StatelessWidget {
     return BlocListener<StatisticsCubit, StatisticsState>(
         listener: (context, state) {
           // print(context.read<Stat>)
-          context.read<MonthlyCubit>().onGetYearDataForChildId(
-                DateTime.now().year,
-                context.read<StatisticsCubit>().state.focusChildId,
-              );
+          if (!state.detailedView) {
+            print("in monthly view");
+            context.read<MonthlyCubit>().onGetYearDataForChildId(
+                  DateTime.now().year,
+                  context.read<StatisticsCubit>().state.focusChildId,
+                );
+          }
         },
         child: Column(
           children: [
             BlocBuilder<MonthlyCubit, MonthlyState>(
               builder: (context, state) {
-                print("State $state");
                 if (state.status.isInitial) {
                   print("initial");
                   return Text("Please select a child");
                 }
-                if (state.status.isLoading){
+                if (state.status.isLoading) {
+                  print("loading");
                   return CircularProgressIndicator();
                 }
                 return SizedBox(
@@ -115,10 +118,9 @@ class MonthlyPanel extends StatelessWidget {
             BlocBuilder<MonthlyCubit, MonthlyState>(
               builder: (context, state) {
                 if (state.status.isInitial) {
-                  print("initial");
                   return Text("");
                 }
-                if (state.status.isLoading){
+                if (state.status.isLoading) {
                   return CircularProgressIndicator();
                 }
                 return SizedBox(

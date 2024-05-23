@@ -5,22 +5,25 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ViewToggle extends StatefulWidget {
   final double width;
   final double height;
-  const ViewToggle({super.key, required this.width, required this.height});
+  // ValueChanged<int> animateToPage;
+  ViewToggle(
+      {super.key,
+      required this.width,
+      required this.height /*,
+      required this.animateToPage*/
+      });
 
   @override
   State<ViewToggle> createState() => _ViewToggleState();
 }
 
 class _ViewToggleState extends State<ViewToggle> {
-  AlignmentGeometry _currentPosition = Alignment.centerLeft;
-  String _currentView = "Detailed";
+  bool detailedView = true;
   void _changeAnimation() {
     setState(() {
-      _currentPosition = _currentPosition == Alignment.centerLeft
-          ? Alignment.centerRight
-          : Alignment.centerLeft;
-      _currentView = _currentView == "Detailed" ? "Overview" : "Detailed";
+      detailedView = !detailedView;
     });
+    // widget.animateToPage(detailedView ? 0 : 1);
   }
 
   @override
@@ -77,9 +80,10 @@ class _ViewToggleState extends State<ViewToggle> {
             ),
           ),
           AnimatedAlign(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.decelerate,
-            alignment: _currentPosition,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeIn,
+            alignment:
+                detailedView ? Alignment.centerLeft : Alignment.centerRight,
             child: Container(
               width: widget.width * 0.55,
               height: widget.height,
@@ -91,7 +95,7 @@ class _ViewToggleState extends State<ViewToggle> {
                 ),
               ),
               child: Text(
-                _currentView,
+                detailedView ? "Detailed" : "Overview",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12,

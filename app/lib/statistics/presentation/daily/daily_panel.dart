@@ -36,6 +36,9 @@ class _DailyPanelState extends State<DailyPanel> {
             Text("Focus Day goes here"),
             BlocBuilder<DailyCubit, DailyState>(
               builder: (context, state) {
+                if (state.status.isLoading) {
+                  return CircularProgressIndicator();
+                }
                 return SizedBox(
                   height: 1000,
                   child: PageView.builder(

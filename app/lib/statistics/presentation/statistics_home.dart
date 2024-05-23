@@ -63,7 +63,7 @@ class StatisticsHomeState extends State<StatisticsHome>
                           value: profile,
                           child: Column(
                             children: [
-                              Text("Name: ${profile.childName}"),
+                              Text(profile.childName),
                               // Text(
                               //     "Date of Birth: ${DateFormat('yyyy-MM-dd').format(profile.birthDate)}"),
                             ],
@@ -81,8 +81,8 @@ class StatisticsHomeState extends State<StatisticsHome>
               );
             },
           ),
-          actions: const [
-            ViewToggle(width: 140, height: 40),
+          actions: [
+            ViewToggle(width: 140, height: 40, /* animateToPage: animateToPage */),
           ],
           // bottom: TabBar(
           //   indicatorSize: TabBarIndicatorSize.tab,
@@ -122,7 +122,7 @@ class StatisticsHomeState extends State<StatisticsHome>
               } 
               return MonthlyPanel();
               // return PageView(
-              //   controller: PageController(),
+              //   controller: _pageController,
               //   children: const [
               //     DailyPanel(),
               //     MonthlyPanel(),

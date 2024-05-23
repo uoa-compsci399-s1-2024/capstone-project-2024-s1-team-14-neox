@@ -12,10 +12,10 @@ class MonthlyCubit extends Cubit<MonthlyState> {
             focusYear: DateTime.now().year, focusMonth: DateTime.now().month));
 
   Future<void> onGetYearDataForChildId(int year, childId) async {
-    emit(state.copyWith(status: MonthlyStatus.loading));
+    emit(MonthlyState(status: MonthlyStatus.loading, focusYear: state.focusYear, focusMonth: state.focusMonth));
+    await Future.delayed(Duration(seconds: 1));
     SingleYearDailyStatsModel newMonthlyStats =
         await _statisticsRepository.getSingleYearDailyStats(year, childId);
-        print("inside monthly cubit $newMonthlyStats");
     emit(state.copyWith(
       status: MonthlyStatus.success,
       focusYear: year,
