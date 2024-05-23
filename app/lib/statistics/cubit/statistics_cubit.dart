@@ -7,11 +7,12 @@ class StatisticsCubit extends Cubit<StatisticsState> {
   StatisticsCubit() : super(const StatisticsState());
 
   void onFocusChildChange(int childId) {
-    emit(state.copyWith(status: StatisticsStatus.success, focusChildId: childId));
-
+    emit(state.copyWith(
+        status: StatisticsStatus.success, focusChildId: childId));
   }
 
-  void onFocusViewChange(StatisticsView view) {
-    emit(state.copyWith(status: StatisticsStatus.success, view: view));
+  void onFocusViewToggle() {
+    emit(state.copyWith(
+        status: StatisticsStatus.success, detailedView: !state.detailedView));
   }
 }

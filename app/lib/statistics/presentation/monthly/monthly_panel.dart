@@ -8,9 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class MonthlyPanel extends StatelessWidget {
   const MonthlyPanel({super.key});
 
-// This widget builds the detailed calendar grid for the chosen month.
   Widget _buildCalendar(DateTime month, Map<DateTime, int>? dailyStats) {
-    // Calculating various details for the month's display
     int daysInMonth = DateTime(month.year, month.month + 1, 0).day;
     DateTime firstDayOfMonth = DateTime(month.year, month.month, 1);
     int weekdayOfFirstDay = firstDayOfMonth.weekday;
