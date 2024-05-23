@@ -22,8 +22,6 @@ extension StatisticsStatusX on StatisticsStatus {
 class StatisticsState extends Equatable {
   final StatisticsStatus status;
   final int focusChildId;
-  // TODO: only need list of int to represent how much time was spend outdoors
-  // Might need three lists to represent day, week, month
   final StatisticsView view;
 
   const StatisticsState({

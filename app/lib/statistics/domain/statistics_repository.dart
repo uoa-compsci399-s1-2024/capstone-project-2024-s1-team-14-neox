@@ -6,6 +6,7 @@ import 'package:path/path.dart';
 import '../../data/entities/arduino_data_entity.dart';
 
 class StatisticsRepository {
+  
   // Daily UI
   Future<List<SingleWeekHourlyStatsModel>> getListOfHourlyStats(
       DateTime startMonday, int weekCount, int childId) async {
@@ -15,7 +16,7 @@ class StatisticsRepository {
       DateTime currentMonday = startMonday.subtract(Duration(days: 7 * i));
       result.add(await getSingleWeekHourlyStats(currentMonday, childId));
     }
-    print(result);
+    // print(result);
     return result;
   }
 
@@ -29,7 +30,9 @@ class StatisticsRepository {
     hourlyStats.forEach((key, value) {
       dailySum[key] = value.values.reduce((value, element) => value + element);
      });
-     weeklyMean = dailySum.values.reduce((value, element) => value + element) / 7;
+
+     int elaspsedDays = min(max(DateTime.now().difference(startMonday).inDays, 1), 7);
+     weeklyMean = dailySum.values.reduce((value, element) => value + element) / elaspsedDays;
 
 
     return SingleWeekHourlyStatsModel(
@@ -50,7 +53,8 @@ class StatisticsRepository {
     Map<DateTime, Map<DateTime, int>> dailyStats = await ArduinoDataEntity.getSingleYearDailyStats(year, childId);
 
     dailyStats.forEach((key, value) {
-      monthlyMean[key] = value.values.reduce((value, element) => value + element) / value.length;
+      int elaspsedDays = min(max(DateTime.now().difference(key).inDays, 1), value.length);
+      monthlyMean[key] = value.values.reduce((value, element) => value + element) / elaspsedDays;
      });
     return SingleYearDailyStatsModel(
       year: year,
