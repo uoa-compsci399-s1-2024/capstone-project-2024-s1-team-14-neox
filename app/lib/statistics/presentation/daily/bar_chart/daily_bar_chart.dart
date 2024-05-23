@@ -38,7 +38,7 @@ class _DailyBarChartState extends State<DailyBarChart> {
       return BarChartBar(x: index++, y: e.value, time: e.key);
     }).toList();
 
-    widget.dailySummary.dailyStats.forEach((key, value) {
+    widget.dailySummary.hourlyStats.forEach((key, value) {
       int index = 0;
       dayBreakdownBarData[key.weekday - 1] = value.entries
         //.map((e) => BarChartBar(x: index++, y: Random().nextInt(150), time: e.key))
