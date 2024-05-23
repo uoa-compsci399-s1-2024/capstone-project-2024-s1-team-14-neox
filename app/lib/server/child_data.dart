@@ -30,7 +30,7 @@ class ChildData {
 
   factory ChildData.fromJson(Map<String, dynamic> json) {
     return ChildData(
-      timestamp: json['tstamp'],
+      timestamp: json['timestamp'],
       childId: json['child_id'],
       uv: json['uv'],
       light: json['light'],

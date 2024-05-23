@@ -11,7 +11,9 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 part 'child_device_state.dart';
 
 class ChildDeviceCubit extends Cubit<ChildDeviceState> {
-  ChildDeviceRepository _repo;
+  final ChildDeviceRepository _repo;
+
+  
 
   
 
@@ -23,6 +25,9 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     required String gender,
     required String deviceRemoteId,
     required String authorisationCode,
+    required int outdoorTimeToday,
+    required int outdoorTimeWeek,
+    required int outdoorTimeMonth,
   }) : 
     _repo = repo,
     super(ChildDeviceIdleState(ChildDeviceState(
@@ -32,6 +37,9 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       gender: gender,
       deviceRemoteId: deviceRemoteId,
       authorisationCode: authorisationCode,
+      outdoorTimeToday: outdoorTimeToday,
+      outdoorTimeWeek: outdoorTimeWeek,
+      outdoorTimeMonth: outdoorTimeMonth,
     )));
 
   void onChildDeviceConnectPressed(String deviceRemoteId, String authorisationCode) {
@@ -93,6 +101,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     required String authorisationCode
   }) async {
     BluetoothDevice? device;
+    
     try {
       if (FlutterBluePlus.adapterStateNow != BluetoothAdapterState.on) {
         if (Platform.isAndroid) {
@@ -117,7 +126,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       emit(ChildDeviceErrorState(state, "Failed to connect to device: $e"));
       return;
     }
-    
+
     const String uuidSerivce = "ba5c0000-243e-4f78-ac25-69688a1669b4";
     const List<String> uuidSamples = [
       "42b25f8f-0000-43de-92b8-47891c706106",
@@ -132,6 +141,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     const String uuidAuthChallengeFromCentral = "c03b7267-dcfa-4525-8521-1bc31c08c312";
     const String uuidAuthResponseFromPeripheral = "750d5d43-96c4-4f5c-8ce1-fdb44a150336";
     const String uuidCentralAuthenticated = "776edbca-a020-4d86-a5e8-25eb87e82554";
+    const String uuidTimestamp = "f06c06bb-0006-4f4c-b6b4-a146eff5ab15";
     const String uuidProgress = "f06c06bb-0007-4f4c-b6b4-a146eff5ab15";
     
     try {
@@ -145,6 +155,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       BluetoothCharacteristic? authChallengeFromCentral;
       BluetoothCharacteristic? authResponseFromPeripheral;
       BluetoothCharacteristic? centralAuthenticated;
+      BluetoothCharacteristic? timestamp;
       BluetoothCharacteristic? progress;
       sampleData.length = uuidSamples.length;
       List<BluetoothService> services = await device.discoverServices();
@@ -169,6 +180,8 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
             authResponseFromPeripheral = characteristic;
           } else if (characteristicUuid == uuidCentralAuthenticated) {
             centralAuthenticated = characteristic;
+          } else if (characteristicUuid == uuidTimestamp) {
+            timestamp = characteristic;
           } else if (characteristicUuid == uuidProgress) {
             progress = characteristic;
           } else {
@@ -190,6 +203,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         authResponseFromCentral,
         authChallengeFromCentral,
         authResponseFromPeripheral,
+        timestamp,
       ];
       List<BluetoothCharacteristic?> readCharacteristics = [
         ...sampleData,
@@ -257,6 +271,13 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       }
 
       // Get sample count
+      int mostRecentSampleTimestamp = await _repo.getMostRecentSampleTimestamp(childId);
+      await timestamp!.write([
+        mostRecentSampleTimestamp & 0xFF,
+        (mostRecentSampleTimestamp >> 8) & 0xFF,
+        (mostRecentSampleTimestamp >> 16) & 0xFF,
+        (mostRecentSampleTimestamp >> 24) & 0xFF,
+      ]);
       await acknowledgement!.write([1]);
       int sampleCount = 0;
       {

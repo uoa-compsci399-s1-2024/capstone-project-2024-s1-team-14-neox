@@ -12,20 +12,21 @@ class ChildApiService {
     Dio dio = Dio();
     try {
       var response = await dio.get('$apiUrl/samples');
-      print(response);
+      var dataList = [];
+
+      for(final data in response.data){
+
+        var sample = ChildData.fromJson(data);
+        dataList.add(sample);
+
+      }
+      
     } catch (e) {
       print(e);
     }
   }
 
-  //
-  // static Future<ChildData> fetchChildDataById(int childId) async {
-  //
-  //    List<ChildData> children = await fetchChildrenData();
-  //    ChildData child = children.firstWhere((element) => element.childId == childId.toString());
-  //    return child;
-  //
-  // }
+
 
   static Future<void> postData(int childId) async {
     Dio dio = Dio();
@@ -38,6 +39,7 @@ class ChildApiService {
       ChildData newSample = sample.toChildData(serverId!);
       dataList.add(newSample);
     }
+
     final url = '$apiUrl/samples/$serverId';
     try {
       List<Map<String, dynamic>> jsonSamples = [];
@@ -46,6 +48,7 @@ class ChildApiService {
         final jsonData = childData.toJson();
         jsonSamples.add(jsonData);
       }
+
       final data = {"samples": jsonSamples};
       final response = await dio.post(url, data: data);
       print(response.statusCode);

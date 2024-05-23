@@ -1,5 +1,7 @@
+import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/classifiers/xgboost.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +16,16 @@ class ChildDeviceRepository {
 
   Future<List<ChildDeviceModel>> fetchChildProfiles() async {
     List<ChildEntity> entities = await ChildEntity.queryAllChildren();
-    return entities.map((child) => ChildDeviceModel.fromEntity(child)).toList();
+    List<ChildDeviceModel> models = entities.map((child) => ChildDeviceModel.fromEntity(child)).toList();
+    
+    Random rng = Random();
+    for (ChildDeviceModel model in models) {
+      model.outdoorTimeToday = rng.nextInt(200);
+      model.outdoorTimeWeek = rng.nextInt(200);
+      model.outdoorTimeMonth = rng.nextInt(200);
+    }
+    
+    return models;
   }
 
   // deletl child profile based on id
@@ -67,6 +78,14 @@ class ChildDeviceRepository {
   Future<List<ChildDeviceModel>> deleteChildDeviceRemoteID(int childId) async {
     await ChildEntity.deleteDeviceForChild(childId);
     return await fetchChildProfiles();
+  }
+
+  Future<int> getMostRecentSampleTimestamp(int childId) async {
+    List<ArduinoDataEntity> data = await ChildEntity.getAllDataForChild(childId);
+    if (data.isEmpty) {
+      return 0;
+    }
+    return data.map((e) => e.datetime.millisecondsSinceEpoch ~/ 1000).reduce(max);
   }
 
   Future<void> parseAndSaveSamples(
@@ -161,11 +180,4 @@ class ChildDeviceRepository {
     return ((3810 * b2) ~/ r2 + 1391).clamp(0, 0xFFFF);
   }
 
-  //////////////////////////////////
-  ///           CLOUD            ///
-  //////////////////////////////////
-
-  static Future<void> syncAllChildData() async {
-    await ChildEntity.syncAllChildData();
-  }
 }

@@ -59,4 +59,13 @@ class AppDb extends _$AppDb {
 
     await customStatement('VACUUM INTO ?', [file.path]);
   }
+  
+  Future<void> deleteEverything() {
+    return transaction(() async {
+      await customStatement('PRAGMA foreign_keys = OFF');
+      for (final table in allTables) {
+        await delete(table).go();
+      }
+    });
+  } 
 }

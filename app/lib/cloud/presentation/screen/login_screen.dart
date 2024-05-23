@@ -59,20 +59,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 icon: Icons.lock,
               ),
               HeightSpacer(myHeight: 20),
-              ElevatedButton.icon(
-                label: const Text(
-                  'SIGN IN WITH GOOGLE',
-                  style: TextStyle(color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                ),
-                icon: const Icon(FontAwesomeIcons.google, color: Colors.white),
-                onPressed: () => context.read<LoginCubit>().logInWithGoogle(),
-              ),
               Column(
                 children: [
                   Padding(
@@ -100,6 +86,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ],
+              ),
+
+              // TODO remove
+              ElevatedButton(
+                child: const Text("Test"),
+                onPressed: () => context.read<LoginCubit>().logInWithGoogle(),
               ),
             ],
           ),

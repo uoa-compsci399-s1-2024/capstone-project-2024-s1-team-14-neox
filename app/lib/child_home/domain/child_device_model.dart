@@ -5,6 +5,9 @@ class ChildDeviceModel {
   final String childName;
   final DateTime birthDate;
   final String gender;
+  int? outdoorTimeToday;
+  int? outdoorTimeWeek;
+  int? outdoorTimeMonth;
   String? deviceRemoteId;
   String? authorisationCode;
   DateTime? lastSynced;
@@ -16,6 +19,9 @@ class ChildDeviceModel {
       required this.gender,
       this.deviceRemoteId,
       this.authorisationCode,
+      this.outdoorTimeToday,
+      this.outdoorTimeWeek,
+      this.outdoorTimeMonth,
       this.lastSynced});
 
   factory ChildDeviceModel.fromEntity(ChildEntity entity) => ChildDeviceModel(

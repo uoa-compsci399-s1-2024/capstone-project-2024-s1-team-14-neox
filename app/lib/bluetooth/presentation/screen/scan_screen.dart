@@ -19,7 +19,7 @@ class ScanScreen extends StatelessWidget {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Enter 10-digit Authentication Code'),
+              const Text('Enter 10-digit authentication code'),
               Text(
                 'See the device manual for the code.',
                 style: Theme.of(context).textTheme.bodySmall,
@@ -28,11 +28,11 @@ class ScanScreen extends StatelessWidget {
           ),
           content: TextField(
             controller: _textFieldController,
-            decoration: const InputDecoration(hintText: "0123456789"),
+            decoration: const InputDecoration(hintText: "Authentication Code"),
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: const Text('CANCEL'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.pop(context);
               },

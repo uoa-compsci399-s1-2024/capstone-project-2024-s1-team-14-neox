@@ -1,9 +1,11 @@
-import 'package:age_calculator/age_calculator.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/presentation/screens/create_child_profile_screen.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/main.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import '../../../bluetooth/bloc/bluetooth_bloc.dart';
 import '../../../bluetooth/presentation/bluetooth_panel.dart';
@@ -18,48 +20,76 @@ class ChildProfileTile extends StatefulWidget {
 }
 
 class _ChildProfileTileState extends State<ChildProfileTile> {
-  String calculateAge(DateTime birthDate) {
-    DateDuration duration = AgeCalculator.age(birthDate);
-    return "${duration.years} years, ${duration.months} months";
-  }
-
   @override
   Widget build(BuildContext context) {
     ChildDeviceState state = context.read<ChildDeviceCubit>().state;
 
+    int outdoorTimeToday = state.outdoorTimeToday;
+    int outdoorTimeAvgWeek = state.outdoorTimeWeek;
+    int outdoorTimeAvgMonth = state.outdoorTimeMonth;
+    int target = App.sharedPreferences.getInt("daily_target")!;
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
       child: Column(
         children: [
-          Row(children: [
-            Text(state.childName, style: const TextStyle(fontSize: 30)),
-            const SizedBox(width: 10),
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) {
-                      return BlocProvider.value(
-                        value: BlocProvider.of<AllChildProfileCubit>(context),
-                        child: BlocProvider.value(
-                          value: BlocProvider.of<ChildDeviceCubit>(context),
-                          child: const CreateChildProfileScreen(editing: true),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-              icon: const Icon(Icons.edit),
-            ),
-            const Spacer(),
-            BlocProvider(
-              create: (_) => BluetoothBloc(),
-              child: const BluetoothPanel(),
-            ),
-          ]),
-          ElevatedButton(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Dummy invisible widget to balance out icon on the right.
+              // This ensures that the text widget is perfectly centred.
+              const Visibility(
+                maintainSize: true, 
+                maintainAnimation: true,
+                maintainState: true,
+                visible: false,
+                child: IconButton(
+                  onPressed: null,
+                  icon: Icon(Icons.edit),
+                ),
+              ),
+
+              Flexible(
+                child: Text(
+                  state.childName,
+                  style: const TextStyle(fontSize: 40),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              IconButton(
+                onPressed: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) {
+                        return BlocProvider.value(
+                          value: BlocProvider.of<AllChildProfileCubit>(context),
+                          child: BlocProvider.value(
+                            value: BlocProvider.of<ChildDeviceCubit>(context),
+                            child: const CreateChildProfileScreen(editing: true),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.edit),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 10),
+          
+          BlocProvider(
+            create: (_) => BluetoothBloc(),
+            child: const BluetoothPanel(),
+          ),
+          
+          if (kDebugMode)
+            ElevatedButton(
               onPressed: () async {
                 // Change start and end times as needed
                 DateTime startTime = DateTime(2024, 1, 1);
@@ -80,8 +110,98 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                 }
               },
               child: Text("Generate data")),
+          
+          Expanded(
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return Column(
+                  children: [
+                    const Spacer(),
+
+                    OutdoorTimeProgressIndicator(
+                      context: context,
+                      radius: constraints.maxWidth / 2 * 0.8,
+                      lineWidth: 18,
+                      percent: (outdoorTimeToday / target).clamp(0, 1),
+                      center: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Today",
+                            style: TextStyle(fontSize: 30),
+                          ),
+                          Text("$outdoorTimeToday / $target minutes outdoors"),
+                        ],
+                      ),
+                    ),
+              
+                    const Spacer(),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        OutdoorTimeProgressIndicator(
+                          context: context,
+                          radius: constraints.maxWidth / 4 * 0.8,
+                          lineWidth: 10,
+                          percent: (outdoorTimeAvgWeek / target).clamp(0, 1),
+                          center: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Past week",
+                                style: TextStyle(fontSize: 18),
+                              ),
+                              Text("$outdoorTimeAvgWeek mins/day"),
+                            ],
+                          ),
+                        ),
+                        OutdoorTimeProgressIndicator(
+                          context: context,
+                          radius: constraints.maxWidth / 4 * 0.8,
+                          lineWidth: 10,
+                          percent: (outdoorTimeAvgMonth / target).clamp(0, 1),
+                          center: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Past month",
+                                style: TextStyle(fontSize: 18),
+                              ),
+                              Text("$outdoorTimeAvgMonth mins/day"),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const Spacer(),
+                  ],
+                );
+              },
+            ),
+          
+          ),
         ],
       ),
     );
   }
+}
+
+// ignore: must_be_immutable
+class OutdoorTimeProgressIndicator extends CircularPercentIndicator {
+  OutdoorTimeProgressIndicator({
+    super.key, 
+    required BuildContext context,
+    required super.radius,
+    required super.lineWidth,
+    required super.percent,
+    required super.center,
+  }) : super(
+    animation: true,
+    arcType: ArcType.FULL,
+    arcBackgroundColor: Colors.grey.withOpacity(0.3),
+    circularStrokeCap: CircularStrokeCap.round,
+    progressColor: percent >= 1 ? const Color.fromARGB(255, 255, 204, 36) : Theme.of(context).primaryColor,
+  );
 }
