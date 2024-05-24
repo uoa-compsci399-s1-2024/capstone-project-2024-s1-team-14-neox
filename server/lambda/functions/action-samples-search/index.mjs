@@ -42,7 +42,7 @@ function make_handler(subjectID)
     const subjectIDValue = decodeURIComponent(event.pathParameters[subjectIDName]);
     const resolvedResource = event.resource.replace("{" + subjectIDName + "}", encodeURIComponent(subjectIDValue));
 
-    const auth = await (async () = {
+    const auth = await (async () => {
       switch (subjectID) {
       case SUBJECT_CHILD:
         return await authenticateUser(event, db, AUTH_PARENT_OFCHILD | AUTH_RESEARCHER_OFSAMESTUDYASCHILD, {"childID": subjectIDValue});
