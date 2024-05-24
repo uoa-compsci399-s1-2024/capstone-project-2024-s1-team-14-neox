@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/classifiers/xgboost.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
@@ -11,20 +12,23 @@ import 'classifiers/xgboost.dart';
 
 class ChildDeviceRepository {
   static const int bytesPerSample = 20;
+  final SharedPreferences sharedPreferences;
+  ChildDeviceRepository({required this.sharedPreferences});
 
   // Fetch all children profiles
 
   Future<List<ChildDeviceModel>> fetchChildProfiles() async {
     List<ChildEntity> entities = await ChildEntity.queryAllChildren();
-    List<ChildDeviceModel> models = entities.map((child) => ChildDeviceModel.fromEntity(child)).toList();
-    
+    List<ChildDeviceModel> models =
+        entities.map((child) => ChildDeviceModel.fromEntity(child)).toList();
+
     Random rng = Random();
     for (ChildDeviceModel model in models) {
       model.outdoorTimeToday = rng.nextInt(200);
       model.outdoorTimeWeek = rng.nextInt(200);
       model.outdoorTimeMonth = rng.nextInt(200);
     }
-    
+
     return models;
   }
 
@@ -35,15 +39,22 @@ class ChildDeviceRepository {
 
   Future<List<ChildDeviceModel>> createChildProfile(
       String name, DateTime birthDate, String gender) async {
-    await ChildEntity.saveSingleChildEntityFromParameters(
+    int childId = await ChildEntity.saveSingleChildEntityFromParameters(
         name, birthDate, gender);
-
+    await sharedPreferences.setInt("focus_id", childId);
     return await fetchChildProfiles();
   }
 
-  Future<List<ChildDeviceModel>> deleteChildProfile(int childId) async {
-    await ChildEntity.deleteChild(childId);
-    return await fetchChildProfiles();
+  Future<List<ChildDeviceModel>> deleteChildProfile(int deleteChildId) async {
+    await ChildEntity.deleteChild(deleteChildId);
+    List<ChildDeviceModel> childProfiles = await fetchChildProfiles();
+    // Set focus child as first child 
+    if (childProfiles.isEmpty) {
+      await sharedPreferences.remove("focus_id");
+    } else {
+      sharedPreferences.setInt("focus_id", childProfiles[0].childId);
+    }
+    return childProfiles;
   }
 
   Future<List<ChildDeviceModel>> updateChildDeviceRemoteID(
@@ -81,11 +92,14 @@ class ChildDeviceRepository {
   }
 
   Future<int> getMostRecentSampleTimestamp(int childId) async {
-    List<ArduinoDataEntity> data = await ChildEntity.getAllDataForChild(childId);
+    List<ArduinoDataEntity> data =
+        await ChildEntity.getAllDataForChild(childId);
     if (data.isEmpty) {
       return 0;
     }
-    return data.map((e) => e.datetime.millisecondsSinceEpoch ~/ 1000).reduce(max);
+    return data
+        .map((e) => e.datetime.millisecondsSinceEpoch ~/ 1000)
+        .reduce(max);
   }
 
   Future<void> parseAndSaveSamples(
@@ -179,5 +193,4 @@ class ChildDeviceRepository {
 
     return ((3810 * b2) ~/ r2 + 1391).clamp(0, 0xFFFF);
   }
-
 }
