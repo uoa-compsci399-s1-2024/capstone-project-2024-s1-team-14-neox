@@ -202,6 +202,7 @@ export const AUTH_RESEARCHER_OFSAMESTUDYASCHILD = 256;  // uses `config.childID`
 // If none were matched, then `AUTH_NONE` is returned.
 export async function authenticateUser(event, db, flags, config)
 {
+  console.log(`caller: ${getDBUserIdFromEvent(event)}`);
   // NOTE: we compare result of bitwise AND using strict equality
   // (===) since strict equality returns bool rather than a number.
   if ((flags & AUTH_ALL) === AUTH_ALL) {
