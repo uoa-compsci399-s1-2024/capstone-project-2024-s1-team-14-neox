@@ -77,7 +77,7 @@ function make_handler(subjectID)
     try {
       switch (event.httpMethod.toUpperCase()) {
       case "PUT":
-        await db.query("INSERT INTO study_${subjectID} (study_id, participant_id) VALUES ($1, $2)",
+        await db.query(`INSERT INTO study_${subjectID} (study_id, participant_id) VALUES ($1, $2)`,
                        [studyID, subjectIDValue]);
         break;
       case "DELETE": {
