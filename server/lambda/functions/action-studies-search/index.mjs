@@ -104,15 +104,16 @@ function make_handler(collectionID)
 
       switch (collectionID) {
       case COLLECTION_GLOBAL:
-        // just no studies at all
+        console.log("no matching rows from DB... we're searching globally so there's just no studies at all");
         break;
       // need to differentiate between no such participant OR participant is not in any studies
       case COLLECTION_RESEARCHERS:
-        // either participant (who is a researcher) is in no studies OR participant is not a RESEARCHER
+        console.log("no matching rows from DB... either participant (who is a researcher) is in no studies OR participant is not a RESEARCHER... checking...");
         if ((await db.query("SELECT * FROM users WHERE id = $1", [subjectID])).rows.length === 0) {
-          // no such user at all
+          console.log("no such user at all");
           return unauthResp;
         } else {
+          console.log("such a user exists... checking if user is a researcher...")
           let groups = [];
           let nextToken;
           do {
@@ -147,19 +148,22 @@ function make_handler(collectionID)
           } while (nextToken != null);
 
           if (groups.includes(process.env.GROUPNAME_RESEARCHERS)) {
-            // researcher is just not in any studies
+            console.log("researcher is just not in any studies");
           } else {
+            console.log("target user is not a researcher");
             return unauthResp;
           }
         }
         break;
       // need to differentiate between no such participant OR participant is not in any studies
       case COLLECTION_CHILDREN:
+        console.log("no matching rows from DB... either participant (who is a child) is in no studies OR participant is not a CHILD... checking...");
+
         if ((await db.query("SELECT * FROM children WHERE id = $1", [subjectID])).rows.length === 0) {
-          // no such child
+          console.log("no such child");
           return unauthResp;
         } else {
-          // child is just not in any studies
+          console.log("child is just not in any studies");
         }
         break;
       }
