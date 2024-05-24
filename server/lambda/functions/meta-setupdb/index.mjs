@@ -23,31 +23,6 @@ CREATE TABLE users (
        id TEXT NOT NULL PRIMARY KEY
 );
 
-CREATE TABLE studies (
-       id TEXT NOT NULL PRIMARY KEY,
-       min_date DATE NOT NULL,
-       max_date DATE NOT NULL,
-       name TEXT,
-       description TEXT,
-       CONSTRAINT date_interval CHECK (min_date <= max_date),
-       -- Ensure all IDs are stored in uppercase
-       CONSTRAINT id_caps CHECK (id = upper(id))
-);
-CREATE TABLE study_children (
-       study_id TEXT NOT NULL,
-       participant_id TEXT NOT NULL,
-       PRIMARY KEY (study_id, participant_id),
-       FOREIGN KEY (study_id) REFERENCES studies (id),
-       FOREIGN KEY (participant_id) REFERENCES children (id)
-);
-CREATE TABLE study_researchers (
-       study_id TEXT NOT NULL,
-       participant_id TEXT NOT NULL,
-       PRIMARY KEY (study_id, participant_id),
-       FOREIGN KEY (study_id) REFERENCES studies (id),
-       FOREIGN KEY (participant_id) REFERENCES users (id)
-);
-
 CREATE TYPE gender AS ENUM (${PERSONAL_INFO_CHILD_GENDER_OPTIONS.map(pg.escapeLiteral).join(', ')});
 CREATE TABLE children (
        id CHAR(${ID_LEN}) NOT NULL PRIMARY KEY,
@@ -84,6 +59,31 @@ CREATE TABLE samples (
        CONSTRAINT col_temp_range CHECK (col_temp >= 0),
        PRIMARY KEY (child_id, "timestamp"),
        FOREIGN KEY (child_id) REFERENCES children (id)
+);
+
+CREATE TABLE studies (
+       id TEXT NOT NULL PRIMARY KEY,
+       min_date DATE NOT NULL,
+       max_date DATE NOT NULL,
+       name TEXT,
+       description TEXT,
+       CONSTRAINT date_interval CHECK (min_date <= max_date),
+       -- Ensure all IDs are stored in uppercase
+       CONSTRAINT id_caps CHECK (id = upper(id))
+);
+CREATE TABLE study_children (
+       study_id TEXT NOT NULL,
+       participant_id TEXT NOT NULL,
+       PRIMARY KEY (study_id, participant_id),
+       FOREIGN KEY (study_id) REFERENCES studies (id),
+       FOREIGN KEY (participant_id) REFERENCES children (id)
+);
+CREATE TABLE study_researchers (
+       study_id TEXT NOT NULL,
+       participant_id TEXT NOT NULL,
+       PRIMARY KEY (study_id, participant_id),
+       FOREIGN KEY (study_id) REFERENCES studies (id),
+       FOREIGN KEY (participant_id) REFERENCES users (id)
 );
 `;
 export const handler = async (event) => {
