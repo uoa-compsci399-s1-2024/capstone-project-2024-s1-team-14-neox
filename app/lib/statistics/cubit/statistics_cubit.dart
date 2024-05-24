@@ -19,25 +19,35 @@ class StatisticsCubit extends Cubit<StatisticsState> {
   }
 
   void onFocusChildChange(int childId) async {
+    print("inside on focus child change start");
+    emit(StatisticsInitial(detailedView: state.detailedView));
     _statisticsRepository.deleteCache();
     await _statisticsRepository.updateFocusChildId(childId);
     if (state.detailedView) {
+      print("focus child detailed view");
       emit(StatisticsDetailed(focusChildId: childId, detailedView: true));
+    } else {
+      print("focus child overview");
+      emit(StatisticsOverview(focusChildId: childId, detailedView: false));
     }
-    emit(StatisticsOverview(focusChildId: childId, detailedView: false));
   }
 
   void onFocusViewToggle() {
     print("in focus view $state");
-    if (state is StatisticsDetailed) {
+    print("testing onFocusViewToggle");
+    if (state is StatisticsInitial) {
+      emit(StatisticsInitial(detailedView: !state.detailedView));
+      return;
+    }
+    if (state.detailedView) {
+      print("stats cubit currently detailed");
       emit(StatisticsOverview(
           focusChildId: (state as StatisticsDetailed).focusChildId,
           detailedView: false));
-    } else if (state is StatisticsOverview) {
+    } else {
       emit(StatisticsOverview(
           focusChildId: (state as StatisticsOverview).focusChildId,
           detailedView: true));
     }
-    emit(StatisticsInitial(detailedView: !state.detailedView));
   }
 }

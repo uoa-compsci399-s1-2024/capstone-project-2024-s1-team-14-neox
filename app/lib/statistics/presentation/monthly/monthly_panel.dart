@@ -89,9 +89,11 @@ class MonthlyPanel extends StatelessWidget {
     return BlocBuilder<MonthlyCubit, MonthlyState>(
       builder: (context, state) {
         if (state.status.isLoading) {
-          print("loading");
+          print("monthly panel loading");
           return CircularProgressIndicator();
         }
+        print("monthly panel ${context.read<StatisticsCubit>().state}");
+        print("monthly panel $state}");
         return Column(
           children: [
             SizedBox(

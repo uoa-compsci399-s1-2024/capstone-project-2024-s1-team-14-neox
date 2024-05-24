@@ -20,6 +20,7 @@ class ViewToggle extends StatefulWidget {
 class _ViewToggleState extends State<ViewToggle> {
   bool detailedView = true;
   void _changeAnimation() {
+    print("focus view toggled in viewToggle");
     setState(() {
       detailedView = !detailedView;
     });
@@ -36,6 +37,7 @@ class _ViewToggleState extends State<ViewToggle> {
         children: <Widget>[
           GestureDetector(
             onTap: () {
+
               _changeAnimation();
               context.read<StatisticsCubit>().onFocusViewToggle();
             },

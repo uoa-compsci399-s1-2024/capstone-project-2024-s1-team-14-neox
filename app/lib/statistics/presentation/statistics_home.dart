@@ -1,6 +1,7 @@
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_model.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/main.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/statistics_repository.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/view_toggle%20copy.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/view_toggle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,7 +48,8 @@ class StatisticsHomeState extends State<StatisticsHome> {
       create: (_) =>
           StatisticsRepository(sharedPreferences: App.sharedPreferences),
       child: BlocProvider(
-        create: (context) => StatisticsCubit(context.read<StatisticsRepository>()),
+        create: (context) =>
+            StatisticsCubit(context.read<StatisticsRepository>()),
         child: Scaffold(
           appBar: AppBar(
             title: BlocBuilder<StatisticsCubit, StatisticsState>(
@@ -73,6 +75,7 @@ class StatisticsHomeState extends State<StatisticsHome> {
                     setState(() {
                       _selectedChildProfile = value;
                     });
+                    print("cahing to child id ${value!.childId}");
                     context.read<StatisticsCubit>().onFocusChildChange(
                           value!.childId, //NONNULLABLE Selection
                         );
@@ -81,10 +84,22 @@ class StatisticsHomeState extends State<StatisticsHome> {
               },
             ),
             actions: [
-              ViewToggle(
-                width: 140,
-                height: 40, /* animateToPage: animateToPage */
-              ),
+              BlocBuilder<StatisticsCubit, StatisticsState>(
+                builder: (context, state) {
+                  return GestureDetector(
+                    onTap: () {
+                      print("tapped stats home");
+                      context.read<StatisticsCubit>().onFocusViewToggle();
+                    },
+                    child: ViewToggleReplace(
+                      width: 140,
+                      height: 40,
+                      detailedView:
+                          context.read<StatisticsCubit>().state.detailedView,
+                    ),
+                  );
+                },
+              )
             ],
             // bottom: TabBar(
             //   indicatorSize: TabBarIndicatorSize.tab,
@@ -102,26 +117,30 @@ class StatisticsHomeState extends State<StatisticsHome> {
             // ),
           ),
           body: BlocBuilder<StatisticsCubit, StatisticsState>(
+              buildWhen: (previous, current) =>
+                  previous != current && current is! StatisticsInitial,
               builder: (context, state) {
-                print(state);
-            if (state is StatisticsOverview) {
-              return BlocProvider(
-                create: (context) =>
-                    MonthlyCubit(context.read<StatisticsRepository>())
-                      ..onGetYearDataForChildId(
-                          DateTime.now().year, state.focusChildId),
-                child: const MonthlyPanel(),
-              );
-            } else if (state is StatisticsDetailed) {
-              return BlocProvider(
-                create: (context) =>
-                    DailyCubit(context.read<StatisticsRepository>())
+                print("state for stats home $state");
+                if (state is StatisticsOverview) {
+                  print("at stats overview home");
+                  return BlocProvider(
+                    create: (context) =>
+                        MonthlyCubit(context.read<StatisticsRepository>())
+                          ..onGetYearDataForChildId(
+                              DateTime.now().year, state.focusChildId),
+                    child: const MonthlyPanel(),
+                  );
+                } else if (state is StatisticsDetailed) {
+                  print("at stats detailed home");
+                  return BlocProvider(
+                    create: (context) => DailyCubit(
+                        context.read<StatisticsRepository>())
                       ..onGetDataForChildId(DateTime.now(), state.focusChildId),
-                child: const DailyPanel(),
-              );
-            }
-            return Text("Please select a child");
-          }),
+                    child: const DailyPanel(),
+                  );
+                }
+                return Text("Please select a child");
+              }),
         ),
       ),
     );
