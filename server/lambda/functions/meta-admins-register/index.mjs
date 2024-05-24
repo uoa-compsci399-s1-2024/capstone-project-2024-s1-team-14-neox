@@ -46,6 +46,7 @@ export const handler = async (event) => {
   }
 
   let newUser;
+  console.log("creating user...");
   try {
     newUser = await cognitoClient.send(new AdminCreateUserCommand({
       UserPoolId: process.env.USERPOOL_ID,
@@ -61,12 +62,18 @@ export const handler = async (event) => {
     }
   }
 
+  const admin_groups = [process.env.GROUPNAME_ADMINS,
+                        process.env.GROUPNAME_RESEARCHERS];
+  console.log(`adding user to groups ${JSON.stringify(admin_groups)}...`);
   try {
-    await cognitoClient.send(new AdminAddUserToGroupCommand({
-      UserPoolId: process.env.USERPOOL_ID,
-      GroupName: process.env.GROUPNAME_ADMINS,
-      Username: newUser.User.Username,
-    }));
+    await Promise.all(
+      admin_groups
+        .map(g => new AdminAddUserToGroupCommand({
+          UserPoolId: process.env.USERPOOL_ID,
+          GroupName: g,
+          Username: newUser.User.Username,
+        }))
+        .map(cmd => cognitoClient.send(cmd)));
   } catch (e) {
     throw e;
   }
