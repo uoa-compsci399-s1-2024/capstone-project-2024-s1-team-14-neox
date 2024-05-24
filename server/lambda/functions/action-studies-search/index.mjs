@@ -79,12 +79,12 @@ function make_handler(collectionID)
     case COLLECTION_RESEARCHERS:
       res = await db.query(`SELECT upper(study_id) AS id
                             FROM study_researchers
-                            WHERE participant_id = $2`,
+                            WHERE participant_id = $1`,
                            [subjectID]);
     case COLLECTION_CHILDREN:
       res = await db.query(`SELECT upper(study_id) AS id
                             FROM study_children
-                            WHERE participant_id = $2`,
+                            WHERE participant_id = $1`,
                            [subjectID]);
     }
     // determine what kind of error happened (if any)
@@ -154,7 +154,7 @@ function make_handler(collectionID)
         break;
       // need to differentiate between no such participant OR participant is not in any studies
       case COLLECTION_CHILDREN:
-        if ((await db.query("SELECT * FROM children WHERE id = $1", subjectID)).rows.length === 0) {
+        if ((await db.query("SELECT * FROM children WHERE id = $1", [subjectID])).rows.length === 0) {
           // no such child
           return unauthResp;
         } else {
