@@ -4,6 +4,7 @@ import {
   authenticateUser,
   AUTH_NONE,
   AUTH_ADMIN,
+  AUTH_SELF,
   AUTH_PARENT_OFCHILD,
   AUTH_ALL,
 } from "/opt/nodejs/lib.mjs";
@@ -52,7 +53,7 @@ function make_handler(collectionID)
       case COLLECTION_GLOBAL:
         return await authenticateUser(event, db, AUTH_ALL);
       case COLLECTION_RESEARCHERS:
-        return await authenticateUser(event, db, AUTH_ADMIN);
+        return await authenticateUser(event, db, AUTH_ADMIN | AUTH_SELF, {"targetUserID": subjectID});
       case COLLECTION_CHILDREN:
         return await authenticateUser(event, db, AUTH_ADMIN | AUTH_PARENT_OFCHILD, {"childID": subjectID});
       }
