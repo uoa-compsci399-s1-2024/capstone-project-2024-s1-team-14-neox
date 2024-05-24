@@ -210,7 +210,7 @@ function make_handler(actionID)
       const sqlFields = [];
       if (actionID === ACTION_MODIFY && event.httpMethod.toUpperCase() === "PUT") {
         const missingOptionalFields = [];
-        for (mf of STUDY_METADATA_FIELDS) {
+        for (let mf of STUDY_METADATA_FIELDS) {
           if (fields[mf.name] === undefined) {
             fields[mf.name] = null;
             missingOptionalFields.push(mf.name);
