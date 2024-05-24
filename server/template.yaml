@@ -914,6 +914,7 @@ Resources:
     Properties:
       CodeUri: lambda/functions/action-researchers-register/
       Handler: index.handler
+      Timeout: 10
       Role: !GetAtt LambdaRole.Arn
       Events:
         ApiEvent:
