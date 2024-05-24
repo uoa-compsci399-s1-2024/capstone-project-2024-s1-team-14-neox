@@ -63,8 +63,8 @@ CREATE TABLE samples (
 
 CREATE TABLE studies (
        id TEXT NOT NULL PRIMARY KEY,
-       min_date DATE NOT NULL,
-       max_date DATE NOT NULL,
+       start_date DATE NOT NULL,
+       end_date DATE NOT NULL,
        name TEXT,
        description TEXT,
        CONSTRAINT date_interval CHECK (min_date <= max_date),
