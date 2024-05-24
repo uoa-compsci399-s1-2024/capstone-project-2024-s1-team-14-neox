@@ -77,16 +77,19 @@ function make_handler(collectionID)
     switch (collectionID) {
     case COLLECTION_GLOBAL:
       res = await db.query("SELECT upper(id) AS id FROM studies");
+      break;
     case COLLECTION_RESEARCHERS:
       res = await db.query(`SELECT upper(study_id) AS id
                             FROM study_researchers
                             WHERE participant_id = $1`,
                            [subjectID]);
+      break;
     case COLLECTION_CHILDREN:
       res = await db.query(`SELECT upper(study_id) AS id
                             FROM study_children
                             WHERE participant_id = $1`,
                            [subjectID]);
+      break;
     }
     // determine what kind of error happened (if any)
     if (res.rows.length === 0) {
