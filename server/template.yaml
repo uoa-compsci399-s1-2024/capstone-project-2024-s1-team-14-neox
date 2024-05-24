@@ -983,6 +983,12 @@ Resources:
       CodeUri: lambda/functions/meta-clearsamples/
       Handler: index.handler
       Role: !GetAtt LambdaRole.Arn
+  FuncMetaClearStudies:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/meta-clearstudies/
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
   FuncMetaReadAllTables:
     Type: AWS::Serverless::Function
     Properties:
