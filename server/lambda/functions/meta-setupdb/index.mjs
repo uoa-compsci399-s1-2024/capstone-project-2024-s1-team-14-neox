@@ -10,13 +10,13 @@ let db = await connectToDB();
 const CREATE_TABLES_TEXT = `
 -- NOTE: THERE SHOULD BE EXTERNAL AND INTERNAL IDs
 
-DROP TABLE IF EXISTS samples;
-DROP TABLE IF EXISTS studies;
-DROP TABLE IF EXISTS study_children;
-DROP TABLE IF EXISTS study_researchers;
-DROP TABLE IF EXISTS children;
-DROP TABLE IF EXISTS users;
-DROP TYPE IF EXISTS gender;
+DROP TABLE IF EXISTS samples CASCADE;
+DROP TABLE IF EXISTS studies CASCADE;
+DROP TABLE IF EXISTS study_children CASCADE;
+DROP TABLE IF EXISTS study_researchers CASCADE;
+DROP TABLE IF EXISTS children CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TYPE IF EXISTS gender CASCADE;
 
 -- We put all users in one table since a user may be admin AND researcher, derived from Cognito groups
 CREATE TABLE users (
