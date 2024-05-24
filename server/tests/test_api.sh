@@ -132,5 +132,23 @@ for user in PARENT1 PARENT2 RESEARCHER1 ADMIN; do
 	echo "$user: listing children of PARENT1"
 	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/parents/$EMAIL_PARENT1/children" 2>/dev/null | head -n1
 	# echo ""
-done
 
+	STUDYID="TEST123"
+	BADSTUDYID="ABC123"
+	echo "$user: creating study"
+	curl -i -X PUT -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID" -d '{"start_date": "2024-01-23", "end_date": "2024-06-13"}' 2>/dev/null #| head -n1
+	# echo ""
+
+	echo "$user: getting details of study"
+	# curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/info" 2>/dev/null #| head -n1
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/info" 2>/dev/null
+	# echo ""
+
+	echo "$user: PUTting details of study"
+	curl -i -X PUT -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/info" -d '{"start_date": "2020-01-01", "end_date": "2020-12-31", "name": "myopia test"}' 2>/dev/null #| head -n1
+	# echo ""
+
+	echo "$user: PATCHing details of study"
+	curl -i -X PATCH -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/info" -d '{"description": "testing myopia"}' 2>/dev/null #| head -n1
+	# echo ""
+done
