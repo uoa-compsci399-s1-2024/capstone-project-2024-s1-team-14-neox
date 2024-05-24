@@ -143,10 +143,14 @@ function make_handler(collectionID)
               addCorsHeaders(errResp);
               return errResp;
             }
-            groups.concat(res.Groups.map(g => g.GroupName));
+            console.log(JSON.stringify(res));
+            for (let i=0; i<res.Groups.length; i++) {
+              groups.push(res.Groups[0].GroupName);
+            }
             nextToken = res.NextToken;
           } while (nextToken != null);
 
+          console.log(`groups: ${JSON.stringify(groups)}`);
           if (groups.includes(process.env.GROUPNAME_RESEARCHERS)) {
             console.log("researcher is just not in any studies");
           } else {
