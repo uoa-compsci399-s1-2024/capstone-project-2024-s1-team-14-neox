@@ -37,7 +37,7 @@ function make_handler(collectionID)
       }
     })();
     const resolvedResource = (() => {
-      switch (collectionId) {
+      switch (collectionID) {
       case COLLECTION_RESEARCHERS:
         return event.resource.replace("{researcherID}", encodeURIComponent(subjectID));
       case COLLECTION_CHILDREN:
@@ -47,7 +47,7 @@ function make_handler(collectionID)
     console.log(`collection: ${collectionID}`);
     console.log(`subjectID: ${subjectID}`);
 
-    const authFlags = await (async () => {
+    const auth = await (async () => {
       switch (collectionID) {
       case COLLECTION_GLOBAL:
         return await authenticateUser(event, db, AUTH_ALL);
