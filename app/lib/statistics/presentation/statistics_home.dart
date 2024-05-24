@@ -1,4 +1,5 @@
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_model.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/main.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/statistics_repository.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/view_toggle.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,6 @@ import '../cubit/monthly_cubit.dart';
 import '../cubit/weekly_cubit.dart';
 import 'daily/daily_panel.dart';
 import 'monthly/monthly_panel.dart';
-import 'weekly/weekly_panel.dart';
 
 class StatisticsHome extends StatefulWidget {
   const StatisticsHome({super.key});
@@ -20,14 +20,10 @@ class StatisticsHome extends StatefulWidget {
   State<StatisticsHome> createState() => StatisticsHomeState();
 }
 
-class StatisticsHomeState extends State<StatisticsHome>
-    with TickerProviderStateMixin {
-  //with TickerProviderStateMixin needed for animation
+class StatisticsHomeState extends State<StatisticsHome> {
   bool detailedView = true;
   ChildDeviceModel? _selectedChildProfile;
   final PageController _pageController = PageController();
-
-  // TODO update Ui, mighnt not be drop button
 
   @override
   void dispose() {
@@ -47,89 +43,85 @@ class StatisticsHomeState extends State<StatisticsHome>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => StatisticsCubit(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: BlocBuilder<StatisticsCubit, StatisticsState>(
-            builder: (context, state) {
-              return DropdownButton<ChildDeviceModel>(
-                value: _selectedChildProfile,
-                items: context
-                    .read<AllChildProfileCubit>()
-                    .state
-                    .profiles
-                    .map((profile) => DropdownMenuItem(
-                          value: profile,
-                          child: Column(
-                            children: [
-                              Text(profile.childName),
-                              // Text(
-                              //     "Date of Birth: ${DateFormat('yyyy-MM-dd').format(profile.birthDate)}"),
-                            ],
-                          ),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedChildProfile = value;
-                  });
-                  context.read<StatisticsCubit>().onFocusChildChange(
-                        value!.childId, //NONNULLABLE Selection
-                      );
-                },
-              );
-            },
-          ),
-          actions: [
-            ViewToggle(width: 140, height: 40, /* animateToPage: animateToPage */),
-          ],
-          // bottom: TabBar(
-          //   indicatorSize: TabBarIndicatorSize.tab,
-          //   dividerColor: Colors.transparent,
-          //   indicator: BoxDecoration(
-          //       color: Theme.of(context).colorScheme.primary,
-          //       borderRadius: BorderRadius.all(Radius.circular(10))),
-          //   labelColor: Colors.white,
-          //   tabs: const [
-          //     Tab(text: "Daily"),
-          //     Tab(text: "Weekly"),
-          //     Tab(text: "Monthly"),
-          //   ],
-          //   controller: _tabController,
-          // ),
-        ),
-        body: RepositoryProvider(
-          create: (_) => StatisticsRepository(),
-          child: MultiBlocProvider(
-            providers: [
-              BlocProvider(
-                  create: (context) =>
-                      DailyCubit(context.read<StatisticsRepository>())),
-              BlocProvider(
-                  create: (context) =>
-                      WeeklyCubit(context.read<StatisticsRepository>())),
-              BlocProvider(
-                  create: (context) =>
-                      MonthlyCubit(context.read<StatisticsRepository>())),
+    return RepositoryProvider(
+      create: (_) =>
+          StatisticsRepository(sharedPreferences: App.sharedPreferences),
+      child: BlocProvider(
+        create: (context) => StatisticsCubit(context.read<StatisticsRepository>()),
+        child: Scaffold(
+          appBar: AppBar(
+            title: BlocBuilder<StatisticsCubit, StatisticsState>(
+              builder: (context, state) {
+                return DropdownButton<ChildDeviceModel>(
+                  value: _selectedChildProfile,
+                  items: context
+                      .read<AllChildProfileCubit>()
+                      .state
+                      .profiles
+                      .map((profile) => DropdownMenuItem(
+                            value: profile,
+                            child: Column(
+                              children: [
+                                Text(profile.childName),
+                                // Text(
+                                //     "Date of Birth: ${DateFormat('yyyy-MM-dd').format(profile.birthDate)}"),
+                              ],
+                            ),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedChildProfile = value;
+                    });
+                    context.read<StatisticsCubit>().onFocusChildChange(
+                          value!.childId, //NONNULLABLE Selection
+                        );
+                  },
+                );
+              },
+            ),
+            actions: [
+              ViewToggle(
+                width: 140,
+                height: 40, /* animateToPage: animateToPage */
+              ),
             ],
-            child: BlocBuilder<StatisticsCubit, StatisticsState>(
-                builder: (context, state) {
-              if (state.focusChildId == -1) {
-                return Text("Please select a child");
-              } else if (state.detailedView) {
-                return DailyPanel();
-              } 
-              return MonthlyPanel();
-              // return PageView(
-              //   controller: _pageController,
-              //   children: const [
-              //     DailyPanel(),
-              //     MonthlyPanel(),
-              //   ],
-              // );
-            }),
+            // bottom: TabBar(
+            //   indicatorSize: TabBarIndicatorSize.tab,
+            //   dividerColor: Colors.transparent,
+            //   indicator: BoxDecoration(
+            //       color: Theme.of(context).colorScheme.primary,
+            //       borderRadius: BorderRadius.all(Radius.circular(10))),
+            //   labelColor: Colors.white,
+            //   tabs: const [
+            //     Tab(text: "Daily"),
+            //     Tab(text: "Weekly"),
+            //     Tab(text: "Monthly"),
+            //   ],
+            //   controller: _tabController,
+            // ),
           ),
+          body: BlocBuilder<StatisticsCubit, StatisticsState>(
+              builder: (context, state) {
+                print(state);
+            if (state is StatisticsOverview) {
+              return BlocProvider(
+                create: (context) =>
+                    MonthlyCubit(context.read<StatisticsRepository>())
+                      ..onGetYearDataForChildId(
+                          DateTime.now().year, state.focusChildId),
+                child: const MonthlyPanel(),
+              );
+            } else if (state is StatisticsDetailed) {
+              return BlocProvider(
+                create: (context) =>
+                    DailyCubit(context.read<StatisticsRepository>())
+                      ..onGetDataForChildId(DateTime.now(), state.focusChildId),
+                child: const DailyPanel(),
+              );
+            }
+            return Text("Please select a child");
+          }),
         ),
       ),
     );

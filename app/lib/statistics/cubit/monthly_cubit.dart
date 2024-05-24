@@ -11,7 +11,7 @@ class MonthlyCubit extends Cubit<MonthlyState> {
       : super(MonthlyState(
             focusYear: DateTime.now().year, focusMonth: DateTime.now().month));
 
-  Future<void> onGetYearDataForChildId(int year, childId) async {
+  Future<void> onGetYearDataForChildId(int year, int childId) async {
     emit(MonthlyState(status: MonthlyStatus.loading, focusYear: state.focusYear, focusMonth: state.focusMonth));
     await Future.delayed(Duration(seconds: 1));
     SingleYearDailyStatsModel newMonthlyStats =

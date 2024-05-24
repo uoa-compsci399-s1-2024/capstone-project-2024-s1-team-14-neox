@@ -9,11 +9,22 @@ import '../../data/entities/arduino_data_entity.dart';
 class StatisticsRepository {
   final SharedPreferences sharedPreferences;
   StatisticsRepository({required this.sharedPreferences});
+  final Map<DateTime, SingleWeekHourlyStatsModel> _weekCache = {};
+  final Map<int, SingleYearDailyStatsModel> _yearCache = {};
 
-  int? getFocusChildId() {
+  Future<int?> getFocusChildId() async {
     return sharedPreferences.getInt("focus_id");
   }
-  
+
+  Future<void> updateFocusChildId(int childId) async {
+    await sharedPreferences.setInt("focus_id", childId);
+  }
+
+  void deleteCache() {
+    _weekCache.clear();
+    _yearCache.clear();
+  }
+
   // Daily UI
   Future<List<SingleWeekHourlyStatsModel>> getListOfHourlyStats(
       DateTime startMonday, int weekCount, int childId) async {
@@ -21,9 +32,12 @@ class StatisticsRepository {
 
     for (int i = 0; i < weekCount; i++) {
       DateTime currentMonday = startMonday.subtract(Duration(days: 7 * i));
-      result.add(await getSingleWeekHourlyStats(currentMonday, childId));
+      DateTime currentMondayMidnight =
+          DateTime(currentMonday.year, currentMonday.month, currentMonday.day);
+      SingleWeekHourlyStatsModel week = _weekCache[currentMondayMidnight] ??
+          await getSingleWeekHourlyStats(currentMonday, childId);
+      result.add(week);
     }
-    // print(result);
     return result;
   }
 
@@ -32,15 +46,17 @@ class StatisticsRepository {
     Map<DateTime, int> dailySum = {};
     double weeklyMean = 0;
 
-    Map<DateTime, Map<DateTime, int>> hourlyStats = await ArduinoDataEntity.getSingleWeekHourlyStats(startMonday, childId);
+    Map<DateTime, Map<DateTime, int>> hourlyStats =
+        await ArduinoDataEntity.getSingleWeekHourlyStats(startMonday, childId);
 
     hourlyStats.forEach((key, value) {
       dailySum[key] = value.values.reduce((value, element) => value + element);
-     });
+    });
 
-     int elaspsedDays = min(max(DateTime.now().difference(startMonday).inDays, 1), 7);
-     weeklyMean = dailySum.values.reduce((value, element) => value + element) / elaspsedDays;
-
+    int elaspsedDays =
+        min(max(DateTime.now().difference(startMonday).inDays, 1), 7);
+    weeklyMean = dailySum.values.reduce((value, element) => value + element) /
+        elaspsedDays;
 
     return SingleWeekHourlyStatsModel(
       startMondayDate: startMonday,
@@ -55,24 +71,27 @@ class StatisticsRepository {
   // Monthly UI
   Future<SingleYearDailyStatsModel> getSingleYearDailyStats(
       int year, int childId) async {
-    Map<DateTime, double> monthlyMean = {};
+    if (!_yearCache.containsKey(year)) {
+      Map<DateTime, double> monthlyMean = {};
 
-    Map<DateTime, Map<DateTime, int>> dailyStats = await ArduinoDataEntity.getSingleYearDailyStats(year, childId);
+      Map<DateTime, Map<DateTime, int>> dailyStats =
+          await ArduinoDataEntity.getSingleYearDailyStats(year, childId);
 
-    dailyStats.forEach((key, value) {
-      int elaspsedDays = min(max(DateTime.now().difference(key).inDays, 1), value.length);
-      monthlyMean[key] = value.values.reduce((value, element) => value + element) / elaspsedDays;
-     });
-    return SingleYearDailyStatsModel(
-      year: year,
-      dailyStats: dailyStats,
-      monthlyMean: monthlyMean,
-    );
+      dailyStats.forEach((key, value) {
+        int elaspsedDays =
+            min(max(DateTime.now().difference(key).inDays, 1), value.length);
+        monthlyMean[key] =
+            value.values.reduce((value, element) => value + element) /
+                elaspsedDays;
+      });
+      _yearCache[year] = SingleYearDailyStatsModel(
+        year: year,
+        dailyStats: dailyStats,
+        monthlyMean: monthlyMean,
+      );
+    }
+    return _yearCache[year]!;
   }
-
-
-
-
 
   // TODO Delete static functions
   static Map<int, Map<DateTime, int>> database = {};
@@ -97,7 +116,8 @@ class StatisticsRepository {
   }
 
   static Future<Map<DateTime, int>> getWeeklyOutdoorMinutes(int childId) async {
-    return await ArduinoDataEntity.countSamplesByDay(getMostRecentMonday() ,DateTime.now() , childId);
+    return await ArduinoDataEntity.countSamplesByDay(
+        getMostRecentMonday(), DateTime.now(), childId);
   }
 
   static DateTime getMostRecentMonday() {

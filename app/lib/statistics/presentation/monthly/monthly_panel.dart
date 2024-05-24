@@ -86,61 +86,35 @@ class MonthlyPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<StatisticsCubit, StatisticsState>(
-        listener: (context, state) {
-          // print(context.read<Stat>)
-          if (!state.detailedView) {
-            print("in monthly view");
-            context.read<MonthlyCubit>().onGetYearDataForChildId(
-                  DateTime.now().year,
-                  context.read<StatisticsCubit>().state.focusChildId,
-                );
-          }
-        },
-        child: Column(
+    return BlocBuilder<MonthlyCubit, MonthlyState>(
+      builder: (context, state) {
+        if (state.status.isLoading) {
+          print("loading");
+          return CircularProgressIndicator();
+        }
+        return Column(
           children: [
-            BlocBuilder<MonthlyCubit, MonthlyState>(
-              builder: (context, state) {
-                if (state.status.isInitial) {
-                  print("initial");
-                  return Text("Please select a child");
-                }
-                if (state.status.isLoading) {
-                  print("loading");
-                  return CircularProgressIndicator();
-                }
-                return SizedBox(
-                  height: 300,
-                  child: MonthlyBarChart(monthlySummary: state.monthlyStats!),
-                );
-              },
+            SizedBox(
+              height: 300,
+              child: MonthlyBarChart(monthlySummary: state.monthlyStats!),
             ),
-            BlocBuilder<MonthlyCubit, MonthlyState>(
-              builder: (context, state) {
-                if (state.status.isInitial) {
-                  return Text("");
-                }
-                if (state.status.isLoading) {
-                  return CircularProgressIndicator();
-                }
-                return SizedBox(
-                  height: 300,
-                  child: PageView.builder(
-                    // controller: _pageController,
-                    onPageChanged: (index) =>
-                        context.read<MonthlyCubit>().onChangeFocusMonth(index),
-                    itemCount: 12,
-                    itemBuilder: (context, pageIndex) {
-                      DateTime month =
-                          DateTime(state.focusYear, pageIndex + 1, 1);
-                      return _buildCalendar(
-                          month, state.monthlyStats!.dailyStats[month]);
-                    },
-                  ),
-                );
-              },
+            SizedBox(
+              height: 300,
+              child: PageView.builder(
+                // controller: _pageController,
+                onPageChanged: (index) =>
+                    context.read<MonthlyCubit>().onChangeFocusMonth(index),
+                itemCount: 12,
+                itemBuilder: (context, pageIndex) {
+                  DateTime month = DateTime(state.focusYear, pageIndex + 1, 1);
+                  return _buildCalendar(
+                      month, state.monthlyStats!.dailyStats[month]);
+                },
+              ),
             ),
           ],
-        ));
+        );
+      },
+    );
   }
 }

@@ -10,14 +10,17 @@ class StatisticsCubit extends Cubit<StatisticsState> {
   StatisticsCubit(this._statisticsRepository)
       : super(StatisticsInitial(detailedView: true));
 
-  void onInitialise() {
-    int? childId = _statisticsRepository.getFocusChildId();
+  void onInitialise() async {
+    int? childId = await _statisticsRepository.getFocusChildId();
+    print("initialising statistics cubit");
     if (childId != null) {
       emit(StatisticsDetailed(focusChildId: childId, detailedView: true));
     }
   }
 
-  void onFocusChildChange(int childId) {
+  void onFocusChildChange(int childId) async {
+    _statisticsRepository.deleteCache();
+    await _statisticsRepository.updateFocusChildId(childId);
     if (state.detailedView) {
       emit(StatisticsDetailed(focusChildId: childId, detailedView: true));
     }
@@ -25,13 +28,16 @@ class StatisticsCubit extends Cubit<StatisticsState> {
   }
 
   void onFocusViewToggle() {
+    print("in focus view $state");
     if (state is StatisticsDetailed) {
       emit(StatisticsOverview(
           focusChildId: (state as StatisticsDetailed).focusChildId,
           detailedView: false));
+    } else if (state is StatisticsOverview) {
+      emit(StatisticsOverview(
+          focusChildId: (state as StatisticsOverview).focusChildId,
+          detailedView: true));
     }
-    emit(StatisticsOverview(
-        focusChildId: (state as StatisticsOverview).focusChildId,
-        detailedView: true));
+    emit(StatisticsInitial(detailedView: !state.detailedView));
   }
 }

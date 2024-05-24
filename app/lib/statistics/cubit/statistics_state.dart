@@ -1,23 +1,31 @@
 part of 'statistics_cubit.dart';
 
-sealed class StatisticsState {
+abstract class StatisticsState extends Equatable {
   final bool detailedView;
 
-  StatisticsState({required this.detailedView});
+  const StatisticsState({required this.detailedView});
+  @override
+  List<Object?> get props => [detailedView];
 }
 
 class StatisticsInitial extends StatisticsState {
-  StatisticsInitial({required super.detailedView});
+  const StatisticsInitial({required super.detailedView});
 }
 
 class StatisticsDetailed extends StatisticsState {
   final int focusChildId;
 
-  StatisticsDetailed({required this.focusChildId, required super.detailedView});
+  const StatisticsDetailed(
+      {required this.focusChildId, required super.detailedView});
+  @override
+  List<Object?> get props => [detailedView, focusChildId];
 }
 
 class StatisticsOverview extends StatisticsState {
   final int focusChildId;
 
-  StatisticsOverview({required this.focusChildId, required super.detailedView});
+  const StatisticsOverview(
+      {required this.focusChildId, required super.detailedView});
+  @override
+  List<Object?> get props => [detailedView, focusChildId];
 }

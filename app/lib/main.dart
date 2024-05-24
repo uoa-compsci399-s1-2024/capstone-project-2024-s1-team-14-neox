@@ -53,9 +53,11 @@ class App extends StatelessWidget {
 
   static Future<void> initSharedPreferences() async {
     sharedPreferences = await SharedPreferences.getInstance();
+    //Daily target
     if (sharedPreferences.getInt("daily_target") == null) {
       sharedPreferences.setInt("daily_target", 120);
     }
+    // Focus id: key "focus_id"
   }
 
   static Future<void> resetSharedPreferences() async {
@@ -111,7 +113,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     // Allows ChildRepository to be accessed anywhere in MyApp
     return RepositoryProvider(
-      create: (context) => ChildDeviceRepository(),
+      create: (context) => ChildDeviceRepository(sharedPreferences: sharedPreferences),
       child: MultiBlocProvider(
         // Alows Cubits and Blocs to be accessible anywhere in MyApp
         providers: [
