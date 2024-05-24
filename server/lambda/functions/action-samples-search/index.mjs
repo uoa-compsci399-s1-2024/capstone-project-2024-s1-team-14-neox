@@ -119,8 +119,8 @@ function make_handler(subjectID)
       statusCode: 200,
       body: JSON.stringify({
         data: res.rows,
-      });
-    }
+      }),
+    };
     addCorsHeaders(goodResp);
     return goodResp;
   });
