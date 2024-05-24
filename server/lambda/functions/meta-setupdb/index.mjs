@@ -67,7 +67,7 @@ CREATE TABLE studies (
        end_date DATE NOT NULL,
        name TEXT,
        description TEXT,
-       CONSTRAINT date_interval CHECK (min_date <= max_date),
+       CONSTRAINT date_interval CHECK (start_date <= end_date),
        -- Ensure all IDs are stored in uppercase
        CONSTRAINT id_caps CHECK (id = upper(id))
 );
