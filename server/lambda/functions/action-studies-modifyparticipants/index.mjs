@@ -50,7 +50,7 @@ function make_handler(subjectID)
       case SUBJECT_RESEARCHERS:
         return await authenticateUser(event, db, AUTH_ADMIN);
       case SUBJECT_CHILDREN: {
-        let authFlags = AUTH_PARENT_OF_CHILD;
+        let authFlags = AUTH_PARENT_OFCHILD;
         if (event.httpMethod.toUpperCase() === "DELETE") {
           authFlags |= AUTH_ADMIN;
         }
