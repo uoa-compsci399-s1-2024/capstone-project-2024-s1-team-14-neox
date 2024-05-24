@@ -83,7 +83,7 @@ function make_handler(subjectID)
       case "DELETE": {
         let res = await db.query(`DELETE FROM study_${subjectID}
                                   WHERE upper(study_id) = upper($1) AND participant_id = $2
-                                  RETURNING`,
+                                  RETURNING *`,
                                  [studyID, subjectIDValue]);
         if (res.rows.length === 0) {
           // need to differentiate between no such study or no such participant

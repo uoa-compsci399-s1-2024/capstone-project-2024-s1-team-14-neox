@@ -238,7 +238,8 @@ function make_handler(actionID)
         case ACTION_MODIFY: {
           let res = await db.query(`UPDATE studies
                                     SET ${sqlFields.map(sf => sf.column + ' = ' + '$' + sf.paramNum).join(', ')}
-                                    WHERE upper(id) = upper($1) RETURNING`,
+                                    WHERE upper(id) = upper($1)
+                                    RETURNING *`,
                                    [p.studyID].concat(sqlFields.map(sf => sf.value)));
           if (res.rows.length === 0) {
             dbError = {
