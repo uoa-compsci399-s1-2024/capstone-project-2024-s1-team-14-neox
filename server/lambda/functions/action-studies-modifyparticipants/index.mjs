@@ -120,6 +120,7 @@ function make_handler(subjectID)
         };
       } else if (e.code === FOREIGN_KEY_VIOLATION && e.constraint === `study_${subjectID}_participant_id_fkey`) {
         assert(event.httpMethod.toUpperCase() === "PUT");
+        console.log("no such participant");
         dbError = {
           resource: resolvedResource,
           status: 403,
