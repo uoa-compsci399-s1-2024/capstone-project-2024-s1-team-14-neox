@@ -87,23 +87,101 @@ IDTOKEN_RESEARCHER1="$(aws cognito-idp admin-initiate-auth --client-id "$CLIENTI
 IDTOKEN_RESEARCHER2="$(aws cognito-idp admin-initiate-auth --client-id "$CLIENTID" --auth-parameters "{\"USERNAME\": \"$EMAIL_RESEARCHER2\", \"PASSWORD\": \"$PASSWORD\"}" --user-pool-id "$POOLID" --auth-flow ADMIN_USER_PASSWORD_AUTH | jq -r '.AuthenticationResult.IdToken')"
 IDTOKEN_ADMIN="$(aws cognito-idp admin-initiate-auth --client-id "$CLIENTID" --auth-parameters "{\"USERNAME\": \"$EMAIL_ADMIN\", \"PASSWORD\": \"$PASSWORD\"}" --user-pool-id "$POOLID" --auth-flow ADMIN_USER_PASSWORD_AUTH | jq -r '.AuthenticationResult.IdToken')"
 
-echo "confirming researchers can't make children"
-curl -i -X POST -H"Authorization: Bearer $IDTOKEN_RESEARCHER1" "$API_URL/children" 2>/dev/null | head -n1
-# echo ""
-echo "confirming admins can't make children"
-curl -i -X POST -H"Authorization: Bearer $IDTOKEN_ADMIN" "$API_URL/children" 2>/dev/null | head -n1
-# echo ""
+# See https://stackoverflow.com/questions/16654607/using-getopts-inside-a-bash-function
 
+function call_api()
+{
+	local OPTIND o
+	local method token url post_data
+	method="GET"
+	while getopts ":m:t:u:d:" o; do
+		case "${o}" in
+			m) method="$OPTARG" ;;
+			t) token="$OPTARG" ;;
+			u) url="$OPTARG" ;;
+			d) post_data="$OPTARG" ;;
+			*) echo "invalid option: $o" >&2
+			   exit 1
+			   ;;
+		esac
+	done
+	if [ -z "$token" ]; then
+		echo "missing token" >&2
+		exit 1
+	fi
+	if [ -z "$url" ]; then
+		echo "missing url" >&2
+		exit 1
+	fi
+	if [ "$method" = "POST" ] && [ -n "$post_data" ]; then
+		curl -i -X "$method" -H"Authorization: Bearer $token" "$url" -H'Content-Type: application/json' -d "$post_data" 2>/dev/null
+	else
+		curl -i -X "$method" -H"Authorization: Bearer $token" "$url" 2>/dev/null
+	fi
+}
+function parse_http_status()
+{
+        awk 'NR == 1 {print $2; exit}'
+}
+function parse_http_body()
+{
+	awk -v inbody=0 '/^$/ {inbody=1; next} inbody {print}'
+}
+function aux_test_auth()
+{
+	local OPTIND o
+	local method token url post_data
+	local status_assertion_options=() message dodebug=0
+	while getopts ":m:t:u:d:s:M:D" o; do
+		case "${o}" in
+			m) method="$OPTARG" ;;
+			t) token="$OPTARG" ;;
+			u) url="$OPTARG" ;;
+			d) post_data="$OPTARG" ;;
+			s) status_assertion_options+=("$OPTARG") ;;
+			M) message="$OPTARG" ;;
+			D) dodebug=1 ;;
+			*) echo "invalid option: $o" >&2
+			   exit 1
+			   ;;
+		esac
+	done
+	if [ "${#status_assertion_options[@]}" -eq 0 ]; then
+		echo "missing status code assertions" >&2
+		exit 1
+	fi
+	[ -n "$message" ] && printf '%s... ' "$message"
+	local resp="$(call_api -m "$method" -t "$token" -u "$url" -d "$post_data")"
+	local status="$(echo "$resp" | parse_http_status)"
+	local asserted_status
+	for asserted_status in "${status_assertion_options[@]}"; do
+		if [ "$status" -ne "$asserted_status" ]; then
+			echo "FAILED"
+			if [ "$dodebug" -eq 1 ]; then
+				echo "$resp"
+			fi
+			return
+		fi
+	done
+	echo "OK"
+}
+
+aux_test_auth -M "confirming researchers can't make children" \
+	      -m POST -t "$IDTOKEN_RESEARCHER1" -u "$API_URL/children" \
+	      -s 403 -D
+aux_test_auth -M "confirming admins can't make children" \
+	      -m POST -t "$IDTOKEN_ADMIN" -u "$API_URL/children" \
+	      -s 403 -D
 if false; then
-echo "confirming parents CAN'T make researchers"
-curl -i -X POST -H"Authorization: Bearer $IDTOKEN_PARENT1" "$API_URL/researchers" -H'content-type: application/json' -d '{"given_name": "Richard", "family_name": "Johnson", "email": "gabriel.lisaca+dump-researcher@gmail.com"}' 2>/dev/null | head -n1
-# echo ""
-echo "confirming researchers CAN'T make researchers"
-curl -i -X POST -H"Authorization: Bearer $IDTOKEN_RESEARCHER1" "$API_URL/researchers" -H'content-type: application/json' -d '{"given_name": "Richard", "family_name": "Johnson", "email": "gabriel.lisaca+dump-researcher@gmail.com"}' 2>/dev/null | head -n1
-# echo ""
-echo "confirming admins CAN make researchers"
-curl -i -X POST -H"Authorization: Bearer $IDTOKEN_ADMIN" "$API_URL/researchers" -H'content-type: application/json' -d '{"given_name": "Richard", "family_name": "Johnson", "email": "gabriel.lisaca+dump-researcher@gmail.com"}' 2>/dev/null | head -n1
-# echo ""
+aux_test_auth -M "confirming parents CAN'T make researchers" \
+	      -m POST -t "$IDTOKEN_PARENT1" -u "$API_URL/researchers" -d '{"given_name": "Richard", "family_name": "Johnson", "email": "gabriel.lisaca+dump-researcher@gmail.com"}' \
+	      -s 403 -D
+aux_test_auth -M "confirming researchers CAN'T make researchers" \
+	      -m POST -t "$IDTOKEN_RESEARCHER1" -u "$API_URL/researchers" -d '{"given_name": "Richard", "family_name": "Johnson", "email": "gabriel.lisaca+dump-researcher@gmail.com"}' \
+	      -s 403
+aux_test_auth -M "confirming admins CAN make researchers" \
+	      -m POST -t "$IDTOKEN_ADMIN" -u "$API_URL/researchers" -H'content-type: application/json' -d '{"given_name": "Richard", "family_name": "Johnson", "email": "gabriel.lisaca+dump-researcher@gmail.com"}' \
+	      -s 204
 fi
 
 echo "registering child for parent1..."
