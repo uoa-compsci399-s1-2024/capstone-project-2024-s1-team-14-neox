@@ -9,25 +9,18 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-class MonthlyPanel extends StatefulWidget {
+class MonthlyPanel extends StatelessWidget {
   const MonthlyPanel({super.key});
-
-  @override
-  State<MonthlyPanel> createState() => _MonthlyPanelState();
-}
-
-class _MonthlyPanelState extends State<MonthlyPanel> {
-  final PageController _pageController = PageController();
-  Widget _buildWeekHeader() {
-    const List<String> days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: days
-          .map((day) =>
-              Text(day, style: const TextStyle(fontWeight: FontWeight.bold)))
-          .toList(),
-    );
-  }
+   
+  // Widget _buildWeekHeader() {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  //     children: days
+  //         .map((day) => Text(day,
+  //             style: const TextStyle(fontSize: 12, color: Colors.grey)))
+  //         .toList(),
+  //   );
+  // }
 
   Widget _buildDateOrIcon(bool isIcon, String text) {
     if (isIcon) {
@@ -46,6 +39,8 @@ class _MonthlyPanelState extends State<MonthlyPanel> {
     int daysInMonth = DateTime(month.year, month.month + 1, 0).day;
     DateTime firstDayOfMonth = DateTime(month.year, month.month, 1);
     int weekdayOfFirstDay = firstDayOfMonth.weekday;
+    List<String> days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
 
     DateTime lastDayOfPreviousMonth =
         firstDayOfMonth.subtract(Duration(days: 1));
@@ -55,7 +50,6 @@ class _MonthlyPanelState extends State<MonthlyPanel> {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Column(
         children: [
-          _buildWeekHeader(),
           Expanded(
             child: GridView.builder(
               physics: const NeverScrollableScrollPhysics(),
@@ -65,9 +59,17 @@ class _MonthlyPanelState extends State<MonthlyPanel> {
                 childAspectRatio: 1,
               ),
               // Calculating the total number of cells required in the grid
-              itemCount: daysInMonth + weekdayOfFirstDay - 1,
+              itemCount: daysInMonth + weekdayOfFirstDay - 1 + 7,
               itemBuilder: (context, index) {
-                if (index < weekdayOfFirstDay - 1) {
+                if (index < 7) {
+                  return Container(
+                    alignment: Alignment.bottomCenter,
+                    child: Text(
+                      days[index],
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  );
+                } else if (index < weekdayOfFirstDay - 1 + 7) {
                   // Displaying dates from the previous month in grey
                   int previousMonthDay =
                       daysInPreviousMonth - (weekdayOfFirstDay - index) + 2;
@@ -80,13 +82,14 @@ class _MonthlyPanelState extends State<MonthlyPanel> {
                   );
                 } else {
                   // Displaying the current month's days
-                  DateTime date = DateTime(
-                      month.year, month.month, index - weekdayOfFirstDay + 2);
+                  DateTime date = DateTime(month.year, month.month,
+                      index - weekdayOfFirstDay + 2 + 7);
                   String text = date.day.toString();
 
                   return Container(
+                    alignment: Alignment.center,
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(2, 0, 2, 4),
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 4),
                       child: _buildDateOrIcon(
                           (dailyStats![date] != null &&
                               dailyStats[date]! >= targetMinutes),
@@ -135,6 +138,7 @@ class _MonthlyPanelState extends State<MonthlyPanel> {
 
     SingleYearDailyStatsModel? stats =
         context.read<MonthlyCubit>().state.monthlyStats;
+    int daysAcheived = stats?.monthlyTargetAcheived[startOfMonth] ?? 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -148,19 +152,12 @@ class _MonthlyPanelState extends State<MonthlyPanel> {
             // background: Colors.blue,
           ),
         ),
-        // Text(
-        //     "Average ${stats?.monthlyMean[startOfMonth]?.floor() ?? 0} mins/day"),
         Text(
-            "Targets achieved: ${stats?.monthlyTargetAcheived[startOfMonth] ?? 0}"),
+            // "Average ${stats?.monthlyMean[startOfMonth]?.floor() ?? 0} mins/day | $daysAcheived ${daysAcheived == 1 ? "day" : "days"} acheived"),
+            // Text(
+            "Targets achieved: $daysAcheived ${daysAcheived == 1 ? "day" : "days"}"),
       ],
     );
-  }
-
-  void onJumpToMonth(int month) {
-    context.read<MonthlyCubit>().onChangeFocusMonth(month);
-    print("on jump to month $month");
-    _pageController.animateTo(month - 1,
-        duration: const Duration(milliseconds: 500), curve: Curves.ease);
   }
 
   @override
@@ -175,8 +172,6 @@ class _MonthlyPanelState extends State<MonthlyPanel> {
         if (state.status.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-        onJumpToMonth(state.focusMonth);
-
         return Padding(
           padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
           child: Column(
@@ -201,16 +196,14 @@ class _MonthlyPanelState extends State<MonthlyPanel> {
               Expanded(
                 // height: screenHeight * 0.3,
                 child: PageView.builder(
-                  // controller: _pageController,
+                  controller: PageController(initialPage: state.focusMonth - 1),
                   onPageChanged: (index) {
-                    print("page changed $index");
                     return context
                         .read<MonthlyCubit>()
                         .onChangeFocusMonth(index + 1);
                   },
                   itemCount: 12,
                   itemBuilder: (context, pageIndex) {
-                    print(pageIndex);
                     DateTime month =
                         DateTime(state.focusYear, pageIndex + 1, 1);
                     return _buildCalendar(

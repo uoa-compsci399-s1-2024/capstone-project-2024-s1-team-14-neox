@@ -27,9 +27,9 @@ class MonthlyCubit extends Cubit<MonthlyState> {
     ));
   }
 
-  void onChangeFocusMonth(int pageIndex) {
+  void onChangeFocusMonth(int month) {
     emit(state.copyWith(
-      focusMonth: pageIndex + 1,
+      focusMonth: month,
     ));
   }
 }

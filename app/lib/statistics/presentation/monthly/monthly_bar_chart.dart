@@ -99,8 +99,8 @@ class _MonthlyBarChartState extends State<MonthlyBarChart> {
                 drawHorizontalLine: true,
                 getDrawingHorizontalLine: (value) => FlLine(
                     color: Theme.of(context).colorScheme.primary,
-                    strokeWidth: 4,
-                    dashArray: [4, 4]),
+                    strokeWidth: 2,
+                    dashArray: [8, 4]),
               ),
               borderData: FlBorderData(show: false),
               titlesData: FlTitlesData(

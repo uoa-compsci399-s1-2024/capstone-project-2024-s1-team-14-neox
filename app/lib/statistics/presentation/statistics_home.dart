@@ -119,7 +119,7 @@ class StatisticsHomeState extends State<StatisticsHome> {
                     key: UniqueKey(), // Workaround for refreshing UI!
                     create: (context) => MonthlyCubit(context.read<StatisticsRepository>())
                       ..onGetYearDataForChildId(DateTime.now().year, state.focusChildId!),
-                    child: const MonthlyPanel(),
+                    child: MonthlyPanel(),
                   );
                 } else {
                   return BlocProvider(
