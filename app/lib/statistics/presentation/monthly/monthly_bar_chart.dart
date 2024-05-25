@@ -12,13 +12,11 @@ class MonthlyBarChart extends StatefulWidget {
   final SingleYearDailyStatsModel monthlySummary;
   final int targetMinutes;
   final int focusMonth;
-  final ValueChanged<int> onJumpToMonth;
   const MonthlyBarChart(
       {super.key,
       required this.monthlySummary,
       required this.targetMinutes,
-      required this.focusMonth,
-      required this.onJumpToMonth});
+      required this.focusMonth});
 
   @override
   State<MonthlyBarChart> createState() => _MonthlyBarChartState();
@@ -128,15 +126,7 @@ class _MonthlyBarChartState extends State<MonthlyBarChart> {
                   ),
                 ),
               ),
-              barTouchData: BarTouchData(touchCallback: (event, response) {
-                if (event is FlTapDownEvent) {
-                  int? index = response?.spot?.touchedBarGroupIndex;
-                  if (index != null) {
-                    print("fl tap up $index");
-                    widget.onJumpToMonth(index + 1);
-                  }
-                }
-              }, touchTooltipData: BarTouchTooltipData(
+              barTouchData: BarTouchData(touchTooltipData: BarTouchTooltipData(
                 getTooltipItem: (group, groupIndex, rod, rodIndex) {
                   return BarTooltipItem(
                     "${DateFormat("MMMM").format(barData[group.x].time)}\n${rod.toY.toInt()} mins",

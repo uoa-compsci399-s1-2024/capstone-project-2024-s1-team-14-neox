@@ -175,6 +175,7 @@ class _MonthlyPanelState extends State<MonthlyPanel> {
         if (state.status.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
+        onJumpToMonth(state.focusMonth);
 
         return Padding(
           padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
@@ -193,7 +194,6 @@ class _MonthlyPanelState extends State<MonthlyPanel> {
                   monthlySummary: state.monthlyStats!,
                   targetMinutes: state.targetMinutes ?? 120,
                   focusMonth: state.focusMonth,
-                  onJumpToMonth: (int month) => onJumpToMonth(month),
                 ),
               ),
               const Divider(height: 5, indent: 20, endIndent: 20),
