@@ -86,9 +86,10 @@ function make_handler(subjectID)
                                   RETURNING *`,
                                  [studyID, subjectIDValue]);
         if (res.rows.length === 0) {
-          // need to differentiate between no such study or no such participant
+          console.log("need to differentiate between no such study or no such participant...");
           if ((await db.query("SELECT * FROM studies WHERE upper(id) = upper($1)",
                               [studyID])).rows.length === 0) {
+            console.log("no such study");
             // FIXME: race condition in case a study with the same ID is made in between the DB calls
             // BUT it doesn't actually matter since it just determines the error message
             dbError = {
@@ -97,6 +98,7 @@ function make_handler(subjectID)
               message: "study doesn't exist",
             };
           } else {
+            console.log("either user is not part of study OR no such user");
             dbError = {
               resource: resolvedResource,
               status: 403,
@@ -110,9 +112,10 @@ function make_handler(subjectID)
     } catch (e) {
       if (e.code === UNIQUE_VIOLATION && e.constraint === `study_${subjectID}_pkey`) {
         assert(event.httpMethod.toUpperCase() === "PUT");
-        // do nothing since it's OK if we re-add the same participant to the study.
+        console.log("doing nothing since it's OK if we re-add the same participant to the study");
       } else if (e.code === FOREIGN_KEY_VIOLATION && e.constraint === `study_${subjectID}_study_id_fkey`) {
         assert(event.httpMethod.toUpperCase() === "PUT");
+        console.log("no such study");
         dbError = {
           resource: resolvedResource,
           status: 404,
