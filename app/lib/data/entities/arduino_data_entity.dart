@@ -321,10 +321,12 @@ class ArduinoDataEntity {
     Map<DateTime, Map<DateTime, int>> hourlyStats = {};
     for (int dayOffset = 0; dayOffset <= 6; dayOffset += 1) {
       DateTime currentDay = startMonday.add(Duration(days: dayOffset));
-      // Ignore dailylight savings
+  //Dailylight savings
+       currentDay = DateTime(currentDay.year, currentDay.month, currentDay.day);
+
       Map<DateTime, int> daily = {};
       for (int hour = 0; hour < 24; hour += 1) {
-        daily[startMonday.add(Duration(hours: hour))] = 0;
+        daily[currentDay.add(Duration(hours: hour))] = 0;
       }
       hourlyStats[currentDay] = daily;
     }

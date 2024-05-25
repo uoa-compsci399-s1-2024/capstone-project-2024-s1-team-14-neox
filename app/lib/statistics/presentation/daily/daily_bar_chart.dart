@@ -55,14 +55,20 @@ class _DailyBarChartState extends State<DailyBarChart> {
       //return BarChartBar(x: index++, y: Random().nextInt(150), time: e.key);
       return BarChartBar(x: index++, y: e.value, time: e.key);
     }).toList();
-
+    print(barData);
     widget.dailySummary.hourlyStats.forEach((key, value) {
       int index = 0;
+      print("new month $key");
       dayBreakdownBarData[key.weekday - 1] = value.entries
           //.map((e) => BarChartBar(x: index++, y: Random().nextInt(150), time: e.key))
-          .map((e) => BarChartBar(x: index++, y: e.value, time: e.key))
-          .toList();
+          .map((e) {
+        print("printing entry $e");
+        return BarChartBar(x: index++, y: e.value, time: e.key);
+      }).toList();
     });
+    for (List<BarChartBar> oneDay in dayBreakdownBarData) {
+      print(oneDay);
+    }
   }
 
   Widget _getDayBottomTitles(double value, TitleMeta meta) {
@@ -79,6 +85,7 @@ class _DailyBarChartState extends State<DailyBarChart> {
   }
 
   Widget _getHourBottomTitles(double value, TitleMeta meta) {
+    print("hour time $value");
     int val = value.toInt();
     String half = val < 12 ? "am" : "pm";
 
@@ -183,8 +190,8 @@ class _DailyBarChartState extends State<DailyBarChart> {
                 touchTooltipData: BarTouchTooltipData(
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     return BarTooltipItem(
-                      "${DateFormat("HH").format(barData[group.x].time)}\n${rod.toY.toInt()} mins",
-                      // "${rod.toY.toInt()} mins",
+                      // "${DateFormat("hh").format(barData[group.x].time)}h ${rod.toY.toInt()} mins",
+                      "${rod.toY.toInt()} mins",
                       const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
