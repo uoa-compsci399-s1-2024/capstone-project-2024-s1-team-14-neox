@@ -118,6 +118,8 @@ function call_api()
 	else
 		curl -i -X "$method" -H"Authorization: Bearer $token" "$url" 2>/dev/null
 	fi
+	# make sure there's a final newline
+	echo ""
 }
 function parse_http_status()
 {
@@ -125,7 +127,7 @@ function parse_http_status()
 }
 function parse_http_body()
 {
-	awk -v inbody=0 '/^$/ {inbody=1; next} inbody {print}'
+	awk -v inbody=0 '/^[[:space:]]*$/ {inbody=1; next} inbody {print}'
 }
 function aux_test_auth()
 {
