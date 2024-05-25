@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/material.dart' as material;
 import 'dart:convert';
 
 import '../../server/child_data.dart';
@@ -125,14 +126,25 @@ class ArduinoDataEntity {
         .into(db.arduinoDatas)
         .insertOnConflictUpdate(arduinoDataEntity.toCompanion());
   }
+  // 104 seconds to save 20160 samples
+  // static Future<void> saveListOfArduinoDataEntity(
+  //     List<ArduinoDataEntity> arduinoDataEntityList) async {
+  //   await Future.forEach(arduinoDataEntityList, (arduinoDataEntity) async {
+  //     await saveSingleArduinoDataEntity(arduinoDataEntity);
+  //     // print("saved");
+  //   });
+  // }
 
+  // Batch to speed up insertion
+  // 1.017 seconds to save 20160 samples
   static Future<void> saveListOfArduinoDataEntity(
       List<ArduinoDataEntity> arduinoDataEntityList) async {
-    await Future.forEach(arduinoDataEntityList, (arduinoDataEntity) async {
-      await saveSingleArduinoDataEntity(arduinoDataEntity);
+    AppDb db = AppDb.instance();
+    await db.batch((batch) {
+      batch.insertAll(
+          db.arduinoDatas, arduinoDataEntityList.map((e) => e.toCompanion()));
     });
   }
-
   ////////////////////////////////////////////////////////////////////////////
   // READ ////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
@@ -243,6 +255,8 @@ class ArduinoDataEntity {
 
       result[startOfDay] = countSamplesWithAppClass1(dataList);
     }
+    print("Drift result");
+    print(result);
 
     return result;
   }
@@ -267,33 +281,110 @@ class ArduinoDataEntity {
     return result;
   }
 
+  static Future<Map<DateTime, Map<DateTime, int>>> getSingleYearDailyStats(
+      int year, int childId) async {
+    // Generate map
+    Map<DateTime, Map<DateTime, int>> dailyStats = {};
+    for (int month = 1; month <= 12; month += 1) {
+      int daysInMonth = material.DateUtils.getDaysInMonth(year, month);
+      Map<DateTime, int> monthly = {};
+      for (int day = 1; day <= daysInMonth; day += 1) {
+        monthly[DateTime(year, month, day)] = 0;
+      }
+      dailyStats[DateTime(year, month, 1)] = monthly;
+    }
+    // Query Database
+    final db = AppDb.instance();
+    final query = db.select(db.arduinoDatas)
+      ..where((tbl) => tbl.childId.equals(childId))
+      ..where((tbl) => tbl.datetime.isBetweenValues(
+          DateTime(year, 1, 1), DateTime(year, 12, 31, 23, 59, 59)))
+      ..where((tbl) => tbl.appClass.equals(1));
+    List<ArduinoDataEntity> dataList = await query.get();
+    for (ArduinoDataEntity sample in dataList) {
+      int year = sample.datetime.year;
+      int month = sample.datetime.month;
+      int day = sample.datetime.day;
+      dailyStats[DateTime(year, month, 1)]![DateTime(year, month, day)] =
+          (dailyStats[DateTime(year, month, 1)]![DateTime(year, month, day)] ??
+                  0) +
+              1;
+    }
+    return dailyStats;
+  }
+
+  static Future<Map<DateTime, Map<DateTime, int>>> getSingleWeekHourlyStats(
+      DateTime startMonday, int childId) async {
+    startMonday =
+        DateTime(startMonday.year, startMonday.month, startMonday.day);
+    // Generate map
+    Map<DateTime, Map<DateTime, int>> hourlyStats = {};
+    for (int dayOffset = 0; dayOffset <= 6; dayOffset += 1) {
+      DateTime currentDay = startMonday.add(Duration(days: dayOffset));
+      // Ignore dailylight savings
+      Map<DateTime, int> daily = {};
+      for (int hour = 0; hour < 24; hour += 1) {
+        daily[startMonday.add(Duration(hours: hour))] = 0;
+      }
+      hourlyStats[currentDay] = daily;
+    }
+    // Query Database
+    final db = AppDb.instance();
+    final query = db.select(db.arduinoDatas)
+      ..where((tbl) => tbl.childId.equals(childId))
+      ..where((tbl) => tbl.datetime.isBetweenValues(
+          startMonday,
+          startMonday
+              .add(const Duration(days: 7))
+              .subtract(const Duration(seconds: 1))))
+      ..where((tbl) => tbl.appClass.equals(1));
+    List<ArduinoDataEntity> dataList = await query.get();
+    for (ArduinoDataEntity sample in dataList) {
+      int year = sample.datetime.year;
+      int month = sample.datetime.month;
+      int day = sample.datetime.day;
+      int hour = sample.datetime.hour;
+      hourlyStats[DateTime(year, month, day)]![
+              DateTime(year, month, day, hour)] =
+          (hourlyStats[DateTime(year, month, day)]![
+                      DateTime(year, month, day, hour)] ??
+                  0) +
+              1;
+    }
+    return hourlyStats;
+  }
+
 ///////////////////////////////////////////////////////////////////
 // FOR TESTING PURPOSE DELETE LATER //////////////////////////////
 //////////////////////////////////////////////////////////////////
 
   static Future<List<ArduinoDataEntity>> createSampleArduinoDataList(
-      int childId, DateTime startDate, int requiredDays) async {
-    final List<ArduinoDataEntity> dataList = [];
-
-    // Sample data for testing
-    DateTime dateTime = DateTime.now().subtract(Duration(days: requiredDays));
+      int childId,
+      DateTime startTime,
+      DateTime endTime,
+      double threshold) async {
+    List<ArduinoDataEntity> dataList = [];
     Random random = Random();
-    for (int i = 0; i < requiredDays * 24 * 60 / 5 - 1; i += 10) {
-      // Increment datetime by 1 minute
-      dateTime = dateTime.add(Duration(minutes: 10));
-
-      final data = ArduinoDataEntity(
-        uv: 5,
-        light: 100,
-        datetime: dateTime,
-        accel: Int16List.fromList([1, 2, 3]),
-        serverClass: 1,
-        appClass: random.nextDouble() < 0.5 ? 0 : 1, // Generates either 0 or 1 randomly
-        childId: childId,
-      );
-      dataList.add(data);
+    int interval = 1; //Default 1 minute
+    for (DateTime time = startTime;
+        time.isBefore(endTime);
+        time = time.add(Duration(minutes: interval))) {
+      if (time.hour > 5 && time.hour < 22) {
+        // only add if between 6am and 10pm
+        final data = ArduinoDataEntity(
+          uv: 5,
+          light: 100,
+          datetime: time,
+          accel: Int16List.fromList([1, 2, 3]),
+          serverClass: 1,
+          appClass: random.nextDouble() > threshold
+              ? 0
+              : 1, // Generates either 0 or 1 randomly
+          childId: childId,
+        );
+        dataList.add(data);
+      }
     }
-
     return dataList;
   }
 }

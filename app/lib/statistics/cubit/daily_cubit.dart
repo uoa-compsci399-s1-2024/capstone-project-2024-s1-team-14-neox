@@ -8,17 +8,21 @@ part 'daily_state.dart';
 
 class DailyCubit extends Cubit<DailyState> {
   StatisticsRepository _statisticsRepository;
-  DailyCubit(this._statisticsRepository)
-      : super(DailyState());
+  DailyCubit(this._statisticsRepository) : super(DailyState());
 
-  Future<void> onGetDataForChildId(queryDate, childId) async {
-    DateTime startMonday = queryDate.subtract(Duration(days: queryDate.weekday - 1));
+  Future<void> onGetDataForChildId(DateTime queryDate, int childId) async {
+    DateTime startMonday =
+        queryDate.subtract(Duration(days: queryDate.weekday - 1));
     emit(state.copyWith(status: DailyStatus.loading));
-     List<SingleWeekHourlyStatsModel> newDailyStats = await  _statisticsRepository.getListOfHourlyStats(startMonday, 4, childId);
-  print(newDailyStats);
+    await Future.delayed(const Duration(milliseconds: 500));
+    List<SingleWeekHourlyStatsModel> newDailyStats = await _statisticsRepository
+        .getListOfHourlyStats(startMonday, 4, childId);
+    // print(newDailyStats[0]);
+    if (isClosed) {
+      return;
+    }
     emit(state.copyWith(
-      status: DailyStatus.success,
-      dailyStats: newDailyStats + state.dailyStats
-    ));
+        status: DailyStatus.success,
+        dailyStats: state.dailyStats + newDailyStats));
   }
 }

@@ -74,7 +74,7 @@ class ChildEntity {
     });
   }
 
-  static Future<void> saveSingleChildEntityFromParameters(
+  static Future<int> saveSingleChildEntityFromParameters(
       String name, DateTime birthDate, String gender) async {
     // String serverId = await ChildApiService.registerChild();
 
@@ -86,9 +86,10 @@ class ChildEntity {
     );
 
     AppDb db = AppDb.instance();
-    await db
+    int id = await db
         .into(db.children)
         .insert(childEntity.toCompanion(), mode: InsertMode.insert);
+    return id;
   }
 
   ////////////////////////////////////////////////////////////////////////////

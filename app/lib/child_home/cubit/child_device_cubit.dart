@@ -15,6 +15,8 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
 
   
 
+  
+
   ChildDeviceCubit({
     required ChildDeviceRepository repo,
     required int childId,
