@@ -48,6 +48,7 @@ export const handler = async (event) => {
     return dbErrResp;
   }
   if (res.rows.length === 0) {
+    console.log("no such study");
     const noSuchStudyErrResp = {
       statusCode: 404,
       body: JSON.stringify({
