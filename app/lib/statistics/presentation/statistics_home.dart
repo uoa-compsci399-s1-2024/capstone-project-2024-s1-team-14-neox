@@ -34,7 +34,12 @@ class StatisticsHomeState extends State<StatisticsHome> {
   @override
   void initState() {
     int? childId = App.sharedPreferences.getInt("focus_id");
-    _selectedChildProfile = context.read<AllChildProfileCubit>().state.profiles.firstWhere((element) => element.childId == childId);
+    _selectedChildProfile = context
+      .read<AllChildProfileCubit>()
+      .state
+      .profiles
+      .where((element) => element.childId == childId)
+      .firstOrNull;
     super.initState();
   }
 
