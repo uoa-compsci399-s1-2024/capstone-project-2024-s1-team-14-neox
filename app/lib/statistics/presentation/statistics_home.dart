@@ -31,6 +31,13 @@ class StatisticsHomeState extends State<StatisticsHome> {
     super.dispose();
   }
 
+  @override
+  void initState() {
+    int? childId = App.sharedPreferences.getInt("focus_id");
+    _selectedChildProfile = context.read<AllChildProfileCubit>().state.profiles.firstWhere((element) => element.childId == childId);
+    super.initState();
+  }
+
   void animateToPage(int index) {
     if (_pageController.hasClients) {
       _pageController.animateToPage(index,
