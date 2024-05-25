@@ -94,7 +94,7 @@ class _DailyBarChartState extends State<DailyBarChart> {
     return SideTitleWidget(
       axisSide: meta.axisSide,
       child: Text(
-        "$val$half",
+        value.toInt().toString(),
         style: const TextStyle(
           color: Colors.grey,
           fontSize: 14,
@@ -183,8 +183,8 @@ class _DailyBarChartState extends State<DailyBarChart> {
                 touchTooltipData: BarTouchTooltipData(
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     return BarTooltipItem(
-                      //"${DateFormat("dd MMMM").format(barData[group.x].time)}\n${rod.toY.toInt()} mins",
-                      "${rod.toY.toInt()} mins",
+                      "${DateFormat("HH").format(barData[group.x].time)}\n${rod.toY.toInt()} mins",
+                      // "${rod.toY.toInt()} mins",
                       const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -202,22 +202,40 @@ class _DailyBarChartState extends State<DailyBarChart> {
     );
   }
 
+  double getHourlyMaxY(int value) {
+    switch (value) {
+      case < 19:
+        return 20;
+      case < 39:
+        return 40;
+      default:
+        return 60;
+    }
+  }
+
+  double roundToCeilingFifty(double value) {
+    return (value / 50).ceilToDouble() * 50;
+  }
+
   @override
   Widget build(BuildContext context) {
     DateTime startMonday = widget.dailySummary.startMondayDate;
     DateTime endMonday = startMonday.add(const Duration(days: 6));
+    Size screenSize = MediaQuery.of(context).size;
+    double screeWidth = screenSize.width;
+    double screenHeight = screenSize.height;
     String heading =
         "${DateFormat("d MMMM").format(startMonday)} - ${DateFormat("d MMMM").format(endMonday)}";
 
     return Padding(
-      padding: const EdgeInsets.only(top: 40),
+      padding: const EdgeInsets.only(top: 16),
       child: Column(
         children: [
           Text(
             heading,
             style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+              fontSize: 24,
+              // fontWeight: FontWeight.bold,
             ),
           ),
           Expanded(
@@ -226,7 +244,8 @@ class _DailyBarChartState extends State<DailyBarChart> {
               context,
               barData,
               sideLabelCount: 10,
-              maxY: max(150, maxValue * 1.2),
+              maxY: roundToCeilingFifty(
+                  max(widget.targetMinutes, maxValue) * 1.2),
               bottomTitles: _getDayBottomTitles,
               barColour: (day) {
                 if (selectedDay == null || selectedDay == day) {
@@ -248,12 +267,12 @@ class _DailyBarChartState extends State<DailyBarChart> {
           ),
           if (selectedDay != null)
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
               child: Text(
                 "${daysLong[selectedDay!]} ${DateFormat("d MMMM").format(startMonday.add(Duration(days: selectedDay!)))}",
                 style: const TextStyle(
                   fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  // fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -263,10 +282,11 @@ class _DailyBarChartState extends State<DailyBarChart> {
               child: _buildBarChart(
                 context,
                 dayBreakdownBarData[selectedDay!],
-                sideLabelCount: 5,
-                maxY: dayBreakdownBarData[selectedDay!]
-                        .fold(0, (prev, data) => max(prev, data.y)) *
-                    1.2,
+                sideLabelCount: 4,
+                maxY: getHourlyMaxY(
+                  dayBreakdownBarData[selectedDay!]
+                      .fold(0, (prev, data) => max(prev, data.y)),
+                ),
                 barColour: (_) => Theme.of(context).primaryColor,
                 bottomTitles: _getHourBottomTitles,
               ),

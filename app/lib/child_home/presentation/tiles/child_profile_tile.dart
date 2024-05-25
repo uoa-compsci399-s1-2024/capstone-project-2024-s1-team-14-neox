@@ -88,29 +88,30 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
           ),
           if (kDebugMode)
             ElevatedButton(
-                onPressed: () async {
-                  // Change start and end times as needed
-                  DateTime startTime = DateTime(2024, 1, 1);
-                  DateTime endTime = DateTime(2025, 1, 1);
-                  // 0.1 is around 96 mins per day, 0.2 is around 192 mins per day
-                  double threshold = 0.18;
+              onPressed: () async {
+                // Change start and end times as needed
+                DateTime startTime = DateTime(2024, 1, 1);
+                DateTime endTime = DateTime(2024, 5, 24);
+                // 0.1 is around 96 mins per day, 0.2 is around 192 mins per day
+                double threshold = 0.15;
 
-                  // For loop to prevent exceeding memory
-                  for (DateTime time = startTime;
-                      time.isBefore(endTime);
-                      time = time.add(Duration(days: 7))) {
-                    print("Creating week for: $time");
-                    List<ArduinoDataEntity> randomData =
-                        await ArduinoDataEntity.createSampleArduinoDataList(
-                            state.childId,
-                            time,
-                            time.add(Duration(days: 7)),
-                            threshold);
-                    await ArduinoDataEntity.saveListOfArduinoDataEntity(
-                        randomData);
-                  }
-                },
-                child: Text("Generate data")),
+                // For loop to prevent exceeding memory
+                for (DateTime time = startTime;
+                    time.isBefore(endTime);
+                    time = time.add(Duration(days: 7))) {
+                  print("Creating week for: $time");
+                  List<ArduinoDataEntity> randomData =
+                      await ArduinoDataEntity.createSampleArduinoDataList(
+                          state.childId,
+                          time,
+                          time.add(Duration(days: 7)),
+                          threshold);
+                  await ArduinoDataEntity.saveListOfArduinoDataEntity(
+                      randomData);
+                }
+              },
+              child: Text("Generate data"),
+            ),
           Expanded(
             child: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
