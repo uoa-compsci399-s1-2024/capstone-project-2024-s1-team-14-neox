@@ -189,7 +189,7 @@ aux_test_auth -M "confirming admins CAN make researchers" \
 fi
 
 echo "registering child for parent1..."
-CHILDID="$(curl -X POST -H"Authorization: Bearer $IDTOKEN_PARENT1" "$API_URL/children" 2>/dev/null | jq -r '.data.id')"
+CHILDID="$(call_api -m POST -t "$IDTOKEN_PARENT1" -u "$API_URL/children" | parse_http_body | jq -r '.data.id')"
 echo "childID is $CHILDID"
 
 if true; then
