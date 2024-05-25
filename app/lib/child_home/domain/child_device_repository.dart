@@ -3,6 +3,9 @@ import 'dart:typed_data';
 
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/classifiers/xgboost.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/main.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/single_week_hourly_stats_model.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/statistics_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,11 +25,20 @@ class ChildDeviceRepository {
     List<ChildDeviceModel> models =
         entities.map((child) => ChildDeviceModel.fromEntity(child)).toList();
 
-    Random rng = Random();
+    StatisticsRepository repo = StatisticsRepository(sharedPreferences: App.sharedPreferences);
+    DateTime now = DateTime.now();
+    DateTime today = DateTime(now.year, now.month, now.day);
+
     for (ChildDeviceModel model in models) {
-      model.outdoorTimeToday = rng.nextInt(200);
-      model.outdoorTimeWeek = rng.nextInt(200);
-      model.outdoorTimeMonth = rng.nextInt(200);
+      SingleWeekHourlyStatsModel stats = (await repo.getListOfHourlyStats(today, 1, model.childId))[0];
+      model.outdoorTimeToday = stats.dailySum[today];
+      model.outdoorTimeWeek = stats.weeklyMean ~/ 7;
+
+      double monthTime = 0;
+      for (int i = 0; i < 4; i++) {
+        monthTime += (await repo.getSingleWeekHourlyStats(today.subtract(Duration(days: 7 * (i + 1))), model.childId)).weeklyMean;
+      }
+      model.outdoorTimeMonth = monthTime ~/ 28;
     }
 
     return models;
