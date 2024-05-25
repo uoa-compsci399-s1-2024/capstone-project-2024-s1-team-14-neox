@@ -1,7 +1,7 @@
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/cubit/monthly_cubit.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/cubit/statistics_cubit.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/statistics_repository.dart';
-import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/monthly/bar_chart/monthly_bar_chart.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/monthly/monthly_bar_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -89,29 +89,29 @@ class MonthlyPanel extends StatelessWidget {
     return BlocBuilder<MonthlyCubit, MonthlyState>(
       builder: (context, state) {
         if (state.status.isLoading) {
-          print("monthly panel loading");
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         }
-        print("monthly panel ${context.read<StatisticsCubit>().state}");
-        print("monthly panel $state}");
         return Column(
           children: [
-            SizedBox(
-              height: 300,
+            Expanded(
+              flex: 2,
               child: MonthlyBarChart(monthlySummary: state.monthlyStats!),
             ),
-            SizedBox(
-              height: 300,
-              child: PageView.builder(
-                // controller: _pageController,
-                onPageChanged: (index) =>
-                    context.read<MonthlyCubit>().onChangeFocusMonth(index),
-                itemCount: 12,
-                itemBuilder: (context, pageIndex) {
-                  DateTime month = DateTime(state.focusYear, pageIndex + 1, 1);
-                  return _buildCalendar(
-                      month, state.monthlyStats!.dailyStats[month]);
-                },
+            Expanded(
+              flex: 1,
+              child: SizedBox(
+                height: 300,
+                child: PageView.builder(
+                  // controller: _pageController,
+                  onPageChanged: (index) =>
+                      context.read<MonthlyCubit>().onChangeFocusMonth(index),
+                  itemCount: 12,
+                  itemBuilder: (context, pageIndex) {
+                    DateTime month = DateTime(state.focusYear, pageIndex + 1, 1);
+                    return _buildCalendar(
+                        month, state.monthlyStats!.dailyStats[month]);
+                  },
+                ),
               ),
             ),
           ],

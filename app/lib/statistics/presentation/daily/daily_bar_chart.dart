@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/single_week_hourly_stats_model.dart';
-import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/daily/bar_chart/bar_chart_bar.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/bar_chart_bar.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -99,76 +99,79 @@ class _DailyBarChartState extends State<DailyBarChart> {
       required Widget Function(double value, TitleMeta meta) bottomTitles,
       required Color Function(int day) barColour,
       required int sideLabelCount,
+      required double maxY,
       Function(FlTouchEvent event, BarTouchResponse? response)? touchCallback,
-      double? barWidth,
     })
   {
-    double maxY = max(150, maxValue * 0.2); // TODO Set max depending on maximum of values in y
     double interval = maxY / sideLabelCount;
     
     return Padding(
       padding: const EdgeInsets.all(40),
-      child: BarChart(
-        BarChartData(
-          minY: 0,
-          maxY: maxY,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return BarChart(
+            BarChartData(
+              minY: 0,
+              maxY: maxY,
 
-          gridData: const FlGridData(show: false),
-          borderData: FlBorderData(show: false),
+              gridData: const FlGridData(show: false),
+              borderData: FlBorderData(show: false),
 
-          titlesData: FlTitlesData(
-            show: true,
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            leftTitles: AxisTitles(
-              axisNameWidget: const Text("Time outdoors (mins)"),
-              sideTitles: SideTitles(
-                interval: interval,
-                showTitles: true,
-                reservedSize: 40,
-                getTitlesWidget: _getSideTitles,
-              ),
-            ),
-
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                interval: 1,
-                showTitles: true,
-                reservedSize: 40,
-                getTitlesWidget: bottomTitles,
-              ),
-            ),
-          ),
-
-          barGroups: barData
-            .map((data) => BarChartGroupData(
-              x: data.x,
-              barRods: [BarChartRodData(
-                toY: data.y.toDouble(),
-                width: barWidth,
-                borderRadius: const BorderRadius.all(Radius.zero),
-                color: barColour(data.x),
-              )],
-            ))
-            .toList(),
-
-          barTouchData: BarTouchData(
-            touchTooltipData: BarTouchTooltipData(
-              getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                return BarTooltipItem(
-                  //"${DateFormat("dd MMMM").format(barData[group.x].time)}\n${rod.toY.toInt()} mins",
-                  "${rod.toY.toInt()} mins",
-                  const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+              titlesData: FlTitlesData(
+                show: true,
+                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                leftTitles: AxisTitles(
+                  axisNameWidget: const Text("Time outdoors (mins)"),
+                  sideTitles: SideTitles(
+                    interval: interval,
+                    showTitles: true,
+                    reservedSize: 40,
+                    getTitlesWidget: _getSideTitles,
                   ),
-                );
-              },
+                ),
+
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    interval: 1,
+                    showTitles: true,
+                    reservedSize: 40,
+                    getTitlesWidget: bottomTitles,
+                  ),
+                ),
+              ),
+
+              barGroups: barData
+                .map((data) => BarChartGroupData(
+                  x: data.x,
+                  barRods: [BarChartRodData(
+                    toY: data.y.toDouble(),
+                    width: constraints.maxWidth / (barData.length * 2),
+                    borderRadius: const BorderRadius.all(Radius.zero),
+                    color: barColour(data.x),
+                  )],
+                ))
+                .toList(),
+
+              barTouchData: BarTouchData(
+                touchTooltipData: BarTouchTooltipData(
+                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                    return BarTooltipItem(
+                      //"${DateFormat("dd MMMM").format(barData[group.x].time)}\n${rod.toY.toInt()} mins",
+                      "${rod.toY.toInt()} mins",
+                      const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    );
+                  },
+                ),
+                touchCallback: touchCallback,
+              ),
             ),
-            touchCallback: touchCallback,
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -197,7 +200,7 @@ class _DailyBarChartState extends State<DailyBarChart> {
               context,
               barData,
               sideLabelCount: 10,
-              barWidth: 40,
+              maxY: max(150, maxValue * 1.2),
               bottomTitles: _getDayBottomTitles,
               barColour: (day) {
                 if (selectedDay == null || selectedDay == day) {
@@ -237,6 +240,7 @@ class _DailyBarChartState extends State<DailyBarChart> {
                 context,
                 dayBreakdownBarData[selectedDay!],
                 sideLabelCount: 5,
+                maxY: dayBreakdownBarData[selectedDay!].fold(0, (prev, data) => max(prev, data.y)) * 1.2,
                 barColour: (_) => Theme.of(context).primaryColor,
                 bottomTitles: _getHourBottomTitles,
               ),

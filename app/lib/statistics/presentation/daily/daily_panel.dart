@@ -1,4 +1,4 @@
-import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/daily/bar_chart/daily_bar_chart.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/daily/daily_bar_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -23,25 +23,36 @@ class _DailyPanelState extends State<DailyPanel> {
 //   }
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DailyCubit, DailyState>(
-      builder: (context, state) {
-        if (state.status.isLoading) {
-          return CircularProgressIndicator();
-        }
-        return SizedBox(
-          height: 1000,
-          child: PageView.builder(
-            // controller: _scrollController,
-            reverse: true,
-            scrollDirection: Axis.horizontal,
-            itemCount: state.dailyStats.length,
-            itemBuilder: ((context, index) {
-              return DailyBarChart(dailySummary: state.dailyStats[index]);
-            }),
-          ),
-        );
-      },
-    );
+    return BlocListener<StatisticsCubit, StatisticsState>(
+        listener: (context, state) {
+          // print(context.read<Stat>)
+          //context.read<DailyCubit>().onGetDataForChildId(
+          //      DateTime.now(),
+          //      context.read<StatisticsCubit>().state.focusChildId,
+          //    );
+        },
+        child: Column(
+          children: [
+            BlocBuilder<DailyCubit, DailyState>(
+              builder: (context, state) {
+                if (state.status.isLoading) {
+                  return const CircularProgressIndicator();
+                }
+                return Expanded(
+                  child: PageView.builder(
+                    // controller: _scrollController,
+                    reverse: true,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: state.dailyStats.length,
+                    itemBuilder: ((context, index) {
+                      return DailyBarChart(dailySummary: state.dailyStats[index]);
+                    }),
+                  ),
+                );
+              },
+            ),
+          ],
+        ));
   }
 }
 
