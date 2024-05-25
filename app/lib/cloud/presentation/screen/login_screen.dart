@@ -38,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
+    Size screenSize = MediaQuery.sizeOf(context);
     double screeWidth = screenSize.width;
     double screenHeight = screenSize.height;
     return BlocProvider(

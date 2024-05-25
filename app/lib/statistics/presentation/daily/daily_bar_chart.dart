@@ -55,20 +55,20 @@ class _DailyBarChartState extends State<DailyBarChart> {
       //return BarChartBar(x: index++, y: Random().nextInt(150), time: e.key);
       return BarChartBar(x: index++, y: e.value, time: e.key);
     }).toList();
-    print(barData);
+    // print(barData);
     widget.dailySummary.hourlyStats.forEach((key, value) {
       int index = 0;
-      print("new month $key");
+      // print("new month $key");
       dayBreakdownBarData[key.weekday - 1] = value.entries
           //.map((e) => BarChartBar(x: index++, y: Random().nextInt(150), time: e.key))
           .map((e) {
-        print("printing entry $e");
+        // print("printing entry $e");
         return BarChartBar(x: index++, y: e.value, time: e.key);
       }).toList();
     });
-    for (List<BarChartBar> oneDay in dayBreakdownBarData) {
-      print(oneDay);
-    }
+    // for (List<BarChartBar> oneDay in dayBreakdownBarData) {
+    //   print(oneDay);
+    // }
   }
 
   Widget _getDayBottomTitles(double value, TitleMeta meta) {
@@ -180,7 +180,7 @@ class _DailyBarChartState extends State<DailyBarChart> {
                           BarChartRodData(
                             toY: data.y.toDouble(),
                             width: constraints.maxWidth / (barData.length * 2),
-                            borderRadius: const BorderRadius.all(Radius.zero),
+                            borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2)),
                             color: barColour(data.x),
                           )
                         ],
@@ -228,7 +228,7 @@ class _DailyBarChartState extends State<DailyBarChart> {
   Widget build(BuildContext context) {
     DateTime startMonday = widget.dailySummary.startMondayDate;
     DateTime endMonday = startMonday.add(const Duration(days: 6));
-    Size screenSize = MediaQuery.of(context).size;
+    Size screenSize = MediaQuery.sizeOf(context);
     double screeWidth = screenSize.width;
     double screenHeight = screenSize.height;
     String heading =
