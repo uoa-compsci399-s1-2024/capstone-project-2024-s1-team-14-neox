@@ -71,7 +71,7 @@ class _MonthlyBarChartState extends State<MonthlyBarChart> {
   Widget _buildBarChart() {
     double maxY = max(150, maxValue * 1.2);
     return Padding(
-      padding: const EdgeInsets.all(40),
+      padding: const EdgeInsets.all(10),
       child: LayoutBuilder(
         builder: (context, constraints) {
           return BarChart(
@@ -137,16 +137,9 @@ class _MonthlyBarChartState extends State<MonthlyBarChart> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 40),
+      padding: const EdgeInsets.only(top: 20),
       child: Column(
         children: [
-          Text(
-            "Year ${widget.monthlySummary.year}",
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
           Expanded(
             child: _buildBarChart()
           ),

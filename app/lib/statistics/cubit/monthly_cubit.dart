@@ -13,16 +13,17 @@ class MonthlyCubit extends Cubit<MonthlyState> {
 
   Future<void> onGetYearDataForChildId(int year, int childId) async {
     emit(MonthlyState(status: MonthlyStatus.loading, focusYear: state.focusYear, focusMonth: state.focusMonth));
+    int targetMinutes = await _statisticsRepository.getDailyTarget();
     await Future.delayed(const Duration(milliseconds: 500));
     SingleYearDailyStatsModel newMonthlyStats = await _statisticsRepository.getSingleYearDailyStats(year, childId);
     if (isClosed) {
       return;
     }
-
     emit(state.copyWith(
       status: MonthlyStatus.success,
       focusYear: year,
       monthlyStats: newMonthlyStats,
+      targetMinutes: targetMinutes,
     ));
   }
 
