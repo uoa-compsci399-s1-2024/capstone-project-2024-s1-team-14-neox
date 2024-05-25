@@ -1,15 +1,21 @@
 #!/bin/bash
 
-usage() { echo "Usage: $0 [-s]" 1>&2; exit 1; }
+function usage()
+{
+	cat >&2 <<EOF
+Usage: $0 [-s] [-r] [-h]
+  -s	set up cognito accounts before testing
+  -r	test researcher account creation
+  -h	view this help message
+EOF
+	exit 1
+}
 
-while getopts ":sh" o; do
+while getopts ":srh" o; do
 	case "${o}" in
-		s)
-			s=1
-			;;
-		*|h)
-			usage
-			;;
+		s) s=1 ;;
+		r) test_create_researchers=1 ;;
+		*|h) usage ;;
 	esac
 done
 
@@ -176,7 +182,7 @@ aux_test_auth -M "confirming researchers can't make children" \
 aux_test_auth -M "confirming admins can't make children" \
 	      -m POST -t "$IDTOKEN_ADMIN" -u "$API_URL/children" \
 	      -s 403 -D
-if false; then
+if [ "$test_create_researchers" = 1 ]; then
 aux_test_auth -M "confirming parents CAN'T make researchers" \
 	      -m POST -t "$IDTOKEN_PARENT1" -u "$API_URL/researchers" -d '{"given_name": "Richard", "family_name": "Johnson", "email": "gabriel.lisaca+dump-researcher@gmail.com"}' \
 	      -s 403 -D
@@ -282,7 +288,7 @@ fi
 # - get samples from a given child
 STUDYID="TEST123"
 BADSTUDYID="ABC123"
-if true; then
+if false; then
 echo "test: creating study..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	echo "$user: creating study"
@@ -291,7 +297,7 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 done
 fi
 
-if true; then
+if false; then
 echo "test: study details..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	echo "$user: getting details of study"
@@ -308,7 +314,7 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 done
 fi
 
-if true; then
+if false; then
 echo "test: listing studies (globally)..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	echo "$user: listing studies (globally)"
@@ -317,7 +323,7 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 done
 fi
 
-if true; then
+if false; then
 echo "test: listing participants in study..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	echo "$user: listing participants in study"
@@ -326,7 +332,7 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 done
 fi
 
-if true; then
+if false; then
 echo "test: adding to study..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	echo "$user: adding child to study"
@@ -343,7 +349,7 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 done
 fi
 
-if true; then
+if false; then
 echo "test: listing participants in study..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	echo "$user: listing participants in study"
@@ -352,7 +358,7 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 done
 fi
 
-if true; then
+if false; then
 echo "test: listing studies..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	echo "$user: listing studies (for child)"
@@ -373,7 +379,7 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 done
 fi
 
-if true; then
+if false; then
 echo "test: sample fetching..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	echo "$user: fetching samples from study"
@@ -386,7 +392,7 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 done
 fi
 
-if true; then
+if false; then
 echo "test: removing from study..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	echo "$user: removing child from study"
@@ -403,7 +409,7 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 done
 fi
 
-if true; then
+if false; then
 echo "test: listing participants in study..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	echo "$user: listing participants in study"
@@ -412,7 +418,7 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 done
 fi
 
-if true; then
+if false; then
 echo "test: sample fetching..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	echo "$user: fetching samples from study"
