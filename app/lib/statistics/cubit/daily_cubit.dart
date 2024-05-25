@@ -8,7 +8,9 @@ part 'daily_state.dart';
 
 class DailyCubit extends Cubit<DailyState> {
   StatisticsRepository _statisticsRepository;
-  DailyCubit(this._statisticsRepository) : super(DailyState());
+  DailyCubit(this._statisticsRepository)
+      : super(
+            DailyState(targetMinutes: _statisticsRepository.getDailyTarget()));
 
   Future<void> onGetDataForChildId(DateTime queryDate, int childId) async {
     DateTime startMonday =

@@ -8,16 +8,34 @@ import 'package:intl/intl.dart';
 
 class DailyBarChart extends StatefulWidget {
   final SingleWeekHourlyStatsModel dailySummary;
+  final int targetMinutes;
 
-  const DailyBarChart({super.key, required this.dailySummary});
+  const DailyBarChart(
+      {super.key, required this.dailySummary, required this.targetMinutes});
 
   @override
   State<DailyBarChart> createState() => _DailyBarChartState();
 }
 
 class _DailyBarChartState extends State<DailyBarChart> {
-  static const List<String> daysShort = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
-  static const List<String> daysLong = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  static const List<String> daysShort = [
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thu",
+    "Fri",
+    "Sat",
+    "Sun"
+  ];
+  static const List<String> daysLong = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
+  ];
 
   int maxValue = 0;
   List<BarChartBar> barData = [];
@@ -41,9 +59,9 @@ class _DailyBarChartState extends State<DailyBarChart> {
     widget.dailySummary.hourlyStats.forEach((key, value) {
       int index = 0;
       dayBreakdownBarData[key.weekday - 1] = value.entries
-        //.map((e) => BarChartBar(x: index++, y: Random().nextInt(150), time: e.key))
-        .map((e) => BarChartBar(x: index++, y: e.value, time: e.key))
-        .toList();
+          //.map((e) => BarChartBar(x: index++, y: Random().nextInt(150), time: e.key))
+          .map((e) => BarChartBar(x: index++, y: e.value, time: e.key))
+          .toList();
     });
   }
 
@@ -62,7 +80,7 @@ class _DailyBarChartState extends State<DailyBarChart> {
 
   Widget _getHourBottomTitles(double value, TitleMeta meta) {
     int val = value.toInt();
-    String half = val < 12 ? "AM" : "PM";
+    String half = val < 12 ? "am" : "pm";
 
     val %= 12;
     if (val == 0) {
@@ -94,35 +112,44 @@ class _DailyBarChartState extends State<DailyBarChart> {
 
   Widget _buildBarChart(
     BuildContext context,
-    List<BarChartBar> barData,
-    {
-      required Widget Function(double value, TitleMeta meta) bottomTitles,
-      required Color Function(int day) barColour,
-      required int sideLabelCount,
-      required double maxY,
-      Function(FlTouchEvent event, BarTouchResponse? response)? touchCallback,
-    })
-  {
+    List<BarChartBar> barData, {
+    required Widget Function(double value, TitleMeta meta) bottomTitles,
+    required Color Function(int day) barColour,
+    required int sideLabelCount,
+    required double maxY,
+    Function(FlTouchEvent event, BarTouchResponse? response)? touchCallback,
+  }) {
     double interval = maxY / sideLabelCount;
-    
+
     return Padding(
-      padding: const EdgeInsets.all(40),
+      padding: const EdgeInsets.all(8),
       child: LayoutBuilder(
         builder: (context, constraints) {
           return BarChart(
             BarChartData(
               minY: 0,
               maxY: maxY,
-
-              gridData: const FlGridData(show: false),
+              gridData: FlGridData(
+                horizontalInterval: widget.targetMinutes.toDouble(),
+                checkToShowHorizontalLine: (value) =>
+                    value == widget.targetMinutes.toDouble(),
+                show: true,
+                drawVerticalLine: false,
+                drawHorizontalLine: true,
+                getDrawingHorizontalLine: (value) => FlLine(
+                    color: Theme.of(context).colorScheme.secondary,
+                    strokeWidth: 4,
+                    dashArray: [4, 4]),
+              ),
               borderData: FlBorderData(show: false),
-
               titlesData: FlTitlesData(
                 show: true,
-                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles:
+                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles:
+                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 leftTitles: AxisTitles(
-                  axisNameWidget: const Text("Time outdoors (mins)"),
+                  // axisNameWidget: const Text("Time outdoors (mins)"),
                   sideTitles: SideTitles(
                     interval: interval,
                     showTitles: true,
@@ -130,7 +157,6 @@ class _DailyBarChartState extends State<DailyBarChart> {
                     getTitlesWidget: _getSideTitles,
                   ),
                 ),
-
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     interval: 1,
@@ -140,19 +166,19 @@ class _DailyBarChartState extends State<DailyBarChart> {
                   ),
                 ),
               ),
-
               barGroups: barData
-                .map((data) => BarChartGroupData(
-                  x: data.x,
-                  barRods: [BarChartRodData(
-                    toY: data.y.toDouble(),
-                    width: constraints.maxWidth / (barData.length * 2),
-                    borderRadius: const BorderRadius.all(Radius.zero),
-                    color: barColour(data.x),
-                  )],
-                ))
-                .toList(),
-
+                  .map((data) => BarChartGroupData(
+                        x: data.x,
+                        barRods: [
+                          BarChartRodData(
+                            toY: data.y.toDouble(),
+                            width: constraints.maxWidth / (barData.length * 2),
+                            borderRadius: const BorderRadius.all(Radius.zero),
+                            color: barColour(data.x),
+                          )
+                        ],
+                      ))
+                  .toList(),
               barTouchData: BarTouchData(
                 touchTooltipData: BarTouchTooltipData(
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
@@ -180,7 +206,8 @@ class _DailyBarChartState extends State<DailyBarChart> {
   Widget build(BuildContext context) {
     DateTime startMonday = widget.dailySummary.startMondayDate;
     DateTime endMonday = startMonday.add(const Duration(days: 6));
-    String heading = "${DateFormat("d MMMM").format(startMonday)} - ${DateFormat("d MMMM").format(endMonday)}";
+    String heading =
+        "${DateFormat("d MMMM").format(startMonday)} - ${DateFormat("d MMMM").format(endMonday)}";
 
     return Padding(
       padding: const EdgeInsets.only(top: 40),
@@ -193,7 +220,6 @@ class _DailyBarChartState extends State<DailyBarChart> {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           Expanded(
             flex: 2,
             child: _buildBarChart(
@@ -220,7 +246,6 @@ class _DailyBarChartState extends State<DailyBarChart> {
               },
             ),
           ),
-          
           if (selectedDay != null)
             Padding(
               padding: const EdgeInsets.all(20),
@@ -232,7 +257,6 @@ class _DailyBarChartState extends State<DailyBarChart> {
                 ),
               ),
             ),
-
           if (selectedDay != null)
             Expanded(
               flex: 1,
@@ -240,7 +264,9 @@ class _DailyBarChartState extends State<DailyBarChart> {
                 context,
                 dayBreakdownBarData[selectedDay!],
                 sideLabelCount: 5,
-                maxY: dayBreakdownBarData[selectedDay!].fold(0, (prev, data) => max(prev, data.y)) * 1.2,
+                maxY: dayBreakdownBarData[selectedDay!]
+                        .fold(0, (prev, data) => max(prev, data.y)) *
+                    1.2,
                 barColour: (_) => Theme.of(context).primaryColor,
                 bottomTitles: _getHourBottomTitles,
               ),

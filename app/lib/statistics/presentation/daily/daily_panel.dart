@@ -46,7 +46,10 @@ class _DailyPanelState extends State<DailyPanel> {
                     scrollDirection: Axis.horizontal,
                     itemCount: state.dailyStats.length,
                     itemBuilder: ((context, index) {
-                      return DailyBarChart(dailySummary: state.dailyStats[index]);
+                      return DailyBarChart(
+                        dailySummary: state.dailyStats[index],
+                        targetMinutes: state.targetMinutes ?? 120,
+                      );
                     }),
                   ),
                 );
