@@ -193,41 +193,82 @@ CHILDID="$(call_api -m POST -t "$IDTOKEN_PARENT1" -u "$API_URL/children" | parse
 echo "childID is $CHILDID"
 
 if true; then
-echo "testing auth..."
+echo "TEST: auth for actions whose status code won't change when child/researcher added/removed to/from study"
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
-	echo "$user: getting personal info for child"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/children/$CHILDID/info" 2>/dev/null | head -n1
-	# echo ""
-
-	echo "$user: PUTting personal info for child"
-	curl -i -X PUT -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/children/$CHILDID/info" -d '{"given_name": "John", "family_name": "Cena"}' 2>/dev/null | head -n1
-	# echo ""
-
-	echo "$user: PATCHing personal info for child"
-	curl -i -X PATCH -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/children/$CHILDID/info" -d '{"gender": "male"}' 2>/dev/null | head -n1
-	# echo ""
-
-	echo "$user: fetching samples for child"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/samples/$CHILDID" 2>/dev/null | head -n1
-	# echo ""
-
-	echo "$user: POSTing samples for child"
-	curl -i -X POST -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/samples/$CHILDID" -H'content-type: application/json' -d "$("$(git rev-parse --show-toplevel)/server/generateXsamples" 1)" 2>/dev/null | head -n1
-	# echo ""
-
 	for usertype in parents researchers admins; do
-		echo "$user: listing user group $usertype"
-		curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/$usertype" 2>/dev/null | head -n1
-		# echo ""
+		assert_code=403
+		case "$user" in
+			PARENT1|PARENT2)
+				case "$usertype" in
+					researchers|admins) assert_code=200 ;;
+				esac
+				;;
+			RESEARCHER1|RESEARCHER2)
+				case "$usertype" in
+					researchers|admins) assert_code=200 ;;
+				esac
+				;;
+			ADMIN) assert_code=200 ;;
+		esac
+		aux_test_auth -M "$user: listing user group $usertype" \
+			      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/$usertype" \
+			      -s "$assert_code" -D
 	done
 
-	echo "$user: listing children of PARENT1"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/parents/$EMAIL_PARENT1/children" 2>/dev/null #| head -n1
-	# echo ""
+	assert_code=403
+	case "$user" in
+		PARENT1|ADMIN) assert_code=200 ;;
+	esac
+	aux_test_auth -M "$user: listing children of PARENT1" \
+		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/parents/$EMAIL_PARENT1/children" \
+		      -s "$assert_code"
+
+	assert_code=403
+	case "$user" in
+		PARENT1) assert_code=204 ;;
+	esac
+	aux_test_auth -M "$user: POSTing samples for child" \
+		      -m POST -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/samples/$CHILDID" -d "$("$(git rev-parse --show-toplevel)/server/generateXsamples" 1)" \
+		      -s "$assert_code"
 done
-fi  # false
+fi
 
 echo "testing auth for studies..."
+
+if true; then
+echo "TEST: PRE-STUDIES: child personal info auth..."
+for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
+	assert_code=403
+	case "$user" in
+		PARENT1) assert_code=200 ;;
+	esac
+	aux_test_auth -M "$user: getting personal info for child" \
+		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/children/$CHILDID/info" \
+		      -s "$assert_code"
+
+	assert_code=403
+	case "$user" in
+		PARENT1) assert_code=204 ;;
+	esac
+	aux_test_auth -M "$user: PUTting personal info for child" \
+		      -m PUT -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/children/$CHILDID/info" -d '{"given_name": "John", "family_name": "Cena"}' \
+		      -s "$assert_code"
+
+
+	aux_test_auth -M "$user: PATCHing personal info for child" \
+		      -m PATCH -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/children/$CHILDID/info" -d '{"gender": "male"}' \
+		      -s "$assert_code"
+
+	assert_code=403
+	case "$user" in
+		PARENT1) assert_code=200 ;;
+	esac
+	aux_test_auth -M "$user: fetching samples for child" \
+		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/samples/$CHILDID" \
+		      -s "$assert_code"
+done
+fi
+
 # order:
 # - create study
 # - fetch/modify study details
