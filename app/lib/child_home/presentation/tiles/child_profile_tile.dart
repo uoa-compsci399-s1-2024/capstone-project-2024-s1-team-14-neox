@@ -39,7 +39,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
               // Dummy invisible widget to balance out icon on the right.
               // This ensures that the text widget is perfectly centred.
               const Visibility(
-                maintainSize: true, 
+                maintainSize: true,
                 maintainAnimation: true,
                 maintainState: true,
                 visible: false,
@@ -60,7 +60,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
               const SizedBox(width: 10),
 
               IconButton(
-                onPressed: (){
+                onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -69,7 +69,8 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                           value: BlocProvider.of<AllChildProfileCubit>(context),
                           child: BlocProvider.value(
                             value: BlocProvider.of<ChildDeviceCubit>(context),
-                            child: const CreateChildProfileScreen(editing: true),
+                            child:
+                                const CreateChildProfileScreen(editing: true),
                           ),
                         );
                       },
@@ -80,44 +81,42 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
               ),
             ],
           ),
-          
           const SizedBox(height: 10),
-          
           BlocProvider(
             create: (_) => BluetoothBloc(),
             child: const BluetoothPanel(),
           ),
-          
           if (kDebugMode)
             ElevatedButton(
-              onPressed: () async {
-                // Change start and end times as needed
-                DateTime startTime = DateTime(2024, 1, 1);
-                DateTime endTime = DateTime(2025, 1, 1);
-                // 0.1 is around 96 mins per day, 0.2 is around 192 mins per day
-                double threshold = 0.18;
+                onPressed: () async {
+                  // Change start and end times as needed
+                  DateTime startTime = DateTime(2024, 1, 1);
+                  DateTime endTime = DateTime(2025, 1, 1);
+                  // 0.1 is around 96 mins per day, 0.2 is around 192 mins per day
+                  double threshold = 0.18;
 
-                // For loop to prevent exceeding memory
-                for (DateTime time = startTime;
-                    time.isBefore(endTime);
-                    time = time.add(Duration(days: 7))) {
-                  print("Creating week for: $time");
-                  List<ArduinoDataEntity> randomData =
-                      await ArduinoDataEntity.createSampleArduinoDataList(
-                          state.childId, time, time.add(Duration(days: 7)), threshold);
-                  await ArduinoDataEntity.saveListOfArduinoDataEntity(
-                      randomData);
-                }
-              },
-              child: Text("Generate data")),
-          
+                  // For loop to prevent exceeding memory
+                  for (DateTime time = startTime;
+                      time.isBefore(endTime);
+                      time = time.add(Duration(days: 7))) {
+                    print("Creating week for: $time");
+                    List<ArduinoDataEntity> randomData =
+                        await ArduinoDataEntity.createSampleArduinoDataList(
+                            state.childId,
+                            time,
+                            time.add(Duration(days: 7)),
+                            threshold);
+                    await ArduinoDataEntity.saveListOfArduinoDataEntity(
+                        randomData);
+                  }
+                },
+                child: Text("Generate data")),
           Expanded(
             child: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
                 return Column(
                   children: [
                     const Spacer(),
-
                     OutdoorTimeProgressIndicator(
                       context: context,
                       radius: constraints.maxWidth / 2 * 0.8,
@@ -134,11 +133,9 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                         ],
                       ),
                     ),
-              
                     const Spacer(),
-
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         OutdoorTimeProgressIndicator(
                           context: context,
@@ -150,9 +147,12 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                             children: [
                               const Text(
                                 "Past week",
-                                style: TextStyle(fontSize: 18),
+                                style: TextStyle(fontSize: 14),
                               ),
-                              Text("$outdoorTimeAvgWeek mins/day"),
+                              Text(
+                                "$outdoorTimeAvgWeek mins/day",
+                                style: const TextStyle(fontSize: 12),
+                              ),
                             ],
                           ),
                         ),
@@ -166,21 +166,22 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                             children: [
                               const Text(
                                 "Past month",
-                                style: TextStyle(fontSize: 18),
+                                style: TextStyle(fontSize: 14),
                               ),
-                              Text("$outdoorTimeAvgMonth mins/day"),
+                              Text(
+                                "$outdoorTimeAvgMonth mins/day",
+                                style: const TextStyle(fontSize: 12),
+                              ),
                             ],
                           ),
                         ),
                       ],
                     ),
-                    
                     const Spacer(),
                   ],
                 );
               },
             ),
-          
           ),
         ],
       ),
@@ -191,17 +192,19 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
 // ignore: must_be_immutable
 class OutdoorTimeProgressIndicator extends CircularPercentIndicator {
   OutdoorTimeProgressIndicator({
-    super.key, 
+    super.key,
     required BuildContext context,
     required super.radius,
     required super.lineWidth,
     required super.percent,
     required super.center,
   }) : super(
-    animation: true,
-    arcType: ArcType.FULL,
-    arcBackgroundColor: Colors.grey.withOpacity(0.3),
-    circularStrokeCap: CircularStrokeCap.round,
-    progressColor: percent >= 1 ? const Color.fromARGB(255, 255, 204, 36) : Theme.of(context).primaryColor,
-  );
+          animation: true,
+          arcType: ArcType.FULL,
+          arcBackgroundColor: Colors.grey.withOpacity(0.3),
+          circularStrokeCap: CircularStrokeCap.round,
+          progressColor: percent >= 1
+              ? const Color.fromARGB(255, 255, 204, 36)
+              : Theme.of(context).primaryColor,
+        );
 }
