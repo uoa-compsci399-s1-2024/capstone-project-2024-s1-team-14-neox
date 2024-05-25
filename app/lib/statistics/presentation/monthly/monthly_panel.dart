@@ -4,11 +4,48 @@ import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/statisti
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/monthly/bar_chart/monthly_bar_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 class MonthlyPanel extends StatelessWidget {
   const MonthlyPanel({super.key});
+  Widget _buildWeekHeader() {
+    return const Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Text(
+          "Mon",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          "Tue",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          "Wed",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          "Thu",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          "Fri",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          "Sat",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          "Sun",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
 
-  Widget _buildCalendar(DateTime month, Map<DateTime, int>? dailyStats) {
+  Widget _buildCalendar(
+      DateTime month, Map<DateTime, int>? dailyStats, int targetMinutes) {
     int daysInMonth = DateTime(month.year, month.month + 1, 0).day;
     DateTime firstDayOfMonth = DateTime(month.year, month.month, 1);
     int weekdayOfFirstDay = firstDayOfMonth.weekday;
@@ -17,70 +54,124 @@ class MonthlyPanel extends StatelessWidget {
         firstDayOfMonth.subtract(Duration(days: 1));
     int daysInPreviousMonth = lastDayOfPreviousMonth.day;
 
-    return GridView.builder(
-      padding: EdgeInsets.zero,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 7,
-        childAspectRatio: 1,
-      ),
-      // Calculating the total number of cells required in the grid
-      itemCount: daysInMonth + weekdayOfFirstDay - 1,
-      itemBuilder: (context, index) {
-        if (index < weekdayOfFirstDay - 1) {
-          // Displaying dates from the previous month in grey
-          int previousMonthDay =
-              daysInPreviousMonth - (weekdayOfFirstDay - index) + 2;
-          return Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                top: BorderSide.none,
-                left: BorderSide.none,
-                right: BorderSide.none,
-                bottom: BorderSide.none,
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          _buildWeekHeader(),
+          Expanded(
+            child: GridView.builder(
+              padding: EdgeInsets.zero,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 7,
+                childAspectRatio: 1,
               ),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              previousMonthDay.toString(),
-              style: TextStyle(color: Colors.grey),
-            ),
-          );
-        } else {
-          // Displaying the current month's days
-          DateTime date =
-              DateTime(month.year, month.month, index - weekdayOfFirstDay + 2);
-          String text = date.day.toString();
-
-          return InkWell(
-            onTap: () {
-              // Handle tap on a date cell
-              // This is where you can add functionality when a date is tapped
-            },
-            child: Container(
-              decoration: const BoxDecoration(
-                border: Border(
-                  top: BorderSide.none,
-                  left: BorderSide.none,
-                  right: BorderSide.none,
-                  bottom: BorderSide.none,
-                ),
-              ),
-              child: Stack(
-                children: [
-                  Text(
-                    text,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+              // Calculating the total number of cells required in the grid
+              itemCount: daysInMonth + weekdayOfFirstDay - 1,
+              itemBuilder: (context, index) {
+                if (index < weekdayOfFirstDay - 1) {
+                  // Displaying dates from the previous month in grey
+                  int previousMonthDay =
+                      daysInPreviousMonth - (weekdayOfFirstDay - index) + 2;
+                  return Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        top: BorderSide.none,
+                        left: BorderSide.none,
+                        right: BorderSide.none,
+                        bottom: BorderSide.none,
+                      ),
                     ),
-                  ),
-                  if (dailyStats![date] != null && dailyStats[date]! >= 120)
-                    Image.asset("assets/icon-small.png")
-                ],
-              ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      previousMonthDay.toString(),
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  );
+                } else {
+                  // Displaying the current month's days
+                  DateTime date = DateTime(
+                      month.year, month.month, index - weekdayOfFirstDay + 2);
+                  String text = date.day.toString();
+            
+                  return Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        top: BorderSide.none,
+                        left: BorderSide.none,
+                        right: BorderSide.none,
+                        bottom: BorderSide.none,
+                      ),
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Text(
+                          text,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (dailyStats![date] != null &&
+                            dailyStats[date]! >= targetMinutes)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+                            child: Image.asset("assets/icon-small.png"),
+                          )
+                      ],
+                    ),
+                  );
+                }
+              },
             ),
-          );
-        }
-      },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildYearHeader(BuildContext context, int focusYear, int focusChild) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(
+          icon: Icon(Icons.arrow_back_ios),
+          onPressed: () => context
+              .read<MonthlyCubit>()
+              .onGetYearDataForChildId(focusYear - 1, focusChild),
+        ),
+        Text(
+          "$focusYear",
+          style: const TextStyle(fontSize: 24),
+        ),
+        IconButton(
+          icon: Icon(Icons.arrow_forward_ios),
+          onPressed: () => context
+              .read<MonthlyCubit>()
+              .onGetYearDataForChildId(focusYear + 1, focusChild),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMonthHeader(BuildContext context) {
+    print(
+        "monthly focus month ${context.read<MonthlyCubit>().state.focusMonth}");
+    DateTime startOfMonth = DateTime(
+      context.read<MonthlyCubit>().state.focusYear,
+      context.read<MonthlyCubit>().state.focusMonth,
+      1,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(DateFormat.LLLL().format(startOfMonth)),
+        Text(
+            "Average outdoor time: ${context.read<MonthlyCubit>().state.monthlyStats?.monthlyMean[startOfMonth]?.floor() ?? 0} mins/day"),
+        Text(
+            "Days target achieved: ${context.read<MonthlyCubit>().state.monthlyStats?.monthlyTargetAcheived[startOfMonth] ?? 0}")
+      ],
     );
   }
 
@@ -92,10 +183,15 @@ class MonthlyPanel extends StatelessWidget {
           print("monthly panel loading");
           return CircularProgressIndicator();
         }
-        print("monthly panel ${context.read<StatisticsCubit>().state}");
-        print("monthly panel $state}");
         return Column(
           children: [
+            _buildYearHeader(
+              context,
+              context.read<MonthlyCubit>().state.focusYear,
+              (context.read<StatisticsCubit>().state as StatisticsOverview)
+                  .focusChildId,
+            ),
+            _buildMonthHeader(context),
             SizedBox(
               height: 300,
               child: MonthlyBarChart(monthlySummary: state.monthlyStats!),
@@ -110,7 +206,9 @@ class MonthlyPanel extends StatelessWidget {
                 itemBuilder: (context, pageIndex) {
                   DateTime month = DateTime(state.focusYear, pageIndex + 1, 1);
                   return _buildCalendar(
-                      month, state.monthlyStats!.dailyStats[month]);
+                      month,
+                      state.monthlyStats!.dailyStats[month],
+                      state.targetMinutes ?? 120);
                 },
               ),
             ),

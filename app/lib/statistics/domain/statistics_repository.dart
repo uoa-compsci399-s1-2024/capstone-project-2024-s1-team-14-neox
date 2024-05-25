@@ -20,6 +20,10 @@ class StatisticsRepository {
     await sharedPreferences.setInt("focus_id", childId);
   }
 
+  Future<int> getDailyTarget() async {
+    return sharedPreferences.getInt("daily_target") ?? 120;
+  }
+
   void deleteCache() {
     _weekCache.clear();
     _yearCache.clear();
@@ -71,23 +75,40 @@ class StatisticsRepository {
   // Monthly UI
   Future<SingleYearDailyStatsModel> getSingleYearDailyStats(
       int year, int childId) async {
+    int dailyTarget = await getDailyTarget();
     if (!_yearCache.containsKey(year)) {
       Map<DateTime, double> monthlyMean = {};
+      Map<DateTime, int> monthlyTargetAcheived = {};
+      DateTime currentTime = DateTime.now();
 
       Map<DateTime, Map<DateTime, int>> dailyStats =
           await ArduinoDataEntity.getSingleYearDailyStats(year, childId);
+      // for each Map<startMonday, Map<day, dailyOutdoorTime>>)
 
-      dailyStats.forEach((key, value) {
-        int elaspsedDays =
-            min(max(DateTime.now().difference(key).inDays, 1), value.length);
-        monthlyMean[key] =
-            value.values.reduce((value, element) => value + element) /
-                elaspsedDays;
+      dailyStats.forEach((startMonth, monthlyOutdoorTime) {
+        int elaspsedDays = 0;
+        int totalOutdoorTime = 0;
+        int targetAcheivedCount = 0;
+
+        monthlyOutdoorTime.forEach((day, outdoorTime) {
+          if (day.isBefore(currentTime)) {
+            elaspsedDays += 1;
+          }
+          if (outdoorTime >= dailyTarget) {
+            targetAcheivedCount += 1;
+          }
+          totalOutdoorTime += outdoorTime;
+        });
+
+        monthlyMean[startMonth] =
+            elaspsedDays == 0 ? 0 : totalOutdoorTime / elaspsedDays;
+        monthlyTargetAcheived[startMonth] = targetAcheivedCount;
       });
       _yearCache[year] = SingleYearDailyStatsModel(
         year: year,
         dailyStats: dailyStats,
         monthlyMean: monthlyMean,
+        monthlyTargetAcheived: monthlyTargetAcheived,
       );
     }
     return _yearCache[year]!;

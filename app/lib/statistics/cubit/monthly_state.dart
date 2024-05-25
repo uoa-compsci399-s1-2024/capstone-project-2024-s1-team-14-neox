@@ -18,12 +18,14 @@ class MonthlyState extends Equatable {
   final MonthlyStatus status;
   final int focusYear;
   final int focusMonth;
+  int? targetMinutes;
   SingleYearDailyStatsModel? monthlyStats;
 
   MonthlyState({
     this.status = MonthlyStatus.initial,
     required this.focusYear,
     required this.focusMonth,
+    this.targetMinutes,
     this.monthlyStats,
   });
 
@@ -31,12 +33,14 @@ class MonthlyState extends Equatable {
     MonthlyStatus? status,
     int? focusYear,
     int? focusMonth,
+    int? targetMinutes,
     SingleYearDailyStatsModel? monthlyStats,
   }) {
     return MonthlyState(
       status: status ?? this.status,
       focusYear: focusYear ?? this.focusYear,
       focusMonth: focusMonth ?? this.focusMonth,
+      targetMinutes: focusMonth ?? this.targetMinutes,
       monthlyStats: monthlyStats ?? this.monthlyStats,
     );
   }
