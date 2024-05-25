@@ -92,19 +92,20 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                 // Change start and end times as needed
                 DateTime startTime = DateTime(2024, 1, 1);
                 DateTime endTime = DateTime(2024, 5, 24);
+                int numberOfWeeks = endTime.difference(startTime).inDays ~/ 7;
                 // 0.1 is around 96 mins per day, 0.2 is around 192 mins per day
                 double threshold = 0.15;
-
+                DateTime time = startTime;
                 // For loop to prevent exceeding memory
-                for (DateTime time = startTime;
-                    time.isBefore(endTime);
-                    time = time.add(Duration(days: 7))) {
+                for (int i = 0; i <= numberOfWeeks; i++) {
+                  time = time.add(const Duration(days: 7));
+                  time = DateTime(time.year, time.month, time.day);
                   print("Creating week for: $time");
                   List<ArduinoDataEntity> randomData =
                       await ArduinoDataEntity.createSampleArduinoDataList(
                           state.childId,
                           time,
-                          time.add(Duration(days: 7)),
+                          time.add(const Duration(days: 7)),
                           threshold);
                   await ArduinoDataEntity.saveListOfArduinoDataEntity(
                       randomData);
