@@ -1,5 +1,6 @@
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/cubit/monthly_cubit.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/cubit/statistics_cubit.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/single_year_daily_stats_model.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/statistics_repository.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/monthly/monthly_bar_chart.dart';
 import 'package:flutter/material.dart';
@@ -136,6 +137,8 @@ class MonthlyPanel extends StatelessWidget {
       1,
     );
 
+    SingleYearDailyStatsModel? stats = context.read<MonthlyCubit>().state.monthlyStats;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -143,8 +146,8 @@ class MonthlyPanel extends StatelessWidget {
           DateFormat.LLLL().format(startOfMonth),
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
-        Text("Average ${context.read<MonthlyCubit>().state.monthlyStats?.monthlyMean[startOfMonth]?.floor() ?? 0} mins/day"),
-        Text("Targets achieved: ${context.read<MonthlyCubit>().state.monthlyStats?.monthlyTargetAcheived[startOfMonth] ?? 0}"),
+        Text("Average ${stats?.monthlyMean[startOfMonth]?.floor() ?? 0} mins/day"),
+        Text("Targets achieved: ${stats?.monthlyTargetAcheived[startOfMonth] ?? 0}"),
       ],
     );
   }

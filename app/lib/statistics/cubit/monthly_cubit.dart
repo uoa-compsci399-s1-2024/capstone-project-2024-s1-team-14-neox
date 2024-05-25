@@ -9,11 +9,11 @@ class MonthlyCubit extends Cubit<MonthlyState> {
   final StatisticsRepository _statisticsRepository;
 
   MonthlyCubit(this._statisticsRepository)
-      : super(MonthlyState(focusYear: DateTime.now().year, focusMonth: DateTime.now().month));
+      : super(MonthlyState(focusYear: DateTime.now().year, focusMonth: DateTime.now().month, targetMinutes: _statisticsRepository.getDailyTarget()));
 
   Future<void> onGetYearDataForChildId(int year, int childId) async {
-    emit(MonthlyState(status: MonthlyStatus.loading, focusYear: state.focusYear, focusMonth: state.focusMonth));
-    int targetMinutes = await _statisticsRepository.getDailyTarget();
+    emit(MonthlyState(status: MonthlyStatus.loading, focusYear: state.focusYear, focusMonth: state.focusMonth, targetMinutes: state.targetMinutes));
+    int targetMinutes = _statisticsRepository.getDailyTarget();
     await Future.delayed(const Duration(milliseconds: 500));
     SingleYearDailyStatsModel newMonthlyStats = await _statisticsRepository.getSingleYearDailyStats(year, childId);
     if (isClosed) {

@@ -25,7 +25,7 @@ class MonthlyState extends Equatable {
     this.status = MonthlyStatus.initial,
     required this.focusYear,
     required this.focusMonth,
-    this.targetMinutes,
+    required this.targetMinutes,
     this.monthlyStats,
   });
 

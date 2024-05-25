@@ -20,8 +20,8 @@ class StatisticsRepository {
     await sharedPreferences.setInt("focus_id", childId);
   }
 
-  Future<int> getDailyTarget() async {
-    return sharedPreferences.getInt("daily_target") ?? 120;
+  int getDailyTarget() {
+    return sharedPreferences.getInt("daily_target")!;
   }
 
   void deleteCache() {
@@ -75,7 +75,7 @@ class StatisticsRepository {
   // Monthly UI
   Future<SingleYearDailyStatsModel> getSingleYearDailyStats(
       int year, int childId) async {
-    int dailyTarget = await getDailyTarget();
+    int dailyTarget = getDailyTarget();
     if (!_yearCache.containsKey(year)) {
       Map<DateTime, double> monthlyMean = {};
       Map<DateTime, int> monthlyTargetAcheived = {};
