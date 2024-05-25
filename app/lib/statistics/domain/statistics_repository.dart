@@ -12,7 +12,7 @@ class StatisticsRepository {
   final Map<DateTime, SingleWeekHourlyStatsModel> _weekCache = {};
   final Map<int, SingleYearDailyStatsModel> _yearCache = {};
 
-  Future<int?> getFocusChildId() async {
+  int? getFocusChildId() {
     return sharedPreferences.getInt("focus_id");
   }
 

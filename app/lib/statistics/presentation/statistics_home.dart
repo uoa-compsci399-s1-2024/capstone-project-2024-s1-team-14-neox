@@ -1,7 +1,6 @@
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_model.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/main.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/statistics_repository.dart';
-import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/view_toggle%20copy.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/presentation/view_toggle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -45,101 +44,79 @@ class StatisticsHomeState extends State<StatisticsHome> {
   @override
   Widget build(BuildContext context) {
     return RepositoryProvider(
-      create: (_) =>
-          StatisticsRepository(sharedPreferences: App.sharedPreferences),
+      create: (_) => StatisticsRepository(sharedPreferences: App.sharedPreferences),
       child: BlocProvider(
-        create: (context) =>
-            StatisticsCubit(context.read<StatisticsRepository>()),
+        create: (context) => StatisticsCubit(context.read<StatisticsRepository>()),
         child: Scaffold(
           appBar: AppBar(
             title: BlocBuilder<StatisticsCubit, StatisticsState>(
               builder: (context, state) {
-                return DropdownButton<ChildDeviceModel>(
-                  value: _selectedChildProfile,
-                  items: context
+                return Padding(
+                  padding: const EdgeInsets.all(5),
+                  child: DropdownButton<ChildDeviceModel>(
+                    isExpanded: true,
+                    value: _selectedChildProfile,
+                    items: context
                       .read<AllChildProfileCubit>()
                       .state
                       .profiles
                       .map((profile) => DropdownMenuItem(
-                            value: profile,
-                            child: Column(
-                              children: [
-                                Text(profile.childName),
-                                // Text(
-                                //     "Date of Birth: ${DateFormat('yyyy-MM-dd').format(profile.birthDate)}"),
-                              ],
-                            ),
-                          ))
+                        value: profile,
+                        child: Text(profile.childName),
+                      ))
                       .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedChildProfile = value;
-                    });
-                    print("cahing to child id ${value!.childId}");
-                    context.read<StatisticsCubit>().onFocusChildChange(
-                          value!.childId, //NONNULLABLE Selection
-                        );
-                  },
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedChildProfile = value;
+                      });
+                      context.read<StatisticsCubit>().onFocusChildChange(value!.childId);
+                    },
+                  ),
                 );
               },
             ),
+
             actions: [
               BlocBuilder<StatisticsCubit, StatisticsState>(
                 builder: (context, state) {
                   return GestureDetector(
                     onTap: () {
-                      print("tapped stats home");
                       context.read<StatisticsCubit>().onFocusViewToggle();
                     },
-                    child: ViewToggleReplace(
+                    child: ViewToggle(
                       width: 140,
                       height: 40,
-                      detailedView:
-                          context.read<StatisticsCubit>().state.detailedView,
+                      detailedView: context.read<StatisticsCubit>().state is DetailedStatisticsState,
                     ),
                   );
                 },
               )
             ],
-            // bottom: TabBar(
-            //   indicatorSize: TabBarIndicatorSize.tab,
-            //   dividerColor: Colors.transparent,
-            //   indicator: BoxDecoration(
-            //       color: Theme.of(context).colorScheme.primary,
-            //       borderRadius: BorderRadius.all(Radius.circular(10))),
-            //   labelColor: Colors.white,
-            //   tabs: const [
-            //     Tab(text: "Daily"),
-            //     Tab(text: "Weekly"),
-            //     Tab(text: "Monthly"),
-            //   ],
-            //   controller: _tabController,
-            // ),
           ),
+
           body: BlocBuilder<StatisticsCubit, StatisticsState>(
-              buildWhen: (previous, current) =>
-                  previous != current && current is! StatisticsInitial,
               builder: (context, state) {
-                print("state for stats home $state");
-                if (state is StatisticsOverview) {
-                  print("at stats overview home");
+                if (state.focusChildId == null) {
+                  return const Center(
+                    child: Text("Select a profile to view"),
+                  );
+                }
+
+                if (state is OverviewStatisticsState) {
                   return BlocProvider(
-                    create: (context) =>
-                        MonthlyCubit(context.read<StatisticsRepository>())
-                          ..onGetYearDataForChildId(
-                              DateTime.now().year, state.focusChildId),
+                    key: UniqueKey(), // Workaround for refreshing UI!
+                    create: (context) => MonthlyCubit(context.read<StatisticsRepository>())
+                      ..onGetYearDataForChildId(DateTime.now().year, state.focusChildId!),
                     child: const MonthlyPanel(),
                   );
-                } else if (state is StatisticsDetailed) {
-                  print("at stats detailed home");
+                } else {
                   return BlocProvider(
-                    create: (context) => DailyCubit(
-                        context.read<StatisticsRepository>())
-                      ..onGetDataForChildId(DateTime.now(), state.focusChildId),
+                    key: UniqueKey(), // Workaround for refreshing UI!
+                    create: (context) => DailyCubit(context.read<StatisticsRepository>())
+                      ..onGetDataForChildId(DateTime.now(), state.focusChildId!),
                     child: const DailyPanel(),
                   );
                 }
-                return Text("Please select a child");
               }),
         ),
       ),

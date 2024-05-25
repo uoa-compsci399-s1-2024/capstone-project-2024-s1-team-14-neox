@@ -7,47 +7,29 @@ part 'statistics_state.dart';
 
 class StatisticsCubit extends Cubit<StatisticsState> {
   final StatisticsRepository _statisticsRepository;
-  StatisticsCubit(this._statisticsRepository)
-      : super(StatisticsInitial(detailedView: true));
 
-  void onInitialise() async {
-    int? childId = await _statisticsRepository.getFocusChildId();
-    print("initialising statistics cubit");
-    if (childId != null) {
-      emit(StatisticsDetailed(focusChildId: childId, detailedView: true));
-    }
-  }
+  StatisticsCubit(this._statisticsRepository)
+      : super(DetailedStatisticsState(focusChildId: _statisticsRepository.getFocusChildId()));
 
   void onFocusChildChange(int childId) async {
-    print("inside on focus child change start");
-    emit(StatisticsInitial(detailedView: state.detailedView));
     _statisticsRepository.deleteCache();
     await _statisticsRepository.updateFocusChildId(childId);
-    if (state.detailedView) {
-      print("focus child detailed view");
-      emit(StatisticsDetailed(focusChildId: childId, detailedView: true));
+    if (isClosed) {
+      return;
+    }
+
+    if (state is DetailedStatisticsState) {
+      emit(DetailedStatisticsState(focusChildId: childId));
     } else {
-      print("focus child overview");
-      emit(StatisticsOverview(focusChildId: childId, detailedView: false));
+      emit(OverviewStatisticsState(focusChildId: childId));
     }
   }
 
   void onFocusViewToggle() {
-    print("in focus view $state");
-    print("testing onFocusViewToggle");
-    if (state is StatisticsInitial) {
-      emit(StatisticsInitial(detailedView: !state.detailedView));
-      return;
-    }
-    if (state.detailedView) {
-      print("stats cubit currently detailed");
-      emit(StatisticsOverview(
-          focusChildId: (state as StatisticsDetailed).focusChildId,
-          detailedView: false));
+    if (state is DetailedStatisticsState) {
+      emit(OverviewStatisticsState(focusChildId: state.focusChildId));
     } else {
-      emit(StatisticsOverview(
-          focusChildId: (state as StatisticsOverview).focusChildId,
-          detailedView: true));
+      emit(DetailedStatisticsState(focusChildId: state.focusChildId));
     }
   }
 }

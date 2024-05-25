@@ -6,16 +6,19 @@ import 'package:equatable/equatable.dart';
 part 'monthly_state.dart';
 
 class MonthlyCubit extends Cubit<MonthlyState> {
-  StatisticsRepository _statisticsRepository;
+  final StatisticsRepository _statisticsRepository;
+
   MonthlyCubit(this._statisticsRepository)
-      : super(MonthlyState(
-            focusYear: DateTime.now().year, focusMonth: DateTime.now().month));
+      : super(MonthlyState(focusYear: DateTime.now().year, focusMonth: DateTime.now().month));
 
   Future<void> onGetYearDataForChildId(int year, int childId) async {
     emit(MonthlyState(status: MonthlyStatus.loading, focusYear: state.focusYear, focusMonth: state.focusMonth));
-    await Future.delayed(Duration(seconds: 1));
-    SingleYearDailyStatsModel newMonthlyStats =
-        await _statisticsRepository.getSingleYearDailyStats(year, childId);
+    await Future.delayed(const Duration(milliseconds: 500));
+    SingleYearDailyStatsModel newMonthlyStats = await _statisticsRepository.getSingleYearDailyStats(year, childId);
+    if (isClosed) {
+      return;
+    }
+
     emit(state.copyWith(
       status: MonthlyStatus.success,
       focusYear: year,

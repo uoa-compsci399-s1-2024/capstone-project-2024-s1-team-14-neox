@@ -89,7 +89,7 @@ class _MonthlyBarChartState extends State<MonthlyBarChart> {
                   sideTitles: SideTitles(
                     interval: maxY / 10,
                     showTitles: true,
-                    reservedSize: 40,
+                    reservedSize: 50,
                     getTitlesWidget: _getSideTitles,
                   ),
                 ),

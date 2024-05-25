@@ -89,7 +89,7 @@ class MonthlyPanel extends StatelessWidget {
     return BlocBuilder<MonthlyCubit, MonthlyState>(
       builder: (context, state) {
         if (state.status.isLoading) {
-          return const CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
         }
         return Column(
           children: [

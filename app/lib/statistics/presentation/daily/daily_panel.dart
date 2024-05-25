@@ -32,11 +32,12 @@ class _DailyPanelState extends State<DailyPanel> {
           //    );
         },
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             BlocBuilder<DailyCubit, DailyState>(
               builder: (context, state) {
                 if (state.status.isLoading) {
-                  return const CircularProgressIndicator();
+                  return const Center(child: CircularProgressIndicator());
                 }
                 return Expanded(
                   child: PageView.builder(
