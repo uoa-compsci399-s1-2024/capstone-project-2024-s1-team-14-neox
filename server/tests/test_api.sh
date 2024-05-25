@@ -155,17 +155,19 @@ function aux_test_auth()
 	[ -n "$message" ] && printf '%s... ' "$message"
 	local resp="$(call_api -m "$method" -t "$token" -u "$url" -d "$post_data")"
 	local status="$(echo "$resp" | parse_http_status)"
+	# at least one needs to match for the assertion to succeed
 	local asserted_status
 	for asserted_status in "${status_assertion_options[@]}"; do
-		if [ "$status" -ne "$asserted_status" ]; then
-			echo "FAILED"
-			if [ "$dodebug" -eq 1 ]; then
-				echo "$resp"
-			fi
+		if [ "$status" -eq "$asserted_status" ]; then
+			echo "OK"
 			return
 		fi
 	done
-	echo "OK"
+	echo "FAILED"
+	if [ "$dodebug" -eq 1 ]; then
+		echo "failed status: got '$status' but expected at least one of '${status_assertion_options[*]}'"
+		echo "$resp"
+	fi
 }
 
 aux_test_auth -M "confirming researchers can't make children" \
