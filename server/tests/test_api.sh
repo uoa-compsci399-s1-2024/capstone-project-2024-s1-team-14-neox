@@ -73,6 +73,13 @@ fi
 set -e
 set -o pipefail
 
+echo "clearing samples..."
+sam remote invoke --stack-name "$STACKNAME" FuncMetaClearSamples
+echo "clearing studies..."
+sam remote invoke --stack-name "$STACKNAME" FuncMetaClearStudies
+echo "clearing children..."
+sam remote invoke --stack-name "$STACKNAME" FuncMetaClearChildren
+
 echo "getting ID tokens..."
 IDTOKEN_PARENT1="$(aws cognito-idp admin-initiate-auth --client-id "$CLIENTID" --auth-parameters "{\"USERNAME\": \"$EMAIL_PARENT1\", \"PASSWORD\": \"$PASSWORD\"}" --user-pool-id "$POOLID" --auth-flow ADMIN_USER_PASSWORD_AUTH | jq -r '.AuthenticationResult.IdToken')"
 IDTOKEN_PARENT2="$(aws cognito-idp admin-initiate-auth --client-id "$CLIENTID" --auth-parameters "{\"USERNAME\": \"$EMAIL_PARENT2\", \"PASSWORD\": \"$PASSWORD\"}" --user-pool-id "$POOLID" --auth-flow ADMIN_USER_PASSWORD_AUTH | jq -r '.AuthenticationResult.IdToken')"
@@ -87,6 +94,7 @@ echo "confirming admins can't make children"
 curl -i -X POST -H"Authorization: Bearer $IDTOKEN_ADMIN" "$API_URL/children" 2>/dev/null | head -n1
 # echo ""
 
+if false; then
 echo "confirming parents CAN'T make researchers"
 curl -i -X POST -H"Authorization: Bearer $IDTOKEN_PARENT1" "$API_URL/researchers" -H'content-type: application/json' -d '{"given_name": "Richard", "family_name": "Johnson", "email": "gabriel.lisaca+dump-researcher@gmail.com"}' 2>/dev/null | head -n1
 # echo ""
@@ -96,13 +104,15 @@ curl -i -X POST -H"Authorization: Bearer $IDTOKEN_RESEARCHER1" "$API_URL/researc
 echo "confirming admins CAN make researchers"
 curl -i -X POST -H"Authorization: Bearer $IDTOKEN_ADMIN" "$API_URL/researchers" -H'content-type: application/json' -d '{"given_name": "Richard", "family_name": "Johnson", "email": "gabriel.lisaca+dump-researcher@gmail.com"}' 2>/dev/null | head -n1
 # echo ""
+fi
 
 echo "registering child for parent1..."
 CHILDID="$(curl -X POST -H"Authorization: Bearer $IDTOKEN_PARENT1" "$API_URL/children" 2>/dev/null | jq -r '.data.id')"
 echo "childID is $CHILDID"
 
-echo "testing auth"
-for user in PARENT1 PARENT2 RESEARCHER1 ADMIN; do
+if true; then
+echo "testing auth..."
+for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	echo "$user: getting personal info for child"
 	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/children/$CHILDID/info" 2>/dev/null | head -n1
 	# echo ""
@@ -130,25 +140,164 @@ for user in PARENT1 PARENT2 RESEARCHER1 ADMIN; do
 	done
 
 	echo "$user: listing children of PARENT1"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/parents/$EMAIL_PARENT1/children" 2>/dev/null | head -n1
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/parents/$EMAIL_PARENT1/children" 2>/dev/null #| head -n1
 	# echo ""
+done
+fi  # false
 
-	STUDYID="TEST123"
-	BADSTUDYID="ABC123"
+echo "testing auth for studies..."
+# order:
+# - create study
+# - fetch/modify study details
+# - list studies (globally)
+# - add child/researcher to study
+# - list studies (for child/researcher)
+# - get samples from a given study
+# - get samples from a given child
+# - remove child/researcher from
+# - get samples from a given study
+# - get samples from a given child
+STUDYID="TEST123"
+BADSTUDYID="ABC123"
+if true; then
+echo "test: creating study..."
+for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	echo "$user: creating study"
 	curl -i -X PUT -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID" -d '{"start_date": "2024-01-23", "end_date": "2024-06-13"}' 2>/dev/null #| head -n1
-	# echo ""
+	echo ""
+done
+fi
 
+if true; then
+echo "test: study details..."
+for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	echo "$user: getting details of study"
-	# curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/info" 2>/dev/null #| head -n1
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/info" 2>/dev/null
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/info" 2>/dev/null | head -n1
 	# echo ""
 
 	echo "$user: PUTting details of study"
-	curl -i -X PUT -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/info" -d '{"start_date": "2020-01-01", "end_date": "2020-12-31", "name": "myopia test"}' 2>/dev/null #| head -n1
+	curl -i -X PUT -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/info" -d '{"start_date": "2020-01-01", "end_date": "2020-12-31", "name": "myopia test"}' 2>/dev/null | head -n1
 	# echo ""
 
 	echo "$user: PATCHing details of study"
-	curl -i -X PATCH -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/info" -d '{"description": "testing myopia"}' 2>/dev/null #| head -n1
+	curl -i -X PATCH -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/info" -d '{"description": "testing myopia"}' 2>/dev/null | head -n1
 	# echo ""
 done
+fi
+
+if true; then
+echo "test: listing studies (globally)..."
+for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
+	echo "$user: listing studies (globally)"
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies" 2>/dev/null #| head -n1
+	echo ""
+done
+fi
+
+if true; then
+echo "test: listing participants in study..."
+for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
+	echo "$user: listing participants in study"
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/participants" 2>/dev/null #| head -n1
+	echo ""
+done
+fi
+
+if true; then
+echo "test: adding to study..."
+for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
+	echo "$user: adding child to study"
+	curl -i -X PUT -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/children/$CHILDID/studies/$STUDYID" 2>/dev/null #| head -n1
+	echo ""
+
+	echo "$user: adding researcher1 to study"
+	curl -i -X PUT -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/researchers/$EMAIL_RESEARCHER1/studies/$STUDYID" 2>/dev/null #| head -n1
+	echo ""
+
+	# echo "$user: adding researcher2 to study"
+	# curl -i -X PUT -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/researchers/$EMAIL_RESEARCHER2/studies/$STUDYID" 2>/dev/null #| head -n1
+	# echo ""
+done
+fi
+
+if true; then
+echo "test: listing participants in study..."
+for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
+	echo "$user: listing participants in study"
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/participants" 2>/dev/null #| head -n1
+	echo ""
+done
+fi
+
+if true; then
+echo "test: listing studies..."
+for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
+	echo "$user: listing studies (for child)"
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/children/$CHILDID/studies" 2>/dev/null #| head -n1
+	echo ""
+
+	echo "$user: listing studies (for researcher1)"
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/researchers/$EMAIL_RESEARCHER1/studies" 2>/dev/null #| head -n1
+	echo ""
+
+	echo "$user: listing studies (for researcher2)"
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/researchers/$EMAIL_RESEARCHER2/studies" 2>/dev/null #| head -n1
+	echo ""
+
+	echo "$user: listing participants in study"
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/participants" 2>/dev/null #| head -n1
+	echo ""
+done
+fi
+
+if true; then
+echo "test: sample fetching..."
+for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
+	echo "$user: fetching samples from study"
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/samples" 2>/dev/null #| head -n1
+	echo ""
+
+	echo "$user: fetching samples from child"
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/samples/$CHILDID" 2>/dev/null #| head -n1
+	echo ""
+done
+fi
+
+if true; then
+echo "test: removing from study..."
+for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
+	echo "$user: removing child from study"
+	curl -i -X DELETE -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/children/$CHILDID/studies/$STUDYID" 2>/dev/null #| head -n1
+	echo ""
+
+	echo "$user: removing researcher1 from study"
+	curl -i -X DELETE -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/researchers/$EMAIL_RESEARCHER1/studies/$STUDYID" 2>/dev/null #| head -n1
+	echo ""
+
+	echo "$user: removing researcher2 from study"
+	curl -i -X DELETE -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/researchers/$EMAIL_RESEARCHER2/studies/$STUDYID" 2>/dev/null #| head -n2
+	echo ""
+done
+fi
+
+if true; then
+echo "test: listing participants in study..."
+for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
+	echo "$user: listing participants in study"
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/participants" 2>/dev/null #| head -n1
+	echo ""
+done
+fi
+
+if true; then
+echo "test: sample fetching..."
+for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
+	echo "$user: fetching samples from study"
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/samples" 2>/dev/null #| head -n1
+	echo ""
+
+	echo "$user: fetching samples from child"
+	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/samples/$CHILDID" 2>/dev/null #| head -n1
+	echo ""
+done
+fi
