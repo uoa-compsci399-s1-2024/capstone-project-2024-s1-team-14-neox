@@ -1,3 +1,4 @@
+import 'package:capstone_project_2024_s1_team_14_neox/cloud/services/aws_cognito.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/server/child_data.dart';
@@ -6,7 +7,7 @@ import 'dart:convert';
 
 class ChildApiService {
   static const String apiUrl =
-      'https://xql8m9zukd.execute-api.ap-southeast-2.amazonaws.com/dev';
+      'https://xu31tcdj0e.execute-api.ap-southeast-2.amazonaws.com/dev';
 
   static void fetchChildrenData() async {
     Dio dio = Dio();
@@ -68,6 +69,34 @@ class ChildApiService {
     Map<String, dynamic> responseData = response.data;
     String id = responseData['data']['id'];
     return id;
+  }
+
+  static getStudy(String idCode) async{
+
+    Dio dio = Dio();
+
+    final token = await AWSServices().getToken();
+    if (token == null) {
+      throw Exception('No token found');
+    }
+
+    final defaultHeaders = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+
+    final String url = '$apiUrl/studies/$idCode/info';
+    try {
+      var response = await dio.get(url, options: Options(headers: defaultHeaders));
+      print(response.data);
+    } catch (e) {
+      print('Error making GET request: $e');
+    }
+  }
+
+
+  static addChildToStudy(String serverId) async {
+    ;
   }
 
 

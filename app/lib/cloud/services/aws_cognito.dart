@@ -123,4 +123,9 @@ class AWSServices {
     }
     return true;
   }
+
+  Future<String?> getToken() async {
+    return await storage.read(key: 'id_token');
+  }
+
 }
