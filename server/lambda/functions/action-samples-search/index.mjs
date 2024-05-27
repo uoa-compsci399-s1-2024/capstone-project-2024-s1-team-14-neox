@@ -68,7 +68,21 @@ function make_handler(subjectID)
     let res;
     switch (subjectID) {
     case SUBJECT_CHILD:
-      res = await db.query("SELECT * FROM samples WHERE child_id = $1", [subjectIDValue]);
+      switch (auth ) {
+      case AUTH_PARENT_OFCHILD:
+        res = await db.query("SELECT * FROM samples WHERE child_id = $1", [subjectIDValue]);
+        break;
+      case AUTH_RESEARCHER_OFSAMESTUDYASCHILD:
+        // TODO: this needs to calculate the union of intervals of (the intersection of studies of the researcher and the child)
+        res = await db.query(`SELECT smp.*
+                              FROM samples as smp, study_children as sc, children as c, studies as s
+                              WHERE smp.child_id = $1
+                                AND sc.participant_id = smp.child_id
+                                AND upper(s.id) = upper(sc.study_id)
+                                AND s.start_date <= smp."timestamp" AND smp."timestamp" < (s.end_date + interval '1 day')`,
+                             [subjectIDValue]);
+        break;
+      }
       if (res.rows.length === 0 &&
           (await db.query("SELECT * FROM children WHERE id = $1", [subjectIDValue])).rows.length === 0) {
         const unauthOrNoSuchChildErrResp = {
@@ -90,9 +104,10 @@ function make_handler(subjectID)
       res = await db.query(`SELECT smp.*,
                                    c.gender,
                                    extract(year from age(c.birthdate)) AS "age"
-                            FROM samples as smp, study_children as sc, children as c
+                            FROM samples as smp, study_children as sc, children as c, studies as s
                             WHERE upper(sc.study_id) = upper($1)
-                              AND c.id = sc.participant_id AND sc.participant_id = smp.child_id`,
+                              AND c.id = sc.participant_id AND sc.participant_id = smp.child_id
+                              AND s.start_date <= smp."timestamp" AND smp."timestamp" < (s.end_date + interval '1 day')`,
                            [subjectIDValue]);
       if (res.rows.length === 0 &&
           (await db.query("SELECT * FROM studies WHERE upper(id) = upper($1)", [subjectIDValue])).rows.length === 0) {
