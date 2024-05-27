@@ -180,7 +180,9 @@ class _DailyBarChartState extends State<DailyBarChart> {
                           BarChartRodData(
                             toY: data.y.toDouble(),
                             width: constraints.maxWidth / (barData.length * 2),
-                            borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2)),
+                            borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(2),
+                                topRight: Radius.circular(2)),
                             color: barColour(data.x),
                           )
                         ],
@@ -241,8 +243,18 @@ class _DailyBarChartState extends State<DailyBarChart> {
           Text(
             heading,
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 18,
               // fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            startMonday.year == endMonday.year
+                ? startMonday.year.toString()
+                : "${startMonday.year} - ${endMonday.year}",
+            style: const TextStyle(
+              fontSize: 12,
+              // fontWeight: FontWeight.bold,
+              color: Colors.grey,
             ),
           ),
           Expanded(

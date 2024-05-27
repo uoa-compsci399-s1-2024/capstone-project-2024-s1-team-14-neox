@@ -122,10 +122,11 @@ class StatisticsHomeState extends State<StatisticsHome> {
                     child: MonthlyPanel(),
                   );
                 } else {
+                  print("state");
                   return BlocProvider(
                     key: UniqueKey(), // Workaround for refreshing UI!
                     create: (context) => DailyCubit(context.read<StatisticsRepository>())
-                      ..onGetDataForChildId(DateTime.now(), state.focusChildId!),
+                      ..onGetPastDataForChildId(state.focusChildId!),
                     child: const DailyPanel(),
                   );
                 }

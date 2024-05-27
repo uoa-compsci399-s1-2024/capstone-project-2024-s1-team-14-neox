@@ -15,12 +15,19 @@ class DailyPanel extends StatefulWidget {
 }
 
 class _DailyPanelState extends State<DailyPanel> {
-  final _scrollController = ScrollController();
-// @override
-//   void initState() {
-//     context.read<StatisticsCubit>().state.focusChildId;
-//     super.initState();
-//   }
+  bool isLoadReady = true;
+  final _pageController = PageController(keepPage: false);
+  // @override
+  // void initState() {
+  //   _scrollController.addListener(() {
+  //     if (_scrollController.position ==
+  //         _scrollController.position.maxScrollExtent) {
+  //       print("max scroll extent");
+  //     }
+  //   });
+  //   super.initState();
+  // }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<StatisticsCubit, StatisticsState>(
@@ -39,18 +46,54 @@ class _DailyPanelState extends State<DailyPanel> {
                 if (state.status.isLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
+                isLoadReady = true;
+                int pageIndex =
+                    state.isPastData ? state.dailyStats.length - 4 : 3;
                 return Expanded(
-                  child: PageView.builder(
-                    // controller: _scrollController,
-                    reverse: true,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: state.dailyStats.length,
-                    itemBuilder: ((context, index) {
-                      return DailyBarChart(
-                        dailySummary: state.dailyStats[index],
-                        targetMinutes: state.targetMinutes ?? 120,
-                      );
-                    }),
+                  child: NotificationListener<OverscrollNotification>(
+                    onNotification: (notification) {
+                      if (notification.metrics.pixels >=
+                              notification.metrics.maxScrollExtent &&
+                          isLoadReady) {
+                        setState(() {
+                          isLoadReady = false;
+                        });
+                        context.read<DailyCubit>().onGetPastDataForChildId(
+                            context
+                                .read<StatisticsCubit>()
+                                .state
+                                .focusChildId!);
+                      } else if (notification.metrics.pixels <=
+                              notification.metrics.maxScrollExtent &&
+                          isLoadReady) {
+                        setState(() {
+                          isLoadReady = false;
+                        });
+                        context.read<DailyCubit>().onGetFutureDataForChildId(
+                            context
+                                .read<StatisticsCubit>()
+                                .state
+                                .focusChildId!);
+                      }
+                      // print(notification);
+                      return true;
+                    },
+                    child: PageView.builder(
+                      controller: PageController(initialPage: pageIndex),
+                      reverse: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: state.dailyStats.length,
+                      itemBuilder: ((context, index) {
+                        // if (index == 0 ||
+                        //     index == state.dailyStats.length + 1) {
+                        //   return CircularProgressIndicator();
+                        // }
+                        return DailyBarChart(
+                          dailySummary: state.dailyStats[index],
+                          targetMinutes: state.targetMinutes ?? 120,
+                        );
+                      }),
+                    ),
                   ),
                 );
               },
