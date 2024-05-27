@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 
 class ChildData {
   final String timestamp;
@@ -47,7 +50,8 @@ class ChildData {
 
   Map<String, dynamic> toJson() {
     DateTime dateTime = DateTime.parse(timestamp);
-    String iso8601Timestamp = '${dateTime.toUtc().toIso8601String().substring(0, 19)}Z';
+    String iso8601Timestamp =
+        '${dateTime.toUtc().toIso8601String().substring(0, 19)}Z';
 
     return {
       'timestamp': iso8601Timestamp,
@@ -65,5 +69,19 @@ class ChildData {
     };
   }
 
-
+  ArduinoDataEntity toArduinoData(int childId) {
+    Int16List? accel = [accel_x, accel_y, accel_z] as Int16List?;
+    return ArduinoDataEntity(
+      accel: accel,
+      datetime: DateTime.parse(timestamp),
+      uv: uv,
+      light: light,
+      clear: clear,
+      colourTemperature: colourTemperature,
+      green: green,
+      red: red,
+      blue: blue,
+      childId: childId,
+    );
+  }
 }

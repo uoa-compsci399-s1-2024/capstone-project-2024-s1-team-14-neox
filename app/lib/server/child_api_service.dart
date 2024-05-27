@@ -11,23 +11,35 @@ class ChildApiService {
   static const String apiUrl =
       'https://xu31tcdj0e.execute-api.ap-southeast-2.amazonaws.com/dev';
 
+  static void fetchChildrenData(int childId) async {
+    ChildEntity? child = await ChildEntity.queryChildById(childId);
+    String? serverId = child?.serverId;
 
+    final token = await AWSServices().getToken();
+    if (token == null) {
+      throw Exception('No token found');
+    }
 
-  static void fetchChildrenData() async {
+    final defaultHeaders = {
+      'Authorization': 'Bearer $token',
+    };
+
     Dio dio = Dio();
     try {
-      var response = await dio.get('$apiUrl/samples');
-      var dataList = [];
+      var response = await dio.get('$apiUrl/samples/$serverId',
+          options: Options(headers: defaultHeaders));
+      List<ArduinoDataEntity> dataList = [];
 
-      for (final data in response.data) {
-        var sample = ChildData.fromJson(data);
-        dataList.add(sample);
+      for (final data in response.data["data"]) {
+        ChildData sample = ChildData.fromJson(data);
+        ArduinoDataEntity arduinoDataEntity = sample.toArduinoData(childId);
+        dataList.add(arduinoDataEntity);
       }
+      ArduinoDataEntity.saveListOfArduinoDataEntity(dataList);
     } catch (e) {
       print(e);
     }
   }
-
 
   static Future<void> postData(int childId) async {
     Dio dio = Dio();
@@ -61,7 +73,8 @@ class ChildApiService {
       }
 
       final data = {"samples": jsonSamples};
-      final response = await dio.post(url, options: Options(headers: defaultHeaders), data: data);
+      final response = await dio.post(url,
+          options: Options(headers: defaultHeaders), data: data);
       print(response.statusCode);
       print(response.data);
     } catch (e) {
@@ -82,7 +95,8 @@ class ChildApiService {
     };
 
     const url = '$apiUrl/children';
-    var response = await dio.post(url, options: Options(headers: defaultHeaders));
+    var response =
+        await dio.post(url, options: Options(headers: defaultHeaders));
 
     print(response.data);
     Map<String, dynamic> responseData = response.data;
@@ -105,8 +119,8 @@ class ChildApiService {
 
     final String url = '$apiUrl/studies/$studyCode/info';
     try {
-      var response = await dio.get(
-          url, options: Options(headers: defaultHeaders));
+      var response =
+          await dio.get(url, options: Options(headers: defaultHeaders));
       Map<String, dynamic> data = response.data["data"];
 
       if (data["description"] == null) {
@@ -122,13 +136,12 @@ class ChildApiService {
     }
   }
 
-
   static addChildToStudy(int childId, String studyCode) async {
     ChildStudyAssociationsEntity.saveSingleChildStudy(childId, studyCode);
     ChildEntity? child = await ChildEntity.queryChildById(childId);
     String? serverId;
 
-    if(child?.serverId == ''){
+    if (child?.serverId == '') {
       String serverId = await ChildApiService.registerChild();
       ChildEntity.updateServerId(childId, serverId);
     }
@@ -138,23 +151,23 @@ class ChildApiService {
     Dio dio = Dio();
     String url = '$apiUrl/children/$serverId/studies/$studyCode';
 
-      final token = await AWSServices().getToken();
-      if (token == null) {
-        throw Exception('No token found');
-      }
+    final token = await AWSServices().getToken();
+    if (token == null) {
+      throw Exception('No token found');
+    }
 
-      final defaultHeaders = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      };
+    final defaultHeaders = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
 
-      try {
-        var response = await dio.put(url, options: Options(headers: defaultHeaders) );
-        print(response.statusCode);
-      } catch (e) {
-        print('$e');
-      }
-
+    try {
+      var response =
+          await dio.put(url, options: Options(headers: defaultHeaders));
+      print(response.statusCode);
+    } catch (e) {
+      print('$e');
+    }
   }
 
   static removeChildFromStudy(int childId, String studyCode) async {
@@ -176,12 +189,12 @@ class ChildApiService {
     };
 
     try {
-      var response = await dio.delete(url, options: Options(headers: defaultHeaders) );
+      var response =
+          await dio.delete(url, options: Options(headers: defaultHeaders));
       print(response.statusCode);
     } catch (e) {
       print('$e');
     }
-
   }
 
   static getAllStudies() async {
@@ -199,15 +212,13 @@ class ChildApiService {
     Dio dio = Dio();
 
     String url = '$apiUrl/studies';
-    var response = await dio.get(url, options: Options(headers: defaultHeaders));
+    var response =
+        await dio.get(url, options: Options(headers: defaultHeaders));
     print(response.data);
     var listOfStudies = response.data["data"];
 
-    for(final studyCode in listOfStudies){
+    for (final studyCode in listOfStudies) {
       await ChildApiService.getStudy(studyCode["id"]);
     }
-
   }
-
 }
-
