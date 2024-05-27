@@ -1,14 +1,11 @@
-import 'dart:ffi';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart' as material;
-import 'dart:convert';
 
 import '../../server/child_data.dart';
-import 'child_entity.dart';
-import 'dart:math';
 
 @UseRowClass(ArduinoDataEntity)
 class ArduinoDatas extends Table {
@@ -188,7 +185,9 @@ class ArduinoDataEntity {
   static Future<DateTime?> getOldestDateTime() async {
     final db = AppDb.instance();
     final query = await (db.select(db.arduinoDatas)
-      ..orderBy([(tbl) => OrderingTerm(expression: tbl.datetime, mode: OrderingMode.asc)])
+      ..orderBy([
+        (tbl) => OrderingTerm(expression: tbl.datetime, mode: OrderingMode.asc)
+      ])
       ..limit(1));
 
     final result = await query.getSingleOrNull();
@@ -199,7 +198,9 @@ class ArduinoDataEntity {
   static Future<DateTime?> getNewestDateTime() async {
     final db = AppDb.instance();
     final query = await (db.select(db.arduinoDatas)
-      ..orderBy([(tbl) => OrderingTerm(expression: tbl.datetime, mode: OrderingMode.desc)])
+      ..orderBy([
+        (tbl) => OrderingTerm(expression: tbl.datetime, mode: OrderingMode.desc)
+      ])
       ..limit(1));
 
     final result = await query.getSingleOrNull();
@@ -324,7 +325,7 @@ class ArduinoDataEntity {
       // Ignore dailylight savings
       Map<DateTime, int> daily = {};
       for (int hour = 0; hour < 24; hour += 1) {
-        daily[startMonday.add(Duration(hours: hour))] = 0;
+        daily[currentDay.add(Duration(hours: hour))] = 0;
       }
       hourlyStats[currentDay] = daily;
     }
