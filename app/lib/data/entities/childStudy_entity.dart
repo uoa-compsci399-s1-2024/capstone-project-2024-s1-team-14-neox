@@ -27,9 +27,18 @@ class ChildStudyAssociationsEntity {
 
   static Future<void> saveSingleChildStudy(int childId, String studyCode) async {
     final db = AppDb.instance();
+    final existingRecord = await (db.select(db.childStudy)
+      ..where((tbl) => tbl.childId.equals(childId) & tbl.studyCode.equals(studyCode))
+    ).getSingleOrNull();
+
+    if (existingRecord != null && existingRecord.childId == childId && existingRecord.studyCode == studyCode) {
+      // Record already exists, handle accordingly
+      print('Record with childId $childId and studyCode $studyCode already exists.');
+      return;
+    }
+
     ChildStudyAssociationsEntity childStudyAssociationsEntity = ChildStudyAssociationsEntity(childId: childId, studyCode: studyCode);
     await db.into(db.childStudy).insert(childStudyAssociationsEntity.toCompanion(), mode: InsertMode.insert);
-
   }
 
 
@@ -70,6 +79,15 @@ class ChildStudyAssociationsEntity {
       ..where((tbl) =>
       tbl.childId.equals(childId) & tbl.studyCode.equals(studyCode)))
         .getSingleOrNull();
+  }
+
+
+  static Future<void> removeFromStudy(int childId, String studyCode) async {
+    final db = AppDb.instance();
+    await (db.delete(db.childStudy)
+      ..where((tbl) =>
+      tbl.childId.equals(childId) & tbl.studyCode.equals(studyCode)))
+        .go();
   }
 
 }
