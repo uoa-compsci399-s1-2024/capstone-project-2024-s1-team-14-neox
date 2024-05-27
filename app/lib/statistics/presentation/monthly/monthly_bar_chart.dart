@@ -12,11 +12,13 @@ class MonthlyBarChart extends StatefulWidget {
   final SingleYearDailyStatsModel monthlySummary;
   final int targetMinutes;
   final int focusMonth;
+  final PageController pageController;
   const MonthlyBarChart(
       {super.key,
       required this.monthlySummary,
       required this.targetMinutes,
-      required this.focusMonth});
+      required this.focusMonth,
+      required this.pageController});
 
   @override
   State<MonthlyBarChart> createState() => _MonthlyBarChartState();
@@ -126,7 +128,19 @@ class _MonthlyBarChartState extends State<MonthlyBarChart> {
                   ),
                 ),
               ),
-              barTouchData: BarTouchData(touchTooltipData: BarTouchTooltipData(
+              barTouchData: BarTouchData(touchCallback:
+                  (FlTouchEvent event, BarTouchResponse? touchResponse) {
+                if (event is FlTapUpEvent) {
+                  int? selectedMonthIndex =
+                      touchResponse?.spot?.touchedBarGroupIndex;
+                  if (selectedMonthIndex != null) {
+                    widget.pageController.jumpToPage(selectedMonthIndex);
+                    context
+                        .read<MonthlyCubit>()
+                        .onChangeFocusMonth(selectedMonthIndex + 1);
+                  }
+                }
+              }, touchTooltipData: BarTouchTooltipData(
                 getTooltipItem: (group, groupIndex, rod, rodIndex) {
                   return BarTooltipItem(
                     "${DateFormat("MMMM").format(barData[group.x].time)}\n${rod.toY.toInt()} mins",
@@ -147,7 +161,10 @@ class _MonthlyBarChartState extends State<MonthlyBarChart> {
                           // color: Colors.blue,
                           color: data.x == widget.focusMonth - 1
                               ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.secondary,
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.5),
                         )
                       ]))
                   .toList(),

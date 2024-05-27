@@ -11,26 +11,31 @@ import 'package:intl/intl.dart';
 
 class MonthlyPanel extends StatelessWidget {
   const MonthlyPanel({super.key});
-   
-  // Widget _buildWeekHeader() {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //     children: days
-  //         .map((day) => Text(day,
-  //             style: const TextStyle(fontSize: 12, color: Colors.grey)))
-  //         .toList(),
-  //   );
-  // }
+
+  Widget _buildWeekHeader() {
+    List<String> days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: days
+          .map((day) => Text(day,
+              style: const TextStyle(fontSize: 12, color: Colors.grey)))
+          .toList(),
+    );
+  }
 
   Widget _buildDateOrIcon(bool isIcon, String text) {
     if (isIcon) {
-      return Image.asset("assets/icon-small.png");
+      return Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Image.asset("assets/icon-small.png"),
+      );
     }
     return Text(
       text,
-      style: const TextStyle(
-        fontWeight: FontWeight.bold,
-      ),
+      // style: const TextStyle(
+      //   fontWeight: FontWeight.bold,
+      // ),
     );
   }
 
@@ -41,15 +46,42 @@ class MonthlyPanel extends StatelessWidget {
     int weekdayOfFirstDay = firstDayOfMonth.weekday;
     List<String> days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-
     DateTime lastDayOfPreviousMonth =
-        firstDayOfMonth.subtract(Duration(days: 1));
+        firstDayOfMonth.subtract(const Duration(days: 1));
     int daysInPreviousMonth = lastDayOfPreviousMonth.day;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Column(
+        // crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          SizedBox(
+            height: 20,
+            child: GridView(
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 7,
+                childAspectRatio: 0.2,
+              ),
+              children: days
+                  .map((day) => Text(day,
+                  textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey)))
+                  .toList(),
+            ),
+          ),
+          // SizedBox(
+          //   height: 20,
+          //   child: ListView(
+          //     scrollDirection: Axis.horizontal,
+          //     padding: EdgeInsets.zero,
+          //     children: days
+          //         .map((day) => Text(day,
+          //             style: const TextStyle(fontSize: 12, color: Colors.grey)))
+          //         .toList(),
+          //   ),
+          // ),
           Expanded(
             child: GridView.builder(
               physics: const NeverScrollableScrollPhysics(),
@@ -59,31 +91,31 @@ class MonthlyPanel extends StatelessWidget {
                 childAspectRatio: 1,
               ),
               // Calculating the total number of cells required in the grid
-              itemCount: daysInMonth + weekdayOfFirstDay - 1 + 7,
+              itemCount: daysInMonth + weekdayOfFirstDay - 1,
               itemBuilder: (context, index) {
-                if (index < 7) {
-                  return Container(
-                    alignment: Alignment.bottomCenter,
-                    child: Text(
-                      days[index],
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  );
-                } else if (index < weekdayOfFirstDay - 1 + 7) {
+                // if (index < 7) {
+                //   return Container(
+                //     alignment: Alignment.bottomCenter,
+                //     child: Text(
+                //       days[index],
+                //       style: const TextStyle(fontSize: 12, color: Colors.grey),
+                //     ),
+                //   );
+                if (index < weekdayOfFirstDay - 1) {
                   // Displaying dates from the previous month in grey
                   int previousMonthDay =
                       daysInPreviousMonth - (weekdayOfFirstDay - index) + 2;
                   return Container(
                     alignment: Alignment.center,
-                    child: Text(
-                      previousMonthDay.toString(),
+                    child: const Text(
+                      "", // previousMonthDay.toString(),
                       style: TextStyle(color: Colors.grey),
                     ),
                   );
                 } else {
                   // Displaying the current month's days
-                  DateTime date = DateTime(month.year, month.month,
-                      index - weekdayOfFirstDay + 2 + 7);
+                  DateTime date = DateTime(
+                      month.year, month.month, index - weekdayOfFirstDay + 2);
                   String text = date.day.toString();
 
                   return Container(
@@ -155,7 +187,7 @@ class MonthlyPanel extends StatelessWidget {
         Text(
             // "Average ${stats?.monthlyMean[startOfMonth]?.floor() ?? 0} mins/day | $daysAcheived ${daysAcheived == 1 ? "day" : "days"} acheived"),
             // Text(
-            "Targets achieved: $daysAcheived ${daysAcheived == 1 ? "day" : "days"}"),
+            "Target achieved: $daysAcheived ${daysAcheived == 1 ? "day" : "days"}"),
       ],
     );
   }
@@ -172,6 +204,9 @@ class MonthlyPanel extends StatelessWidget {
         if (state.status.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
+        print("monthly panel state $state");
+        PageController pageController =
+            PageController(initialPage: state.focusMonth - 1);
         return Padding(
           padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
           child: Column(
@@ -189,6 +224,7 @@ class MonthlyPanel extends StatelessWidget {
                   monthlySummary: state.monthlyStats!,
                   targetMinutes: state.targetMinutes ?? 120,
                   focusMonth: state.focusMonth,
+                  pageController: pageController,
                 ),
               ),
               const Divider(height: 5, indent: 20, endIndent: 20),
@@ -196,7 +232,7 @@ class MonthlyPanel extends StatelessWidget {
               Expanded(
                 // height: screenHeight * 0.3,
                 child: PageView.builder(
-                  controller: PageController(initialPage: state.focusMonth - 1),
+                  controller: pageController,
                   onPageChanged: (index) {
                     return context
                         .read<MonthlyCubit>()

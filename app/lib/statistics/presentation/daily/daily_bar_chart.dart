@@ -262,7 +262,7 @@ class _DailyBarChartState extends State<DailyBarChart> {
                 }
               },
               touchCallback: (FlTouchEvent event, BarTouchResponse? response) {
-                if (event is FlTapDownEvent) {
+                if (event is FlTapUpEvent) {
                   int? select = response?.spot?.touchedBarGroupIndex;
                   if (select != selectedDay) {
                     selectedDay = select;
