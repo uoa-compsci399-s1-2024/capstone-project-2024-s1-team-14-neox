@@ -70,7 +70,7 @@ class ChildData {
   }
 
   ArduinoDataEntity toArduinoData(int childId) {
-    Int16List? accel = [accel_x, accel_y, accel_z] as Int16List?;
+    Int16List? accel = Int16List.fromList([accel_x.toInt(), accel_y.toInt(), accel_z.toInt()]);
     return ArduinoDataEntity(
       accel: accel,
       datetime: DateTime.parse(timestamp),

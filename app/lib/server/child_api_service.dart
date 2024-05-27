@@ -36,6 +36,7 @@ class ChildApiService {
         dataList.add(arduinoDataEntity);
       }
       ArduinoDataEntity.saveListOfArduinoDataEntity(dataList);
+      print("samples retrieved");
     } catch (e) {
       print(e);
     }
@@ -64,19 +65,36 @@ class ChildApiService {
     }
 
     final url = '$apiUrl/samples/$serverId';
-    try {
-      List<Map<String, dynamic>> jsonSamples = [];
 
-      for (var childData in dataList) {
-        final jsonData = childData.toJson();
-        jsonSamples.add(jsonData);
+    try {
+
+      int chunkSize = 1000;
+      List<Future<Response>> futures = [];
+
+      for (int i = 0; i < dataList.length; i += chunkSize) {
+        List chunk = dataList.sublist(
+          i,
+          i + chunkSize > dataList.length ? dataList.length : i + chunkSize,
+        );
+
+        List jsonSamples = chunk.map((childData) => childData.toJson()).toList();
+
+        final data = {"samples": jsonSamples};
+
+
+        futures.add(dio.post(
+          url,
+          options: Options(headers: defaultHeaders),
+          data: data,
+        ));
       }
 
-      final data = {"samples": jsonSamples};
-      final response = await dio.post(url,
-          options: Options(headers: defaultHeaders), data: data);
-      print(response.statusCode);
-      print(response.data);
+      // Wait for all POST requests to complete
+      List<Response> responses = await Future.wait(futures);
+      for (var response in responses) {
+        print(response.statusCode);
+        print(response.data);
+      }
     } catch (e) {
       print('Error posting data: $e');
     }
@@ -98,7 +116,6 @@ class ChildApiService {
     var response =
         await dio.post(url, options: Options(headers: defaultHeaders));
 
-    print(response.data);
     Map<String, dynamic> responseData = response.data;
     String id = responseData['data']['id'];
     return id;
