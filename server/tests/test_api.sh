@@ -352,7 +352,12 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 
 	assert_code=403
 	case "$user" in
-		PARENT1) assert_code=204 ;;
+		PARENT1)
+			assert_code=204
+			echo "clearing samples before an action which should be authorised..."
+			sam remote invoke --stack-name "$STACKNAME" FuncMetaClearSamples
+			echo ""
+			;;
 	esac
 	aux_test_auth -M "$user: POSTing samples for child" \
 		      -m POST -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/samples/$CHILDID" -d "$("$(git rev-parse --show-toplevel)/server/generateXsamples" 1)" \
