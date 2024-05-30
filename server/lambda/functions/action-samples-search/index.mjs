@@ -90,6 +90,7 @@ function make_handler(subjectID)
       }
       if (res.rows.length === 0 &&
           (await db.query("SELECT * FROM children WHERE id = $1", [subjectIDValue])).rows.length === 0) {
+        const msg = unauth_message(subjectID);
         const unauthOrNoSuchChildErrResp = {
           // we want to protect child IDs
           statusCode: 403,
@@ -97,11 +98,12 @@ function make_handler(subjectID)
             errors: [{
               resource: resolvedResource,
               status: 403,
-              message: unauth_message(subjectID),
+              message: msg,
             }],
           }),
         };
         addCorsHeaders(unauthOrNoSuchChildErrResp);
+        console.error(msg);
         return unauthOrNoSuchChildErrResp;
       }
       break;
@@ -117,17 +119,19 @@ function make_handler(subjectID)
                            [subjectIDValue]);
       if (res.rows.length === 0 &&
           (await db.query("SELECT * FROM studies WHERE upper(id) = upper($1)", [subjectIDValue])).rows.length === 0) {
+        const msg = "study doesn't exist";
         const noSuchStudyErrResp = {
           statusCode: 404,
           body: JSON.stringify({
             errors: [{
               resource: resolvedResource,
               status: 404,
-              message: "study doesn't exist",
+              message: msg,
             }],
           }),
         };
         addCorsHeaders(noSuchStudyErrResp);
+        console.error(msg);
         return noSuchStudyErrResp;
       }
       break;
