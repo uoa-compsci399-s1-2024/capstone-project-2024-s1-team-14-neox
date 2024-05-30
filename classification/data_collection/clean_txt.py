@@ -9,8 +9,3 @@ def rewrite_file(input, output):
 def unix_to_datetime(unix):
     print(datetime.fromtimestamp(unix).strftime('%Y-%m-%d %H:%M:%S'))
 
-
-unix_to_datetime(1712471231)
-unix_to_datetime(1712471482)
-
-
