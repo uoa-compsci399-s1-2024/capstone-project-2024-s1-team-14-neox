@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.sizeOf(context);
-    double screeWidth = screenSize.width;
+    double screenWidth = screenSize.width;
     double screenHeight = screenSize.height;
     return BlocProvider(
       create: (context) => LoginCubit(AuthenticationRepository()),
@@ -66,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(
-                  height: screeWidth * 0.1,
+                  height: screenWidth * 0.1,
                 ),
                 TextField(
                   controller: emailController,
@@ -153,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 // ),
                 SizedBox(
                   // padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 8.0),
-                  width: screeWidth,
+                  width: screenWidth,
                   height: 60,
                   child: ElevatedButton(
                     style: ButtonStyle(

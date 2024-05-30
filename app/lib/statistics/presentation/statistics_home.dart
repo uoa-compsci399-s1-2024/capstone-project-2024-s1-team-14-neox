@@ -35,11 +35,11 @@ class StatisticsHomeState extends State<StatisticsHome> {
   void initState() {
     int? childId = App.sharedPreferences.getInt("focus_id");
     _selectedChildProfile = context
-      .read<AllChildProfileCubit>()
-      .state
-      .profiles
-      .where((element) => element.childId == childId)
-      .firstOrNull;
+        .read<AllChildProfileCubit>()
+        .state
+        .profiles
+        .where((element) => element.childId == childId)
+        .firstOrNull;
     super.initState();
   }
 
@@ -56,38 +56,67 @@ class StatisticsHomeState extends State<StatisticsHome> {
   @override
   Widget build(BuildContext context) {
     return RepositoryProvider(
-      create: (_) => StatisticsRepository(sharedPreferences: App.sharedPreferences),
+      create: (_) =>
+          StatisticsRepository(sharedPreferences: App.sharedPreferences),
       child: BlocProvider(
-        create: (context) => StatisticsCubit(context.read<StatisticsRepository>()),
+        create: (context) =>
+            StatisticsCubit(context.read<StatisticsRepository>()),
         child: Scaffold(
           appBar: AppBar(
             title: BlocBuilder<StatisticsCubit, StatisticsState>(
-              builder: (context, state) {
-                return Padding(
-                  padding: const EdgeInsets.all(5),
+                builder: (context, state) {
+              return InputDecorator(
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.all(0),
+                  prefixIcon: const Icon(
+                    Icons.face,
+                    color: Colors.black,
+                  ),
+                  filled: true,
+                  fillColor:
+                      Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.background,
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: DropdownButtonHideUnderline(
                   child: DropdownButton<ChildDeviceModel>(
                     isExpanded: true,
                     value: _selectedChildProfile,
+                    icon: const Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Colors.black,
+                    ),
+                    iconSize: 32,
+                    elevation: 2,
+                    borderRadius: BorderRadius.circular(16),
                     items: context
-                      .read<AllChildProfileCubit>()
-                      .state
-                      .profiles
-                      .map((profile) => DropdownMenuItem(
-                        value: profile,
-                        child: Text(profile.childName),
-                      ))
-                      .toList(),
+                        .read<AllChildProfileCubit>()
+                        .state
+                        .profiles
+                        .map(
+                          (profile) => DropdownMenuItem(
+                            value: profile,
+                            child: Text(profile.childName),
+                          ),
+                        )
+                        .toList(),
                     onChanged: (value) {
                       setState(() {
                         _selectedChildProfile = value;
                       });
-                      context.read<StatisticsCubit>().onFocusChildChange(value!.childId);
+                      context
+                          .read<StatisticsCubit>()
+                          .onFocusChildChange(value!.childId);
                     },
                   ),
-                );
-              },
-            ),
-
+                ),
+              );
+            }),
             actions: [
               BlocBuilder<StatisticsCubit, StatisticsState>(
                 builder: (context, state) {
@@ -98,39 +127,42 @@ class StatisticsHomeState extends State<StatisticsHome> {
                     child: ViewToggle(
                       width: 140,
                       height: 40,
-                      detailedView: context.read<StatisticsCubit>().state is DetailedStatisticsState,
+                      detailedView: context.read<StatisticsCubit>().state
+                          is DetailedStatisticsState,
                     ),
                   );
                 },
               )
             ],
           ),
-
           body: BlocBuilder<StatisticsCubit, StatisticsState>(
               builder: (context, state) {
-                if (state.focusChildId == null) {
-                  return const Center(
-                    child: Text("Select a profile to view"),
-                  );
-                }
+            if (state.focusChildId == null) {
+              return const Center(
+                child: Text("Select a profile to view"),
+              );
+            }
 
-                if (state is OverviewStatisticsState) {
-                  return BlocProvider(
-                    key: UniqueKey(), // Workaround for refreshing UI!
-                    create: (context) => MonthlyCubit(context.read<StatisticsRepository>())
-                      ..onGetYearDataForChildId(DateTime.now().year, state.focusChildId!),
-                    child: MonthlyPanel(),
-                  );
-                } else {
-                  print("state");
-                  return BlocProvider(
-                    key: UniqueKey(), // Workaround for refreshing UI!
-                    create: (context) => DailyCubit(context.read<StatisticsRepository>())
+            if (state is OverviewStatisticsState) {
+              return BlocProvider(
+                key: UniqueKey(), // Workaround for refreshing UI!
+                create: (context) =>
+                    MonthlyCubit(context.read<StatisticsRepository>())
+                      ..onGetYearDataForChildId(
+                          DateTime.now().year, state.focusChildId!),
+                child: MonthlyPanel(),
+              );
+            } else {
+              print("state");
+              return BlocProvider(
+                key: UniqueKey(), // Workaround for refreshing UI!
+                create: (context) =>
+                    DailyCubit(context.read<StatisticsRepository>())
                       ..onGetPastDataForChildId(state.focusChildId!),
-                    child: const DailyPanel(),
-                  );
-                }
-              }),
+                child: const DailyPanel(),
+              );
+            }
+          }),
         ),
       ),
     );
