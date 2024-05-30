@@ -158,7 +158,7 @@ function aux_test_auth()
 		echo "missing status code assertions" >&2
 		exit 1
 	fi
-	[ -n "$message" ] && printf '%s... ' "$message"
+	[ -n "$message" ] && printf 'AUTH: %s... ' "$message"
 	local resp="$(call_api -m "$method" -t "$token" -u "$url" -d "$post_data")"
 	local status="$(echo "$resp" | parse_http_status)"
 	# at least one needs to match for the assertion to succeed
@@ -174,6 +174,54 @@ function aux_test_auth()
 		echo "failed status: got '$status' but expected at least one of '${status_assertion_options[*]}'"
 		echo "$resp"
 	fi
+}
+function aux_test_body()
+{
+	# NOTE: this function assumes the status code has already been
+	# checked before being called.
+	# -C: check expression passed to jq
+	#     which should process the response body
+	#     and output to stdout 'true' for success, 'false' for failure
+	local OPTIND o
+	local method token url post_data
+	local message dodebug=0 check_expr
+	while getopts ":m:t:u:d:M:DC:" o; do
+		case "${o}" in
+			m) method="$OPTARG" ;;
+			t) token="$OPTARG" ;;
+			u) url="$OPTARG" ;;
+			d) post_data="$OPTARG" ;;
+			M) message="$OPTARG" ;;
+			D) dodebug=1 ;;
+			C) check_expr="$OPTARG" ;;
+			*) echo "invalid option: $o" >&2
+			   exit 1
+			   ;;
+		esac
+	done
+	if [ -z "$check_expr" ]; then
+		echo "missing check expression" >&2
+		exit 1
+	fi
+	[ -n "$message" ] && printf 'BODY: %s... ' "$message"
+	local resp="$(call_api -m "$method" -t "$token" -u "$url" -d "$post_data")"
+	# local status="$(echo "$resp" | parse_http_status)"
+	local body="$(echo "$resp" | parse_http_body)"
+	local check_result="$(echo "$body" | jq -r "$check_expr")"
+	case "$check_result" in
+		true) echo "OK"
+		      return ;;
+		false) echo "FAILED"
+		       if [ "$dodebug" -eq 1 ]; then
+			       echo "failed check expr: \"$check_expr\""
+			       echo "$resp"
+		       fi
+		       return
+		       ;;
+		*) echo "invalid result for check on http response body: got $check_result" >&2
+		   exit 1
+		   ;;
+	esac
 }
 
 aux_test_auth -M "confirming researchers can't make children" \
