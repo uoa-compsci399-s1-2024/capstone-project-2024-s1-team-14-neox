@@ -247,7 +247,7 @@ CHILDID="$(call_api -m POST -t "$IDTOKEN_PARENT1" -u "$API_URL/children" | parse
 echo "childID is $CHILDID"
 
 if true; then
-echo "TEST: auth for actions whose status code won't change when child/researcher added/removed to/from study"
+echo "TEST: actions whose status code won't change when child/researcher added/removed to/from study"
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	# first we set our assertions
 	check_expr_fragment_basicformat="(. | type==\"object\") and (.data | type==\"array\") and all(.data[]; has(\"id\"))"
@@ -381,7 +381,7 @@ aux_test_body -M "checking if out-of-range field values are rejected" \
 	      -D -C "(.errors | length == 7)
 	      	     and all(.errors[]; .status == 400 and (.message | contains(\"out of range\")))"
 
-echo "testing auth for studies..."
+echo "TEST: auth for actions whose status is affected by studies..."
 
 if true; then
 echo "TEST: PRE-STUDIES: child personal info auth..."
