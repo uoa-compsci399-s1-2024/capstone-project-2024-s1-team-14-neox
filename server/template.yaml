@@ -727,13 +727,13 @@ Resources:
       Handler: index.handler_researchers
       Role: !GetAtt LambdaRole.Arn
       Events:
-        ReplaceEvent:
+        AddEvent:
           Type: Api
           Properties:
             Path: /researchers/{researcherID}/studies/{studyID}
             Method: put
             RestApiId: !Ref API
-        PartialUpdateEvent:
+        RemoveEvent:
           Type: Api
           Properties:
             Path: /researchers/{researcherID}/studies/{studyID}
@@ -746,13 +746,13 @@ Resources:
       Handler: index.handler_children
       Role: !GetAtt LambdaRole.Arn
       Events:
-        ReplaceEvent:
+        AddEvent:
           Type: Api
           Properties:
             Path: /children/{childID}/studies/{studyID}
             Method: put
             RestApiId: !Ref API
-        PartialUpdateEvent:
+        RemoveEvent:
           Type: Api
           Properties:
             Path: /children/{childID}/studies/{studyID}
