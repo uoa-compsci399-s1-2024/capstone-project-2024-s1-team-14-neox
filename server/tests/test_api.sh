@@ -401,8 +401,6 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	aux_test_auth -M "$user: PUTting personal info for child" \
 		      -m PUT -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/children/$CHILDID/info" -d '{"given_name": "John", "family_name": "Cena"}' \
 		      -s "$assert_code"
-
-
 	aux_test_auth -M "$user: PATCHing personal info for child" \
 		      -m PATCH -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/children/$CHILDID/info" -d '{"gender": "male"}' \
 		      -s "$assert_code"
