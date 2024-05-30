@@ -331,12 +331,24 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	done
 
 	assert_code=403
+	check_expr=""
 	case "$user" in
-		PARENT1|ADMIN) assert_code=200 ;;
+		PARENT1|ADMIN)
+			assert_code=200
+			check_expr="
+			[\"$CHILDID\"
+			] as \$children | (\$children - [.data[].id]) | length == 0"
+			;;
 	esac
 	aux_test_auth -M "$user: listing children of PARENT1" \
 		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/parents/$EMAIL_PARENT1/children" \
 		      -s "$assert_code"
+	# we won't check the response bodies for the unauthorised calls
+	if [ -n "$check_expr" ]; then
+		aux_test_body -M "$user: checking if test child(ren) is in list of children for parent" \
+			      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/parents/$EMAIL_PARENT1/children" \
+			      -C "$check_expr" -D
+	fi
 
 	assert_code=403
 	case "$user" in
