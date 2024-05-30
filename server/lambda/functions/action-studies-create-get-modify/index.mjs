@@ -55,17 +55,19 @@ function make_handler(actionID)
     // the format can change without having to recreate the DB tables.
     if (actionID === ACTION_CREATE) {
       if (!(p.studyID.match(STUDYID_REGEX))) {
+        const msg = `invalid study id, it must match the regular expression: ${STUDYID_REGEX}`;
         const badStudyIdErrResp = {
           statusCode: 400,
           body: JSON.stringify({
             errors: [{
               resource: p.resolvedResource,
               status: 400,
-              message: `invalid study id, it must match the regular expression: ${STUDYID_REGEX}`,
+              message: msg,
             }]
           }),
         };
         addCorsHeaders(badStudyIdErrResp);
+        console.error(msg);
         return badStudyIdErrResp;
       }
     }
@@ -105,17 +107,19 @@ function make_handler(actionID)
         throw e;
       }
       if (res.rows.length === 0) {
+        const msg = "study doesn't exist";
         const noSuchStudyErrResp = {
           statusCode: 404,
           body: JSON.stringify({
             errors: [{
               resource: p.resolvedResource,
               status: 404,
-              message: "study doesn't exist"
+              message: msg,
             }],
           }),
         };
         addCorsHeaders(noSuchStudyErrResp);
+        console.error(msg);
         return noSuchStudyErrResp;
       }
 
@@ -158,6 +162,7 @@ function make_handler(actionID)
             status: 400,
             message: "bad field name"
           });
+          console.error(`${errors[errors.length-1].message}`);
         }
       }
 
@@ -184,6 +189,7 @@ function make_handler(actionID)
           status: 400,
           message: "research period must be YYYY-MM-DD dates",
         });
+        console.error(`${errors[errors.length-1].message}`);
       }
       if (fields.end_date !== undefined && !isMatch(fields.end_date, STUDY_DATE_FORMAT)) {
         errors.push({
@@ -191,6 +197,7 @@ function make_handler(actionID)
           status: 400,
           message: "research period must be YYYY-MM-DD dates",
         });
+        console.error(`${errors[errors.length-1].message}`);
       }
 
       if (errors.length > 0) {
@@ -289,6 +296,7 @@ function make_handler(actionID)
           }),
         };
         addCorsHeaders(dbErrResp);
+        console.error(dbError.message);
         return dbErrResp;
       }
 

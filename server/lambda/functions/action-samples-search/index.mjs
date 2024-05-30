@@ -90,7 +90,6 @@ function make_handler(subjectID)
       }
       if (res.rows.length === 0 &&
           (await db.query("SELECT * FROM children WHERE id = $1", [subjectIDValue])).rows.length === 0) {
-        const msg = unauth_message(subjectID);
         const unauthOrNoSuchChildErrResp = {
           // we want to protect child IDs
           statusCode: 403,
@@ -98,12 +97,12 @@ function make_handler(subjectID)
             errors: [{
               resource: resolvedResource,
               status: 403,
-              message: msg,
+              message: unauth_message(subjectID),
             }],
           }),
         };
         addCorsHeaders(unauthOrNoSuchChildErrResp);
-        console.error(msg);
+        console.error("no such child but returning status 403 to prevent leaking existence/nonexistence of child IDs");
         return unauthOrNoSuchChildErrResp;
       }
       break;
