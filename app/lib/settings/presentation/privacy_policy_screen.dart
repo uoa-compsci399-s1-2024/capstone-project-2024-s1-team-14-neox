@@ -27,7 +27,7 @@ We collect your personal information in order to:
 Besides our staff, we share this information with:
 • researchers conducting your registered studies in order to help understand and prevent the development of myopia in young children.
 
-You have the right to ask for a copy of any personal information we hold about you, and to ask for it to be corrected if you think it is wrong. If you'd like to ask for a copy of your information, or to have it corrected, please contact us at example@example.com, or (000) 000-0000, or The University of Auckland Private Bag 92019 Auckland 1142 New Zealand.
+You have the right to ask for a copy of any personal information we hold about you, and to ask for it to be corrected if you think it is wrong. If you'd like to ask for a copy of your information, or to have it corrected, please contact John Phillips (j.phillips@auckland.ac.nz) and Phil Turnbull (p.turnbull@auckland.ac.nz), or The University of Auckland, Building 505, 85 Park Road, Grafton, Auckland, 1023, New Zealand.
 """,
               style: TextStyle(
                 fontSize: 16,

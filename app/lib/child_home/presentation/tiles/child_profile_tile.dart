@@ -30,162 +30,177 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
     int target = App.sharedPreferences.getInt("daily_target")!;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            width: 2,
+            color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // Dummy invisible widget to balance out icon on the right.
-              // This ensures that the text widget is perfectly centred.
-              const Visibility(
-                maintainSize: true,
-                maintainAnimation: true,
-                maintainState: true,
-                visible: false,
-                child: IconButton(
-                  onPressed: null,
-                  icon: Icon(Icons.edit),
-                ),
-              ),
-
-              Flexible(
-                child: Text(
-                  state.childName,
-                  style: const TextStyle(fontSize: 40),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-
-              const SizedBox(width: 10),
-
-              IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) {
-                        return BlocProvider.value(
-                          value: BlocProvider.of<AllChildProfileCubit>(context),
-                          child: BlocProvider.value(
-                            value: BlocProvider.of<ChildDeviceCubit>(context),
-                            child:
-                                const CreateChildProfileScreen(editing: true),
-                          ),
-                        );
-                      },
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Dummy invisible widget to balance out icon on the right.
+                  // This ensures that the text widget is perfectly centred.
+                  const Visibility(
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    visible: false,
+                    child: IconButton(
+                      onPressed: null,
+                      icon: Icon(Icons.edit),
                     ),
-                  );
-                },
-                icon: const Icon(Icons.edit),
+                  ),
+      
+                  Flexible(
+                    child: Text(
+                      state.childName,
+                      style: const TextStyle(fontSize: 40),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+      
+                  const SizedBox(width: 10),
+      
+                  IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) {
+                            return BlocProvider.value(
+                              value:
+                                  BlocProvider.of<AllChildProfileCubit>(context),
+                              child: BlocProvider.value(
+                                value: BlocProvider.of<ChildDeviceCubit>(context),
+                                child:
+                                    const CreateChildProfileScreen(editing: true),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.edit),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              BlocProvider(
+                create: (_) => BluetoothBloc(),
+                child: const BluetoothPanel(),
+              ),
+              if (kDebugMode)
+                ElevatedButton(
+                  onPressed: () async {
+                    // Change start and end times as needed
+                    DateTime startTime = DateTime(2024, 2, 1);
+                    DateTime endTime = DateTime(2024, 5, 22);
+                    int numberOfWeeks = endTime.difference(startTime).inDays ~/ 7;
+                    // 0.1 is around 96 mins per day, 0.2 is around 192 mins per day
+                    double threshold = 0.11;
+                    DateTime time = startTime;
+                    // For loop to prevent exceeding memory
+                    for (int i = 0; i <= numberOfWeeks; i++) {
+                      time = time.add(const Duration(days: 7));
+                      time = DateTime(time.year, time.month, time.day);
+                      print("Creating week for: $time");
+                      List<ArduinoDataEntity> randomData =
+                          await ArduinoDataEntity.createSampleArduinoDataList(
+                              state.childId,
+                              time,
+                              time.add(const Duration(days: 7)),
+                              threshold);
+                      await ArduinoDataEntity.saveListOfArduinoDataEntity(
+                          randomData);
+                    }
+                  },
+                  child: const Text("Generate data"),
+                ),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    return Column(
+                      children: [
+                        const Spacer(),
+                        OutdoorTimeProgressIndicator(
+                          context: context,
+                          radius: constraints.maxWidth / 2 * 0.8,
+                          lineWidth: 18,
+                          percent: (outdoorTimeToday / target).clamp(0, 1),
+                          center: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Today",
+                                style: TextStyle(fontSize: 30),
+                              ),
+                              Text(
+                                  "$outdoorTimeToday/$target ${outdoorTimeToday == 1 ? "min" : "mins"} outdoors"),
+                            ],
+                          ),
+                        ),
+                        const Spacer(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            OutdoorTimeProgressIndicator(
+                              context: context,
+                              radius: constraints.maxWidth / 4 * 0.8,
+                              lineWidth: 10,
+                              percent: (outdoorTimeAvgWeek / target).clamp(0, 1),
+                              center: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    "Past week",
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                  Text(
+                                    "$outdoorTimeAvgWeek ${outdoorTimeAvgWeek == 1 ? "min" : "mins"}/day",
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            OutdoorTimeProgressIndicator(
+                              context: context,
+                              radius: constraints.maxWidth / 4 * 0.8,
+                              lineWidth: 10,
+                              percent: (outdoorTimeAvgMonth / target).clamp(0, 1),
+                              center: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    "Past month",
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                  Text(
+                                    "$outdoorTimeAvgMonth ${outdoorTimeAvgMonth == 1 ? "min" : "mins"}/day",
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                      ],
+                    );
+                  },
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          BlocProvider(
-            create: (_) => BluetoothBloc(),
-            child: const BluetoothPanel(),
-          ),
-          if (kDebugMode)
-            ElevatedButton(
-              onPressed: () async {
-                // Change start and end times as needed
-                DateTime startTime = DateTime(2024, 1, 1);
-                DateTime endTime = DateTime(2024, 5, 24);
-                int numberOfWeeks = endTime.difference(startTime).inDays ~/ 7;
-                // 0.1 is around 96 mins per day, 0.2 is around 192 mins per day
-                double threshold = 0.15;
-                DateTime time = startTime;
-                // For loop to prevent exceeding memory
-                for (int i = 0; i <= numberOfWeeks; i++) {
-                  time = time.add(const Duration(days: 7));
-                  time = DateTime(time.year, time.month, time.day);
-                  print("Creating week for: $time");
-                  List<ArduinoDataEntity> randomData =
-                      await ArduinoDataEntity.createSampleArduinoDataList(
-                          state.childId,
-                          time,
-                          time.add(const Duration(days: 7)),
-                          threshold);
-                  await ArduinoDataEntity.saveListOfArduinoDataEntity(
-                      randomData);
-                }
-              },
-              child: Text("Generate data"),
-            ),
-          Expanded(
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return Column(
-                  children: [
-                    const Spacer(),
-                    OutdoorTimeProgressIndicator(
-                      context: context,
-                      radius: constraints.maxWidth / 2 * 0.8,
-                      lineWidth: 18,
-                      percent: (outdoorTimeToday / target).clamp(0, 1),
-                      center: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            "Today",
-                            style: TextStyle(fontSize: 30),
-                          ),
-                          Text("$outdoorTimeToday/$target ${outdoorTimeToday == 1? "min": "mins"} outdoors"),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        OutdoorTimeProgressIndicator(
-                          context: context,
-                          radius: constraints.maxWidth / 4 * 0.8,
-                          lineWidth: 10,
-                          percent: (outdoorTimeAvgWeek / target).clamp(0, 1),
-                          center: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text(
-                                "Past week",
-                                style: TextStyle(fontSize: 14),
-                              ),
-                              Text(
-                                "$outdoorTimeAvgWeek ${outdoorTimeAvgWeek == 1? "min": "mins"}/day",
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        ),
-                        OutdoorTimeProgressIndicator(
-                          context: context,
-                          radius: constraints.maxWidth / 4 * 0.8,
-                          lineWidth: 10,
-                          percent: (outdoorTimeAvgMonth / target).clamp(0, 1),
-                          center: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text(
-                                "Past month",
-                                style: TextStyle(fontSize: 14),
-                              ),
-                              Text(
-                                "$outdoorTimeAvgMonth ${outdoorTimeAvgMonth == 1? "min": "mins"}/day",
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

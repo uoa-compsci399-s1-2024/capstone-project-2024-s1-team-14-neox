@@ -1,4 +1,5 @@
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/cubit/child_device_cubit.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
@@ -28,7 +29,7 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
     if (widget.editing) {
       ChildDeviceState state = context.read<ChildDeviceCubit>().state;
       _nameController.text = state.childName;
-      _dobController.text = DateFormat('d MMMM YYYY').format(state.birthDate);
+      _dobController.text = DateFormat('d MMMM yyyy').format(state.birthDate);
       _selectedGender = state.gender;
       _authCodeController.text = state.authorisationCode;
       _unpair = state.deviceRemoteId.isEmpty;
@@ -247,6 +248,12 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
       ),
       DropdownButtonFormField(
         value: _selectedGender,
+        icon: const Icon(
+          Icons.keyboard_arrow_down,
+          color: Colors.black,
+        ),
+        isExpanded: true,
+        
         items: genders
             .map((gender) => DropdownMenuItem(
                 value: gender,
@@ -255,7 +262,8 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
                     : (gender[0].toUpperCase() + gender.substring(1)))))
             .toList(),
         onChanged: onGenderSelected,
-        // style: TextStyle(fontWeight: FontWeight.w200),
+        elevation: 2,
+        borderRadius: BorderRadius.circular(16),
         decoration: InputDecoration(
           labelText: "Gender",
           enabledBorder: OutlineInputBorder(
@@ -276,30 +284,56 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
         ),
       ),
       const SizedBox(
-        height: 40,
+        height: 20,
       ),
     ];
 
     if (widget.editing) {
-      body.add(Row(
-        children: [
-          Text(
-            _unpair ? "Not paired" : state!.deviceRemoteId,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const Spacer(),
-          ElevatedButton(
-            onPressed: _unpair ? null : onUnpairPressed,
-            child: const Text("Unpair"),
-          ),
-        ],
-      ));
-
-      body.add(
+      body.addAll([
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                enabled: !_unpair,
+                controller: TextEditingController.fromValue(TextEditingValue(
+                  text: _unpair ? "Not paired" : state!.deviceRemoteId,
+                )),
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: "Device remote ID",
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.tertiary,
+                      width: 2,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2,
+                    ),
+                  ),
+                  // prefixIcon: Icon(Icons.person),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 12),
+              child: ElevatedButton(
+                onPressed: _unpair ? null : onUnpairPressed,
+                child: const Text("Unpair"),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 20,
+        ),
         TextField(
           enabled: !_unpair,
           controller: _authCodeController,
-          readOnly: true,
           decoration: InputDecoration(
             labelText: "Device authentication code",
             enabledBorder: OutlineInputBorder(
@@ -319,27 +353,11 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
             // prefixIcon: Icon(Icons.person),
           ),
         ),
-
-        // TextField(
-        //   controller: _authCodeController,
-        //   enabled: !_unpair,
-        // )
-      );
+        const SizedBox(
+          height: 20,
+        ),
+      ]);
     }
-
-    // Format each field
-    // for (int i = 0; i < body.length; i++) {
-    //   body[i] = Padding(
-    //     padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-    //     child: Column(
-    //       crossAxisAlignment: CrossAxisAlignment.start,
-    //       children: [
-    //         Text(fields[i]),
-    //         body[i],
-    //       ],
-    //     ),
-    //   );
-    // }
 
     // Create buttons
     List<Widget> buttons;
@@ -408,30 +426,17 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
           ),
         ),
 
-        // ElevatedButton(
-        //   onPressed: onDeletePressed,
-        //   child: const Text('Delete'),
-        // ),
-        // const Spacer(),
-        // ElevatedButton(
-        //   onPressed: onCancelPressed,
-        //   child: const Text('Cancel'),
-        // ),
-        // ElevatedButton(
-        //   onPressed: onSavePressed,
-        //   child: const Text('Save'),
-        // ),
+
       ];
     } else {
       buttons = [
-        // ElevatedButton(
-        //   onPressed: onAddChildPressed,
-        //   child: const Text('Add child'),
-        // ),
+                const SizedBox(
+          height: 40,
+        ),
         SizedBox(
           width: screenWidth,
-          height: 60,
-          child: ElevatedButton(
+          height: 40,
+          child: FilledButton(
             style: ButtonStyle(
                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
@@ -440,22 +445,12 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
             onPressed: onAddChildPressed,
             child: const Text(
               'Add child',
-              style: TextStyle(fontSize: 24),
+              style: TextStyle(fontSize: 20),
             ),
           ),
         ),
       ];
     }
-
-    // // Format each button
-    // for (int i = 0; i < buttons.length; i++) {
-    //   if (buttons[i] is! Spacer) {
-    //     buttons[i] = Padding(
-    //       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-    //       child: buttons[i],
-    //     );
-    //   }
-    // }
 
     return Scaffold(
       appBar: AppBar(

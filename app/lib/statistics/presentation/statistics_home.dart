@@ -87,11 +87,14 @@ class StatisticsHomeState extends State<StatisticsHome> {
                   child: DropdownButton<ChildDeviceModel>(
                     isExpanded: true,
                     value: _selectedChildProfile,
-                    icon: const Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.black,
+                    icon: const Padding(
+                      padding:  EdgeInsets.only(right: 4.0),
+                      child:  Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.black,
+                      ),
                     ),
-                    iconSize: 32,
+                    iconSize: 24,
                     elevation: 2,
                     borderRadius: BorderRadius.circular(16),
                     items: context

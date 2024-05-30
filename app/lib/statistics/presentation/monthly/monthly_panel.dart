@@ -204,7 +204,6 @@ class MonthlyPanel extends StatelessWidget {
         if (state.status.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-        print("monthly panel state $state");
         PageController pageController =
             PageController(initialPage: state.focusMonth - 1);
         return Padding(

@@ -19,7 +19,7 @@ class CloudHomeScreen extends StatelessWidget {
         },
         builder: (context, state) {
           if (state.status.isLoading) {
-            return const CircularProgressIndicator();
+            return Center(child: const CircularProgressIndicator());
           } else if (state.status.isLoginSuccess) {
             return BlocProvider(
               create: (context) => CloudSyncCubit(),

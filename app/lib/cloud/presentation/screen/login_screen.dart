@@ -125,58 +125,45 @@ class _LoginScreenState extends State<LoginScreen> {
                     // prefixIcon: Icon(Icons.person),
                   ),
                 ),
-                // InputField(
-                //   controller: emailController,
-                //   isPassword: false,
-                //   labelTxt: 'Email',
-                //   icon: Icons.person,
-                // ),
-                // InputField(
-                //   controller: passwordController,
-                //   isPassword: true,
-                //   labelTxt: 'Password',
-                //   icon: Icons.lock,
-                // ),
                 const SizedBox(
-                  height: 40,
+                  height: 20,
                 ),
-                // TextButton(
-                //   style: ButtonStyle(backgroundColor:Theme.of(context).colorScheme.),
-                //   onPressed: () =>
-                //       context.read<LoginCubit>().logInWithEmailAndPassword(
-                //             emailController.text,
-                //             passwordController.text,
-                //           ),
-                //   child: const Text(
-                //     'Log in',
-                //     style: TextStyle(fontSize: 24),
-                //   ),
-                // ),
                 SizedBox(
-                  // padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 8.0),
                   width: screenWidth,
-                  height: 60,
-                  child: ElevatedButton(
+                  height: 40,
+                  child: FilledButton(
                     style: ButtonStyle(
                         shape:
                             MaterialStateProperty.all<RoundedRectangleBorder>(
                                 RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ))),
-                    child: const Text(
-                      'Log in',
-                      style: TextStyle(fontSize: 24),
-                    ),
                     onPressed: () =>
                         context.read<LoginCubit>().logInWithEmailAndPassword(
                               emailController.text,
                               passwordController.text,
                             ),
+                    child: const Text(
+                      'Log in',
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 8.0),
-                  child: TextButton(
+                const SizedBox(
+                  height: 40,
+                ),
+                const Text("Don't have an account?"),
+                SizedBox(
+                  width: screenWidth,
+                  height: 40,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                          color: Theme.of(context).colorScheme.primary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -184,15 +171,23 @@ class _LoginScreenState extends State<LoginScreen> {
                             builder: (context) => const RegisterScreen()),
                       );
                     },
-                    child: Text("Don't have an account? Register here"),
+                    child: const Text(
+                      'Sign up',
+                      style: TextStyle(
+                        fontSize: 20,
+                        // color: Colors.red,
+                      ),
+                    ),
                   ),
                 ),
 
                 // TODO remove
-                if (kDebugMode) ElevatedButton(
-                  child: const Text("Test"),
-                  onPressed: () => context.read<LoginCubit>().logInWithGoogle(),
-                ),
+                if (kDebugMode)
+                  ElevatedButton(
+                    child: const Text("Test"),
+                    onPressed: () =>
+                        context.read<LoginCubit>().logInWithGoogle(),
+                  ),
               ],
             ),
           ),

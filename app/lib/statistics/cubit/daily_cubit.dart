@@ -23,7 +23,6 @@ class DailyCubit extends Cubit<DailyState> {
   }
 
   Future<void> onGetPastDataForChildId(int childId) async {
-    print("on get data pressed");
     emit(state.copyWith(status: DailyStatus.loading));
     await Future.delayed(const Duration(milliseconds: 200));
     DateTime startMonday =

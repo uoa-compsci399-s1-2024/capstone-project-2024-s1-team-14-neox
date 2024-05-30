@@ -45,9 +45,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.sizeOf(context);
+    double screenWidth = screenSize.width;
+    double screenHeight = screenSize.height;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Register"),
+        title: const Text("Create a Neox account"),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -188,15 +191,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(
                 height: 40,
               ),
-              PrimaryBtn(
-                btnText: 'Register',
-                btnFun: () => register(
-                  context,
-                  emailController.text,
-                  passwordController.text,
-                  middleNameController.text,
-                  givenNameController.text,
-                  familyNameController.text,
+              SizedBox(
+                width: screenWidth,
+                height: 40,
+                child: FilledButton(
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ))),
+                  onPressed: () => register(
+                    context,
+                    emailController.text,
+                    passwordController.text,
+                    middleNameController.text,
+                    givenNameController.text,
+                    familyNameController.text,
+                  ),
+                  child: const Text(
+                    'Sign up',
+                    style: TextStyle(fontSize: 20),
+                  ),
                 ),
               ),
             ],
