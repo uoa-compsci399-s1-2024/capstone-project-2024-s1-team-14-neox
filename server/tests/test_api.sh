@@ -428,32 +428,59 @@ fi
 # - remove child/researcher from
 # - get samples from a given study
 # - get samples from a given child
-STUDYID="TEST123"
+if true; then
+echo "TEST: study creation and study details..."
+STUDYID="TESTTEST123"
 BADSTUDYID="ABC123"
-if false; then
-echo "test: creating study..."
+STUDYFIELDS='{"start_date": "2024-01-01", "end_date": "2024-06-01", "name": "Test", "description": "Test description"}'
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
-	echo "$user: creating study"
-	curl -i -X PUT -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID" -d '{"start_date": "2024-01-23", "end_date": "2024-06-13"}' 2>/dev/null #| head -n1
-	echo ""
+	assert_code_args=('-s' 403)
+	case "$user" in
+		ADMIN)
+			assert_code_args=(
+				'-s' 200
+				'-s' 409  # such a study already exists
+			)
+			;;
+	esac
+	aux_test_auth -M "$user: creating study with ID $STUDYID" \
+		      -m PUT -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/studies/$STUDYID" -d "$STUDYFIELDS" \
+		      -D "${assert_code_args[@]}"
+
+
+	# everyone can fetch study details
+	aux_test_auth -M "$user: getting details of study" \
+		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/studies/$STUDYID/info" \
+		      -D -s 200
+
+	assert_code=403
+	case "$user" in
+		ADMIN) assert_code=204 ;;
+	esac
+	aux_test_auth -M "$user: PUTting details of study" \
+		      -m PUT -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/studies/$STUDYID/info" -d "$STUDYFIELDS" \
+		      -D -s "$assert_code"
+	aux_test_auth -M "$user: PATCHing details of study" \
+		      -m PATCH -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/studies/$STUDYID/info" -d '{"description": "testing myopia"}' \
+		      -D -s "$assert_code"
 done
-fi
 
-if false; then
-echo "test: study details..."
-for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
-	echo "$user: getting details of study"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/info" 2>/dev/null | head -n1
-	# echo ""
-
-	echo "$user: PUTting details of study"
-	curl -i -X PUT -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/info" -d '{"start_date": "2020-01-01", "end_date": "2020-12-31", "name": "myopia test"}' 2>/dev/null | head -n1
-	# echo ""
-
-	echo "$user: PATCHing details of study"
-	curl -i -X PATCH -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/info" -d '{"description": "testing myopia"}' 2>/dev/null | head -n1
-	# echo ""
+for missing_field in start_date end_date; do
+	aux_test_body -M "creating study with ID $BADSTUDYID with missing field '$missing_field'" \
+		      -m PUT -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$BADSTUDYID" -d "$(echo "$STUDYFIELDS" | jq -r "del(.$missing_field)")" \
+		      -D -C "(.errors[0].resource | contains(\"fieldname=$missing_field\"))
+		             and (.errors[0].message | contains(\"missing\"))"
 done
+aux_test_auth -M "fetching details of nonexistent study $BADSTUDYID" \
+	      -m GET -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$BADSTUDYID/info" \
+	      -D -s 404
+aux_test_auth -M "PUTting details of nonexistent study $BADSTUDYID" \
+	      -m PUT -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$BADSTUDYID/info" -d "$STUDYFIELDS" \
+	      -D -s 404
+aux_test_auth -M "PATCHing details of nonexistent study $BADSTUDYID" \
+	      -m PATCH -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$BADSTUDYID/info" -d '{"description": "testing myopia"}' \
+	      -D -s 404
+
 fi
 
 if false; then
