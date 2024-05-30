@@ -249,24 +249,85 @@ echo "childID is $CHILDID"
 if true; then
 echo "TEST: auth for actions whose status code won't change when child/researcher added/removed to/from study"
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
+	# first we set our assertions
+	check_expr_fragment_basicformat="(. | type==\"object\") and (.data | type==\"array\") and all(.data[]; has(\"id\"))"
+	check_expr_fragment_parents="
+	[\"$EMAIL_PARENT1\",
+	 \"$EMAIL_PARENT2\"
+	] as \$parents | (\$parents - [.data[].id]) | length == 0
+        "
+	check_expr_fragment_researchers="
+	[\"$EMAIL_RESEARCHER1\",
+	 \"$EMAIL_RESEARCHER2\",
+         \"$EMAIL_ADMIN\"
+	] as \$researchers | (\$researchers - [.data[].id]) | length == 0
+        "
+	check_expr_fragment_admins="
+	[\"$EMAIL_ADMIN\"
+	] as \$admins | (\$admins - [.data[].id]) | length == 0
+        "
 	for usertype in parents researchers admins; do
 		assert_code=403
+		check_expr=""
 		case "$user" in
 			PARENT1|PARENT2)
 				case "$usertype" in
-					researchers|admins) assert_code=200 ;;
+					researchers)
+						assert_code=200
+						check_expr="${check_expr_fragment_basicformat}
+						and ${check_expr_fragment_researchers}"
+						;;
+					admins)
+						assert_code=200
+						check_expr="${check_expr_fragment_basicformat}
+						and ${check_expr_fragment_admins}"
+						;;
 				esac
 				;;
 			RESEARCHER1|RESEARCHER2)
 				case "$usertype" in
-					researchers|admins) assert_code=200 ;;
+					researchers)
+						assert_code=200
+						check_expr="${check_expr_fragment_basicformat}
+						and ${check_expr_fragment_researchers}"
+						;;
+					admins)
+						assert_code=200
+						check_expr="${check_expr_fragment_basicformat}
+						and ${check_expr_fragment_admins}"
+						;;
 				esac
 				;;
-			ADMIN) assert_code=200 ;;
+			# admins can view all lists of user groups
+			ADMIN)
+				assert_code=200
+				case "$usertype" in
+					parents)
+						check_expr="${check_expr_fragment_basicformat}
+						and ${check_expr_fragment_parents}"
+						;;
+					researchers)
+						check_expr="${check_expr_fragment_basicformat}
+						and ${check_expr_fragment_researchers}"
+						;;
+					admins)
+						check_expr="${check_expr_fragment_basicformat}
+						and ${check_expr_fragment_admins}"
+						;;
+				esac
+				;;
 		esac
+
+		# now we actually test
 		aux_test_auth -M "$user: listing user group $usertype" \
 			      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/$usertype" \
 			      -s "$assert_code" -D
+		# we won't check the response bodies for the unauthorised calls
+		if [ -n "$check_expr" ]; then
+			aux_test_body -M "$user: checking if test $usertype are in the list of $usertype" \
+				      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/$usertype" \
+				      -C "$check_expr" -D
+		fi
 	done
 
 	assert_code=403
