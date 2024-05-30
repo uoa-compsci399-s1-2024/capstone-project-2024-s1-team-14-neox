@@ -1,3 +1,4 @@
+import 'package:capstone_project_2024_s1_team_14_neox/data/entities/childStudy_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/study_entity.dart';
 import 'package:drift/drift.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
@@ -82,4 +83,25 @@ class StudyEntity {
     await (db.delete(db.study)..where((tbl) => tbl.studyCode.equals(studyCode)))
         .go();
   }
+
+  static Future<void> clearStudyTable() async {
+    final db = AppDb.instance();
+    await db.delete(db.study).go();
+  }
+
+  factory StudyEntity.fromJson(Map<String, dynamic> json, String studyCode) {
+     StudyEntity study = StudyEntity(name: json["name"],
+        description: json["description"],
+        startDate: DateTime.parse(json["start_date"]),
+        endDate: DateTime.parse(json["end_date"]),
+        studyCode: studyCode);
+    return study;
+  }
+
+
+
+
+
+
+
 }
