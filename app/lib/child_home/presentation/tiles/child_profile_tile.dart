@@ -102,11 +102,11 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                 ElevatedButton(
                   onPressed: () async {
                     // Change start and end times as needed
-                    DateTime startTime = DateTime(2024, 2, 1);
+                    DateTime startTime = DateTime(2023, 1, 1);
                     DateTime endTime = DateTime(2024, 5, 22);
                     int numberOfWeeks = endTime.difference(startTime).inDays ~/ 7;
-                    // 0.1 is around 96 mins per day, 0.2 is around 192 mins per day
-                    double threshold = 0.11;
+                    // 0.1 is around 96 mins per day, 0.2 is around 192 mins per day, recommend 0.13
+                    double threshold = 0.13;
                     DateTime time = startTime;
                     // For loop to prevent exceeding memory
                     for (int i = 0; i <= numberOfWeeks; i++) {
