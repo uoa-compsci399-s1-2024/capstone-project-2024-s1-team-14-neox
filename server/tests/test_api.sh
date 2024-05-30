@@ -434,6 +434,11 @@ STUDYID="TESTTEST123"
 BADSTUDYID="ABC123"
 STUDYFIELDS='{"start_date": "2024-01-01", "end_date": "2024-06-01", "name": "Test", "description": "Test description"}'
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
+	# everyone can list studies globally
+	aux_test_auth -M "$user: listing studies (globally)" \
+		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/studies" \
+		      -s 200
+
 	assert_code_args=('-s' 403)
 	case "$user" in
 		ADMIN)
@@ -481,24 +486,18 @@ aux_test_auth -M "PATCHing details of nonexistent study $BADSTUDYID" \
 	      -m PATCH -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$BADSTUDYID/info" -d '{"description": "testing myopia"}' \
 	      -D -s 404
 
-fi
-
-if false; then
-echo "test: listing studies (globally)..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
-	echo "$user: listing studies (globally)"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies" 2>/dev/null #| head -n1
-	echo ""
+	assert_code=403
+	case "$user" in
+		ADMIN) assert_code=200 ;;
+	esac
+	aux_test_auth -M "$user: listing participants in study" \
+		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/studies/$STUDYID/participants" \
+		      -s "$assert_code"
 done
-fi
-
-if false; then
-echo "test: listing participants in study..."
-for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
-	echo "$user: listing participants in study"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/participants" 2>/dev/null #| head -n1
-	echo ""
-done
+aux_test_auth -M "listing participants of nonexistent study $BADSTUDYID" \
+	      -m GET -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$BADSTUDYID/participants" \
+	      -s 404
 fi
 
 if false; then
@@ -540,10 +539,6 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 
 	echo "$user: listing studies (for researcher2)"
 	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/researchers/$EMAIL_RESEARCHER2/studies" 2>/dev/null #| head -n1
-	echo ""
-
-	echo "$user: listing participants in study"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/participants" 2>/dev/null #| head -n1
 	echo ""
 done
 fi
