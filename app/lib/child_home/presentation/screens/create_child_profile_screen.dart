@@ -347,8 +347,8 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
       buttons = [
         SizedBox(
           width: screenWidth,
-          height: 60,
-          child: ElevatedButton(
+          height: 40,
+          child: FilledButton(
             style: ButtonStyle(
                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
@@ -366,7 +366,7 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
         ),
         SizedBox(
           width: screenWidth,
-          height: 60,
+          height: 40,
           child: OutlinedButton(
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: Theme.of(context).colorScheme.primary),
@@ -389,7 +389,7 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
         ),
         SizedBox(
           width: screenWidth,
-          height: 60,
+          height: 40,
           child: OutlinedButton(
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.red),
