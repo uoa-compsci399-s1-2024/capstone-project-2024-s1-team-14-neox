@@ -12,20 +12,18 @@ Amplify.configure({
     }
   });
 
-const baseURI = "https://xu31tcdj0e.execute-api.ap-southeast-2.amazonaws.com/dev"
 
 const Home = ({ isAdmin, showButton }) => {
     const [familyName, setFamilyName] = useState(null);
     const [studies, setStudies] = useState([]);
-    const [jwtToken, setJwtToken] = useState(null); 
-    const [modal, setModal] = useState(false);
+    const [idToken, setIdToken] = useState(null); 
 
-    const fetchJwtToken = async() => {
+    const fetchIdToken = async() => {
         const session = await Auth.currentSession();
-        const token = session.getIdToken().getJwtToken();
-        setJwtToken(token);
+        const token = session.getIdToken();
+        setIdToken(token);
     }
-    fetchJwtToken();
+    fetchIdToken();
 
     useEffect(() => {
         async function fetchFamilyName() {
@@ -44,22 +42,23 @@ const Home = ({ isAdmin, showButton }) => {
     useEffect(() => {
         const fetchStudies = async () => {
             try {
-            /* const user = await Auth.currentAuthenticatedUser();
+            const user = await Auth.currentAuthenticatedUser();
             const session = await Auth.currentSession();
             const idToken = session.getIdToken();
             const attributes = user.attributes;
             const email = attributes.email;
-            const endpoint = "https://xu31tcdj0e.execute-api.ap-southeast-2.amazonaws.com/dev/"
-            const data = await fetch(endpoint + "researchers/" + email + "/studies", {
+            const data = await fetch(awsExports.API_ENDPOINT + "/researchers/" + email + "/studies", {
                 method: 'GET',
                 mode: 'no-cors',
                 headers: {
-                    'Authorization': 'Bearer ' + idToken.decodePayload()
+                    'Authorization': 'Bearer ' + idToken
                 },
-            })*/
-            const result = await fetch('https://jsonplaceholder.typicode.com/posts')
-            const jsonResult = await result.json()
-            setStudies(jsonResult)
+            })
+            /*const result = await fetch('https://jsonplaceholder.typicode.com/posts')
+            const jsonResult = await result.json()*/
+            setStudies(data)
+            console.log(idToken)
+            console.log(data)
             } catch (error) {
                 console.error('Error fetching study data', error);
             }
@@ -67,9 +66,15 @@ const Home = ({ isAdmin, showButton }) => {
         }
         fetchStudies()
     }, [])
-    
-    function openModal() {
-        setModal(true)
+
+    async function removeStudy(id) {
+        /*const result = await fetch(awsExports.API_ENDPOINT + "/studies/" + id, { 
+            method: "DELETE",
+            header: {
+                'Authorization': 'Bearer' + jwtToken
+            }
+        })*/
+        console.log("works")
     }
     
 
@@ -90,17 +95,18 @@ const Home = ({ isAdmin, showButton }) => {
                 {studies.map(study =>              
                 <div class="study-card" key={study.id}>
                 <Card variation="elevated">
-                    <h5 style={{"text-align": "center", "font-style": "italic"}}>ID {study.id}</h5>
+                <button type="button" class="btn btn-link" onClick={() => removeStudy(study.id)} style={{"float": "left", "clear": "none"}}>Delete</button>
+                <h5 style={{"text-align": "center", "font-style": "italic", "width": "90%"}}>ID {study.id}</h5>
                     <hr/>
                     <h3 style={{"text-align": "center"}}>{study.title}</h3>
                     <h5 style={{"text-align": "center", "padding-bottom": "2%"}}>{study.completed} </h5>
                     <h5><span class="card-titles">Period:</span> {study.userId} - {study.userId} </h5>
-                    <h5><span class="card-titles bottom">Researchers:</span></h5>                  
-                    <div class="d-table-row gap-2 d-md-flex justify-content-md-end">
+                    <h5><span class="card-titles bottom">Researchers:</span></h5> 
+                    <div class="d-table-row gap-4 d-md-flex justify-content-md-end">
                         <button type="button" class="btn btn-outline-primary">Download CSV</button>
                         {isAdmin ? (
-                            <Link to="/users" type="button" class="btn btn-outline-primary"
-                            >Manage Researchers</Link>
+                                <Link to="/users" type="button" class="btn btn-outline-primary"
+                                >Manage Researchers</Link>
                         ) : (null)}
                     </div>
                 </Card>

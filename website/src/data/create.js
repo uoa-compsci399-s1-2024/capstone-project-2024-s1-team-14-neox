@@ -75,7 +75,7 @@ const Create = ({ toggleButton, handleJwtToken }) => {
                 "endDate": endDate
               }
             })
-            console.log(study.json())
+            navigate("/home");
           };
 
           
