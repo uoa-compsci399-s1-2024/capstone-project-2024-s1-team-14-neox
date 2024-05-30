@@ -1,28 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { Link, Navigate, useLocation } from 'react-router-dom';
-import { Auth, Logger } from 'aws-amplify';
+import { Link } from 'react-router-dom';
+import { Auth, Amplify } from 'aws-amplify';
 import { Card } from '@aws-amplify/ui-react';
+import { awsExports } from "../aws-exports";
 
+Amplify.configure({
+    Auth: {
+      region: awsExports.REGION,
+      userPoolId: awsExports.USER_POOL_ID,
+      userPoolWebClientId: awsExports.USER_POOL_APP_CLIENT_ID
+    }
+  });
+
+const baseURI = "https://xu31tcdj0e.execute-api.ap-southeast-2.amazonaws.com/dev"
 
 const Home = ({ isAdmin, showButton }) => {
     const [familyName, setFamilyName] = useState(null);
-    var data = null;
-    var title = null;
-    var id = null;
-    var description = null;
-    var startDate = null;
-    var endDate = null;
-    var set = false;
-    if (typeof(localStorage['cards-demos']) != "undefined") {
-        set = true;
-        data = localStorage['cards-demos'];
-        title = data[0] + data[1] + data[2] + data[3] + data[4] + data[5];
-        id = data[7] + data[8] + data[9] + data[10] + data[11] + data[12];
-        description = data[14] + data[15] + data[16] + data[17] + data[18] + data[19] + data[20] + data[21] + data[22] + data[23] + data[24];
-        startDate = "21/05/24";
-        endDate = "21/06/24";
+    const [studies, setStudies] = useState([])
+    const [jwtToken, setJwtToken] = useState(null); 
+
+    const fetchJwtToken = async() => {
+        const session = await Auth.currentSession();
+        const token = session.getIdToken().getJwtToken();
+        setJwtToken(token);
     }
-    
+    fetchJwtToken();
+
     useEffect(() => {
         async function fetchFamilyName() {
             try {
@@ -37,49 +40,28 @@ const Home = ({ isAdmin, showButton }) => {
         fetchFamilyName();
     }, []);
 
-    function StudyCard() {
-        return (
-            <div class="study-card">
-                <Card variation="elevated">
-                    <h5 style={{"text-align": "center", "font-style": "italic"}}>ID 210524</h5>
-                    <hr/>
-                    <h3 style={{"text-align": "center"}}>Miopia in Children</h3>
-                    <h5 style={{"text-align": "center", "padding-bottom": "2%"}}>Exploring the relationship between outdoor time and Miopia progression in children </h5>
-                    <h5><span class="card-titles">Period:</span> 21/05/24 - 21/06/24 </h5>
-                    <h5><span class="card-titles bottom">Researchers:</span></h5>                  
-                    <div class="d-table-row gap-2 d-md-flex justify-content-md-end">
-                        <button type="button" class="btn btn-outline-primary">Download CSV</button>
-                        {isAdmin ? (
-                            <button type="button" class="btn btn-outline-primary" //onClick={() => alert("Works!")}
-                            >Manage Researchers</button>
-                        ) : (null)}
-                    </div>
-                </Card>
-            </div>
-        )
-    }
+    useEffect(() => {
+        async function fetchStudies() {
+            try {
+            const user = await Auth.currentAuthenticatedUser()
+            const attributes = user.attributes;
+            const email = attributes.email;
+            const data = await fetch("https://xu31tcdj0e.execute-api.ap-southeast-2.amazonaws.com/dev/researchers/gabriel.lisaca+admin@gmail.com/studies", {
+                method: 'GET',
+                mode: 'no-cors',
+                headers: {
+                    'Authorization': 'Bearer ' + jwtToken
+                },
+            })
+            console.log(data.json())
+            } catch (error) {
+                console.error('Error fetching study data', error);
+            }
+        }
+        fetchStudies()
+    }, [])
     
-    function studyCard() {
-        return (
-            <div class="study-card">
-                <Card variation="elevated">
-                    <h5 style={{"text-align": "center", "font-style": "italic"}}>ID {id} </h5>
-                    <hr/>
-                    <h3 style={{"text-align": "center"}}>{title}</h3>
-                    <h5 style={{"text-align": "center", "padding-bottom": "2%"}}>{description}</h5>
-                    <h5><span class="card-titles">Period:</span> {startDate} - {endDate} </h5>
-                    <h5><span class="card-titles bottom">Researchers:</span></h5>                  
-                    <div class="d-table-row gap-2 d-md-flex justify-content-md-end">
-                        <button type="button" class="btn btn-outline-primary">Download CSV</button>
-                        {isAdmin ? (
-                            <button type="button" class="btn btn-outline-primary" //onClick={() => alert("Works!")}
-                            >Manage Researchers</button>
-                        ) : (null)}
-                    </div>
-                </Card>
-            </div>
-        )
-    }
+    
 
     return (
         <div class="home-body">
@@ -95,11 +77,28 @@ const Home = ({ isAdmin, showButton }) => {
             <hr/>
             <div class="studies">
                 <h3>Current Studies</h3>               
-                {StudyCard()}  
-                {set ? (
-                    studyCard()
-                    
-                ): (null)}              
+                <div class="study-card">
+                
+                {studies.map(study =>
+                <Card variation="elevated" key={study.id}>
+            
+                    <h5 style={{"text-align": "center", "font-style": "italic"}}>ID {study.id}</h5>
+                    <hr/>
+                    <h3 style={{"text-align": "center"}}>{study.title}</h3>
+                    <h5 style={{"text-align": "center", "padding-bottom": "2%"}}>{study.description} </h5>
+                    <h5><span class="card-titles">Period:</span> {studies.startDate} - {study.endDate} </h5>
+                    <h5><span class="card-titles bottom">Researchers:</span></h5>                  
+                    <div class="d-table-row gap-2 d-md-flex justify-content-md-end">
+                        <button type="button" class="btn btn-outline-primary">Download CSV</button>
+                        {isAdmin ? (
+                            <button type="button" class="btn btn-outline-primary" //onClick={() => alert("Works!")}
+                            >Manage Researchers</button>
+                        ) : (null)}
+                    </div>
+                </Card>
+                )}
+            </div>
+                
             </div>
             {isAdmin ? (
                 null
