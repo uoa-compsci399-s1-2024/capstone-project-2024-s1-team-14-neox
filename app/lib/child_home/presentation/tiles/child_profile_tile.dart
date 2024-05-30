@@ -131,7 +131,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                             "Today",
                             style: TextStyle(fontSize: 30),
                           ),
-                          Text("$outdoorTimeToday / $target minutes outdoors"),
+                          Text("$outdoorTimeToday/$target ${outdoorTimeToday == 1? "min": "mins"} outdoors"),
                         ],
                       ),
                     ),
@@ -152,7 +152,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                                 style: TextStyle(fontSize: 14),
                               ),
                               Text(
-                                "$outdoorTimeAvgWeek mins/day",
+                                "$outdoorTimeAvgWeek ${outdoorTimeAvgWeek == 1? "min": "mins"}/day",
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ],
@@ -171,7 +171,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                                 style: TextStyle(fontSize: 14),
                               ),
                               Text(
-                                "$outdoorTimeAvgMonth mins/day",
+                                "$outdoorTimeAvgMonth ${outdoorTimeAvgMonth == 1? "min": "mins"}/day",
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ],

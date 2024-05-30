@@ -85,23 +85,22 @@ class _DailyBarChartState extends State<DailyBarChart> {
   }
 
   Widget _getHourBottomTitles(double value, TitleMeta meta) {
-    print("hour time $value");
     int val = value.toInt();
     String half = val < 12 ? "am" : "pm";
 
-    val %= 12;
-    if (val == 0) {
-      val = 12;
-    }
 
-    if (val % 3 != 0) {
+    if (val %2 != 0) {
       return Container();
     }
 
+    // val %= 12;
+    // if (val == 0) {
+    //   val = 12;
+    // }
     return SideTitleWidget(
       axisSide: meta.axisSide,
       child: Text(
-        value.toInt().toString(),
+        val.toString(), //"$val$half",
         style: const TextStyle(
           color: Colors.grey,
           fontSize: 14,
