@@ -61,12 +61,21 @@ const Create = ({ toggleButton, handleJwtToken }) => {
         const handleSubmit = async (event) => {
             event.preventDefault();
             const formData = new FormData(event.target);
-            const name = formData.get('name');
+            const title = formData.get('title');
             const id = formData.get('id');
             const description = formData.get('description');
-            var data = [[name], [id], [description], [startDate], [endDate]];
-            localStorage.setItem('cards-demos', data )
-            navigate("/home");
+            const study = await fetch("https://httpbin.org/anything", {
+              method: "post",
+              headers: {"Content-Type": "application/json"},
+              body: {
+                "title": title,
+                "id": id,
+                "desription": description,
+                "startDate": startDate,
+                "endDate": endDate
+              }
+            })
+            console.log(study.json())
           };
 
           
@@ -83,7 +92,7 @@ const Create = ({ toggleButton, handleJwtToken }) => {
               
               <div className="mb-3">
                 <label>Study Name</label>
-                <input type="text" className="form-control" placeholder="" name="name" required />
+                <input type="text" className="form-control" placeholder="" name="title" required />
               </div>
               <div className="mb-3">
                 <label>Study ID</label>

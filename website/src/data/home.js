@@ -16,8 +16,9 @@ const baseURI = "https://xu31tcdj0e.execute-api.ap-southeast-2.amazonaws.com/dev
 
 const Home = ({ isAdmin, showButton }) => {
     const [familyName, setFamilyName] = useState(null);
-    const [studies, setStudies] = useState([])
+    const [studies, setStudies] = useState([]);
     const [jwtToken, setJwtToken] = useState(null); 
+    const [modal, setModal] = useState(false);
 
     const fetchJwtToken = async() => {
         const session = await Auth.currentSession();
@@ -41,26 +42,35 @@ const Home = ({ isAdmin, showButton }) => {
     }, []);
 
     useEffect(() => {
-        async function fetchStudies() {
+        const fetchStudies = async () => {
             try {
-            const user = await Auth.currentAuthenticatedUser()
+            /* const user = await Auth.currentAuthenticatedUser();
+            const session = await Auth.currentSession();
+            const idToken = session.getIdToken();
             const attributes = user.attributes;
             const email = attributes.email;
-            const data = await fetch("https://xu31tcdj0e.execute-api.ap-southeast-2.amazonaws.com/dev/researchers/gabriel.lisaca+admin@gmail.com/studies", {
+            const endpoint = "https://xu31tcdj0e.execute-api.ap-southeast-2.amazonaws.com/dev/"
+            const data = await fetch(endpoint + "researchers/" + email + "/studies", {
                 method: 'GET',
                 mode: 'no-cors',
                 headers: {
-                    'Authorization': 'Bearer ' + jwtToken
+                    'Authorization': 'Bearer ' + idToken.decodePayload()
                 },
-            })
-            console.log(data.json())
+            })*/
+            const result = await fetch('https://jsonplaceholder.typicode.com/posts')
+            const jsonResult = await result.json()
+            setStudies(jsonResult)
             } catch (error) {
                 console.error('Error fetching study data', error);
             }
+            
         }
         fetchStudies()
     }, [])
     
+    function openModal() {
+        setModal(true)
+    }
     
 
     return (
@@ -76,29 +86,25 @@ const Home = ({ isAdmin, showButton }) => {
             ):(null)}
             <hr/>
             <div class="studies">
-                <h3>Current Studies</h3>               
-                <div class="study-card">
-                
-                {studies.map(study =>
-                <Card variation="elevated" key={study.id}>
-            
+                <h3>Current Studies</h3> 
+                {studies.map(study =>              
+                <div class="study-card" key={study.id}>
+                <Card variation="elevated">
                     <h5 style={{"text-align": "center", "font-style": "italic"}}>ID {study.id}</h5>
                     <hr/>
                     <h3 style={{"text-align": "center"}}>{study.title}</h3>
-                    <h5 style={{"text-align": "center", "padding-bottom": "2%"}}>{study.description} </h5>
-                    <h5><span class="card-titles">Period:</span> {studies.startDate} - {study.endDate} </h5>
+                    <h5 style={{"text-align": "center", "padding-bottom": "2%"}}>{study.completed} </h5>
+                    <h5><span class="card-titles">Period:</span> {study.userId} - {study.userId} </h5>
                     <h5><span class="card-titles bottom">Researchers:</span></h5>                  
                     <div class="d-table-row gap-2 d-md-flex justify-content-md-end">
                         <button type="button" class="btn btn-outline-primary">Download CSV</button>
                         {isAdmin ? (
-                            <button type="button" class="btn btn-outline-primary" //onClick={() => alert("Works!")}
-                            >Manage Researchers</button>
+                            <Link to="/users" type="button" class="btn btn-outline-primary"
+                            >Manage Researchers</Link>
                         ) : (null)}
                     </div>
                 </Card>
-                )}
-            </div>
-                
+                </div>)}
             </div>
             {isAdmin ? (
                 null
