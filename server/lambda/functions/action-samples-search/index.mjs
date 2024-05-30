@@ -2,6 +2,7 @@ import {
   addCorsHeaders,
   connectToDB,
   DATETIME_OUTPUT_FORMAT,
+  getDBUserIdFromEvent,
   authenticateUser,
   AUTH_NONE,
   AUTH_PARENT_OFCHILD,
@@ -68,19 +69,23 @@ function make_handler(subjectID)
     let res;
     switch (subjectID) {
     case SUBJECT_CHILD:
-      switch (auth ) {
+      switch (auth) {
       case AUTH_PARENT_OFCHILD:
         res = await db.query("SELECT * FROM samples WHERE child_id = $1", [subjectIDValue]);
         break;
       case AUTH_RESEARCHER_OFSAMESTUDYASCHILD:
-        // TODO: this needs to calculate the union of intervals of (the intersection of studies of the researcher and the child)
-        res = await db.query(`SELECT smp.*
-                              FROM samples as smp, study_children as sc, children as c, studies as s
+        res = await db.query(`WITH commonstudies AS (
+                                (SELECT upper(study_id) as id FROM study_children WHERE participant_id = $1)
+                                  INTERSECT
+                                (SELECT upper(study_id) as id FROM study_researchers WHERE participant_id = $2)
+                              )
+                              SELECT DISTINCT smp.*
+                              FROM samples as smp, studies as s, commonstudies as cs
                               WHERE smp.child_id = $1
-                                AND sc.participant_id = smp.child_id
-                                AND upper(s.id) = upper(sc.study_id)
-                                AND s.start_date <= smp."timestamp" AND smp."timestamp" < (s.end_date + interval '1 day')`,
-                             [subjectIDValue]);
+                                AND upper(s.id) = upper(cs.id)
+                                AND   s.start_date <= timezone('UTC', smp."timestamp")::date
+                                  AND timezone('UTC', smp."timestamp")::date < (s.end_date + interval '1 day')`,
+                             [subjectIDValue, getDBUserIdFromEvent(event)]);
         break;
       }
       if (res.rows.length === 0 &&
@@ -107,7 +112,8 @@ function make_handler(subjectID)
                             FROM samples as smp, study_children as sc, children as c, studies as s
                             WHERE upper(sc.study_id) = upper($1)
                               AND c.id = sc.participant_id AND sc.participant_id = smp.child_id
-                              AND s.start_date <= smp."timestamp" AND smp."timestamp" < (s.end_date + interval '1 day')`,
+                              AND   s.start_date <= timezone('UTC', smp."timestamp")::date
+                                AND timezone('UTC', smp."timestamp")::date < (s.end_date + interval '1 day')`,
                            [subjectIDValue]);
       if (res.rows.length === 0 &&
           (await db.query("SELECT * FROM studies WHERE upper(id) = upper($1)", [subjectIDValue])).rows.length === 0) {
