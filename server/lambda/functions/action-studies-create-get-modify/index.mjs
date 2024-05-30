@@ -150,7 +150,22 @@ function make_handler(actionID)
     case ACTION_CREATE:
     case ACTION_MODIFY: {
       let fields = JSON.parse(event.body);
-      console.log(`got fields: ${JSON.stringify(fields)}`);
+      if (fields === null) {
+        const msg = "missing or empty request body";
+        const missingBodyResp = {
+          statusCode: 400,
+          body: JSON.stringify({
+            errors: [{
+              resource: p.resolvedResource,
+              status: 400,
+              message: msg,
+            }],
+          }),
+        };
+        addCorsHeaders(missingBodyResp);
+        console.error(msg);
+        return missingBodyResp;
+      }
 
       let errors = [];
 
