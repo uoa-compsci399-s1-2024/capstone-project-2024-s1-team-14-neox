@@ -365,6 +365,22 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 done
 fi
 
+echo "clearing samples..."
+sam remote invoke --stack-name "$STACKNAME" FuncMetaClearSamples
+echo ""
+BADSAMPLES="$("$(git rev-parse --show-toplevel)/server/generateXsamples" 7 |
+		     jq -r '.samples[0].uv |= -1 |
+			    .samples[1].light |= -1 |
+			    .samples[2].col_red |= 256 |
+			    .samples[3].col_green |= 256 |
+			    .samples[4].col_blue |= 256 |
+			    .samples[5].col_clear |= -1 |
+			    .samples[6].col_temp |= -1')"
+aux_test_body -M "checking if out-of-range field values are rejected" \
+	      -m POST -t "$IDTOKEN_PARENT1" -u "$API_URL/samples/$CHILDID" -d "$BADSAMPLES" \
+	      -D -C "(.errors | length == 7)
+	      	     and all(.errors[]; .status == 400 and (.message | contains(\"out of range\")))"
+
 echo "testing auth for studies..."
 
 if true; then
