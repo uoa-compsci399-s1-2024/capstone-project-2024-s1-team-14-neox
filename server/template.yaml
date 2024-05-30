@@ -606,6 +606,7 @@ Resources:
     Properties:
       CodeUri: lambda/functions/meta-cognito-postconfirm/
       Handler: index.handler
+      Timeout: 30
       Role: !GetAtt LambdaRole.Arn
       # Can't set trigger for userpool here because of circular dependencies.
   # API Gateway
