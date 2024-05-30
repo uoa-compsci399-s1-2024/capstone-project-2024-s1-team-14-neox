@@ -496,6 +496,9 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/studies/$STUDYID/participants" \
 		      -s "$assert_code"
 done
+aux_test_body -M "checking there are no participants of the study we just made" \
+	      -m GET -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$STUDYID/participants" \
+	      -D -C "(.data.children | length == 0) and (.data.parents | length == 0) and (.data.researchers | length == 0)"
 aux_test_auth -M "listing participants of nonexistent study $BADSTUDYID" \
 	      -m GET -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$BADSTUDYID/participants" \
 	      -s 404
