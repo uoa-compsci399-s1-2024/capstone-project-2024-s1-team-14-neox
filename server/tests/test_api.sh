@@ -119,7 +119,7 @@ function call_api()
 		echo "missing url" >&2
 		exit 1
 	fi
-	if [ "$method" = "POST" ] && [ -n "$post_data" ]; then
+	if [ -n "$post_data" ]; then
 		curl -i -X "$method" -H"Authorization: Bearer $token" "$url" -H'Content-Type: application/json' -d "$post_data" 2>/dev/null
 	else
 		curl -i -X "$method" -H"Authorization: Bearer $token" "$url" 2>/dev/null
