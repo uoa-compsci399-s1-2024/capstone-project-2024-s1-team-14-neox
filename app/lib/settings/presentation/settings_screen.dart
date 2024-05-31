@@ -144,93 +144,98 @@ class _SettingsScreenState extends State<SettingsScreen> {
           title: const Text("Settings"),
           scrolledUnderElevation: 0,
         ),
-        body: Column(
-          children: [
-            _buildSetting(
-              "Daily outdoor time target",
-              icon: Text(
-                "${App.sharedPreferences.getInt("daily_target")} minutes",
-                style: const TextStyle(color: Colors.grey),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildSetting(
+                "Daily outdoor time target",
+                icon: Text(
+                  "${App.sharedPreferences.getInt("daily_target")} minutes",
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                action: () => _showDailyTargetDialog(context),
               ),
-              action: () => _showDailyTargetDialog(context),
-            ),
-            Divider(
-              thickness: 4,
-              height: 4,
-              color: Colors.grey[200],
-            ),
-            _buildSetting(
-              "Frequently asked questions",
-              action: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const FaqsScreen()),
-                );
-              },
-            ),
-            _buildSetting(
-              "Background",
-              action: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AboutScreen()),
-                );
-              },
-            ),
-            _buildSetting(
-              "Privacy policy",
-              action: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const PrivacyPolicyScreen()),
-                );
-              },
-            ),
-            _buildSetting(
-              "About",
-              icon: null,
-              action: () {
-                showAboutDialog(
-                  context: context,
-                  applicationName: "Neox Sens",
-                  applicationVersion: "v1.0.0",
-                  applicationIcon: SvgPicture.asset(
-                    "assets/icon_medium.svg",
-                    width: 50,
-                  ),
-                );
-              },
-            ),
-            Divider(
-              thickness: 4,
-              height: 4,
-              color: Colors.grey[200],
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8.0, 40, 8, 0),
-              child: SizedBox(
-                width: screenWidth,
-                height: 40,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+              Divider(
+                thickness: 4,
+                height: 4,
+                color: Colors.grey[200],
+              ),
+              _buildSetting(
+                "Frequently asked questions",
+                action: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const FaqsScreen()),
+                  );
+                },
+              ),
+              _buildSetting(
+                "Background",
+                action: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AboutScreen()),
+                  );
+                },
+              ),
+              _buildSetting(
+                "Privacy policy",
+                action: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const PrivacyPolicyScreen()),
+                  );
+                },
+              ),
+              _buildSetting(
+                "About",
+                icon: null,
+                action: () {
+                  showAboutDialog(
+                    context: context,
+                    applicationName: "Neox Sens",
+                    applicationVersion: "v1.0.0",
+                    applicationIcon: SvgPicture.asset(
+                      "assets/icon_medium.svg",
+                      width: 50,
                     ),
-                  ),
-                  onPressed: () => _showDeleteAllDataDialog(context),
-                  child: const Text(
-                    'Delete all data',
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.red,
+                  );
+                },
+              ),
+              Divider(
+                thickness: 4,
+                height: 4,
+                color: Colors.grey[200],
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8.0, 40, 8, 0),
+                child: SizedBox(
+                  width: screenWidth,
+                  height: 40,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.red),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () => _showDeleteAllDataDialog(context),
+                    child: const Text(
+                      'Delete all data',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.red,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(
+                height: 10,
+              )
+            ],
+          ),
         ));
   }
 }

@@ -31,13 +31,13 @@ class ScanResultTile extends StatelessWidget {
   Widget _buildConnectButton(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.black,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
       onPressed: () {
         onConnect();
       },
-      child: const Text('PAIR'),
+      child: const Text('Pair'),
     );
   }
 

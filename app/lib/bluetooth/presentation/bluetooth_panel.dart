@@ -15,10 +15,10 @@ class BluetoothPanel extends StatelessWidget {
     return BlocListener<ChildDeviceCubit, ChildDeviceState>(
       listener: (context, state) {
         if (state is ChildDeviceConnectState) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Paired device'),
-            duration: Duration(seconds: 2),
-            backgroundColor: Colors.lightBlue,
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: const Text('Paired device'),
+            duration: const Duration(seconds: 2),
+            backgroundColor: Theme.of(context).colorScheme.secondary,
           ));
           context.read<AllChildProfileCubit>().updateDeviceRemoteId(
               childId: state.childId,
@@ -31,13 +31,14 @@ class BluetoothPanel extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.errorMessage),
             duration: const Duration(seconds: 4),
+            backgroundColor: Colors.grey,
           ));
 
         } else if (state is ChildDeviceSyncSuccessState) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Sync complete"),
-            duration: Duration(seconds: 2),
-            backgroundColor: Colors.lightBlue,
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: const Text("Sync complete"),
+            duration: const Duration(seconds: 2),
+            backgroundColor: Theme.of(context).colorScheme.secondary,
           ));
 
         }

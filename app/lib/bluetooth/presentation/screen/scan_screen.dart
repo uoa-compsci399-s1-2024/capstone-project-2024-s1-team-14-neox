@@ -70,6 +70,7 @@ class ScanScreen extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text(state.errorMessage),
               duration: const Duration(seconds: 2),
+              backgroundColor: Colors.grey,
             ));
           } else if (state is BluetoothConnectSuccessState) {
             context.read<ChildDeviceCubit>().onChildDeviceConnectPressed(
