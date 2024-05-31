@@ -656,6 +656,13 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 		      -D -s "$assert_code"
 done
 
+newgender="female"
+newbirthdate="2020-02-01"
+call_api -m PATCH -t "$IDTOKEN_PARENT1" -u "$API_URL/children/$CHILDID/info" -d "{\"gender\": \"$newgender\", \"birthdate\": \"$newbirthdate\"}" >/dev/null
+aux_test_body -M "checking if gender and age found in study samples" \
+	      -m GET -t "$IDTOKEN_RESEARCHER1" -u "$API_URL/studies/$STUDYID/samples" \
+	      -D -C "all(.data[]; .gender == \"$newgender\" and .age != null)"
+
 echo "clearing samples to prepare for testing the research period..."
 sam remote invoke --stack-name "$STACKNAME" FuncMetaClearSamples
 echo ""
