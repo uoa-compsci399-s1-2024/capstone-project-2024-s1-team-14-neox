@@ -661,7 +661,7 @@ Resources:
               - !Sub "'http://localhost:${WebsiteLocalhostPort}'"
               - "'*'"
         AllowMethods: "'OPTIONS, GET, POST, PUT, PATCH, DELETE'"
-        AllowHeaders: "'Origin, Content-Type, Accept'"
+        AllowHeaders: "'Origin, Content-Type, Accept, Authorization'"
         AllowCredentials: true
       MethodSettings:
         - LoggingLevel: INFO
