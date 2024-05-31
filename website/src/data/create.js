@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+
 //Auth related imports
 import { awsExports } from '../aws-exports';
 import { Authenticator } from '@aws-amplify/ui-react';
@@ -59,23 +60,36 @@ const Create = ({ toggleButton, handleJwtToken }) => {
         };
 
         const handleSubmit = async (event) => {
+          try{
+            const session = await Auth.currentSession();
+            const idToken = session.getIdToken();
+            const jwtToken = idToken.getJwtToken()
             event.preventDefault();
             const formData = new FormData(event.target);
             const title = formData.get('title');
             const id = formData.get('id');
             const description = formData.get('description');
-            const study = await fetch("https://httpbin.org/anything", {
-              method: "post",
-              headers: {"Content-Type": "application/json"},
+            console.log(JSON.stringify(jwtToken))
+            const study = await fetch(awsExports.API_ENDPOINT + "/studies/" + id, {
+              method: "put",
+              mode: "cors",
+              headers: {
+                "Authorization": "Bearer " + jwtToken
+              },
+              credentials: 'include',
               body: {
-                "title": title,
-                "id": id,
+                "name": title,
                 "desription": description,
-                "startDate": startDate,
-                "endDate": endDate
+                "start_date": startDate,
+                "end_date": endDate
               }
             })
-            navigate("/home");
+            console.log(JSON.stringify(jwtToken))
+            //navigate("/home"); 
+          } catch (error) {
+            console.log("Error creating study", error)
+          }
+
           };
 
           
