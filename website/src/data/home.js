@@ -15,8 +15,6 @@ Amplify.configure({
 
 const Home = ({ isAdmin, showButton }) => {
     const [familyName, setFamilyName] = useState(null);
-    const [Ids, setIds] = useState([]);
-    const [idToken, setidToken] = useState([]);
 
     useEffect(() => {
         async function fetchFamilyName() {
@@ -32,60 +30,23 @@ const Home = ({ isAdmin, showButton }) => {
         fetchFamilyName();
     }, []);
 
+    const [idToken, setIdToken] = useState(null);
+
     useEffect(() => {
-        const fetchIds = async () => {
-            try {
-            const user = await Auth.currentAuthenticatedUser();
+        const fetchIdToken = async () => {
+          try {
             const session = await Auth.currentSession();
-            const idToken = session.getIdToken();
-            const attributes = user.attributes;
-            const email = attributes.email;
-            const getId = await fetch(awsExports.API_ENDPOINT + "/researchers/" + email + "/studies", {
-                method: 'GET',
-                mode: 'cors',
-                headers: {
-                    'Authorization': 'Bearer ' + idToken.getJwtToken()
-                },
-		        credentials: 'include',
-            })
-            const jsonId = await getId.json()
-            const ids = jsonId
-            if (typeof(ids) != undefined) {
-                setIds([ids])
-                //const metadata = await fetchMetadata(Ids)
-            }
-
-            console.log(Ids)
-            } catch (error) {
-                console.error('Error fetching study data', error);
-                setIds([])
-                console.log(typeof(Ids))
-            }
-            
+            const token = session.getIdToken();
+            setIdToken(token);
+          } catch (error) {
+            console.error('Error fetching ID token:', error);
+          }
+        };
+        if (!isAdmin) {
+            fetchIdToken();
         }
-        fetchIds()
-    }, [])
+    }, []);
 
-    /*async function fetchMetadata(Id) {
-        try {
-        const session = await Auth.currentSession();
-        const idToken = session.getIdToken();
-        const getMetadata = await fetch(awsExports.API_ENDPOINT + "/studies/" + Id + 'info', {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'Authorization': 'Bearer ' + idToken.getJwtToken()
-            },
-            credentials: 'include',
-        })
-        const jsonMetadata = await getMetadata.json()
-        const metadata = jsonMetadata.data
-        console.log(metadata)
-        } catch (error) {
-            console.error('Error fetching study data', error);
-        }
-        
-    }*/
     const [studies, setStudies] = useState([]);
     const [idTokenAdmin, setIdTokenAdmin] = useState(null); 
     
@@ -100,41 +61,80 @@ const Home = ({ isAdmin, showButton }) => {
             console.error('Error fetching ID token:', error);
           }
         };
-    
-        fetchIdTokenAdmin();
+        if (isAdmin) {
+            fetchIdTokenAdmin();
+        }
     }, []);
     
     useEffect(() => {
         const fetchStudies = async () => {
           try {
-            const session = await Auth.currentSession();
-            const idToken = session.getIdToken();
-    
-            const response = await fetch(`${awsExports.API_ENDPOINT}/studies`, {
-              method: 'GET',
-              mode: 'cors',
-              headers: {
-                'Authorization': 'Bearer ' + idTokenAdmin.getJwtToken()
-              },
-              credentials: 'include',
-            });
-            
-            const jsonData = await response.json();
-            console.log(jsonData);
-            if (jsonData && Array.isArray(jsonData.data)) { 
-              setStudies(jsonData.data);
-            } else {
-              console.error('Error fetching study data:', jsonData); 
+            const user = await Auth.currentAuthenticatedUser();
+            const email = user.attributes.email;
+            var studyData = [];
+            var token = null;
+            if (!idToken && !idTokenAdmin) {
+                throw new Error('No ID token');
             }
+            else if (idTokenAdmin) {
+                const response = await fetch(`${awsExports.API_ENDPOINT}/studies`, {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Authorization': 'Bearer ' + idTokenAdmin.getJwtToken()
+                },
+                credentials: 'include',
+                });
+                const jsonData = await response.json();
+                if (jsonData && Array.isArray(jsonData.data)) { 
+                studyData = jsonData.data;
+                } else {
+                console.error('Error fetching study data:', jsonData); 
+                }
+                token = idTokenAdmin;
+            }
+            else if (idToken){
+                const response = await fetch(`${awsExports.API_ENDPOINT}/researchers/${email}/studies`, {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Authorization': 'Bearer ' + idToken.getJwtToken()
+                },
+                credentials: 'include',
+                });
+                const jsonData = await response.json();
+                if (jsonData && Array.isArray(jsonData.data)) { 
+                studyData = jsonData.data;
+                } else {
+                    console.error('Error fetching study data:', jsonData); 
+                }
+                token = idToken;
+            }
+            for (let i in studyData) {
+                const info = await fetch(`${awsExports.API_ENDPOINT}/studies/${studyData[i].id}/info`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Authorization': 'Bearer ' + token.getJwtToken()
+                    },
+                    credentials: 'include',
+                });
+                const jsoninfo = await info.json();
+                const data = jsoninfo.data;
+                studyData[i]["start_date"] = data.start_date;
+                studyData[i]["end_date"] = data.end_date;
+                studyData[i]["name"] = data.name;
+                studyData[i]["description"] = data.description;
+            }
+            setStudies(studyData);
           } catch (error) {
             console.error('Error fetching study data', error);
           }
         };
-    
-        if (idTokenAdmin) { 
-          fetchStudies();
-        }
-      }, [idTokenAdmin]); 
+        fetchStudies();
+
+      }, [idTokenAdmin])
+           
 
     return (
         <div class="home-body">
@@ -145,63 +145,65 @@ const Home = ({ isAdmin, showButton }) => {
                     <div className="d-grid">
                         <Link to="/create" className="btn btn-primary">Start a new study</Link>
                     </div>
-                <hr/>
-                <div class="studies">
-                    <h3>Current Studies</h3>
-                    {typeof(Ids) != undefined ? (
-                    <div>
-                    {studies.map((study) => (              
-                    <div class="study-card" key={study.id}>
-                    <Card variation="elevated">
-                    <h5 style={{"text-align": "center", "font-style": "italic", "width": "90%"}}>ID {study.id}</h5>
-                        <hr/>
-                        <h3 style={{"text-align": "center"}}>{study.id}</h3>
-                        <h5 style={{"text-align": "center", "padding-bottom": "2%"}}>{study.id} </h5>
-                        <h5><span class="card-titles">Period:</span> {study.id} - {study.id} </h5>
-                        <h5><span class="card-titles bottom">Researchers:</span></h5> 
-                        <div class="d-table-row gap-4 d-md-flex justify-content-md-end">
-                            <button type="button" class="btn btn-outline-primary">Download CSV</button>
+                    <hr/>
+                    <div class="studies">
+                        <h3>Current Studies</h3>
+                        <div>
+                            {studies.map((study) => (              
+                            <div class="study-card" key={study.id}>
+                                <Card variation="elevated">
+                                    <h5 style={{"text-align": "center", "font-style": "italic"}}>ID {study.id}</h5>
+                                    <hr/>
+                                    <h3 style={{"text-align": "center"}}>{study.name}</h3>
+                                    <h5 style={{"text-align": "center", "padding-bottom": "2%"}}>{study.description} </h5>
+                                    <h5><span class="card-titles">Period:</span> {study.start_date} - {study.end_date} </h5>
+                                    <h5><span class="card-titles bottom">Researchers: </span>{study.id}</h5> 
+                                    <div class="d-table-row gap-4 d-md-flex justify-content-md-end">
+                                        <button type="button" class="btn btn-outline-primary">Download CSV</button>
 
-                            <Link to="/users" type="button" class="btn btn-outline-primary"
-                            >Manage Researchers</Link>
-                            
+                                        <Link to="/users" type="button" class="btn btn-outline-primary"
+                                        >Manage Researchers</Link>
+                                    
+                                    </div>
+                                </Card>
+                            </div>
+                            ))}
                         </div>
-                    </Card>
                     </div>
-                    ))}
-                </div>
-                    ):(null) }     
-                </div>
                 </div>
             
             ):(
             <div>
             <hr/>
             <div class="studies">
-                <h3>Current Studies</h3> 
-                
-                {Ids.map(study =>              
-                <div class="study-card" key={study.id}>
-                <Card variation="elevated">
-                <h5 style={{"text-align": "center", "font-style": "italic", "width": "90%"}}>ID {study.id}</h5>
-                    <hr/>
-                    <h3 style={{"text-align": "center"}}>{study.id}</h3>
-                    <h5 style={{"text-align": "center", "padding-bottom": "2%"}}>{study.id} </h5>
-                    <h5><span class="card-titles">Period:</span> {study.id} - {study.id} </h5>
-                    <h5><span class="card-titles bottom">Researchers:</span></h5> 
-                    <div class="d-table-row gap-4 d-md-flex justify-content-md-end">
-                        <button type="button" class="btn btn-outline-primary">Download CSV</button>
+                        <h3>Current Studies</h3>
+                        <div>
+                            {studies.map((study) => (              
+                            <div class="study-card" key={study.id}>
+                                <Card variation="elevated">
+                                    <h5 style={{"text-align": "center", "font-style": "italic"}}>ID {study.id}</h5>
+                                    <hr/>
+                                    <h3 style={{"text-align": "center"}}>{study.name}</h3>
+                                    <h5 style={{"text-align": "center", "padding-bottom": "2%"}}>{study.description} </h5>
+                                    <h5><span class="card-titles">Period:</span> {study.start_date} - {study.end_date} </h5>
+                                    <h5><span class="card-titles bottom">Researchers: </span>{study.id}</h5> 
+                                    <div class="d-table-row gap-4 d-md-flex justify-content-md-end">
+                                        <button type="button" class="btn btn-outline-primary">Download CSV</button>
+                                    
+                                    </div>
+                                </Card>
+                            </div>
+                            ))}
+                            <div class="non-admin">
+                                <p>Don't see a study?</p>
+                                <p>Request access from the admins</p>
+                            </div>
+                        </div>
                     </div>
-                </Card>
-                </div>)}
+                </div> 
+                )}
+
             </div>
-            <div class="non-admin">
-                <p>Don't see a study?</p>
-                <p>Request access from the admins</p>
-                </div>
-        </div>
-            )}
-        </div>
         )}
 
 export default Home;

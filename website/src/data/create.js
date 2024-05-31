@@ -85,7 +85,7 @@ const Create = ({ toggleButton, handleJwtToken }) => {
                 "end_date": format(endDate, "yyyy-MM-dd")
               })
             })
-            //navigate("/home"); 
+            navigate("/home"); 
           } catch (error) {
             console.log("Error creating study", error)
           }
