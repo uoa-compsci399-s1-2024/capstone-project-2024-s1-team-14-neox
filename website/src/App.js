@@ -9,8 +9,6 @@ import Popup from './popup';
 import AccessDenied from './data/accessDenied';
 import Home from './data/home';
 import Create from './data/create';
-import PrivateRoutes from './data/privateRoutes';
-import DisplayChart from './data/displayChart';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import logo from './data/neox.svg';
 
@@ -98,7 +96,6 @@ function App() {
         
       }else{
         handleSignOut();
-        alert("The email does not exist");
       }
       //console.log('token is ', token);
       toggleButton(false);
@@ -123,7 +120,6 @@ function App() {
                   {showButton &&<li className="nav-item"><Link className="nav-link" to={'/'}>Login</Link></li>}
                   {!showButton && isAdmin && <li className="nav-item"><Link className="nav-link" to={'/users'}>Users</Link></li>}
                   {!showButton && isAdmin && <li className="nav-item"><Link className="nav-link" to={'/create'}>New Study</Link></li>}
-                  {!showButton && !isAdmin && <li className="nav-item"><Link className="nav-link" to={'/studyData'}>Study Data</Link></li>}
                   {!showButton && ( <li className="nav-item"> <Link className="nav-link" onClick={() => { handleSignOut();}} to={'/'}>Logout</Link></li>)}
                 </ul>
             </div>
@@ -131,9 +127,6 @@ function App() {
           <div className="auth-wrapper">
             <div className="auth-inner">
               <Routes>
-                {!showButton && !isAdmin && (
-                  <Route path="/studyData" element={<DisplayChart />} />
-                )}
                 <Route path="/"  element={<Login toggleButton={toggleButton} handleJwtToken={handleJwtToken} />}/>
                 {!showButton && isAdmin && (
                   <Route path="/users" element={<Users toggleButton={toggleButton} handleJwtToken={handleJwtToken} />} />
