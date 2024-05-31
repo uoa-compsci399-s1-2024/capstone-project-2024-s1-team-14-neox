@@ -9,44 +9,51 @@ class StudyTile extends StatelessWidget {
   final StudyModel study;
   final VoidCallback onStudyDelete;
 
-  // TODO pass function to add and delete children, like how you will do for scan in bluetooth bloc
-  const StudyTile({super.key, required this.study, required this.onStudyDelete});
+  const StudyTile(
+      {super.key, required this.study, required this.onStudyDelete});
 
-  Widget _buildParticipationList(BuildContext context, ParticipantsState state) {
+  Widget _buildParticipationList(
+      BuildContext context, ParticipantsState state) {
     return Column(
       children: [
         const Text(
           "Participants",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-
         if (state.allChildren.isEmpty) ...const [
-          Text("No profiles no show."),
-          Text("Add profiles to participate in the study from the home tab."),
+          Text(
+            "No profiles no show.",
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            "Add profiles to participate in the study from the home tab.",
+            textAlign: TextAlign.center,
+          ),
         ],
-
         ...state.allChildren.map((child) => Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              child.childName,
-              style: const TextStyle(fontSize: 18),
-            ),
-            state.participating.any((other) => other.childId == child.childId)
-              ? IconButton(
-                iconSize: 32,
-                onPressed: () => context
-                  .read<ParticipantsCubit>()
-                  .deleteChildFromStudy(child.childId, study.studyCode),
-                icon: const Icon(Icons.remove))
-              : IconButton(
-                iconSize: 32,
-                onPressed: () => context
-                  .read<ParticipantsCubit>()
-                  .addChildToStudy(child.childId, study.studyCode),
-                icon: const Icon(Icons.add)),
-          ],
-        ))
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  child.childName,
+                  style: const TextStyle(fontSize: 18),
+                ),
+                state.participating
+                        .any((other) => other.childId == child.childId)
+                    ? IconButton(
+                        iconSize: 32,
+                        onPressed: () => context
+                            .read<ParticipantsCubit>()
+                            .deleteChildFromStudy(
+                                child.childId, study.studyCode),
+                        icon: const Icon(Icons.remove))
+                    : IconButton(
+                        iconSize: 32,
+                        onPressed: () => context
+                            .read<ParticipantsCubit>()
+                            .addChildToStudy(child.childId, study.studyCode),
+                        icon: const Icon(Icons.add)),
+              ],
+            ))
       ],
     );
   }
@@ -56,7 +63,7 @@ class StudyTile extends StatelessWidget {
       context: context,
       builder: (innerContext) => AlertDialog(
         title: const Padding(
-          padding: EdgeInsets.all(10),
+          padding: EdgeInsets.all(12),
           child: Text('Withdraw from study?'),
         ),
         actions: [
@@ -78,6 +85,9 @@ class StudyTile extends StatelessWidget {
   }
 
   void _showBottomSheetDialog(BuildContext context) {
+    Size screenSize = MediaQuery.sizeOf(context);
+    double screenWidth = screenSize.width;
+    double screenHeight = screenSize.height;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -85,15 +95,15 @@ class StudyTile extends StatelessWidget {
         return Wrap(
           children: [
             Padding(
-              padding: const EdgeInsets.all(40),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
                   StudyInfoTile(study),
-              
                   const Divider(height: 50),
-                  
                   BlocProvider(
-                    create: (_) => ParticipantsCubit(context.read<StudyRepository>())..getParticipatingStatus(study.studyCode),
+                    create: (_) =>
+                        ParticipantsCubit(context.read<StudyRepository>())
+                          ..getParticipatingStatus(study.studyCode),
                     child: BlocBuilder<ParticipantsCubit, ParticipantsState>(
                       builder: (context, state) {
                         if (state.status.isLoading) {
@@ -103,14 +113,27 @@ class StudyTile extends StatelessWidget {
                       },
                     ),
                   ),
-                  
                   const Divider(height: 50),
-              
-                  ElevatedButton(
-                    onPressed: () => _showWithdrawConfirmDialog(context),
-                    child: const Text("Withdraw from study"),
+                  SizedBox(
+                    width: screenWidth,
+                    height: 40,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.red),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () => _showWithdrawConfirmDialog(context),
+                      child: const Text(
+                        'Withdraw from study',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
                   ),
-
                   const SizedBox(height: 20),
                 ],
               ),

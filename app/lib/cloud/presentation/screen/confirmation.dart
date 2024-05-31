@@ -31,38 +31,71 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
 
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.sizeOf(context);
+    double screenWidth = screenSize.width;
+    double screenHeight = screenSize.height;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Confirmation Page'),
+        title: const Text('Confirmation Page'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Confirm Your Email',
-              style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20.0),
-            Text(
-              'A confirmation code has been sent to ${widget.email}. '
-              'Please enter the code below:',
-            ),
-            SizedBox(height: 20.0),
-            TextField(
-              controller: codeController,
-              decoration: InputDecoration(
-                labelText: 'Confirmation Code',
-                border: OutlineInputBorder(),
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Confirm Your Email',
+                style: TextStyle(fontSize: 24.0),
               ),
-            ),
-            SizedBox(height: 20.0),
-            PrimaryBtn(
-              btnText: 'Confirm',
-              btnFun: () => confirmCode(widget.email, codeController.text),
-            ),
-          ],
+              const SizedBox(height: 20.0),
+              Text(
+                'A confirmation code has been sent to ${widget.email}. '
+                'Please enter the code below:',
+              ),
+              const SizedBox(height: 20.0),
+              TextField(
+                controller: codeController,
+                decoration: InputDecoration(
+                  labelText: 'Confirmation Code',
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.tertiary,
+                      width: 2,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: screenWidth,
+                height: 40,
+                child: FilledButton(
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ))),
+                  onPressed: () => confirmCode(widget.email, codeController.text),
+                  child: const Text(
+                    'Confirm',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+            ],
+          ),
         ),
       ),
     );

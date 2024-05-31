@@ -24,4 +24,7 @@ class StudyModel {
         startDate: entity.startDate,
         endDate: entity.endDate,
       );
+
+    @override
+    String toString() => "$studyCode $name";
 }
