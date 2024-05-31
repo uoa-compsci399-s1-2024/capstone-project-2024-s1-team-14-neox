@@ -468,11 +468,11 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 		      -D -s "$assert_code"
 done
 
-aux_test_body -M "creating study with ID $BADSTUDYID with empty input" \
+aux_test_body -M "checking if backend rejects creating study with ID $BADSTUDYID with empty input" \
 	      -m PUT -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$BADSTUDYID" \
 	      -D -C "(.errors[0].message | test(\"missing.+body\"))"
 for missing_field in start_date end_date; do
-	aux_test_body -M "creating study with ID $BADSTUDYID with missing field '$missing_field'" \
+	aux_test_body -M "checking if backend rejects creating study with ID $BADSTUDYID with missing field '$missing_field'" \
 		      -m PUT -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$BADSTUDYID" -d "$(echo "$STUDYFIELDS" | jq -r "del(.$missing_field)")" \
 		      -D -C "(.errors[0].resource | contains(\"fieldname=$missing_field\"))
 		             and (.errors[0].message | contains(\"missing\"))"
