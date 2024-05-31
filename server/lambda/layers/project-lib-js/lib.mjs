@@ -66,12 +66,15 @@ export async function connectToDB()
   return db;
 }
 
+// See https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-cors.html#apigateway-enable-cors-proxy
 export function addCorsHeaders(response)
 {
   if (response.headers === undefined) {
     response.headers = {};
   }
-  response.headers["Access-Control-Allow-Origin"] = "*";
+  response.headers["Access-Control-Allow-Origin"] = process.env.CORS_ALLOW_ORIGIN;
+  response.headers["Access-Control-Allow-Methods"] = "'OPTIONS, GET, POST, PUT, PATCH, DELETE'";
+  response.headers["Access-Control-Allow-Headers"] = "'Origin, Content-Type, Accept'";
 }
 
 // Based on https://www.rfc-editor.org/rfc/rfc7231#section-3.1.1.1

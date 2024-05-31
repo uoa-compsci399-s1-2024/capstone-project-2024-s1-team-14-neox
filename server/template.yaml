@@ -106,6 +106,22 @@ Globals:
         GROUPNAME_ADMINS: !Ref AdminsUserGroup
         GROUPNAME_RESEARCHERS: !Ref ResearchersUserGroup
         GROUPNAME_PARENTS: !Ref ParentsUserGroup
+        CORS_ALLOW_ORIGIN: !If
+          - IsProd
+          - Fn::Sub:
+            - "'${Origin}'"
+            - Origin: !ImportValue
+                Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-prod-website"
+          - !If
+            - IsDev
+            - Fn::Sub:
+              - "'${Origin}'"
+              - Origin: !ImportValue
+                  Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-dev-website"
+            - !If
+              - IsLocalhostWebsite
+              - !Sub "'http://localhost:${WebsiteLocalhostPort}'"
+              - "'*'"
     VpcConfig:
       SecurityGroupIds:
         - !Ref DBAccessSecurityGroup
