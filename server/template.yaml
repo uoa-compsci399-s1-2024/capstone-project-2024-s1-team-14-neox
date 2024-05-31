@@ -640,6 +640,8 @@ Resources:
       StageName: dev
       Auth:
         DefaultAuthorizer: CognitoAuth
+        # Why would you require auth on preflight requests???
+        AddDefaultAuthorizerToCorsPreflight: false
         Authorizers:
           CognitoAuth:
             UserPoolArn: !GetAtt UserPool.Arn
