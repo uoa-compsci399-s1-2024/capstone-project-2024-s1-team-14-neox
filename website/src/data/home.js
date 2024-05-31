@@ -87,24 +87,6 @@ const Home = ({ isAdmin, showButton }) => {
         
     }*/
     
-    async function removeStudy(id) {
-        const session = await Auth.currentSession();
-        const idToken = session.getIdToken()
-        try{
-        const result = await fetch(awsExports.API_ENDPOINT + "/studies/" + id, { 
-            method: "DELETE",
-            mode: 'cors',
-            headers: {
-                'Authorization': 'Bearer ' + idToken.getJwtToken()
-                },
-		    credentials: 'include',
-        })
-        console.log(result.json())
-        } catch (error) {
-            console.log("Delete failed", error)
-        }
-    }
-    
 
     return (
         <div class="home-body">
@@ -123,7 +105,6 @@ const Home = ({ isAdmin, showButton }) => {
                     {Ids.map(study =>              
                     <div class="study-card" key={study.id}>
                     <Card variation="elevated">
-                    <button type="button" class="btn btn-link" onClick={() => removeStudy(study.id)} style={{"float": "left", "clear": "none"}}>Delete</button>
                     <h5 style={{"text-align": "center", "font-style": "italic", "width": "90%"}}>ID {study.id}</h5>
                         <hr/>
                         <h3 style={{"text-align": "center"}}>{study.id}</h3>
@@ -154,7 +135,6 @@ const Home = ({ isAdmin, showButton }) => {
                 {Ids.map(study =>              
                 <div class="study-card" key={study.id}>
                 <Card variation="elevated">
-                <button type="button" class="btn btn-link" onClick={() => removeStudy(study.id)} style={{"float": "left", "clear": "none"}}>Delete</button>
                 <h5 style={{"text-align": "center", "font-style": "italic", "width": "90%"}}>ID {study.id}</h5>
                     <hr/>
                     <h3 style={{"text-align": "center"}}>{study.id}</h3>
