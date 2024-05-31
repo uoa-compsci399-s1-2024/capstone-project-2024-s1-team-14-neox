@@ -200,11 +200,12 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
             ),
           ),
           focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.primary,
-                width: 2,
-              )),
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+              width: 2,
+            ),
+          ),
           // prefixIcon: Icon(Icons.person),
         ),
       ),
@@ -253,7 +254,6 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
           color: Colors.black,
         ),
         isExpanded: true,
-        
         items: genders
             .map((gender) => DropdownMenuItem(
                 value: gender,
@@ -417,7 +417,7 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
             ),
             onPressed: onDeletePressed,
             child: const Text(
-              'Delete profile',
+              'Delete child',
               style: TextStyle(
                 fontSize: 20,
                 color: Colors.red,
@@ -425,12 +425,10 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
             ),
           ),
         ),
-
-
       ];
     } else {
       buttons = [
-                const SizedBox(
+        const SizedBox(
           height: 40,
         ),
         SizedBox(

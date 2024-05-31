@@ -113,6 +113,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   // prefixIcon: Icon(Icons.person),
                 ),
               ),
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    "The password must have: ",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  Text(
+                    "  - at least 8 characters",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  Text(
+                    "  - at least 1 number ",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  Text(
+                    "  - at least 1 special character ",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  Text(
+                    "  - at least 1 uppercase letter",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  Text(
+                    "  - at least 1 lowercase letter",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                ],
+              ),
               const SizedBox(
                 height: 20,
               ),
