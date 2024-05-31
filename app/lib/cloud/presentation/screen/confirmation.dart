@@ -36,7 +36,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
 
   @override
   Widget build(BuildContext context) {
-    Size screenSize = MediaQuery.sizeOf(context);
+        Size screenSize = MediaQuery.sizeOf(context);
     double screenWidth = screenSize.width;
     double screenHeight = screenSize.height;
     return Scaffold(
