@@ -12,6 +12,7 @@ import { Auth, Amplify, Logger, Hub  } from 'aws-amplify';
 //date range picker
 import { DateRangePicker } from 'rsuite';
 import 'rsuite/dist/rsuite.min.css';
+import { format } from 'date-fns';
 
 Amplify.configure({
   Auth: {
@@ -69,7 +70,7 @@ const Create = ({ toggleButton, handleJwtToken }) => {
             const title = formData.get('title');
             const id = formData.get('id');
             const description = formData.get('description');
-            console.log(JSON.stringify(jwtToken))
+            console.log(typeof(format(startDate, "yyyy-MM--dd")))
             const study = await fetch(awsExports.API_ENDPOINT + "/studies/" + id, {
               method: "put",
               mode: "cors",
@@ -80,11 +81,10 @@ const Create = ({ toggleButton, handleJwtToken }) => {
               body: JSON.stringify({
                 "name": title,
                 "description": description,
-                "start_date": startDate,
-                "end_date": endDate
+                "start_date": format(startDate, "yyyy-MM-dd"),
+                "end_date": format(endDate, "yyyy-MM-dd")
               })
             })
-            console.log(JSON.stringify(jwtToken))
             //navigate("/home"); 
           } catch (error) {
             console.log("Error creating study", error)
