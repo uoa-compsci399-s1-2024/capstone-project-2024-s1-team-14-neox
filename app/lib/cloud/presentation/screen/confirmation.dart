@@ -8,7 +8,12 @@ class ConfirmationPage extends StatefulWidget {
   final String password;
   void Function(String, String) loginAction;
 
-  ConfirmationPage({Key? key, required this.email, required this.password, required this.loginAction}) : super(key: key);
+  ConfirmationPage(
+      {Key? key,
+      required this.email,
+      required this.password,
+      required this.loginAction})
+      : super(key: key);
 
   @override
   _ConfirmationPageState createState() => _ConfirmationPageState();
@@ -57,7 +62,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
               TextField(
                 controller: codeController,
                 decoration: InputDecoration(
-                  labelText: 'Confirmation Code',
+                  labelText: 'Confirmation code',
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(
@@ -84,7 +89,8 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                           RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ))),
-                  onPressed: () => confirmCode(widget.email, codeController.text),
+                  onPressed: () =>
+                      confirmCode(widget.email, codeController.text),
                   child: const Text(
                     'Confirm',
                     style: TextStyle(fontSize: 20),
@@ -105,6 +111,19 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
     if (await AWSServices().confirm(email, code)) {
       Navigator.pop(context); // Dangerously use context across async gap
       widget.loginAction(email, widget.password);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Please try again",
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: Colors.grey,
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 }
