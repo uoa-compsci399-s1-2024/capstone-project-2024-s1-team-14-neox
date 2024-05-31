@@ -8,4 +8,10 @@ class BarChartBar {
     required this.y,
     required this.time,
   });
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return "$x $y $time \n ";
+  }
 }

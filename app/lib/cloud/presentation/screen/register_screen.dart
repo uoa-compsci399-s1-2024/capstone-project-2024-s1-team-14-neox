@@ -18,6 +18,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late TextEditingController middleNameController;
   late TextEditingController givenNameController;
   late TextEditingController familyNameController;
+  late bool _passwordVisible;
 
   @override
   void initState() {
@@ -27,6 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     middleNameController = TextEditingController();
     givenNameController = TextEditingController();
     familyNameController = TextEditingController();
+    _passwordVisible = false;
     super.initState();
   }
 
@@ -43,57 +45,172 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.sizeOf(context);
+    double screenWidth = screenSize.width;
+    double screenHeight = screenSize.height;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Register"),
+        title: const Text("Create a Neox account"),
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              InputField(
+              TextField(
                 controller: emailController,
-                isPassword: false,
-                labelTxt: 'Email',
-                icon: Icons.person,
+                obscureText: false,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: "Email",
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.tertiary,
+                      width: 2,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      )),
+                  // prefixIcon: Icon(Icons.person),
+                ),
               ),
-              InputField(
+              const SizedBox(
+                height: 20,
+              ),
+              TextField(
                 controller: passwordController,
-                isPassword: true,
-                labelTxt: 'Password',
-                icon: Icons.lock,
+                obscureText: !_passwordVisible,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  labelText: "Password",
+                  suffixIcon: IconButton(
+                      icon: Icon(_passwordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off),
+                      onPressed: () {
+                        setState(() {
+                          _passwordVisible = !_passwordVisible;
+                        });
+                      }),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.tertiary,
+                      width: 2,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      )),
+                  // prefixIcon: Icon(Icons.person),
+                ),
               ),
-              InputField(
+              const SizedBox(
+                height: 20,
+              ),
+              TextField(
                 controller: givenNameController,
-                isPassword: false,
-                labelTxt: 'Given Name',
-                icon: Icons.person,
+                obscureText: false,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  labelText: "Given name",
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.tertiary,
+                      width: 2,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      )),
+                  // prefixIcon: Icon(Icons.person),
+                ),
               ),
-              InputField(
+              const SizedBox(
+                height: 20,
+              ),
+              TextField(
                 controller: middleNameController,
-                isPassword: false,
-                labelTxt: 'Middle Name',
-                icon: Icons.person,
+                obscureText: false,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  labelText: "Middle name",
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.tertiary,
+                      width: 2,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      )),
+                  // prefixIcon: Icon(Icons.person),
+                ),
               ),
-              InputField(
+              const SizedBox(
+                height: 20,
+              ),
+              TextField(
                 controller: familyNameController,
-                isPassword: false,
-                labelTxt: 'Family Name',
-                icon: Icons.person,
+                obscureText: false,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  labelText: "Family name",
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.tertiary,
+                      width: 2,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      )),
+                  // prefixIcon: Icon(Icons.person),
+                ),
               ),
-              HeightSpacer(myHeight: 20),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: PrimaryBtn(
-                  btnText: 'Register',
-                  btnFun: () => register(
+              const SizedBox(
+                height: 40,
+              ),
+              SizedBox(
+                width: screenWidth,
+                height: 40,
+                child: FilledButton(
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ))),
+                  onPressed: () => register(
                     context,
                     emailController.text,
                     passwordController.text,
                     middleNameController.text,
                     givenNameController.text,
                     familyNameController.text,
+                  ),
+                  child: const Text(
+                    'Sign up',
+                    style: TextStyle(fontSize: 20),
                   ),
                 ),
               ),

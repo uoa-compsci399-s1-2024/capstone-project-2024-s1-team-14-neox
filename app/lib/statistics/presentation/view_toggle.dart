@@ -18,7 +18,7 @@ class ViewToggle extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      margin: EdgeInsets.all(8),
+      margin: const EdgeInsets.all(8),
       child: Stack(
         children: <Widget>[
           Container(
@@ -27,33 +27,34 @@ class ViewToggle extends StatelessWidget {
             decoration: ShapeDecoration(
               color: Theme.of(context).colorScheme.background,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50),
-                side:
-                    BorderSide(color: Theme.of(context).colorScheme.secondary),
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
               ),
             ),
             child: const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8),
                   child: Text(
                     "Daily",
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  padding: EdgeInsets.symmetric(horizontal: 2),
                   child: Text(
                     "Monhtly",
+                    textAlign: TextAlign.right,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -63,9 +64,8 @@ class ViewToggle extends StatelessWidget {
           AnimatedAlign(
             duration: const Duration(milliseconds: 100),
             curve: Curves.easeIn,
-            alignment: detailedView
-                ? Alignment.centerLeft
-                : Alignment.centerRight,
+            alignment:
+                detailedView ? Alignment.centerLeft : Alignment.centerRight,
             child: Container(
               width: width * 0.55,
               height: height,
@@ -73,18 +73,15 @@ class ViewToggle extends StatelessWidget {
               decoration: ShapeDecoration(
                 color: Theme.of(context).colorScheme.primary,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
               child: Text(
-                detailedView
-                    ? "Daily"
-                    : "Monthly",
+                detailedView ? "Daily" : "Monthly",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12,
                   color: Theme.of(context).colorScheme.background,
-                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),

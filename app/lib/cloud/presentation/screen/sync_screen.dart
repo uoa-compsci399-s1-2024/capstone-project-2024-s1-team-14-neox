@@ -68,6 +68,9 @@ class SyncScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.sizeOf(context);
+    double screenWidth = screenSize.width;
+    double screenHeight = screenSize.height;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Cloud"),
@@ -76,141 +79,217 @@ class SyncScreen extends StatelessWidget {
       body: RepositoryProvider(
         create: (context) => StudyRepository(),
         child: BlocProvider(
-          create: (context) => StudyCubit(context.read<StudyRepository>())..getAllParticipatingStudies(),
+          create: (context) => StudyCubit(context.read<StudyRepository>())
+            ..getAllParticipatingStudies(),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(40, 40, 40, 0),
-            child: Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(40),
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(30),
-                    child: Row(
-                      children: [
-                        const Text(
-                          "Sync your data to the cloud",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Container(
+                  //   decoration: BoxDecoration(
+                  //     borderRadius: BorderRadius.circular(40),
+                  //     color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  //   ),
+
+                  SizedBox(
+                    height: 80,
+                    child: FilledButton(
+                      style: ButtonStyle(
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(40),
+                            ),
                           ),
-                        ),
-
-                        const Spacer(),
-                    
-                        // BlocBuilder<CloudSyncCubit, CloudSyncState>(
-                        //   builder: (context, state) {
-                        //     if (state.lastSynced == null) {
-                        //       return const Text("Last synced: never");
-                        //     }
-                        //     return Text("Last synced: ${DateFormat('yyyy-MM-dd - kk:mm:ss').format(state.lastSynced!)}");
-                        //   },
-                        // ),
-                        
-                        // const Spacer(),
-                        
-                        ElevatedButton(
-                          onPressed: () => context.read<CloudSyncCubit>().syncAllChildData(),
-                          child: BlocBuilder<CloudSyncCubit, CloudSyncState>(
-                            builder: (context, state) {
-                              if (state.status.isLoading) {
-                                return const CircularProgressIndicator();
-                              }
-                              return const Icon(Icons.cloud_upload, color: Colors.black);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const Divider(height: 80),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Participate in a study",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                          backgroundColor: MaterialStatePropertyAll(
+                              Theme.of(context)
+                                  .colorScheme
+                                  .secondary
+                                  .withOpacity(0.1))),
+                      onPressed: () =>
+                          context.read<CloudSyncCubit>().syncAllChildData(),
+                      child: BlocBuilder<CloudSyncCubit, CloudSyncState>(
+                        builder: (context, state) {
+                          if (state.status.isLoading) {
+                            return Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Text(
+                                    'Syncing...',
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary),
+                                  ),
+                                  const CircularProgressIndicator(),
+                                ]);
+                          }
+                          return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Text(
+                                  'Sync to cloud',
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary),
+                                ),
+                                Icon(Icons.cloud_upload,
+                                    size: 40,
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                              ]);
+                        },
                       ),
                     ),
+                  ),
+                  const Divider(height: 60),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Myopia research",
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
 
-                    BlocConsumer<StudyCubit, StudyState>(
-                      listener: (context, state) {
-                        if (state.status.isFetchStudySuccess) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) {
-                              return RepositoryProvider.value(
-                                value: context.read<StudyRepository>(),
-                                child: BlocProvider.value(
-                                  value:
-                                      BlocProvider.of<StudyCubit>(context),
-                                  child: JoinStudyScreen(
-                                    study: state.newStudy!,
+                      BlocConsumer<StudyCubit, StudyState>(
+                        listener: (context, state) {
+                          if (state.status.isFetchStudySuccess) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) {
+                                return RepositoryProvider.value(
+                                  value: context.read<StudyRepository>(),
+                                  child: BlocProvider.value(
+                                    value: BlocProvider.of<StudyCubit>(context),
+                                    child: JoinStudyScreen(
+                                      study: state.newStudy!,
+                                    ),
                                   ),
-                                ),
-                              );
+                                );
+                              }),
+                            );
+                          }
+                        },
+                        builder: (context, state) {
+                          if (state.status.isLoading) {
+                            return const CircularProgressIndicator();
+                          }
+                          return IconButton(
+                            iconSize: 32,
+                            icon: const Icon(Icons.add),
+                            onPressed: () => _showStudyCodeInputDialog(context,
+                                onStudyFetch: (s) {
+                              context
+                                  .read<StudyCubit>()
+                                  .fetchStudyFromServer(s);
                             }),
                           );
-                        }
-                      },
-                      builder: (context, state) {
-                        if (state.status.isLoading) {
-                          return const CircularProgressIndicator();
-                        }
-                        return IconButton(
-                          iconSize: 32,
-                          icon: const Icon(Icons.add),
-                          onPressed: () => _showStudyCodeInputDialog(
-                              context, onStudyFetch: (s) {
-                            context
-                                .read<StudyCubit>()
-                                .fetchStudyFromServer(s);
-                          }),
+                        },
+                      ),
+                      // onStudyFetch: (studyCode) => Navigator.push(
+                      // context,
+                      // MaterialPageRoute(builder: (_) {
+                      //   return BlocProvider.value(
+                      //     value: BlocProvider.of<StudyCubit>(context),
+                      //     child: JoinStudyScreen(studyCode: _textFieldController.text.toLowerCase().trim(),),
+                      //   );
+                      // }F
+                    ],
+                  ),
+                  BlocBuilder<StudyCubit, StudyState>(
+                    builder: (context, state) {
+                      if (state.studies.isEmpty) {
+                        return Container(
+                          height: screenHeight * 0.3,
+                          width: screenWidth * 0.8,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              width: 1,
+                              color: Colors.grey,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  "You are not participating in any studies.",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const Text(
+                                  "Help the researchers at Neox Labs reduce the progress of myopia for children in New Zealand",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 40,
+                                  child: ElevatedButton(
+                                    style: ButtonStyle(
+                                      shape: MaterialStateProperty.all<
+                                          RoundedRectangleBorder>(
+                                        RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                    ),
+                                    onPressed: () => _showStudyCodeInputDialog(
+                                      context,
+                                      onStudyFetch: (s) {
+                                        context
+                                            .read<StudyCubit>()
+                                            .fetchStudyFromServer(s);
+                                      },
+                                    ),
+                                    child: const Text(
+                                      'Join',
+                                      style: TextStyle(fontSize: 20),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         );
-                      },
-                    ),
-                    // onStudyFetch: (studyCode) => Navigator.push(
-                    // context,
-                    // MaterialPageRoute(builder: (_) {
-                    //   return BlocProvider.value(
-                    //     value: BlocProvider.of<StudyCubit>(context),
-                    //     child: JoinStudyScreen(studyCode: _textFieldController.text.toLowerCase().trim(),),
-                    //   );
-                    // }F
-                  ],
-                ),
+                      }
 
-                BlocBuilder<StudyCubit, StudyState>(
-                  builder: (context, state) {
-                    if (state.studies.isEmpty) {
-                      return Container();
-                    }
-                    return Expanded(
-                      child: ListView(
+                      return ListView(
                         scrollDirection: Axis.vertical,
                         children: [
                           ...state.studies.map(
-                            (s) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 20),
-                              child: StudyTile(
-                                study: s,
-                                onStudyDelete: () => context.read<StudyCubit>().withdrawStudy(s.studyCode),
+                            (s) => Expanded(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                child: StudyTile(
+                                  study: s,
+                                  onStudyDelete: () => context
+                                      .read<StudyCubit>()
+                                      .withdrawStudy(s.studyCode),
+                                ),
                               ),
                             ),
                           ),
                         ],
-                      ),
-                    );
-                  },
-                ),
-              ],
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
