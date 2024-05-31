@@ -73,8 +73,8 @@ export function addCorsHeaders(response)
     response.headers = {};
   }
   response.headers["Access-Control-Allow-Origin"] = process.env.CORS_ALLOW_ORIGIN;
-  response.headers["Access-Control-Allow-Methods"] = "'OPTIONS, GET, POST, PUT, PATCH, DELETE'";
-  response.headers["Access-Control-Allow-Headers"] = "'Origin, Content-Type, Accept'";
+  response.headers["Access-Control-Allow-Methods"] = 'OPTIONS, GET, POST, PUT, PATCH, DELETE';
+  response.headers["Access-Control-Allow-Headers"] = 'Origin, Content-Type, Accept';
 }
 
 // Based on https://www.rfc-editor.org/rfc/rfc7231#section-3.1.1.1
