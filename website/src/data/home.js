@@ -133,7 +133,7 @@ const Home = ({ isAdmin, showButton }) => {
         };
         fetchStudies();
 
-      }, [idTokenAdmin])
+      }, [idToken, idTokenAdmin])
            
 
     return (
