@@ -255,19 +255,19 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	# first we set our assertions
 	check_expr_fragment_basicformat="(. | type==\"object\") and (.data | type==\"array\") and all(.data[]; has(\"id\"))"
 	check_expr_fragment_parents="
-	[\"$EMAIL_PARENT1\",
+	([\"$EMAIL_PARENT1\",
 	 \"$EMAIL_PARENT2\"
-	] as \$parents | (\$parents - [.data[].id]) | length == 0
+	] as \$parents | (\$parents - [.data[].id]) | length == 0)
         "
 	check_expr_fragment_researchers="
-	[\"$EMAIL_RESEARCHER1\",
+	([\"$EMAIL_RESEARCHER1\",
 	 \"$EMAIL_RESEARCHER2\",
          \"$EMAIL_ADMIN\"
-	] as \$researchers | (\$researchers - [.data[].id]) | length == 0
+	] as \$researchers | (\$researchers - [.data[].id]) | length == 0)
         "
 	check_expr_fragment_admins="
-	[\"$EMAIL_ADMIN\"
-	] as \$admins | (\$admins - [.data[].id]) | length == 0
+	([\"$EMAIL_ADMIN\"
+	] as \$admins | (\$admins - [.data[].id]) | length == 0)
         "
 	for usertype in parents researchers admins; do
 		assert_code=403
@@ -339,8 +339,8 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 		PARENT1|ADMIN)
 			assert_code=200
 			check_expr="
-			[\"$CHILDID\"
-			] as \$children | (\$children - [.data[].id]) | length == 0"
+			([\"$CHILDID\"
+			] as \$children | (\$children - [.data[].id]) | length == 0)"
 			;;
 	esac
 	aux_test_auth -M "$user: listing children of PARENT1" \
@@ -582,7 +582,7 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 		PARENT1|ADMIN)
 			assert_code=200
 			check_expr="
-			[\"$STUDYID\"] as \$studies | (\$studies - [.data[].id]) | length == 0"
+			([\"$STUDYID\"] as \$studies | (\$studies - [.data[].id]) | length == 0)"
 			;;
 	esac
 	aux_test_auth -M "$user: listing studies (for child)" \
@@ -600,7 +600,7 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 		RESEARCHER1|ADMIN)
 			assert_code=200
 			check_expr="
-			[\"$STUDYID\"] as \$studies | (\$studies - [.data[].id]) | length == 0"
+			([\"$STUDYID\"] as \$studies | (\$studies - [.data[].id]) | length == 0)"
 			;;
 	esac
 	aux_test_auth -M "$user: listing studies (for researcher1)" \
@@ -618,7 +618,7 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 		RESEARCHER2|ADMIN)
 			assert_code=200
 			check_expr="
-			[\"$STUDYID\"] as \$studies | (\$studies - [.data[].id]) | length == 1"
+			([\"$STUDYID\"] as \$studies | (\$studies - [.data[].id]) | length == 1)"
 			;;
 	esac
 	aux_test_auth -M "$user: listing studies (for researcher2)" \
