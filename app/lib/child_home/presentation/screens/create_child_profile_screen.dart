@@ -187,6 +187,7 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
     ];
 
     List<Widget> body = [
+      const SizedBox(height: 8),
       TextField(
         controller: _nameController,
         keyboardType: TextInputType.text,
@@ -442,7 +443,7 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
             ))),
             onPressed: onAddChildPressed,
             child: const Text(
-              'Add child',
+              'Add',
               style: TextStyle(fontSize: 20),
             ),
           ),
