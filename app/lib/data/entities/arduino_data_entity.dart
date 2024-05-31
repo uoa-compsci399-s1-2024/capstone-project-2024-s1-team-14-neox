@@ -236,6 +236,13 @@ class ArduinoDataEntity {
     return query.get();
   }
 
+  static Future<int> getOutdoorCountForChildByDateRange(
+      DateTime startDate, DateTime endDate, int childId) async {
+    List<ArduinoDataEntity> query =
+        await queryArduinoDataForChildByDateRange(startDate, endDate, childId);
+    return countSamplesWithAppClass1(query);
+  }
+
   static int countSamplesWithAppClass1(List<ArduinoDataEntity> dataList) {
     return dataList.where((data) => data.appClass == 1).length;
   }
@@ -246,18 +253,17 @@ class ArduinoDataEntity {
 
     for (var day = startTime;
         day.isBefore(endTime);
-        day = day.add(Duration(days: 1))) {
+        day = day.add(const Duration(days: 1))) {
       final startOfDay = DateTime(day.year, day.month, day.day);
-      final endOfDay =
-          startOfDay.add(Duration(days: 1)).subtract(Duration(seconds: 1));
+      final endOfDay = startOfDay
+          .add(const Duration(days: 1))
+          .subtract(const Duration(seconds: 1));
 
       final dataList = await queryArduinoDataForChildByDateRange(
           startOfDay, endOfDay, childId);
 
       result[startOfDay] = countSamplesWithAppClass1(dataList);
     }
-    print("Drift result");
-    print(result);
 
     return result;
   }
@@ -268,10 +274,11 @@ class ArduinoDataEntity {
 
     for (var hour = startTime;
         hour.isBefore(endTime);
-        hour = hour.add(Duration(hours: 1))) {
+        hour = hour.add(const Duration(hours: 1))) {
       final startOfHour = DateTime(hour.year, hour.month, hour.day, hour.hour);
-      final endOfHour =
-          startOfHour.add(Duration(hours: 1)).subtract(Duration(seconds: 1));
+      final endOfHour = startOfHour
+          .add(const Duration(hours: 1))
+          .subtract(Duration(seconds: 1));
 
       final dataList = await queryArduinoDataForChildByDateRange(
           startOfHour, endOfHour, childId);
@@ -322,8 +329,8 @@ class ArduinoDataEntity {
     Map<DateTime, Map<DateTime, int>> hourlyStats = {};
     for (int dayOffset = 0; dayOffset <= 6; dayOffset += 1) {
       DateTime currentDay = startMonday.add(Duration(days: dayOffset));
-  //Dailylight savings
-       currentDay = DateTime(currentDay.year, currentDay.month, currentDay.day);
+      //Dailylight savings
+      currentDay = DateTime(currentDay.year, currentDay.month, currentDay.day);
 
       Map<DateTime, int> daily = {};
       for (int hour = 0; hour < 24; hour += 1) {
