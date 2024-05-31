@@ -158,7 +158,7 @@ function aux_test_auth()
 		echo "missing status code assertions" >&2
 		exit 1
 	fi
-	[ -n "$message" ] && printf 'AUTH: %s... ' "$message"
+	[ -n "$message" ] && printf 'AUTH(expect one of: %s): %s... ' "${status_assertion_options[*]}" "$message"
 	local resp="$(call_api -m "$method" -t "$token" -u "$url" -d "$post_data")"
 	local status="$(echo "$resp" | parse_http_status)"
 	# at least one needs to match for the assertion to succeed
