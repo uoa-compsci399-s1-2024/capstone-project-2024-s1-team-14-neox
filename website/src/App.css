@@ -144,7 +144,7 @@ button {
 }
 
 .researchers-list {
-  max-height: 170px; /* Adjust this value as needed */
+  max-height: 200px; /* Adjust this value as needed */
   overflow-y: auto;
   padding: 5px; /* Optional: Add some padding */
 }

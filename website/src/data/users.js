@@ -8,6 +8,7 @@ import '../App.css';
 import '@aws-amplify/ui-react/styles.css';
 import { Auth, Amplify, Logger, Hub  } from 'aws-amplify';
 import Popup from '../popup';
+import axios from 'axios';
 
 Amplify.configure({
   Auth: {
@@ -17,57 +18,100 @@ Amplify.configure({
   }
 });
 
-const Users = ({ toggleButton, handleJwtToken }) => {
-  const [jwtToken, setJwtToken] = useState('');
+const Users = ({ toggleButton, handleJwtToken , jwtToken}) => {
   const [createdUsers, setCreatedUsers] = useState([]);
   const logger = new Logger('Logger', 'INFO');
   const [isSignedUp, setIsSignedUp] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
   const [newUserEmail, setNewUserEmail] = useState('');
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [idToken, setIdToken] = useState(null); 
+
   const togglePopup = () => {
     setIsOpen(!isOpen);
   };
-
-  const handleSignUp = async (event) => {
-      event.preventDefault();
-      const formData = new FormData(event.target);
-      const email = formData.get('email');
-      const password = formData.get('password');
-      const firstName = formData.get('given_name');
-      const middleName = formData.get('middle_name');
-      const lastName = formData.get('family_name');
-      const nickname = formData.get('nickname');
   
+
+  useEffect(() => {
+    const fetchIdToken = async () => {
       try {
-        const { user } = await Auth.signUp({
-          username: email,
-          password,
-          attributes: {
-            email,
-            given_name: firstName,
-            middle_name: middleName,
-            family_name: lastName,
-            nickname
-          }
-        });
-        console.log('user:', user);
-        setNewUserEmail(email);
-        setIsSignedUp(true);
-        setIsSuccessful(true);
-        setCreatedUsers((prevUsers) => [...prevUsers, { email, firstName, lastName, nickname }]);
-        togglePopup();
+        const session = await Auth.currentSession();
+        const token = session.getIdToken();
+        setIdToken(token);
       } catch (error) {
-        togglePopup();
-        setIsSuccessful(false);
-        setNewUserEmail(email);
-        setErrorMessage(error.message);
-        console.log('Error signing up:', error);
+        console.error('Error fetching ID token:', error);
       }
     };
+
+    fetchIdToken();
+  }, []);
+
+  useEffect(() => {
+    const fetchResearchers = async () => {
+      try {
+        const response = await axios.get(`${awsExports.API_ENDPOINT}/researchers`, {
+          headers: { Authorization: `Bearer ${idToken.getJwtToken()}` },
+          withCredentials: true,
+        });
   
+        if (response.data && Array.isArray(response.data.data)) {
+          setCreatedUsers(response.data.data);
+          logger.info('Fetched researchers:', response.data.data);
+        } else {
+          setCreatedUsers(response.data.data);
+          logger.info('Fetched researchers:', response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching researchers:', error);
+      }
+    };
+
+    if (idToken) {
+      fetchResearchers();
+    }
+  }, [idToken, newUserEmail]);
+  
+  const handleSignUp = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const email = formData.get('email');
+    const firstName = formData.get('given_name');
+    const lastName = formData.get('family_name');
+
+    if (!idToken) {
+      console.error('Missing JWT token for signup');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${awsExports.API_ENDPOINT}/researchers`,
+        {
+          given_name: firstName,
+          family_name: lastName,
+          email,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${idToken.getJwtToken()}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      setNewUserEmail(email);
+      setIsSignedUp(true);
+      setIsSuccessful(true);
+      togglePopup();
+    } catch (error) {
+      togglePopup();
+      setIsSuccessful(false);
+      setErrorMessage(error.message);
+      console.error('Error signing up:', error);
+    }
+  };
+
     if (isSignedUp) {
       //return <Redirect to="/Home" />;
     }
@@ -83,24 +127,12 @@ const Users = ({ toggleButton, handleJwtToken }) => {
             <input type="email" className="form-control" placeholder="Enter email" name="email" required />
           </div>
           <div className="mb-3">
-            <label>Password</label>
-            <input type="password" className="form-control" placeholder="Enter password" name="password" required />
-          </div>
-          <div className="mb-3">
             <label>First name</label>
-            <input type="text" className="form-control" placeholder="" name="given_name" required />
-          </div>
-          <div className="mb-3">
-            <label>Middle name</label>
-            <input type="text" className="form-control" placeholder="" name="middle_name" required/>
+            <input type="text" className="form-control" placeholder="Enter given name" name="given_name" required />
           </div>
           <div className="mb-3">
             <label>Last name</label>
-            <input type="text" className="form-control" placeholder="" name="family_name" required />
-          </div>
-          <div className="mb-3">
-            <label>Nickname</label>
-            <input type="text" className="form-control" placeholder="" name="nickname" required/>
+            <input type="text" className="form-control" placeholder="Enter family name" name="family_name" required />
           </div>
           <div className="d-grid">
             <button type="submit" className="btn btn-primary">Create</button>
@@ -109,13 +141,15 @@ const Users = ({ toggleButton, handleJwtToken }) => {
           <br/>
           <h2 style={{"text-align": "center"}}>Registered researchers</h2>
           <div className="researchers-list">
-            {createdUsers.map((user, index) => (
-                <div key={index} className="card mb-3">
-                  <div className="card-body">
-                    <p className="card-text" style={{"text-align": "center"}}>{user.lastName} | {user.email}</p>
-                  </div>
-                </div>
-              ))}
+          {createdUsers.map((user) => ( 
+          <div key={user.id} className="card mb-3"> {/* Access user.id directly */}
+            <div className="card-body">
+              <p className="card-text" style={{ textAlign: "center" }}>
+                {user.id} {/* Display the user's ID */}
+              </p>
+            </div>
+          </div>
+          ))}
           </div>
         </form>
 
