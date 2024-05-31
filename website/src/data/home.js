@@ -16,7 +16,7 @@ Amplify.configure({
 const Home = ({ isAdmin, showButton }) => {
     const [familyName, setFamilyName] = useState(null);
     const [Ids, setIds] = useState([]);
-    const [studies, setStudies] = useState([])
+    const [idToken, setidToken] = useState([]);
 
     useEffect(() => {
         async function fetchFamilyName() {
@@ -86,7 +86,55 @@ const Home = ({ isAdmin, showButton }) => {
         }
         
     }*/
+    const [studies, setStudies] = useState([]);
+    const [idTokenAdmin, setIdTokenAdmin] = useState(null); 
     
+    useEffect(() => {
+        const fetchIdTokenAdmin = async () => {
+          try {
+            const session = await Auth.currentSession();
+            const token = session.getIdToken();
+            setIdTokenAdmin(token);
+            //console.log(idTokenAdmin)
+          } catch (error) {
+            console.error('Error fetching ID token:', error);
+          }
+        };
+    
+        fetchIdTokenAdmin();
+    }, []);
+    
+    useEffect(() => {
+        const fetchStudies = async () => {
+          try {
+            const session = await Auth.currentSession();
+            const idToken = session.getIdToken();
+    
+            const response = await fetch(`${awsExports.API_ENDPOINT}/studies`, {
+              method: 'GET',
+              mode: 'cors',
+              headers: {
+                'Authorization': 'Bearer ' + idTokenAdmin.getJwtToken()
+              },
+              credentials: 'include',
+            });
+            
+            const jsonData = await response.json();
+            console.log(jsonData);
+            if (jsonData && Array.isArray(jsonData.data)) { 
+              setStudies(jsonData.data);
+            } else {
+              console.error('Error fetching study data:', jsonData); 
+            }
+          } catch (error) {
+            console.error('Error fetching study data', error);
+          }
+        };
+    
+        if (idTokenAdmin) { 
+          fetchStudies();
+        }
+      }, [idTokenAdmin]); 
 
     return (
         <div class="home-body">
@@ -102,7 +150,7 @@ const Home = ({ isAdmin, showButton }) => {
                     <h3>Current Studies</h3>
                     {typeof(Ids) != undefined ? (
                     <div>
-                    {Ids.map(study =>              
+                    {studies.map((study) => (              
                     <div class="study-card" key={study.id}>
                     <Card variation="elevated">
                     <h5 style={{"text-align": "center", "font-style": "italic", "width": "90%"}}>ID {study.id}</h5>
@@ -113,14 +161,14 @@ const Home = ({ isAdmin, showButton }) => {
                         <h5><span class="card-titles bottom">Researchers:</span></h5> 
                         <div class="d-table-row gap-4 d-md-flex justify-content-md-end">
                             <button type="button" class="btn btn-outline-primary">Download CSV</button>
-                    
+
                             <Link to="/users" type="button" class="btn btn-outline-primary"
                             >Manage Researchers</Link>
                             
                         </div>
                     </Card>
                     </div>
-                    )}
+                    ))}
                 </div>
                     ):(null) }     
                 </div>
