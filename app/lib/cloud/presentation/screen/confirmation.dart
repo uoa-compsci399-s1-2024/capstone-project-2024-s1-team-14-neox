@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 
 class ConfirmationPage extends StatefulWidget {
   final String email;
+  final String password;
+  void Function(String, String) loginAction;
 
-  const ConfirmationPage({Key? key, required this.email}) : super(key: key);
+  ConfirmationPage({Key? key, required this.email, required this.password, required this.loginAction}) : super(key: key);
 
   @override
   _ConfirmationPageState createState() => _ConfirmationPageState();
@@ -66,8 +68,10 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
     );
   }
 
-  void confirmCode(String email, String code) {
-    AWSServices().confirm(email, code);
-    MaterialPageRoute(builder: (context) => LoginScreen());
+  void confirmCode(String email, String code) async {
+    if (await AWSServices().confirm(email, code)) {
+      Navigator.pop(context); // Dangerously use context across async gap
+      widget.loginAction(email, widget.password);
+    }
   }
 }

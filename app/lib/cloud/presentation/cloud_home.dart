@@ -15,6 +15,7 @@ class CloudHomeScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => LoginCubit(AuthenticationRepository()),
       child: BlocConsumer<LoginCubit, LoginState>(
+        key: UniqueKey(), // Workaround for updating UI
         listener: (context, state) {
         },
         builder: (context, state) {
