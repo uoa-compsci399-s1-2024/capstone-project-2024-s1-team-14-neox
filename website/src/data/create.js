@@ -77,12 +77,12 @@ const Create = ({ toggleButton, handleJwtToken }) => {
                 "Authorization": "Bearer " + jwtToken
               },
               credentials: 'include',
-              body: {
+              body: JSON.stringify({
                 "name": title,
-                "desription": description,
+                "description": description,
                 "start_date": startDate,
                 "end_date": endDate
-              }
+              })
             })
             console.log(JSON.stringify(jwtToken))
             //navigate("/home"); 
