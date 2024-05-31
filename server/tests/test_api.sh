@@ -81,10 +81,13 @@ set -o pipefail
 
 echo "clearing samples..."
 sam remote invoke --stack-name "$STACKNAME" FuncMetaClearSamples
+echo ""
 echo "clearing studies..."
 sam remote invoke --stack-name "$STACKNAME" FuncMetaClearStudies
+echo ""
 echo "clearing children..."
 sam remote invoke --stack-name "$STACKNAME" FuncMetaClearChildren
+echo ""
 
 echo "getting ID tokens..."
 IDTOKEN_PARENT1="$(aws cognito-idp admin-initiate-auth --client-id "$CLIENTID" --auth-parameters "{\"USERNAME\": \"$EMAIL_PARENT1\", \"PASSWORD\": \"$PASSWORD\"}" --user-pool-id "$POOLID" --auth-flow ADMIN_USER_PASSWORD_AUTH | jq -r '.AuthenticationResult.IdToken')"
@@ -106,7 +109,7 @@ function call_api()
 			t) token="$OPTARG" ;;
 			u) url="$OPTARG" ;;
 			d) post_data="$OPTARG" ;;
-			*) echo "invalid option: $o" >&2
+			*) echo "$FUNCNAME: invalid option: $OPTARG" >&2
 			   exit 1
 			   ;;
 		esac
@@ -149,7 +152,7 @@ function aux_test_auth()
 			s) status_assertion_options+=("$OPTARG") ;;
 			M) message="$OPTARG" ;;
 			D) dodebug=1 ;;
-			*) echo "invalid option: $o" >&2
+			*) echo "$FUNCNAME: invalid option: $OPTARG" >&2
 			   exit 1
 			   ;;
 		esac
@@ -194,7 +197,7 @@ function aux_test_body()
 			M) message="$OPTARG" ;;
 			D) dodebug=1 ;;
 			C) check_expr="$OPTARG" ;;
-			*) echo "invalid option: $o" >&2
+			*) echo "$FUNCNAME: invalid option: $OPTARG" >&2
 			   exit 1
 			   ;;
 		esac
@@ -384,7 +387,7 @@ aux_test_body -M "checking if out-of-range field values are rejected" \
 echo "TEST: auth for actions whose status is affected by studies..."
 
 if true; then
-echo "TEST: PRE-STUDIES: child personal info auth..."
+echo "TEST: PRE-STUDIES: child personal info auth and child sample fetching..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	assert_code=403
 	case "$user" in
@@ -413,6 +416,35 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/samples/$CHILDID" \
 		      -s "$assert_code"
 done
+# NOTE: at this point, the child personal info would have been modified by the auth checking and are thus in an indeterminate state.
+CHILDINFO='{
+	"given_name": "Bob",
+	"middle_name": "Billy",
+	"family_name": "Jones",
+	"nickname": "Bobby",
+	"gender": "male",
+	"birthdate": "2024-03-12"
+}'
+call_api -m PUT -t "$IDTOKEN_PARENT1" -u "$API_URL/children/$CHILDID/info" -d "$CHILDINFO" >/dev/null
+aux_test_body -M "checking if PUT on child personal info works as expected" \
+	      -m GET -t "$IDTOKEN_PARENT1" -u "$API_URL/children/$CHILDID/info" \
+	      -D -C "(.data == $CHILDINFO)"
+newfamilyname="Cena"
+call_api -m PATCH -t "$IDTOKEN_PARENT1" -u "$API_URL/children/$CHILDID/info" -d "{\"family_name\": \"$newfamilyname\"}" >/dev/null
+aux_test_body -M "checking if PATCH on child personal info works as expected" \
+	      -m GET -t "$IDTOKEN_PARENT1" -u "$API_URL/children/$CHILDID/info" \
+	      -D -C ".data == ($CHILDINFO | .family_name |= \"$newfamilyname\")"
+# Now we check if backend rejects invalid field values
+nongender="nongender"
+aux_test_body -M "checking if nonexistent gender value '$nongender' is rejected from child personal info" \
+	      -m PATCH -t "$IDTOKEN_PARENT1" -u "$API_URL/children/$CHILDID/info" -d "{\"gender\": \"$nongender\"}" \
+	      -D -C "(.errors[0].status == 400)
+	             and (.errors[0].resource | contains(\"fieldvalue=gender\"))"
+nonbirthdate="nonbirthdate"
+aux_test_body -M "checking if nonexistent birthdate value '$nonbirthdate' is rejected from child personal info" \
+	      -m PATCH -t "$IDTOKEN_PARENT1" -u "$API_URL/children/$CHILDID/info" -d "{\"birthdate\": \"$nonbirthdate\"}" \
+	      -D -C "(.errors[0].status == 400)
+	             and (.errors[0].resource | contains(\"fieldvalue=birthdate\"))"
 fi
 
 # order:
@@ -428,7 +460,7 @@ fi
 # - get samples from a given child
 if true; then
 echo "TEST: study creation and study details..."
-STUDYID="TESTTEST123"
+STUDYID="TEST123"
 BADSTUDYID="ABC123"
 STUDYFIELDS='{"start_date": "2024-01-01", "end_date": "2024-06-01", "name": "Test", "description": "Test description"}'
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
@@ -437,19 +469,22 @@ for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/studies" \
 		      -s 200
 
-	assert_code_args=('-s' 403)
 	case "$user" in
-		ADMIN)
-			assert_code_args=(
-				'-s' 200
-				'-s' 409  # such a study already exists
-			)
-			;;
+		ADMIN) assert_code=204 ;;
 	esac
 	aux_test_auth -M "$user: creating study with ID $STUDYID" \
 		      -m PUT -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/studies/$STUDYID" -d "$STUDYFIELDS" \
-		      -D "${assert_code_args[@]}"
+		      -D -s "$assert_code"
+done
 
+for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
+	assert_code=403
+	case "$user" in
+		ADMIN) assert_code=409 ;;
+	esac
+	aux_test_auth -M "$user: creating study with duplicate ID $STUDYID" \
+		      -m PUT -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/studies/$STUDYID" -d "$STUDYFIELDS" \
+		      -D -s "$assert_code"
 
 	# everyone can fetch study details
 	aux_test_auth -M "$user: getting details of study" \
@@ -487,6 +522,17 @@ aux_test_auth -M "PATCHing details of nonexistent study $BADSTUDYID" \
 	      -m PATCH -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$BADSTUDYID/info" -d '{"description": "testing myopia"}' \
 	      -D -s 404
 
+# NOTE: at this point, the study details would have been modified by the auth checking and are thus in an indeterminate state.
+call_api -m PUT -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$STUDYID/info" -d "$STUDYFIELDS" >/dev/null
+aux_test_body -M "checking if PUT on study details works as expected" \
+	      -m GET -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$STUDYID/info" \
+	      -D -C "(.data == $STUDYFIELDS)"
+newname="updated study name"
+call_api -m PATCH -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$STUDYID/info" -d "{\"name\": \"$newname\"}" >/dev/null
+aux_test_body -M "checking if PATCH on study details works as expected" \
+	      -m GET -t "$IDTOKEN_ADMIN" -u "$API_URL/studies/$STUDYID/info" \
+	      -D -C ".data == ($STUDYFIELDS | .name |= \"$newname\")"
+
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	assert_code=403
 	case "$user" in
@@ -504,77 +550,160 @@ aux_test_auth -M "listing participants of nonexistent study $BADSTUDYID" \
 	      -s 404
 fi
 
-if false; then
-echo "test: adding to study..."
+if true; then
+echo "TEST: adding to study..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
-	echo "$user: adding child to study"
-	curl -i -X PUT -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/children/$CHILDID/studies/$STUDYID" 2>/dev/null #| head -n1
-	echo ""
+	assert_code=403
+	case "$user" in
+		PARENT1) assert_code=204 ;;
+	esac
+        aux_test_auth -M "$user: adding child to study" \
+		      -m PUT -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/children/$CHILDID/studies/$STUDYID" \
+		      -D -s "$assert_code"
 
-	echo "$user: adding researcher1 to study"
-	curl -i -X PUT -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/researchers/$EMAIL_RESEARCHER1/studies/$STUDYID" 2>/dev/null #| head -n1
-	echo ""
-
-	# echo "$user: adding researcher2 to study"
-	# curl -i -X PUT -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/researchers/$EMAIL_RESEARCHER2/studies/$STUDYID" 2>/dev/null #| head -n1
-	# echo ""
+	assert_code=403
+	case "$user" in
+		ADMIN) assert_code=204 ;;
+	esac
+        aux_test_auth -M "$user: adding researcher1 to study" \
+		      -m PUT -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/researchers/$EMAIL_RESEARCHER1/studies/$STUDYID" \
+		      -D -s "$assert_code"
 done
 fi
 
-if false; then
-echo "test: listing participants in study..."
+# NOTE: the following tests require the above participants having been added to the study
+
+if true; then
+echo "TEST: listing studies that a child/user is participating in..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
-	echo "$user: listing participants in study"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/participants" 2>/dev/null #| head -n1
-	echo ""
+	assert_code=403
+	check_expr=""
+	case "$user" in
+		PARENT1|ADMIN)
+			assert_code=200
+			check_expr="
+			[\"$STUDYID\"] as \$studies | (\$studies - [.data[].id]) | length == 0"
+			;;
+	esac
+	aux_test_auth -M "$user: listing studies (for child)" \
+		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/children/$CHILDID/studies" \
+		      -D -s "$assert_code"
+	if [ -n "$check_expr" ]; then
+		aux_test_body -M "$user: checking child is in study" \
+			      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/children/$CHILDID/studies" \
+			      -D -C "$check_expr"
+	fi
+
+	assert_code=403
+	check_expr=""
+	case "$user" in
+		RESEARCHER1|ADMIN)
+			assert_code=200
+			check_expr="
+			[\"$STUDYID\"] as \$studies | (\$studies - [.data[].id]) | length == 0"
+			;;
+	esac
+	aux_test_auth -M "$user: listing studies (for researcher1)" \
+		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/researchers/$EMAIL_RESEARCHER1/studies" \
+		      -D -s "$assert_code"
+	if [ -n "$check_expr" ]; then
+		aux_test_body -M "$user: checking researcher1 is in study" \
+			      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/researchers/$EMAIL_RESEARCHER1/studies" \
+			      -D -C "$check_expr"
+	fi
+
+	assert_code=403
+	check_expr=""
+	case "$user" in
+		RESEARCHER2|ADMIN)
+			assert_code=200
+			check_expr="
+			[\"$STUDYID\"] as \$studies | (\$studies - [.data[].id]) | length == 1"
+			;;
+	esac
+	aux_test_auth -M "$user: listing studies (for researcher2)" \
+		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/researchers/$EMAIL_RESEARCHER2/studies" \
+		      -D -s "$assert_code"
+	if [ -n "$check_expr" ]; then
+		aux_test_body -M "$user: checking researcher2 is NOT in study" \
+			      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/researchers/$EMAIL_RESEARCHER2/studies" \
+			      -D -C "$check_expr"
+	fi
 done
 fi
 
-if false; then
-echo "test: listing studies..."
+if true; then
+echo "TEST: sample fetching..."
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
-	echo "$user: listing studies (for child)"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/children/$CHILDID/studies" 2>/dev/null #| head -n1
-	echo ""
+	assert_code=403
+	case "$user" in
+		RESEARCHER1)
+			assert_code=200
+			;;
+	esac
+	aux_test_auth -M "$user: fetching samples from study" \
+		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/studies/$STUDYID/samples" \
+		      -D -s "$assert_code"
 
-	echo "$user: listing studies (for researcher1)"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/researchers/$EMAIL_RESEARCHER1/studies" 2>/dev/null #| head -n1
-	echo ""
-
-	echo "$user: listing studies (for researcher2)"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/researchers/$EMAIL_RESEARCHER2/studies" 2>/dev/null #| head -n1
-	echo ""
+	assert_code=403
+	case "$user" in
+		PARENT1|RESEARCHER1)
+			assert_code=200
+			;;
+	esac
+	aux_test_auth -M "$user: fetching samples from child" \
+		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/samples/$CHILDID" \
+		      -D -s "$assert_code"
 done
+
+echo "clearing samples to prepare for testing the research period..."
+sam remote invoke --stack-name "$STACKNAME" FuncMetaClearSamples
+echo ""
+STUDY_START_DATE="$(echo "$STUDYFIELDS" | jq -r '.start_date')"
+STUDY_END_DATE="$(echo "$STUDYFIELDS" | jq -r '.end_date')"
+# The third sample is definitely not in the study.
+RANGETESTSAMPLES="$("$(git rev-parse --show-toplevel)/server/generateXsamples" 3 |
+			   jq -r ".samples[0].timestamp |= \"$STUDY_START_DATE\" + \"T00:00:00Z\" |
+			          .samples[1].timestamp |= \"$STUDY_END_DATE\" + \"T23:59:59Z\"")"
+call_api -m POST -t "$IDTOKEN_PARENT1" -u "$API_URL/samples/$CHILDID" -d "$RANGETESTSAMPLES" >/dev/null
+aux_test_body -M "checking if samples from child of same study as researcher are restricted the samples in research period" \
+	      -m GET -t "$IDTOKEN_RESEARCHER1" -u "$API_URL/samples/$CHILDID" \
+	      -D -C ".data | length == 2"
+aux_test_body -M "checking if samples from study have timestamps from within the research period" \
+	      -m GET -t "$IDTOKEN_RESEARCHER1" -u "$API_URL/studies/$STUDYID/samples" \
+	      -D -C ".data | length == 2"
 fi
 
-if false; then
-echo "test: sample fetching..."
+if true; then
+echo "TEST: removing from study..."
+# TODO: test what happens if delete someone from nonexistent study
+aux_test_auth -M "checking if deleting someone from study which doesn't exist indicates there is no such study" \
+	      -m DELETE -t "$IDTOKEN_ADMIN" -u "$API_URL/researchers/$EMAIL_RESEARCHER2/studies/$BADSTUDYID" \
+	      -D -s 404
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
-	echo "$user: fetching samples from study"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/samples" 2>/dev/null #| head -n1
-	echo ""
+	echo "re-adding child to study to prepare for auth test of child removal (from study)..."
+        call_api -m PUT -t "$IDTOKEN_PARENT1" -u "$API_URL/children/$CHILDID/studies/$STUDYID" >/dev/null
+	assert_code=403
+	case "$user" in
+		PARENT1|ADMIN) assert_code=204 ;;
+	esac
+	aux_test_auth -M "$user: removing child from study" \
+		      -m DELETE -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/children/$CHILDID/studies/$STUDYID" \
+		      -D -s "$assert_code"
 
-	echo "$user: fetching samples from child"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/samples/$CHILDID" 2>/dev/null #| head -n1
-	echo ""
+	echo "re-adding researcher1 to study to prepare for auth test of researcher removal (from study)..."
+        call_api -m PUT -t "$IDTOKEN_ADMIN" -u "$API_URL/researchers/$EMAIL_RESEARCHER1/studies/$STUDYID" >/dev/null
+	assert_code=403
+	case "$user" in
+		ADMIN) assert_code=204 ;;
+	esac
+	aux_test_auth -M "$user: removing researcher1 from study" \
+		      -m DELETE -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/researchers/$EMAIL_RESEARCHER1/studies/$STUDYID" \
+		      -D -s "$assert_code"
 done
-fi
-
-if false; then
-echo "test: removing from study..."
-for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
-	echo "$user: removing child from study"
-	curl -i -X DELETE -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/children/$CHILDID/studies/$STUDYID" 2>/dev/null #| head -n1
-	echo ""
-
-	echo "$user: removing researcher1 from study"
-	curl -i -X DELETE -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/researchers/$EMAIL_RESEARCHER1/studies/$STUDYID" 2>/dev/null #| head -n1
-	echo ""
-
-	echo "$user: removing researcher2 from study"
-	curl -i -X DELETE -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/researchers/$EMAIL_RESEARCHER2/studies/$STUDYID" 2>/dev/null #| head -n2
-	echo ""
-done
+aux_test_auth -M "checking if deleting a researcher from study who isn't actually in the study doesn't confirm the existence of the ID" \
+	      -m DELETE -t "$IDTOKEN_ADMIN" -u "$API_URL/researchers/$EMAIL_RESEARCHER2/studies/$STUDYID" \
+	      -D -s 403
 fi
 
 if false; then
