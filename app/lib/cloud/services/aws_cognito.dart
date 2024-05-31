@@ -23,6 +23,7 @@ class AWSServices {
   void register(BuildContext context, String email, String password,
       String middleName, String givenName, String familyName) async {
     try {
+      print("$email $password $middleName $givenName $familyName");
       var signUpResult = await userPool.signUp(
         email,
         password,
