@@ -1,4 +1,4 @@
-timestamp,uv,accelX,accelY,accelZ,r,g,b,c,colorTemp,lux,target,code
+timestamp,uv,accelX,accelY,accelZ,r,g,b,c,colorTemp,lux,target
 1716401757,6,3349,326,10193,2601,3027,3487,7506,7079,1381,,
 1716401759,2,-1085,-3574,9468,2325,2692,3088,6790,6943,1233,,
 1716401761,6,-2964,-619,6480,2325,2654,3078,6501,7055,1181,,
