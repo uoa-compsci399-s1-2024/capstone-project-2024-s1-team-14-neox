@@ -91,30 +91,27 @@ class SyncScreen extends StatelessWidget {
                   //     borderRadius: BorderRadius.circular(40),
                   //     color: Theme.of(context).primaryColor.withOpacity(0.1),
                   //   ),
-
-                  SizedBox(
-                    height: 80,
-                    child: FilledButton(
-                      style: ButtonStyle(
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(40),
-                            ),
-                          ),
-                          backgroundColor: MaterialStatePropertyAll(
-                              Theme.of(context)
-                                  .colorScheme
-                                  .secondary
-                                  .withOpacity(0.1))),
-                      onPressed: () =>
-                          context.read<CloudSyncCubit>().syncAllChildData(),
-                      child: BlocBuilder<CloudSyncCubit, CloudSyncState>(
-                        builder: (context, state) {
-                          if (state.status.isLoading) {
-                            return Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
+                  BlocBuilder<CloudSyncCubit, CloudSyncState>(
+                    builder: (context, state) {
+                      if (state.status.isLoading) {
+                        SizedBox(
+                          height: 80,
+                          child: FilledButton(
+                            style: ButtonStyle(
+                                shape: MaterialStateProperty.all<
+                                    RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(40),
+                                  ),
+                                ),
+                                backgroundColor: MaterialStatePropertyAll(
+                                    Theme.of(context)
+                                        .colorScheme
+                                        .secondary
+                                        .withOpacity(0.1))),
+                            onPressed: null,
+                            child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: [
                                   Text(
                                     'Syncing...',
@@ -125,28 +122,47 @@ class SyncScreen extends StatelessWidget {
                                             .primary),
                                   ),
                                   const CircularProgressIndicator(),
-                                ]);
-                          }
-                          return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Text(
-                                  'Sync to cloud',
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary),
+                                ]),
+                          ),
+                        );
+                      }
+              
+                      return SizedBox(
+                        height: 80,
+                        child: FilledButton(
+                          style: ButtonStyle(
+                              shape: MaterialStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(40),
                                 ),
-                                Icon(Icons.cloud_upload,
-                                    size: 40,
-                                    color:
-                                        Theme.of(context).colorScheme.primary),
-                              ]);
-                        },
-                      ),
-                    ),
+                              ),
+                              backgroundColor: MaterialStatePropertyAll(
+                                  Theme.of(context)
+                                      .colorScheme
+                                      .secondary
+                                      .withOpacity(0.1))),
+                          onPressed: () =>
+                              context.read<CloudSyncCubit>().syncAllChildData(),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text(
+                                'Sync to cloud',
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    color: Theme.of(context).colorScheme.primary),
+                              ),
+                              Icon(Icons.cloud_upload,
+                                  size: 40,
+                                  color: Theme.of(context).colorScheme.primary),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
+              
                   const Divider(height: 60),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -157,7 +173,7 @@ class SyncScreen extends StatelessWidget {
                           fontSize: 20,
                         ),
                       ),
-
+              
                       BlocConsumer<StudyCubit, StudyState>(
                         listener: (context, state) {
                           if (state.status.isFetchStudySuccess) {
@@ -186,9 +202,7 @@ class SyncScreen extends StatelessWidget {
                             icon: const Icon(Icons.add),
                             onPressed: () => _showStudyCodeInputDialog(context,
                                 onStudyFetch: (s) {
-                              context
-                                  .read<StudyCubit>()
-                                  .fetchStudyFromServer(s);
+                              context.read<StudyCubit>().fetchStudyFromServer(s);
                             }),
                           );
                         },
@@ -200,87 +214,89 @@ class SyncScreen extends StatelessWidget {
                       //     value: BlocProvider.of<StudyCubit>(context),
                       //     child: JoinStudyScreen(studyCode: _textFieldController.text.toLowerCase().trim(),),
                       //   );
-                      // }F
+                      // }
                     ],
                   ),
                   BlocBuilder<StudyCubit, StudyState>(
                     builder: (context, state) {
+                      print(state.studies);
                       if (state.studies.isEmpty) {
-                        return Container(
+                        return SizedBox(
                           height: screenHeight * 0.3,
                           width: screenWidth * 0.8,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              width: 1,
-                              color: Colors.grey,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                width: 1,
+                                color: Colors.grey,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  "You are not participating in any studies.",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 16,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    "You are not participating in any studies.",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
                                   ),
-                                ),
-                                const Text(
-                                  "Help the researchers at Neox Labs reduce the progress of myopia for children in New Zealand",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 14,
+                                  const Text(
+                                    "Help the researchers at Neox Labs reduce the progress of myopia for children in New Zealand",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 40,
-                                  child: ElevatedButton(
-                                    style: ButtonStyle(
-                                      shape: MaterialStateProperty.all<
-                                          RoundedRectangleBorder>(
-                                        RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
+                                  SizedBox(
+                                    height: 40,
+                                    child: ElevatedButton(
+                                      style: ButtonStyle(
+                                        shape: MaterialStateProperty.all<
+                                            RoundedRectangleBorder>(
+                                          RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    onPressed: () => _showStudyCodeInputDialog(
-                                      context,
-                                      onStudyFetch: (s) {
-                                        context
-                                            .read<StudyCubit>()
-                                            .fetchStudyFromServer(s);
-                                      },
-                                    ),
-                                    child: const Text(
-                                      'Join',
-                                      style: TextStyle(fontSize: 20),
+                                      onPressed: () => _showStudyCodeInputDialog(
+                                        context,
+                                        onStudyFetch: (s) {
+                                          context
+                                              .read<StudyCubit>()
+                                              .fetchStudyFromServer(s);
+                                        },
+                                      ),
+                                      child: const Text(
+                                        'Join',
+                                        style: TextStyle(fontSize: 20),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         );
                       }
-
+              
                       return ListView(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
                         scrollDirection: Axis.vertical,
                         children: [
                           ...state.studies.map(
-                            (s) => Expanded(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 20),
-                                child: StudyTile(
-                                  study: s,
-                                  onStudyDelete: () => context
-                                      .read<StudyCubit>()
-                                      .withdrawStudy(s.studyCode),
-                                ),
+                            (s) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: StudyTile(
+                                study: s,
+                                onStudyDelete: () => context
+                                    .read<StudyCubit>()
+                                    .withdrawStudy(s.studyCode),
                               ),
                             ),
                           ),
@@ -288,6 +304,9 @@ class SyncScreen extends StatelessWidget {
                       );
                     },
                   ),
+                  const SizedBox(
+                    height: 10,
+                  )
                 ],
               ),
             ),

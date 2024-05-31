@@ -156,9 +156,9 @@ class _MyHomePageState extends State<MyHomePage> {
     const CloudHomeScreen(),
     SettingsScreen(),
     const DatabaseViewer(),
-    const RegisterScreen(),
+    //const RegisterScreen(),
     const LoginScreen(),
-    const ConfirmationPage(email: ''),
+    //const ConfirmationPage(email: ''),
     SyncScreen(),
   ];
 

@@ -20,9 +20,10 @@ class AWSServices {
     '${(dotenv.env['CLIENT_ID'])}',
   );
 
-  void register(BuildContext context, String email, String password,
+  Future<bool> register(BuildContext context, String email, String password,
       String middleName, String givenName, String familyName) async {
     try {
+      print("$email $password $middleName $givenName $familyName");
       var signUpResult = await userPool.signUp(
         email,
         password,
@@ -35,14 +36,10 @@ class AWSServices {
         ],
       );
       print('User registration successful: ${signUpResult.user}');
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ConfirmationPage(email: email),
-        ),
-      );
+      return true;
     } catch (e) {
       print('Error during user registration: $e');
+      return false;
     }
   }
 
@@ -96,12 +93,13 @@ class AWSServices {
     }
   }
 
-  void confirm(String email, String code) async {
+  Future<bool> confirm(String email, String code) async {
     final cognitoUser = CognitoUser(email, userPool);
 
     bool registrationConfirmed = false;
     try {
       registrationConfirmed = await cognitoUser.confirmRegistration(code);
+      return true;
     } catch (e) {
       if (e is CognitoClientException && e.name == 'ExpiredCodeException') {
         // Code has expired, resend the code
@@ -115,13 +113,11 @@ class AWSServices {
       }
       print(registrationConfirmed);
     }
+    return false;
   }
 
-  bool inSession() {
-    if (storage.read(key: 'access_token') == null) {
-      return false;
-    }
-    return true;
+  Future<bool> inSession() async {
+    return await storage.read(key: 'access_token') != null;
   }
 
   Future<String?> getToken() async {

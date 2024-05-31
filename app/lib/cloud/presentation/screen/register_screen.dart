@@ -1,3 +1,4 @@
+import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/confirmation.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/services/aws_cognito.dart';
 import '../widget/input_field.dart';
@@ -5,7 +6,8 @@ import '../widget/primary_btn.dart';
 import 'spacer.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  void Function(String, String) loginAction;
+  RegisterScreen(this.loginAction, {Key? key}) : super(key: key);
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -112,6 +114,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       )),
                   // prefixIcon: Icon(Icons.person),
                 ),
+              ),
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    "The password must have: ",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  Text(
+                    "  - at least 8 characters",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  Text(
+                    "  - at least 1 number ",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  Text(
+                    "  - at least 1 special character ",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  Text(
+                    "  - at least 1 uppercase letter",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  Text(
+                    "  - at least 1 lowercase letter",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                ],
               ),
               const SizedBox(
                 height: 20,
@@ -222,8 +253,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void register(BuildContext context, String email, String password,
-      String givenName, String middleName, String familyName) {
-    AWSServices()
-        .register(context, email, password, givenName, middleName, familyName);
+      String givenName, String middleName, String familyName) async {
+    if (await AWSServices().register(context, email, password, givenName, middleName, familyName)) {
+      
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ConfirmationPage(email: email, password: password, loginAction: widget.loginAction),
+        ),
+      );
+    }
   }
 }
