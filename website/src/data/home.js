@@ -47,13 +47,14 @@ const Home = ({ isAdmin, showButton }) => {
             const idToken = session.getIdToken();
             const attributes = user.attributes;
             const email = attributes.email;
-            const data = await fetch(awsExports.API_ENDPOINT + "/researchers/" + email + "/studies", {
+            const data = await (await fetch(awsExports.API_ENDPOINT + "/researchers/" + email + "/studies", {
                 method: 'GET',
-                mode: 'no-cors',
+                mode: 'cors',
                 headers: {
-                    'Authorization': 'Bearer ' + idToken
+                    'Authorization': 'Bearer ' + idToken.getJwtToken()
                 },
-            })
+		credentials: 'include',
+            })).json().data
             /*const result = await fetch('https://jsonplaceholder.typicode.com/posts')
             const jsonResult = await result.json()*/
             setStudies(data)
