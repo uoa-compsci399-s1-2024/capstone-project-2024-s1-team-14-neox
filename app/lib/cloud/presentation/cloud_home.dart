@@ -16,18 +16,17 @@ class CloudHomeScreen extends StatelessWidget {
       create: (context) => LoginCubit(AuthenticationRepository()),
       child: BlocConsumer<LoginCubit, LoginState>(
         listener: (context, state) {
-          // TODO: implement listener for login failure
         },
         builder: (context, state) {
           if (state.status.isLoading) {
-            return const CircularProgressIndicator();
+            return Center(child: const CircularProgressIndicator());
           } else if (state.status.isLoginSuccess) {
             return BlocProvider(
               create: (context) => CloudSyncCubit(),
               child: SyncScreen(),
             );
           } else {
-            return LoginScreen();
+            return const LoginScreen();
           }
         },
       ),

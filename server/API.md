@@ -50,73 +50,100 @@ which it was recorded.
 For a given child, we will require that timestamps uniquely identify
 samples.  For example, if the server already has a sample with the
 timestamp `2024-04-10T22:49:48+12:00` for child A, and the client
-sends a *new* sample with the same timestamp[^1], then the server will
-reject that sample.
+sends a *new* sample with the same timestamp[^1] for child A, then the
+server will reject that sample.
 
 ## User Roles
 
-- Parent:
-  - Can view only their own children's data.
-  - Can view their own personal info.
-  - Can view their children's personal info.
-  - Can view their own associations.
-  - Can view their children's associations.
-- Clinician:
-  - Can only view data of children they work with.
-  - Can view their own personal info.
-  - Can view the personal info of the children they work with.
-  - Can view their own associations.
-  - Can view the associations of the children they work with.
-  - Can request to become associated with a given child.
-- Researcher: Can only view anonymised data of children.
-- Admin (maybe for now just provided as lambdas to run?):
-  - Can register and delete users.
-  - Can add, delete, and modify a user's personal information.
-  - Can add, delete, and modify a user's associations???
+### Parent
+
+- Can create new children entities on server associated with
+  him/herself.
+- Can view and modify their own personal info.
+- Can view and modify their children's personal info.
+- Can view only their own children's sample data.
+- Can send samples associated with their children to the server.
+- Can view the list of their own children.
+- Can view the list of the studies their children are part of (by
+  specific child).
+- Can add and revoke consent for studies their children are part of
+  (by specific child).
+- Can view the list of researchers.
+- Can view the list of admins.
+
+### Researcher
+
+- Can view the list of studies they are part of.
+- Can view anonymised sample data of all children in a given study
+  they have access to.
+- Can view *some* personal info fields of children in their studies
+  (inlined as a sample field):
+  - age (*not* date of birth)
+  - gender
+- Can only VIEW their own personal info (their accounts are made for
+  them).
+- Can view the list of researchers.
+- Can view the list of admins.
+
+### Admin
+
+- Can create researcher accounts.
+- Can delete researcher accounts.
+- Can delete parent accounts.
+- Can view, patch, and replace their own personal information.
+- Can view, patch, and replace a researcher's personal information.
+- Can view, patch, and replace a parent's personal information.
+- Can create studies.
+- Can delete studies.
+- Can modify metadata of studies.
+- Can list and search across all studies.
+- Can view the list of researchers.
+- Can view the list of parents.
+- Can view the list of children.
+- Can view the list of children for a parent.
+- Can view the list of studies for a child.
+- Can view the list of studies for a researcher.
+- Can view the list of children, parents, researchers involved in a study.
+- Can *revoke* consent to a given study for a child.
+- Can add and remove access to a given study for a researcher.
+
+#### Note on creation
+
+Admin accounts can't be created or removed with the API.  For security
+reasons, they must only be created or removed by the sysadmin
+operating the backend.
 
 ## Note on IDs
 
-Child IDs and user IDs (ie, parents, researchers, and clinicians) will
-be a 6-digit number all coming from the same "namespace".  In other
-words, a child ID and a user ID can't be the same.
+The client should treat IDs as an opaque string.
 
-The client should treat it as an opaque string, however.  The fact
-that it can be represented as an integer is an implementation detail.
+### Child IDs
+
+Child IDs will be a 9-digit number.  A regular expression to match
+such IDs is `^[0-9]{9}$`.
+
+### User IDs
+
+User IDs (ie, parents, researchers, and admins) will simply be the
+email address which the account was created with.  Why?  Because:
+
+1. the stakeholders are used to communicating via email, so it would
+   be easier if the email *is* the ID; and
+2. it would make the implementation of users simple in the backend
+   since a previous version of spec required child and user IDs to
+   come from the same "namespace" and thereby incur the complexity
+   associated with maintaining that uniqueness between quite different
+   entities (children don't have accounts; parents, researchers, and
+   admins have accounts).
+
+**Since user IDs are emails, note that you will need to URI-encode
+them when placing them in the URI (eg,
+`/parents/{uriEncode(parentID)}/children`)**
 
 ### Privacy
 
-Although IDs aren't a secret, we will only share IDs to those who need
-it.
-
-## Note on clinicians requesting access to sample data and personal info of a specific child
-
-### Process
-
-#### 1. Clinician sends request to make an association with a given `childID`
-
-To prevent leaking IDs, callers won't get any indication of whether an
-ID exists or not.
-
-Even though we can assume we will trust the process of verifying
-clinicians, we can't trust that their credentials will *never* be
-compromised and thereby allowing attackers to use their account to
-harvest IDs (of children they don't already have associations with)
-and then potentially use those to gain access to other systems.
-
-#### 2. Server always sends a successful response (unless clinician has too many pending requests)
-
-To prevent attacks by flooding the API with association requests to
-non-existent children, we will set a max number of requests (total
-between pending, accepted, and rejected) (number TBD).
-
-#### 3. IF `childID` refers to a real child, then parent of the child will see the request when they next retrieve the associations for their child
-
-#### 4. Parent can respond to the request by making a special request to API
-
-#### 5. If accepted, clinician will become authorised for the child
-
-OPEN QUESTION: should requests have a status flag and a way for them
-to be cleared?
+Although child and user IDs aren't a secret, we will only share IDs to
+those who need it.
 
 ## Note on sample fields
 
@@ -124,11 +151,28 @@ to be cleared?
 - `timestamp`: String of ISO8601-formatted datetime with seconds
   resolution and timezone.  If timezone is UTC 0, then it must be
   specified either as `Z` OR an offset of `+00:00`.
-- `uv`: Numeric value of UV exposure (TODO units).
-- `light`: Numeric value of light exposure (TODO units).
-- `acceleration`: UNDECIDED: Three-element numeric array for device acceleration
-  where the first element is the `x` component, second is `y`, and
-  third is `z`.
+- `uv`: Non-negative integer value of UV exposure (TODO units).
+- `light`: Non-negative integer value of light exposure (lux).
+- `accel_x`: Signed integer value for the `x` component of the
+  acceleration experienced by the device.
+- `accel_y`: Signed integer value for the `y` component of the
+  acceleration experienced by the device.
+- `accel_z`: Signed integer value for the `z` component of the
+  acceleration experienced by the device.
+- `col_red`: Unsigned byte for the red component of the colour sensed
+  by the device.
+- `col_green`: Unsigned byte for the green component of the colour
+  sensed by the device.
+- `col_blue`: Unsigned byte for the blue component of the colour
+  sensed by the device.
+- `col_clear`: Unsigned integer value for the clear component of the
+  colour sensed by the device.
+- `col_temp`: Unsigned integer value for the temperature of the colour
+  sensed by the device (degrees Kelvin).
+
+### Additional sample fields when retrieving the samples for a study
+
+See the relevant permission for the researcher user role.
 
 ## Note on personal info fields
 
@@ -137,28 +181,30 @@ https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-att
 
 ### Children
 
-- birthdate
-- family_name
-- given_name
-- middle_name
-- nickname
+All fields are optional.  Researchers only really want `birthdate`
+since age is a relevant predictor for progression of myopia.
+
+- `birthdate`
+- `family_name`
+- `given_name`
+- `middle_name`
+- `nickname`
+- `gender`
 
 ### Users (ie, everyone except children)
 
-- family_name
-- given_name
-- middle_name
-- nickname
-- email
+- `family_name` (required)
+- `given_name` (required)
+- `middle_name`
+- `nickname`
+- `email` (required)
+- `phone_number` ???
 
-## Authentication (SUBJECT TO CHANGE)
+## Authentication
 
-Use HTTP authentication: use the `Authorization` header.
-
-For OAuth, we use `Authorization: Bearer <TOKEN>`
-(<https://stackoverflow.com/questions/17334276/oauth2-0-how-to-pass-access-token>).
-
-Otherwise, use HTTP cookies.
+First authenticate with Cognito using the Cognito API.  Then add the
+token to the `Authorization` header as `Authorization: Bearer <TOKEN>`
+in every API action.
 
 ## Note on status codes
 
@@ -207,7 +253,6 @@ The schema for response bodies from every status code (except 204 of course, and
 ```
 where:
 
-- the content and type of `API_VERSION` is currently unspecified (maybe int or maybe string); and
 - the schema for `CONTENT` will differ depending on the API action and status code.
 
 ### Schema for error responses
@@ -235,49 +280,97 @@ where:
 
 ## Actions
 
-### UNDECIDED Sign up (POST) (`/users/`)
+### Sign up
 
-In the `data` field of the response, the server will send the client a
-JSON object whose only field (for now) will be the ID of the user.
-The ID won't need to be added to any requests from client because we
-would already know their ID once they've been authenticated.
+Sign up via the AWS Cognito API.  Other than this and authenticating
+the user, Cognito should never be called.  Use the API actions for
+that.
 
-The schema:
-```json
+#### LOW PRIORITY???: We *may* allow registering via Google.
+
+### Register researcher account (POST) (`/researchers`)
+
+Client will send the following personal info of the researcher to be
+registered:
+
+- `given_name`
+- `family_name`
+- `email`
+
+#### If authorised AND all required fields given
+
+Server will return HTTP status 204.
+
+The server will create a researcher account and set a temporary
+password.  The researcher should reset this password within some
+number of days (Cognito default is 7).
+
+Note that the ID of the researcher account is the email.
+
+#### If authorised BUT NOT all required fields given
+
+Server will return HTTP status 400.
+
+#### If authorised BUT user already exists
+
+Server will return HTTP status 409.
+
+#### If not authorised
+
+Server will return 403.
+
+### Search for parents (GET) (`/parents`)
+
+No filters for now, but any filters in future API specs should go into
+query string.
+
+Output schema:
+
+``` json
 {
-	"id": ID,
+	"data": [
+		{"id": USERID},
+		...
+	]
 }
 ```
 
-AWS Cognito allows using third party identity providers like Google
-and Facebook, so we will use Cognito even if we don't use third party
-identity providers.
+### Search for researchers (GET) (`/researchers`)
 
-LOW PRIORITY: MAYBE: Session token[^3] is OPTIONAL.  If the session token
-given to the server is an admin's token, then allow registering other
-accounts?  This is to allow site admins to register clinicians since
-the admins would need to set which child devices they can monitor.
-Only the admins should be allowed to see the list of child devices.  I
-don't think this would allow site admins to register users by OAuth
-though.
+No filters for now, but any filters in future API specs should go into
+query string.
 
-### LOW PRIORITY: Search for users (GET) (`/users`)
+Output schema:
 
-Should be able to search by name, number of children, etc.  Filters
-should go into query string.
+``` json
+{
+	"data": [
+		{"id": USERID},
+		...
+	]
+}
+```
 
-### Get/Replace/Update personal info of a specific user (GET/PUT/PATCH) (`/users/{userID}/info`)
+### LOW PRIORITY: Search for children (GET) (`/children`)
 
-If authorised:
+No filters for now, but any filters in future API specs should go into
+query string.
+
+### Get/Replace/Update personal info associated with a specific child/parent/researcher (GET/PUT/PATCH) (`/<children OR parents OR researchers>/{ID}/info`)
+
+#### If authorised AND such a child/parent/researcher exists:
 
 - GET: the `data` field of the response body will contain the personal
-  info associated with the user with ID `userID`.
-- PUT: server will completely replace the personal info of `userID`
-  with the info supplied by caller.
-- PATCH: server will update only the personal info fields of `userID`
+  info associated with the child/parent/researcher specified in the
+  request.
+- PUT: server will completely replace the personal info of the
+  child/parent/researcher specified in the request with the info
   supplied by caller.
+- PATCH: server will update only the personal info fields of the
+  child/parent/researcher supplied by caller.
 
-Schema of `data` field of response:
+#### Personal info schema:
+
 ```json
 {
 	"<PERSONAL_INFO_FIELD_NAME>": "<PERSONAL_INFO_FIELD_VALUE>",
@@ -285,24 +378,62 @@ Schema of `data` field of response:
 }
 ```
 
-If not authorised OR no such user:
+#### If not authorised OR no such child/parent/researcher:
 
-Return 403 response where the `resource` field of the error response
-is the same as the URI at which the action was invoked.
+Server will return 403.
 
-### LOW PRIORITY: Delete a specific user (DELETE) (`/users/{userID}`)
+#### PUT/PATCH
 
-If authorised: server will delete user with ID `userID` and return a
-204 response.
+If any personal info fields are invalid: return 400 response, where for each invalid field name/value:
 
-If not authorised OR no such user: server will return a 403 response
-where the `resource` field of the error response is the same as the
-URI at which the action was invoked.
+- the `resource` field of the object in `errors` will be:
+  - `/<children OR parents OR researchers>/{ID}/info?fieldname={field}` when `field` is an invalid
+    field name
+  - `/<children OR parents OR researchers>/{ID}/info?fieldvalue={field}` when the value of `field`
+    is invalid
+- `status` will be 400.
 
-OPEN QUESTION: Should this delete their children and the data of their
-children too?
+No personal info fields will be updated so the client should correct
+the fields listed in the errors when they try again.  For example, if
+the client provided the `birthdate` field for a child but it was in
+the wrong format:
 
-OPEN QUESTION: Should only admins be allowed to delete users?
+```json
+{
+	"errors": [
+		{
+			"resource": "/children/123456789/info?fieldvalue=birthdate",
+			"status": 400,
+			"message": "birthdate must be formatted YYYY-MM-DD",
+		}
+	],
+}
+```
+
+### LOW PRIORITY: Delete a specific parent/researcher account (DELETE) (`/parents/{parentID}` OR `/researchers/{researcherID}`)
+
+#### If authorised AND such an account exists
+
+Server will delete parent/researcher account with the given ID and
+return a 204 response.
+
+#### If not authorised OR no such account
+
+Server will return 403.
+
+#### OPEN QUESTION: FOR PARENTS: Should this delete their children and the data of their children too?
+
+### LOW PRIORITY: Delete child (DELETE) (`/children/{childID}`)
+
+#### If authorised AND such a child exists
+
+Server will delete child with ID `childID` and return a 204 response.
+
+#### If not authorised OR no such child exists
+
+Server will return a 403.
+
+#### OPEN QUESTION: Should all the samples associated with `childID` be deleted too?
 
 ### Register child (POST) (`/children`)
 
@@ -323,255 +454,236 @@ for the parents should be able to register children.  And that app
 provides a token to identify the parent which we would use to
 automatically associate the parent with the child.
 
-OPEN QUESTION: For consistency (and testing purposes), should admins
-be able to register child devices?
+#### OPEN QUESTION: For consistency (and testing purposes), should admins be able to register child devices?
 
-### Get list of children associated with a user (GET) (`/users/{userID}/associations`)
+### Get list of children associated with a parent (GET) (`/parents/{parentID}/children`)
 
-#### If authorised:
-
-Server returns HTTP 200 response:
-
-``` json
-{
-	"data": {
-		"children": [
-			{"id": CHILD_ID1},
-			{"id": CHILD_ID2},
-			...
-		],
-	}
-}
-```
-
-#### If not authorised OR no such user:
-
-Server returns 403.
-
-### Get association requests sent by a user (GET) (`/users/{userID}/associations/requests`)
-
-#### If authorised:
+#### If authorised AND such a parent exists:
 
 Server returns HTTP 200 response:
-
-``` json
-{
-	"data": {
-		"pending": [
-			{"id": CHILD_ID1, "timestamp": ...},
-			{"id": CHILD_ID2, "timestamp": ...},
-		],
-		"accepted": [ ... ],
-		"rejected": [ ... ],
-	}
-}
-```
-
-The `pending`, `accepted`, and `rejected` fields contain the IDs of
-children for which the clinician has requested access to their sample
-data and personal info.  The IDs of such children don't necessarily
-refer to existing children to prevent leaking IDs.  The `timestamp` of
-requests will be an ISO8601-formatted datetime with timezone.
-
-#### If not authorised OR no such user:
-
-Server returns 403.
-
-### Get users associated with a given child (GET) (`/children/{childID}/associations`)
-
-#### If authorised (parent of child OR user is associated with child):
-
-Server returns HTTP 200 response:
-
-``` json
-{
-	"data": {
-		"parent_id": USERID_PARENT,
-		"clinicians": [
-			{"id": USERID_CLINICIAN1},
-			{"id": USERID_CLINICIAN2},
-			...
-		],
-	}
-}
-```
-
-#### If not authorised OR no such child:
-
-Server returns 403.
-
-### Get association requests for a child (GET) (`/children/{childID}/associations/requests`)
 
 ``` json
 {
 	"data": [
-		{"id": USERID_CLINICIAN1, "timestamp": ...},
-		{"id": USERID_CLINICIAN2, "timestamp": ...},
+		{"id": CHILD_ID1},
+		{"id": CHILD_ID2},
+		...
+	],
+}
+```
+
+#### If not authorised OR no such user:
+
+Server returns 403.
+
+### Get list of studies a child/researcher is enrolled/collaborating in (GET) (`/<children OR researchers>/{ID}/studies`)
+
+#### Flow
+
+##### 1. User sends GET request with query parameters for:
+
+- Same filters as the global search on studies
+
+##### 2a. If authorised AND such a child/researcher exists:
+
+Same success response as the success response of the global search on studies.
+
+##### 2b. If not authorised OR no such child/researcher:
+
+Server returns 403.
+
+### Add/Remove a child OR researcher to/from a study (PUT/DELETE) (`/<children OR researchers>/{ID}/studies/{studyID}`)
+
+#### If authorised AND such a study exists
+
+Server returns 204.
+
+#### If authorised BUT no such study exists
+
+Server returns 404.
+
+#### If not authorised OR no such child/researcher
+
+Server returns 403
+
+### Create study with a given study ID (PUT) (`/studies/{studyID}`)
+
+`studyID` is a case-insensitive string used to identify the study.  It
+should be short and easy to remember since parents will need to enter
+it to consent to the study.  Regular expression: `^[A-Za-z0-9]+$`.
+
+Request body should have the following schema with the following
+mandatory fields:
+
+``` json
+{
+	"start_date": ...,
+	"end_date": ...,
+}
+```
+
+where:
+
+- `start_date` and `end_date` are `YYYY-MM-DD` dates which refer to the
+  earliest and latest samples, respectively, to include in the study
+  (note that all samples from any day [including the final day] in the
+  period of the study are included).  **Interpretation: UTC 0
+  datetimes where `start_date` has time `00:00:00Z` and `end_date` has
+  time `23:59:59Z`.**
+
+These fields are optional:
+
+- `name`: name of study
+- `description`
+
+#### If authorised AND study ID unique:
+
+Server will create study and return 204.
+
+#### If authorised AND study ID taken:
+
+Server will return 404.
+
+Study IDs are designed to be shared.
+
+#### If not authorised:
+
+Server will return 403.
+
+### Delete a study (DELETE) (`/studies/{studyID}`)
+
+See action to create a study for the format of `studyID`.
+
+#### If authorised AND study exists:
+
+Server will delete study and return 204.
+
+#### If authorised BUT no such study:
+
+Server will return 404.
+
+#### If not authorised:
+
+Server will return 403.
+
+### Search studies (GET) (`/studies`)
+
+#### Flow
+
+##### 1. User sends GET request with query parameters for:
+
+- Filter by:
+  - start/end date
+
+##### 2a. If authorised
+
+User receives:
+
+``` json
+{
+	"data": [
+		{"id": STUDY_ID},
 		...
 	]
 }
 ```
 
-Each request object contains the IDs of clinicians who have requested
-access to sample data and personal info of the child.  The `timestamp`
-of pending requests will be an ISO8601-formatted datetime with
-timezone.
+##### 2b. If not authorised
 
-### CLINICIAN: Request access to sample data and personal info of a specific child (PUT) (`/children/{childID}/associations/requests/{userID}`)
+Server returns 403.
 
-First, the clinician must know the ID of the child so they must ask the parent.
+### Get/Replace/Update info about study (GET/PUT/PATCH) (`/studies/{studyID}/info`)
 
-Request body is undefined.  Future versions of the API may define this.
+#### If authorised for the specific study identified by `studyID` and such a study exists:
 
-To prevent leaking child IDs, this request will always succeed (HTTP
-status 2XX) even if the child ID doesn't refer to an existing child.
+- GET: the `data` field of the response body will contain the metadata
+  of the study.  (on success: HTTP 200.)
+- PUT: server will completely replace the metadata of the study.  (on success: HTTP 204.)
+- PATCH: server will update only the metadata fields of the study.  (on success: HTTP 204.)
 
-### PARENT: ACCEPT clinician's request for child association (PUT) (`/users/{userID}/associations/{childID}`)
-
-Request body is undefined.  A future version of the API may define it
-if we want more granular permissions granted with an association (ie,
-role-based [RBAC] vs attribute-based [ABAC] access control).
-
-#### If authorised (parent of child):
-
-Server will return 204.
-
-As a consequence:
-
-- CLINICIAN will see the child's ID in its `accepted` requests.
-- CLINICIAN will see the child's ID in its list of child associations
-  when they next request their own associations.
-- CLINICIAN will have the corresponding access rights to sample data
-  and personal info.
-- PARENT will see the clinician's ID in the child's list of
-  associations when they next request the child's associations.
-
-The corresponding requests in the child and clinician resources will
-no longer be seen in further requests.
-
-#### If not authorised OR no such child:
-
-Server will return 403.
-
-### PARENT: REJECT clinician's request for child association (DELETE) (`/children/{childID}/associations/requests/{userID}`)
-
-#### If authorised (parent of child):
-
-Server will return 204.
-
-As a consequence:
-
-- CLINICIAN will see the child's ID in its `rejected` requests.
-- The corresponding requests in the child and clinician resources will
-  no longer be seen in further requests.
-
-#### If not authorised OR no such child:
-
-Server will return 403.
-
-### CLINICIAN: DELETE request for child association (DELETE) (`/children/{childID}/associations/requests/{userID}`)
-
-#### If authorised (parent of child):
-
-Server will return 204.
-
-As a consequence:
-
-- CLINICIAN will no longer see the request for child ID.
-- PARENT will no longer see the request for child ID from clinician ID.
-
-##### If trying to DELETE accepted association request
-
-It's OK.  It will be removed from the list of `accepted` requests.
-
-##### If trying to DELETE association request that doesn't actually exist
-
-Server will return 404.
-
-#### If not authorised OR no such child:
-
-Server will return 403.
-
-### Get/Replace/Update personal info associated with a specific child (GET/PUT/PATCH) (`/children/{childID}/info`)
-
-#### If authorised:
-
-- GET: the `data` field of the response body will contain the personal
-  info associated with the child with ID `childID`.
-- PUT: server will completely replace the personal info of `childID`
-  with the info supplied by caller.
-- PATCH: server will update only the personal info fields of `childID`
-  supplied by caller.
-
-#### Personal info schema:
+#### Metadata schema:
 
 ```json
 {
-	"<PERSONAL_INFO_FIELD_NAME>": "<PERSONAL_INFO_FIELD_VALUE>",
+	"<METADATA_FIELD_NAME>": "<METADATA_FIELD_VALUE>",
 	...
 }
 ```
 
-#### If not authorised OR no such child:
-
-Return 403 response where the `resource` field of the error response
-is the same as the URI at which the action was invoked.
-
 #### PUT/PATCH
 
-If any personal info fields are invalid: return 400 response, where for each invalid field name/value:
+If any metadata fields are invalid: return 400 response, where for
+each invalid field name/value:
 
-- the `resource` field of `errors` will be:
-  - `/children/{childID}/info?fieldname={field}` when `field` is an invalid field name
-  - `/children/{childID}/info?fieldvalue={field}` when the value of `field` is invalid
+- the `resource` field of the object in `errors` will be:
+  - `/studies/{studyID}/info?fieldname={field}` when `field` is an
+    invalid field name
+  - `/studies/{studyID}/info?fieldvalue={field}` when the value of
+    `field` is invalid
 - `status` will be 400.
 
-No personal info fields will be updated so the client should correct
-the fields listed in the errors when they try again.  For example, if
-the client provided the `birthdate` field but it was in the wrong
-format:
+No metadata fields will be updated so the client should correct the
+fields listed in the errors when they try again.  For example, if the
+client provided the `max_date` field but it was in the wrong format:
 
 ```json
 {
 	"errors": [
 		{
-			"resource": "/children/123456789/info?fieldvalue=birthdate",
+			"resource": "/studies/EYES24/info?fieldvalue=max_date",
 			"status": 400,
-			"message": "birthdate must be formatted YYYY-MM-DD",
+			"message": "date must have timezone",
 		}
 	],
 }
-
-
 ```
 
-### LOW PRIORITY: Delete child (DELETE) (`/children/{childID}`)
+#### If study ID doesn't exist:
 
-If authorised: server will delete child with ID `childID` and return a
-204 response.
+Server will return 404.
 
-If not authorised OR no such child: server will return a 403 response where the
-`resource` field of the error response is the same as the URI at which
-the action was invoked.
+Study IDs are designed to be shared.
 
-OPEN QUESTION: Should all the samples associated with `childID` be
-deleted too?
+#### If not authorised:
 
-### UNDECIDED Authenticate (POST) (one of `/auth`, `/authenticate`, `/login`)
+Server will return 403.
+
+### Get list of children, parents, and researchers in a study (GET) (`/studies/{studyID}/participants`)
+
+#### If authorised:
+
+Server will return HTTP status 200 with the body:
+
+``` json
+{
+	"data": {
+		"children": [
+			{"id": ..., "parent_id": ...},
+			...
+		],
+		"parents": [
+			{"id": ...},
+			...
+		],
+		"researchers": [
+			{"id": ...},
+			...
+		]
+	}
+}
+```
+
+#### If not authorised:
+
+Server will return 403.
+
+### Authenticate (Cognito)
 
 #### Flow
 
-1. User gives credentials.
-2. Upon successful authentication, user gets session token.
-
-#### Details
-
-- This will just be an interface to AWS Cognito.
-- Client doesn't need to do this API action if they authenticate with
-  OAuth, for example.  The client can just pass the token from a
-  third-party identity provider directly to the API.
-- NOTE: Every other action (except registration) will take a session
-  token[^3] to identify the user.
+1. User gives credentials to AWS Cognito API.
+2. Upon successful authentication, pass the token in each request in
+   the `Authorization` header.
 
 ### Add samples (POST) (`/samples/{childID}`)
 
@@ -599,30 +711,62 @@ If sample already existing: error `status` will be 409 "Conflict".
 
 If sample sensor fields are invalid: error `status` will be 400 "Bad Request".
 
-### Search samples (GET) (`/samples`)
+### Search samples (GET) (`/samples/{childID}`)
 
 #### Flow
 
-1. User sends GET request with query parameters for:
-    - Filter by:
-        - min/max timestamp
-        - parent ID
-        - child ID
-		- (FUTURE: child device type/version)
-        - child name[^2] (fuzzy match?)
-    <!-- - Specify output format: -->
-    <!--     - sensor values only -->
-    <!--     - classified only (`outside` or `inside`) -->
-    <!--     - both of the above -->
-        <!-- - include parent ID -->
-        <!-- - include child name[^2] -->
-2. Upon success: user receives a JSON array in the `data` response
-   field where each element of the array is a JSON object containing
-   the sample fields.
+##### 1. User sends GET request with query parameters for:
+
+- Filter by:
+  - min/max timestamp
+  - (FUTURE: child device type/version)
+
+- Specify output format:
+  - sensor values
+  - list of timestamps only
+
+##### 2a. If authorised and output format is sensor values
+
+User receives:
+
+``` json
+{
+	"data": [
+		{"timestamp": ..., ...},
+		...
+	]
+}
+```
+
+##### 2b. If authorised and output format is the list of timestamps only
+
+User receives a list of timestamps:
+
+``` json
+{
+	"data": [
+		TIMESTAMP_1,
+		TIMESTAMP_2,
+		...
+	]
+}
+```
+
+This is mainly for the app when the sample-adding requests timeout and
+thereby don't receive a response from server about which samples
+succeeded.
+
+Assuming the app knows the minimum and maximum timestamp of the
+sample-adding request which timed out, they can use the response from
+this action to mark the samples which successfully went onto the
+server (and thereby have their timestamp show up in the output).
+
+##### 2c. If not authorised OR no such child
+
+Server returns 403.
 
 #### Details
 
-- Filters are given in the query string.
 - FOR NOW: filters will be a simple AND, but it could be extended to
   allow arbitrary nesting of logical expressions (up to a limit).
   Maybe by having just one query parameter with special syntax like
@@ -630,9 +774,26 @@ If sample sensor fields are invalid: error `status` will be 400 "Bad Request".
 - TODO: Maybe the results should be returned in "pages" (AKA
   "pagination").
 - Automatically sort results by date.
-- Asking for samples to be classified would make a call to the
-  classifier (ML or something else).  This would slow down the
-  response time.
+
+### Search samples in a given study (GET) (`/studies/{studyID}/samples`)
+
+#### Flow
+
+##### 1. User sends GET request with query parameters for:
+
+- Same filters as sample search action
+
+##### 2a. If authorised AND study exists:
+
+Server will return HTTP status 200.
+
+The response body will have the same schema as the response from the
+sample search action, but each sample will have additional fields (see
+the relevant subheading in the notes for sample fields above).
+
+##### 2b. If authorised BUT no such study:
+
+Server will return 404.
 
 ## Some rejected approaches
 
@@ -669,9 +830,3 @@ do the same thing, but more generally.  The caller should just filter
 by device ID.
 
 [^1]: maybe because the child uses more than one device
-
-[^2]: NOTE: The clients want child names anonymised on backend or
-    encrypted (they said "hashed" but the way they used it implied
-    encryption)
-
-[^3]: TODO: is "session token" an accurate name?

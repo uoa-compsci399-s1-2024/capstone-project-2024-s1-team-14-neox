@@ -4,8 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../domain/child_device_model.dart';
 import '../domain/child_device_repository.dart';
 
-
-
 part 'all_child_profile_state.dart';
 
 class AllChildProfileCubit extends Cubit<AllChildProfileState> {
@@ -14,68 +12,106 @@ class AllChildProfileCubit extends Cubit<AllChildProfileState> {
 
   Future<void> fetchChildProfiles() async {
     try {
-      final List<ChildDeviceModel> profiles = await _childDeviceRepository.fetchChildProfiles();
+      final List<ChildDeviceModel> profiles =
+          await _childDeviceRepository.fetchChildProfiles();
       emit(state.copyWith(
           status: AllChildProfileStatus.fetchSuccess, profiles: profiles));
-    } on Exception catch (e) {
-      emit(state.copyWith(
-          status: AllChildProfileStatus.failure,
-          message: "The child profiles cannot be fetched."),);
-      print("fetchChildProfiles: ${e.toString()}");
+    } catch (e) {
+      emit(
+        state.copyWith(
+            status: AllChildProfileStatus.failure,
+            message: "The profiles cannot be fetched."),
+      );
     }
   }
 
-  Future<void> createChildProfile(String name, DateTime birthDate) async {
+  Future<void> createChildProfile(String name, DateTime birthDate, String gender) async {
     emit(state.copyWith(status: AllChildProfileStatus.loading));
     try {
-      final List<ChildDeviceModel>  childDeviceProfiles =
-          await _childDeviceRepository.createChildProfile(name, birthDate);
+      final List<ChildDeviceModel> childDeviceProfiles =
+          await _childDeviceRepository.createChildProfile(name, birthDate, gender);
       emit(state.copyWith(
         status: AllChildProfileStatus.addSuccess,
         profiles: childDeviceProfiles,
-        message: "The child profile has been added",
+        message: "The profile has been added",
       ));
-    } on Exception catch (e) {
+    } catch (e) {
       emit(state.copyWith(
           status: AllChildProfileStatus.failure,
-          message: "The child profile cannot be created."));
-      print(e.toString());
+          message: "The profile cannot be created."));
+    }
+  }
+
+  Future<void> updateChildProfile(int childId, String name, DateTime birthDate, String gender, String authorisationCode) async {
+    emit(state.copyWith(status: AllChildProfileStatus.loading));
+    try {
+      final List<ChildDeviceModel> childDeviceProfiles = await _childDeviceRepository.updateChildDetails(
+        childId,
+        name,
+        birthDate,
+        gender,
+        authorisationCode,
+      );
+      emit(state.copyWith(
+        status: AllChildProfileStatus.addSuccess,
+        profiles: childDeviceProfiles,
+        message: "The profile has been updated",
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+          status: AllChildProfileStatus.failure,
+          message: "The profile cannot be updated."));
     }
   }
 
   Future<void> deleteChildProfile(int childId) async {
     emit(state.copyWith(status: AllChildProfileStatus.loading));
+    late List<ChildDeviceModel> childDeviceProfiles;
     try {
-      
-      final childDeviceProfiles = await _childDeviceRepository.deleteChildProfile(childId);
-      emit(state.copyWith(
-        status: AllChildProfileStatus.deleteSuccess,
-        profiles: childDeviceProfiles,
-        message: "The child profile has been deleted",
-      ));
-    } on Exception catch (e) {
+      childDeviceProfiles =
+          await _childDeviceRepository.deleteChildProfile(childId);
+    } catch (e) {
       emit(state.copyWith(
           status: AllChildProfileStatus.failure,
-          message: "The child profile cannot be deleted."));
-
-      print("deleteChildProfiles: ${e.toString()}");
+          message: "The profile cannot be deleted."));
     }
+    await Future.delayed(
+      const Duration(microseconds: 1000),
+      () {
+        emit(
+          state.copyWith(
+            status: AllChildProfileStatus.deleteSuccess,
+            profiles: childDeviceProfiles,
+            message: "The profile has been deleted",
+          ),
+        );
+      },
+    );
   }
 
   Future<void> updateDeviceRemoteId(
       {required int childId, required String deviceRemoteId}) async {
     emit(state.copyWith(status: AllChildProfileStatus.loading));
 
-    final childDeviceProfiles =
-        await _childDeviceRepository.updateChildDeviceRemoteID(childId, deviceRemoteId);
+    final childDeviceProfiles = await _childDeviceRepository
+        .updateChildDeviceRemoteID(childId, deviceRemoteId);
     emit(state.copyWith(
         status: AllChildProfileStatus.updateSuccess,
         profiles: childDeviceProfiles,
         message: "Successfully updated device"));
   }
 
-    Future<void> deleteDeviceRemoteId(
-      {required int childId}) async {
+  Future<void> updateAuthorisationCode(
+      {required int childId, required String authorisationCode}) async {
+    final childDeviceProfiles = await _childDeviceRepository
+        .updateChildAuthenticationCode(childId, authorisationCode);
+    emit(state.copyWith(
+        status: AllChildProfileStatus.updateSuccess,
+        profiles: childDeviceProfiles,
+        message: "Successfully updated authentication code"));
+  }
+
+  Future<void> deleteDeviceRemoteId({required int childId}) async {
     emit(state.copyWith(status: AllChildProfileStatus.loading));
 
     final childDeviceProfiles =
@@ -85,6 +121,4 @@ class AllChildProfileCubit extends Cubit<AllChildProfileState> {
         profiles: childDeviceProfiles,
         message: "Successfully unpaired device"));
   }
-
 }
-

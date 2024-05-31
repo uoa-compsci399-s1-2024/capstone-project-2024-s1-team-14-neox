@@ -21,9 +21,9 @@ class $ChildrenTable extends Children
   static const VerificationMeta _serverIdMeta =
       const VerificationMeta('serverId');
   @override
-  late final GeneratedColumn<int> serverId = GeneratedColumn<int>(
+  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
       'server_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -47,9 +47,21 @@ class $ChildrenTable extends Children
   late final GeneratedColumn<String> authorisationCode =
       GeneratedColumn<String>('authorisation_code', aliasedName, false,
           type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _genderMeta = const VerificationMeta('gender');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, serverId, name, birthDate, deviceRemoteId, authorisationCode];
+  late final GeneratedColumn<String> gender = GeneratedColumn<String>(
+      'gender', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        serverId,
+        name,
+        birthDate,
+        deviceRemoteId,
+        authorisationCode,
+        gender
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -97,6 +109,12 @@ class $ChildrenTable extends Children
     } else if (isInserting) {
       context.missing(_authorisationCodeMeta);
     }
+    if (data.containsKey('gender')) {
+      context.handle(_genderMeta,
+          gender.isAcceptableOrUnknown(data['gender']!, _genderMeta));
+    } else if (isInserting) {
+      context.missing(_genderMeta);
+    }
     return context;
   }
 
@@ -108,6 +126,8 @@ class $ChildrenTable extends Children
     return ChildEntity(
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      gender: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}gender'])!,
       birthDate: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}birth_date'])!,
       deviceRemoteId: attachedDatabase.typeMapping.read(
@@ -115,7 +135,7 @@ class $ChildrenTable extends Children
       authorisationCode: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}authorisation_code'])!,
       serverId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}server_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}server_id'])!,
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
     );
@@ -129,11 +149,12 @@ class $ChildrenTable extends Children
 
 class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
   final Value<int> id;
-  final Value<int> serverId;
+  final Value<String> serverId;
   final Value<String> name;
   final Value<DateTime> birthDate;
   final Value<String> deviceRemoteId;
   final Value<String> authorisationCode;
+  final Value<String> gender;
   const ChildrenCompanion({
     this.id = const Value.absent(),
     this.serverId = const Value.absent(),
@@ -141,26 +162,30 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
     this.birthDate = const Value.absent(),
     this.deviceRemoteId = const Value.absent(),
     this.authorisationCode = const Value.absent(),
+    this.gender = const Value.absent(),
   });
   ChildrenCompanion.insert({
     this.id = const Value.absent(),
-    required int serverId,
+    required String serverId,
     required String name,
     required DateTime birthDate,
     required String deviceRemoteId,
     required String authorisationCode,
+    required String gender,
   })  : serverId = Value(serverId),
         name = Value(name),
         birthDate = Value(birthDate),
         deviceRemoteId = Value(deviceRemoteId),
-        authorisationCode = Value(authorisationCode);
+        authorisationCode = Value(authorisationCode),
+        gender = Value(gender);
   static Insertable<ChildEntity> custom({
     Expression<int>? id,
-    Expression<int>? serverId,
+    Expression<String>? serverId,
     Expression<String>? name,
     Expression<DateTime>? birthDate,
     Expression<String>? deviceRemoteId,
     Expression<String>? authorisationCode,
+    Expression<String>? gender,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -169,16 +194,18 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
       if (birthDate != null) 'birth_date': birthDate,
       if (deviceRemoteId != null) 'device_remote_id': deviceRemoteId,
       if (authorisationCode != null) 'authorisation_code': authorisationCode,
+      if (gender != null) 'gender': gender,
     });
   }
 
   ChildrenCompanion copyWith(
       {Value<int>? id,
-      Value<int>? serverId,
+      Value<String>? serverId,
       Value<String>? name,
       Value<DateTime>? birthDate,
       Value<String>? deviceRemoteId,
-      Value<String>? authorisationCode}) {
+      Value<String>? authorisationCode,
+      Value<String>? gender}) {
     return ChildrenCompanion(
       id: id ?? this.id,
       serverId: serverId ?? this.serverId,
@@ -186,6 +213,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
       birthDate: birthDate ?? this.birthDate,
       deviceRemoteId: deviceRemoteId ?? this.deviceRemoteId,
       authorisationCode: authorisationCode ?? this.authorisationCode,
+      gender: gender ?? this.gender,
     );
   }
 
@@ -196,7 +224,7 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
       map['id'] = Variable<int>(id.value);
     }
     if (serverId.present) {
-      map['server_id'] = Variable<int>(serverId.value);
+      map['server_id'] = Variable<String>(serverId.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -210,6 +238,9 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
     if (authorisationCode.present) {
       map['authorisation_code'] = Variable<String>(authorisationCode.value);
     }
+    if (gender.present) {
+      map['gender'] = Variable<String>(gender.value);
+    }
     return map;
   }
 
@@ -221,7 +252,8 @@ class ChildrenCompanion extends UpdateCompanion<ChildEntity> {
           ..write('name: $name, ')
           ..write('birthDate: $birthDate, ')
           ..write('deviceRemoteId: $deviceRemoteId, ')
-          ..write('authorisationCode: $authorisationCode')
+          ..write('authorisationCode: $authorisationCode, ')
+          ..write('gender: $gender')
           ..write(')'))
         .toString();
   }
@@ -293,6 +325,32 @@ class $ArduinoDatasTable extends ArduinoDatas
   late final GeneratedColumn<int> appClass = GeneratedColumn<int>(
       'app_class', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _redMeta = const VerificationMeta('red');
+  @override
+  late final GeneratedColumn<int> red = GeneratedColumn<int>(
+      'red', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _greenMeta = const VerificationMeta('green');
+  @override
+  late final GeneratedColumn<int> green = GeneratedColumn<int>(
+      'green', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _blueMeta = const VerificationMeta('blue');
+  @override
+  late final GeneratedColumn<int> blue = GeneratedColumn<int>(
+      'blue', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _clearMeta = const VerificationMeta('clear');
+  @override
+  late final GeneratedColumn<int> clear = GeneratedColumn<int>(
+      'clear', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _colourTemperatureMeta =
+      const VerificationMeta('colourTemperature');
+  @override
+  late final GeneratedColumn<int> colourTemperature = GeneratedColumn<int>(
+      'colour_temperature', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -304,7 +362,12 @@ class $ArduinoDatasTable extends ArduinoDatas
         accelY,
         accelZ,
         serverClass,
-        appClass
+        appClass,
+        red,
+        green,
+        blue,
+        clear,
+        colourTemperature
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -374,6 +437,38 @@ class $ArduinoDatasTable extends ArduinoDatas
     } else if (isInserting) {
       context.missing(_appClassMeta);
     }
+    if (data.containsKey('red')) {
+      context.handle(
+          _redMeta, red.isAcceptableOrUnknown(data['red']!, _redMeta));
+    } else if (isInserting) {
+      context.missing(_redMeta);
+    }
+    if (data.containsKey('green')) {
+      context.handle(
+          _greenMeta, green.isAcceptableOrUnknown(data['green']!, _greenMeta));
+    } else if (isInserting) {
+      context.missing(_greenMeta);
+    }
+    if (data.containsKey('blue')) {
+      context.handle(
+          _blueMeta, blue.isAcceptableOrUnknown(data['blue']!, _blueMeta));
+    } else if (isInserting) {
+      context.missing(_blueMeta);
+    }
+    if (data.containsKey('clear')) {
+      context.handle(
+          _clearMeta, clear.isAcceptableOrUnknown(data['clear']!, _clearMeta));
+    } else if (isInserting) {
+      context.missing(_clearMeta);
+    }
+    if (data.containsKey('colour_temperature')) {
+      context.handle(
+          _colourTemperatureMeta,
+          colourTemperature.isAcceptableOrUnknown(
+              data['colour_temperature']!, _colourTemperatureMeta));
+    } else if (isInserting) {
+      context.missing(_colourTemperatureMeta);
+    }
     return context;
   }
 
@@ -395,6 +490,16 @@ class $ArduinoDatasTable extends ArduinoDatas
           .read(DriftSqlType.int, data['${effectivePrefix}app_class'])!,
       serverClass: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}server_class'])!,
+      green: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}green'])!,
+      blue: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}blue'])!,
+      red: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}red'])!,
+      clear: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}clear'])!,
+      colourTemperature: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}colour_temperature'])!,
       childId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}child_id'])!,
     );
@@ -417,6 +522,11 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
   final Value<int> accelZ;
   final Value<int> serverClass;
   final Value<int> appClass;
+  final Value<int> red;
+  final Value<int> green;
+  final Value<int> blue;
+  final Value<int> clear;
+  final Value<int> colourTemperature;
   const ArduinoDatasCompanion({
     this.id = const Value.absent(),
     this.childId = const Value.absent(),
@@ -428,6 +538,11 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     this.accelZ = const Value.absent(),
     this.serverClass = const Value.absent(),
     this.appClass = const Value.absent(),
+    this.red = const Value.absent(),
+    this.green = const Value.absent(),
+    this.blue = const Value.absent(),
+    this.clear = const Value.absent(),
+    this.colourTemperature = const Value.absent(),
   });
   ArduinoDatasCompanion.insert({
     this.id = const Value.absent(),
@@ -440,6 +555,11 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     required int accelZ,
     required int serverClass,
     required int appClass,
+    required int red,
+    required int green,
+    required int blue,
+    required int clear,
+    required int colourTemperature,
   })  : childId = Value(childId),
         uv = Value(uv),
         light = Value(light),
@@ -448,7 +568,12 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
         accelY = Value(accelY),
         accelZ = Value(accelZ),
         serverClass = Value(serverClass),
-        appClass = Value(appClass);
+        appClass = Value(appClass),
+        red = Value(red),
+        green = Value(green),
+        blue = Value(blue),
+        clear = Value(clear),
+        colourTemperature = Value(colourTemperature);
   static Insertable<ArduinoDataEntity> custom({
     Expression<int>? id,
     Expression<int>? childId,
@@ -460,6 +585,11 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     Expression<int>? accelZ,
     Expression<int>? serverClass,
     Expression<int>? appClass,
+    Expression<int>? red,
+    Expression<int>? green,
+    Expression<int>? blue,
+    Expression<int>? clear,
+    Expression<int>? colourTemperature,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -472,6 +602,11 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
       if (accelZ != null) 'accel_z': accelZ,
       if (serverClass != null) 'server_class': serverClass,
       if (appClass != null) 'app_class': appClass,
+      if (red != null) 'red': red,
+      if (green != null) 'green': green,
+      if (blue != null) 'blue': blue,
+      if (clear != null) 'clear': clear,
+      if (colourTemperature != null) 'colour_temperature': colourTemperature,
     });
   }
 
@@ -485,7 +620,12 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
       Value<int>? accelY,
       Value<int>? accelZ,
       Value<int>? serverClass,
-      Value<int>? appClass}) {
+      Value<int>? appClass,
+      Value<int>? red,
+      Value<int>? green,
+      Value<int>? blue,
+      Value<int>? clear,
+      Value<int>? colourTemperature}) {
     return ArduinoDatasCompanion(
       id: id ?? this.id,
       childId: childId ?? this.childId,
@@ -497,6 +637,11 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
       accelZ: accelZ ?? this.accelZ,
       serverClass: serverClass ?? this.serverClass,
       appClass: appClass ?? this.appClass,
+      red: red ?? this.red,
+      green: green ?? this.green,
+      blue: blue ?? this.blue,
+      clear: clear ?? this.clear,
+      colourTemperature: colourTemperature ?? this.colourTemperature,
     );
   }
 
@@ -533,6 +678,21 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
     if (appClass.present) {
       map['app_class'] = Variable<int>(appClass.value);
     }
+    if (red.present) {
+      map['red'] = Variable<int>(red.value);
+    }
+    if (green.present) {
+      map['green'] = Variable<int>(green.value);
+    }
+    if (blue.present) {
+      map['blue'] = Variable<int>(blue.value);
+    }
+    if (clear.present) {
+      map['clear'] = Variable<int>(clear.value);
+    }
+    if (colourTemperature.present) {
+      map['colour_temperature'] = Variable<int>(colourTemperature.value);
+    }
     return map;
   }
 
@@ -548,7 +708,362 @@ class ArduinoDatasCompanion extends UpdateCompanion<ArduinoDataEntity> {
           ..write('accelY: $accelY, ')
           ..write('accelZ: $accelZ, ')
           ..write('serverClass: $serverClass, ')
-          ..write('appClass: $appClass')
+          ..write('appClass: $appClass, ')
+          ..write('red: $red, ')
+          ..write('green: $green, ')
+          ..write('blue: $blue, ')
+          ..write('clear: $clear, ')
+          ..write('colourTemperature: $colourTemperature')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $StudyTable extends Study with TableInfo<$StudyTable, StudyEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StudyTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _studyCodeMeta =
+      const VerificationMeta('studyCode');
+  @override
+  late final GeneratedColumn<String> studyCode = GeneratedColumn<String>(
+      'study_code', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _startDateMeta =
+      const VerificationMeta('startDate');
+  @override
+  late final GeneratedColumn<DateTime> startDate = GeneratedColumn<DateTime>(
+      'start_date', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _endDateMeta =
+      const VerificationMeta('endDate');
+  @override
+  late final GeneratedColumn<DateTime> endDate = GeneratedColumn<DateTime>(
+      'end_date', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, studyCode, name, description, startDate, endDate];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'study';
+  @override
+  VerificationContext validateIntegrity(Insertable<StudyEntity> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('study_code')) {
+      context.handle(_studyCodeMeta,
+          studyCode.isAcceptableOrUnknown(data['study_code']!, _studyCodeMeta));
+    } else if (isInserting) {
+      context.missing(_studyCodeMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(_startDateMeta,
+          startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta));
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('end_date')) {
+      context.handle(_endDateMeta,
+          endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta));
+    } else if (isInserting) {
+      context.missing(_endDateMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StudyEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StudyEntity(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      startDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}start_date'])!,
+      endDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}end_date'])!,
+      studyCode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}study_code'])!,
+    );
+  }
+
+  @override
+  $StudyTable createAlias(String alias) {
+    return $StudyTable(attachedDatabase, alias);
+  }
+}
+
+class StudyCompanion extends UpdateCompanion<StudyEntity> {
+  final Value<int> id;
+  final Value<String> studyCode;
+  final Value<String> name;
+  final Value<String> description;
+  final Value<DateTime> startDate;
+  final Value<DateTime> endDate;
+  const StudyCompanion({
+    this.id = const Value.absent(),
+    this.studyCode = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.endDate = const Value.absent(),
+  });
+  StudyCompanion.insert({
+    this.id = const Value.absent(),
+    required String studyCode,
+    required String name,
+    required String description,
+    required DateTime startDate,
+    required DateTime endDate,
+  })  : studyCode = Value(studyCode),
+        name = Value(name),
+        description = Value(description),
+        startDate = Value(startDate),
+        endDate = Value(endDate);
+  static Insertable<StudyEntity> custom({
+    Expression<int>? id,
+    Expression<String>? studyCode,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<DateTime>? startDate,
+    Expression<DateTime>? endDate,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (studyCode != null) 'study_code': studyCode,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (startDate != null) 'start_date': startDate,
+      if (endDate != null) 'end_date': endDate,
+    });
+  }
+
+  StudyCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? studyCode,
+      Value<String>? name,
+      Value<String>? description,
+      Value<DateTime>? startDate,
+      Value<DateTime>? endDate}) {
+    return StudyCompanion(
+      id: id ?? this.id,
+      studyCode: studyCode ?? this.studyCode,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (studyCode.present) {
+      map['study_code'] = Variable<String>(studyCode.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<DateTime>(startDate.value);
+    }
+    if (endDate.present) {
+      map['end_date'] = Variable<DateTime>(endDate.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StudyCompanion(')
+          ..write('id: $id, ')
+          ..write('studyCode: $studyCode, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChildStudyTable extends ChildStudy
+    with TableInfo<$ChildStudyTable, ChildStudyAssociationsEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChildStudyTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _childIdMeta =
+      const VerificationMeta('childId');
+  @override
+  late final GeneratedColumn<int> childId = GeneratedColumn<int>(
+      'child_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _studyCodeMeta =
+      const VerificationMeta('studyCode');
+  @override
+  late final GeneratedColumn<String> studyCode = GeneratedColumn<String>(
+      'study_code', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [childId, studyCode];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'child_study';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ChildStudyAssociationsEntity> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('child_id')) {
+      context.handle(_childIdMeta,
+          childId.isAcceptableOrUnknown(data['child_id']!, _childIdMeta));
+    } else if (isInserting) {
+      context.missing(_childIdMeta);
+    }
+    if (data.containsKey('study_code')) {
+      context.handle(_studyCodeMeta,
+          studyCode.isAcceptableOrUnknown(data['study_code']!, _studyCodeMeta));
+    } else if (isInserting) {
+      context.missing(_studyCodeMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {childId, studyCode};
+  @override
+  ChildStudyAssociationsEntity map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChildStudyAssociationsEntity(
+      childId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}child_id'])!,
+      studyCode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}study_code'])!,
+    );
+  }
+
+  @override
+  $ChildStudyTable createAlias(String alias) {
+    return $ChildStudyTable(attachedDatabase, alias);
+  }
+}
+
+class ChildStudyCompanion
+    extends UpdateCompanion<ChildStudyAssociationsEntity> {
+  final Value<int> childId;
+  final Value<String> studyCode;
+  final Value<int> rowid;
+  const ChildStudyCompanion({
+    this.childId = const Value.absent(),
+    this.studyCode = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ChildStudyCompanion.insert({
+    required int childId,
+    required String studyCode,
+    this.rowid = const Value.absent(),
+  })  : childId = Value(childId),
+        studyCode = Value(studyCode);
+  static Insertable<ChildStudyAssociationsEntity> custom({
+    Expression<int>? childId,
+    Expression<String>? studyCode,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (childId != null) 'child_id': childId,
+      if (studyCode != null) 'study_code': studyCode,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ChildStudyCompanion copyWith(
+      {Value<int>? childId, Value<String>? studyCode, Value<int>? rowid}) {
+    return ChildStudyCompanion(
+      childId: childId ?? this.childId,
+      studyCode: studyCode ?? this.studyCode,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (childId.present) {
+      map['child_id'] = Variable<int>(childId.value);
+    }
+    if (studyCode.present) {
+      map['study_code'] = Variable<String>(studyCode.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChildStudyCompanion(')
+          ..write('childId: $childId, ')
+          ..write('studyCode: $studyCode, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -558,11 +1073,14 @@ abstract class _$AppDb extends GeneratedDatabase {
   _$AppDb(QueryExecutor e) : super(e);
   late final $ChildrenTable children = $ChildrenTable(this);
   late final $ArduinoDatasTable arduinoDatas = $ArduinoDatasTable(this);
+  late final $StudyTable study = $StudyTable(this);
+  late final $ChildStudyTable childStudy = $ChildStudyTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [children, arduinoDatas];
+  List<DatabaseSchemaEntity> get allSchemaEntities =>
+      [children, arduinoDatas, study, childStudy];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [

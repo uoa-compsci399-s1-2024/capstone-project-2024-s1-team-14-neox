@@ -1,3 +1,4 @@
+import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,7 +12,7 @@ class CloudSyncCubit extends Cubit<CloudSyncState> {
   Future<void> syncAllChildData() async {
     emit(state.copyWith(status: CloudSyncStatus.loading));
     try {
-      await ChildDeviceRepository.syncAllChildData();
+      await ChildEntity.syncAllChildData();
     } on Exception catch (e) {
       emit(state.copyWith(
         status: CloudSyncStatus.failure,

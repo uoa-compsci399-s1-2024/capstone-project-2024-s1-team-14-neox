@@ -2,30 +2,17 @@ part of 'bluetooth_bloc.dart';
 
 sealed class BluetoothEvent {}
 
-class BluetoothScanStartPressed extends BluetoothEvent {}
+class BluetoothScanStarted extends BluetoothEvent {}
 
-class BluetoothScanStopPressed extends BluetoothEvent {}
+class BluetoothAuthCodeEntered extends BluetoothEvent {
+  final String deviceRemoteId;
+  final String authorisationCode;
+
+  BluetoothAuthCodeEntered({required this.deviceRemoteId, required this.authorisationCode});
+}
 
 class BluetoothConnectPressed extends BluetoothEvent {
   final String deviceRemoteId;
 
   BluetoothConnectPressed({required this.deviceRemoteId});
-}
-
-class BluetoothDisconnectPressed extends BluetoothEvent {
-  final String deviceRemoteId;
-  BluetoothDisconnectPressed({required this.deviceRemoteId});
-}
-
-class BluetoothSyncPressed extends BluetoothEvent {
-  final int childId;
-  final String childName;
-  final String deviceRemoteId;
-  final String authorisationCode;
-
-  BluetoothSyncPressed({
-    required this.childId,
-    required this.childName,
-    required this.deviceRemoteId,
-    required this.authorisationCode});
 }

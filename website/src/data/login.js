@@ -1,47 +1,48 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { Component } from "react";
-export default class Login extends Component {
-    render() {
-        const { toggleButton } = this.props;
-        return (
-            <form onSubmit={() => toggleButton()}>
-                <h3>Sign In</h3>
-
-                <div className="mb-3">
-                    <label>Email address</label>
-                    <input
-                        type="email"
-                        className="form-control"
-                        placeholder="Enter email"
-                    />
-                </div>
-                <div className="mb-3">
-                    <label>Password</label>
-                    <input
-                        type="password"
-                        className="form-control"
-                        placeholder="Enter password"
-                    />
-                </div>
-                <div className="mb-3">
-                    <div className="custom-control custom-checkbox">
-                        <input
-                            type="checkbox"
-                            className="custom-control-input"
-                            id="customCheck1"
-                        />
-                        <label className="custom-control-label" htmlFor="customCheck1">Remember me</label>
-                    </div>
-                </div>
-                <div className="d-grid">
-                    <button type="submit" className="btn btn-primary" >Submit</button>
-                </div>
-                <p className="forgot-password text-right">
-                    Forgot <a href="#">password?</a>
-                </p>
-            </form>
-        );
-    }
-}
+import React, { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import LoginLogo from './loginLogo.svg';
+//Auth related imports
+import { awsExports } from '../aws-exports';
+import { Authenticator } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
+import { Auth, Amplify, Logger, Hub  } from 'aws-amplify';
 
 
+
+Amplify.configure({
+  Auth: {
+    region: awsExports.REGION,
+    userPoolId: awsExports.USER_POOL_ID,
+    userPoolWebClientId: awsExports.USER_POOL_APP_CLIENT_ID
+  }
+});
+
+const Login = ({ toggleButton, handleJwtToken }) => {
+    
+    return (
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
+              <img src={LoginLogo} alt="NEOX Logo" width="250px" />
+              <h1 style={{ margin: '0', padding: '0' }}>Welcome to Neox Labs</h1>
+              <br></br>
+              <h2 style={{ margin: '0', padding: '0' }}>Log in to continue</h2>
+              <br></br>
+          </div>
+        </div>
+        <Authenticator initialState='signIn' loginMechanisms={['email']} hideSignUp={true}
+          components={{
+          }}
+          services={{
+          }}
+          >
+          {({ signOut, user}) => (
+              <Navigate to="/Home" />
+          )}
+        </Authenticator>
+      </div>
+  );
+};
+
+export default Login;

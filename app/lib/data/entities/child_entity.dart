@@ -1,5 +1,7 @@
+import 'dart:math';
+
+import 'package:capstone_project_2024_s1_team_14_neox/cloud/services/aws_cognito.dart';
 import 'package:drift/drift.dart';
-import '../../server/child_data.dart';
 import 'arduino_data_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/server/child_api_service.dart';
@@ -8,7 +10,7 @@ import 'package:capstone_project_2024_s1_team_14_neox/server/child_api_service.d
 class Children extends Table {
   IntColumn get id => integer().autoIncrement()();
 
-  IntColumn get serverId => integer()();
+  TextColumn get serverId => text()();
 
   TextColumn get name => text()();
 
@@ -17,6 +19,8 @@ class Children extends Table {
   TextColumn get deviceRemoteId => text()();
 
   TextColumn get authorisationCode => text()();
+
+  TextColumn get gender => text()();
 }
 
 class ChildEntity {
@@ -25,29 +29,34 @@ class ChildEntity {
   DateTime birthDate;
   String? deviceRemoteId;
   String? authorisationCode;
-  int? serverId;
+  String? serverId;
+  String gender;
 
   //TODO: deviceRemoteId is duplicated in child entity and arduino device entity
 
-  ChildEntity(
-      {required this.name,
-      required this.birthDate,
-      this.deviceRemoteId,
-      this.authorisationCode,
-      this.serverId,
-      this.id});
+  ChildEntity({
+    required this.name,
+    required this.gender,
+    required this.birthDate,
+    this.deviceRemoteId,
+    this.authorisationCode,
+    this.serverId,
+    this.id,
+  });
 
   ChildrenCompanion toCompanion() {
     return ChildrenCompanion(
       name: Value(name),
-      serverId: Value(serverId ?? 0),
+      serverId: Value(serverId ?? ''),
       birthDate: Value(birthDate),
       deviceRemoteId: Value(deviceRemoteId ?? ''),
       authorisationCode: Value(authorisationCode ?? ''),
+      gender: Value(gender),
     );
   }
-  ////////////////////////////////////////////////////////////////////////////
-  // CREATE //////////////////////////////////////////////////////////////////
+
+  ///////////////////////////////////////////////////////////////
+  //   // CREATE ///////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
 
   static Future<void> saveSingleChildEntity(ChildEntity childEntity) async {
@@ -55,7 +64,7 @@ class ChildEntity {
     await db
         .into(db.children)
         .insert(childEntity.toCompanion(), mode: InsertMode.insert);
-    print(childEntity.name);
+    // print(childEntity.name);
   }
 
   static Future<void> saveListOfChildren(
@@ -65,17 +74,24 @@ class ChildEntity {
     });
   }
 
-  static Future<void> saveSingleChildEntityFromParameters(
-      String name, DateTime birthDate) async {
+  static Future<int> saveSingleChildEntityFromParameters(
+      String name, DateTime birthDate, String gender) async {
+    // String serverId = await ChildApiService.registerChild();
+
     ChildEntity childEntity = ChildEntity(
       name: name,
+      gender: gender,
       birthDate: birthDate,
+      serverId: "",
     );
+
     AppDb db = AppDb.instance();
-    await db
+    int id = await db
         .into(db.children)
         .insert(childEntity.toCompanion(), mode: InsertMode.insert);
+    return id;
   }
+
   ////////////////////////////////////////////////////////////////////////////
   // READ ////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
@@ -102,10 +118,12 @@ class ChildEntity {
     return childEntity;
   }
 
-
-  static Future<ChildEntity?> queryChildByDeviceRemoteId(String deviceRemoteId) async {
+  static Future<ChildEntity?> queryChildByDeviceRemoteId(
+      String deviceRemoteId) async {
     AppDb db = AppDb.instance();
-    return await (db.select(db.children)..where((tbl) => tbl.deviceRemoteId.equals(deviceRemoteId))).getSingleOrNull();
+    return await (db.select(db.children)
+          ..where((tbl) => tbl.deviceRemoteId.equals(deviceRemoteId)))
+        .getSingleOrNull();
   }
 
   static Future<List<ArduinoDataEntity>> getAllDataForChild(int childId) async {
@@ -113,6 +131,14 @@ class ChildEntity {
         await ArduinoDataEntity.queryArduinoDataById(childId);
     return data;
   }
+
+  static Future<List<ChildEntity>> queryChildNoServerId() async {
+    AppDb db = AppDb.instance();
+    return await (db.select(db.children)
+          ..where((tbl) => tbl.serverId.equals("")))
+        .get();
+  }
+
   ////////////////////////////////////////////////////////////////////////////
   // UPDATE //////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
@@ -124,6 +150,34 @@ class ChildEntity {
         .write(ChildrenCompanion(deviceRemoteId: Value(deviceRemoteId)));
   }
 
+  static Future<void> updateAuthorisationCode(int childId, String code) async {
+    AppDb db = AppDb.instance();
+    await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
+        .write(ChildrenCompanion(authorisationCode: Value(code)));
+  }
+
+  static Future<void> updateChildDetails(
+    int childId,
+    String name,
+    DateTime birthDate,
+    String gender,
+    String authorisationCode,
+  ) async {
+    AppDb db = AppDb.instance();
+    await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
+        .write(ChildrenCompanion(
+      name: Value(name),
+      birthDate: Value(birthDate),
+      gender: Value(gender),
+      authorisationCode: Value(authorisationCode),
+    ));
+  }
+
+  static Future<void> updateServerId(int childId, String serverId) async {
+    AppDb db = AppDb.instance();
+    await (db.update(db.children)..where((tbl) => tbl.id.equals(childId)))
+        .write(ChildrenCompanion(serverId: Value(serverId)));
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   // DELETE //////////////////////////////////////////////////////////////////
@@ -141,7 +195,6 @@ class ChildEntity {
     await (db.delete(db.children)..where((tbl) => tbl.id.equals(childId))).go();
   }
 
-
   ////////////////////////////////////////////////////////////////////////////
   // CAN BE DELETED LATER////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
@@ -150,16 +203,21 @@ class ChildEntity {
     return "$id, $name, $birthDate, $deviceRemoteId \n";
   }
 
-
-  
   //////////////////////////////////
   ///           CLOUD            ///
   //////////////////////////////////
-  
 
-  static Future<void> syncAllChildData() async{
-    
+  static Future<void> syncAllChildData() async {
+    List<ChildEntity> noServerIdChildren = await ChildEntity.queryChildNoServerId();
+    for (final noServerIdChild in noServerIdChildren) {
+      String generatedServerId = await ChildApiService.registerChild();
+      ChildEntity.updateServerId(noServerIdChild.id!, generatedServerId);
+    }
+    List<ChildEntity> children = await ChildEntity.queryAllChildren();
+    for (final child in children) {
+      if (child.serverId == "") {}
+      int? id = child.id;
+      ChildApiService.postData(id!);
+    }
   }
-
-
 }

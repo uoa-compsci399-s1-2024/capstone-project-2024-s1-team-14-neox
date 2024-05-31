@@ -21,7 +21,7 @@
     <!-- Default -->
     
     <application
-        android:label="capstone_project_2024_s1_team_14_neox"
+        android:label="Neox Sens"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

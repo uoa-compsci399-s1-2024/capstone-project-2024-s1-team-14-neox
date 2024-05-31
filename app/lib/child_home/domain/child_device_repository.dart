@@ -1,17 +1,47 @@
+import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/classifiers/xgboost.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/main.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/single_week_hourly_stats_model.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/statistics_repository.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../analysis/domain/sensor_data_model.dart';
 import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
+import 'classifiers/xgboost.dart';
 
 class ChildDeviceRepository {
+  static const int bytesPerSample = 20;
+  final SharedPreferences sharedPreferences;
+  ChildDeviceRepository({required this.sharedPreferences});
+
   // Fetch all children profiles
 
   Future<List<ChildDeviceModel>> fetchChildProfiles() async {
     List<ChildEntity> entities = await ChildEntity.queryAllChildren();
-    return entities.map((child) => ChildDeviceModel.fromEntity(child)).toList();
+    List<ChildDeviceModel> models =
+        entities.map((child) => ChildDeviceModel.fromEntity(child)).toList();
+
+    StatisticsRepository repo = StatisticsRepository(sharedPreferences: App.sharedPreferences);
+    DateTime now = DateTime.now();
+    DateTime today = DateTime(now.year, now.month, now.day);
+
+    for (ChildDeviceModel model in models) {
+      SingleWeekHourlyStatsModel stats = (await repo.getListOfHourlyStats(today, 1, model.childId))[0];
+      model.outdoorTimeToday = stats.dailySum[today];
+      model.outdoorTimeWeek = stats.weeklyMean ~/ 7;
+
+      double monthTime = 0;
+      for (int i = 0; i < 4; i++) {
+        monthTime += (await repo.getSingleWeekHourlyStats(today.subtract(Duration(days: 7 * (i + 1))), model.childId)).weeklyMean;
+      }
+      model.outdoorTimeMonth = monthTime ~/ 28;
+    }
+
+    return models;
   }
 
   // deletl child profile based on id
@@ -20,31 +50,73 @@ class ChildDeviceRepository {
   // add child remote id
 
   Future<List<ChildDeviceModel>> createChildProfile(
-      String name, DateTime birthDate) async {
-    ChildEntity.saveSingleChildEntityFromParameters(name, birthDate);
-
-    return fetchChildProfiles();
+      String name, DateTime birthDate, String gender) async {
+    int childId = await ChildEntity.saveSingleChildEntityFromParameters(
+        name, birthDate, gender);
+    await sharedPreferences.setInt("focus_id", childId);
+    return await fetchChildProfiles();
   }
 
-  Future<List<ChildDeviceModel>> deleteChildProfile(int childId) async {
-    ChildEntity.deleteChild(childId);
-    return fetchChildProfiles();
+  Future<List<ChildDeviceModel>> deleteChildProfile(int deleteChildId) async {
+    await ChildEntity.deleteChild(deleteChildId);
+    List<ChildDeviceModel> childProfiles = await fetchChildProfiles();
+    // Set focus child as first child 
+    if (childProfiles.isEmpty) {
+      await sharedPreferences.remove("focus_id");
+    } else {
+      sharedPreferences.setInt("focus_id", childProfiles[0].childId);
+    }
+    return childProfiles;
   }
 
   Future<List<ChildDeviceModel>> updateChildDeviceRemoteID(
       int childId, String deviceRemoteId) async {
-    ChildEntity.updateRemoteDeviceId(childId, deviceRemoteId);
-    return fetchChildProfiles();
+    await ChildEntity.updateRemoteDeviceId(childId, deviceRemoteId);
+    return await fetchChildProfiles();
+  }
+
+  Future<List<ChildDeviceModel>> updateChildAuthenticationCode(
+      int childId, String authorisationCode) async {
+    await ChildEntity.updateAuthorisationCode(childId, authorisationCode);
+    return await fetchChildProfiles();
+  }
+
+  Future<List<ChildDeviceModel>> updateChildDetails(
+    int childId,
+    String name,
+    DateTime birthDate,
+    String gender,
+    String authorisationCode,
+  ) async {
+    await ChildEntity.updateChildDetails(
+      childId,
+      name,
+      birthDate,
+      gender,
+      authorisationCode,
+    );
+    return await fetchChildProfiles();
   }
 
   Future<List<ChildDeviceModel>> deleteChildDeviceRemoteID(int childId) async {
-    ChildEntity.deleteDeviceForChild(childId);
-    return fetchChildProfiles();
+    await ChildEntity.deleteDeviceForChild(childId);
+    return await fetchChildProfiles();
   }
 
-  static Future<void> parseAndSaveSamples(
+  Future<int> getMostRecentSampleTimestamp(int childId) async {
+    List<ArduinoDataEntity> data =
+        await ChildEntity.getAllDataForChild(childId);
+    if (data.isEmpty) {
+      return 0;
+    }
+    return data
+        .map((e) => e.datetime.millisecondsSinceEpoch ~/ 1000)
+        .reduce(max);
+  }
+
+  Future<void> parseAndSaveSamples(
       String childName, List<int> bytes, int childId) async {
-    const int bytesPerSample = 14;
+    List<ArduinoDataEntity> samples = [];
     while (bytes.length % bytesPerSample != 0) {
       bytes.removeLast();
     }
@@ -54,47 +126,83 @@ class ChildDeviceRepository {
         return;
       }
 
+      int readUint16() {
+        int value = bytes[i] | (bytes[i + 1] << 8);
+        i += 2;
+        return value;
+      }
+
       int timestamp = bytes[i] |
           (bytes[i + 1] << 8) |
           (bytes[i + 2] << 16) |
           (bytes[i + 3] << 24);
       i += 4;
-      int uv = bytes[i] | (bytes[i + 1] << 8);
-      i += 2;
-      int light = bytes[i] | (bytes[i + 1] << 8);
-      i += 2;
-      int accelX = bytes[i] | (bytes[i + 1] << 8);
-      i += 2;
-      int accelY = bytes[i] | (bytes[i + 1] << 8);
-      i += 2;
-      int accelZ = bytes[i] | (bytes[i + 1] << 8);
-      i += 2;
+      int uv = readUint16();
+      int accelX = readUint16(); // Although values are unsigned here,
+      int accelY = readUint16(); // acceleration is converted to signed
+      int accelZ = readUint16(); // in Int16List.fromList.
+      int red = readUint16();
+      int green = readUint16();
+      int blue = readUint16();
+      int clear = readUint16();
+      int light = _calculateLux(red, blue, green);
+      int colourTemperature =
+          _calculateColourTemperature(red, blue, green, clear);
 
-      await ArduinoDataEntity.saveSingleArduinoDataEntity(
-        ArduinoDataEntity(
-          name: childName,
-          childId: childId,
-          uv: uv,
-          light: light,
-          datetime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
-          accel: Int16List.fromList([accelX, accelY, accelZ]),
-        ),
-      );
+      int appClass =
+          score([uv, light, accelX, accelY, accelZ])[1] > 0.7 ? 1 : 0;
+
+      samples.add(ArduinoDataEntity(
+        name: childName,
+        childId: childId,
+        uv: uv,
+        light: light,
+        datetime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
+        accel: Int16List.fromList([accelX, accelY, accelZ]),
+        red: red,
+        green: green,
+        blue: blue,
+        clear: clear,
+        colourTemperature: colourTemperature,
+        appClass: appClass,
+      ));
     }
+    await ArduinoDataEntity.saveListOfArduinoDataEntity(samples);
   }
 
-  static Future<List<SensorDataModel>> fetchArduinoSamplesByChildId(
-      int childId) async {
-    List<ArduinoDataEntity> entities =
-        await ChildEntity.getAllDataForChild(childId);
-    return entities.map((data) => SensorDataModel.fromEntity(data)).toList();
+  int _calculateLux(int r, int g, int b) {
+    return ((-0.32466 * r) + (1.57837 * g) + (-0.73191 * b))
+        .toInt()
+        .clamp(0, 0xFFFF);
   }
 
-  //////////////////////////////////
-  ///           CLOUD            ///
-  //////////////////////////////////
+  int _calculateColourTemperature(int r, int g, int b, int c) {
+    const int integrationTime = 101;
 
-  static Future<void> syncAllChildData() async {
-    await ChildEntity.syncAllChildData();
+    if (c == 0) {
+      return 0;
+    }
+
+    int sat;
+    if ((256 - integrationTime) > 63) {
+      sat = 65535;
+    } else {
+      sat = 1024 * (256 - integrationTime);
+    }
+    if ((256 - integrationTime) <= 63) {
+      sat -= sat ~/ 4;
+    }
+    if (c >= sat) {
+      return 0;
+    }
+
+    int ir = (r + g + b > c) ? (r + g + b - c) ~/ 2 : 0;
+    int r2 = r - ir;
+    int b2 = b - ir;
+    if (r2 == 0) {
+      return 0;
+    }
+
+    return ((3810 * b2) ~/ r2 + 1391).clamp(0, 0xFFFF);
   }
 }

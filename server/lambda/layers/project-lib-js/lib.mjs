@@ -142,3 +142,9 @@ export function generateID()
 }
 
 export const TEMP_PARENT_ID = '1';
+
+export const PERSONAL_INFO_CHILD_GENDER_OPTIONS = [
+  "male",
+  "female",
+  "other",
+];

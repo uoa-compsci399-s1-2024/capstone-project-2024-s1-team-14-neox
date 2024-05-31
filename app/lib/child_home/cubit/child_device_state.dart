@@ -1,68 +1,127 @@
 part of 'child_device_cubit.dart';
 
-enum ChildDeviceStatus {
-  unknown,
-  paired,
-  pairSuccess,
-  unpairSuccess,
-  failure,
-  loading,
-}
-
-extension ChildDeviceStatusX on ChildDeviceStatus {
-  bool get isUnknown => this == ChildDeviceStatus.unknown;
-  bool get isPaired => this == ChildDeviceStatus.paired;
-  bool get isPairSuccess => this == ChildDeviceStatus.pairSuccess;
-  bool get isUnpairSuccess => this == ChildDeviceStatus.unpairSuccess;
-  bool get isFailure => this == ChildDeviceStatus.failure;
-  bool get isLoading => this == ChildDeviceStatus.loading;
-}
-
-class ChildDeviceState extends Equatable {
-  final ChildDeviceStatus status;
+class ChildDeviceState {
   final int childId;
   final String childName;
   final DateTime birthDate;
-  final String? deviceRemoteId;
-  final String? authorisationCode;
-  final String message;
+  final String gender;
+  final String deviceRemoteId;
+  final String authorisationCode;
+  final int outdoorTimeToday;
+  final int outdoorTimeWeek;
+  final int outdoorTimeMonth;
 
   const ChildDeviceState({
     required this.childId,
-    required this.status,
     required this.childName,
     required this.birthDate,
+    required this.gender,
     required this.deviceRemoteId,
     required this.authorisationCode,
-    this.message = "",
+    required this.outdoorTimeToday,
+    required this.outdoorTimeWeek,
+    required this.outdoorTimeMonth,
   });
+}
 
-  ChildDeviceState copyWith({
-    ChildDeviceStatus? status,
-    int? childId,
-    String? childName,
-    DateTime? birthDate,
-    String? deviceRemoteId,
-    String? message,
-  }) {
-    return ChildDeviceState(
-      status: status ?? this.status,
-      childId: childId ?? this.childId,
-      childName: childName ?? this.childName,
-      birthDate: birthDate ?? this.birthDate,
-      deviceRemoteId: deviceRemoteId ?? "",
-      authorisationCode: authorisationCode ?? "",
-      message: message ?? "",
-    );
-  }
+class ChildDeviceIdleState extends ChildDeviceState {
+  ChildDeviceIdleState(ChildDeviceState childDeviceState) : super(
+    childId: childDeviceState.childId,
+    childName: childDeviceState.childName,
+    birthDate: childDeviceState.birthDate,
+    gender: childDeviceState.gender,
+    deviceRemoteId: childDeviceState.deviceRemoteId,
+    authorisationCode: childDeviceState.authorisationCode,
+    outdoorTimeToday: childDeviceState.outdoorTimeToday,
+    outdoorTimeWeek: childDeviceState.outdoorTimeWeek,
+    outdoorTimeMonth: childDeviceState.outdoorTimeMonth,
+  );
+}
 
-  @override
-  List<Object?> get props => [
-        status,
-        childId,
-        childName,
-        deviceRemoteId,
-        authorisationCode,
-        message,
-      ];
+class ChildDeviceErrorState extends ChildDeviceState {
+  final String errorMessage;
+
+  ChildDeviceErrorState(ChildDeviceState childDeviceState, this.errorMessage) : super(
+    childId: childDeviceState.childId,
+    childName: childDeviceState.childName,
+    birthDate: childDeviceState.birthDate,
+    gender: childDeviceState.gender,
+    deviceRemoteId: childDeviceState.deviceRemoteId,
+    authorisationCode: childDeviceState.authorisationCode,
+    outdoorTimeToday: childDeviceState.outdoorTimeToday,
+    outdoorTimeWeek: childDeviceState.outdoorTimeWeek,
+    outdoorTimeMonth: childDeviceState.outdoorTimeMonth,
+  );
+}
+
+class ChildDeviceLoadingState extends ChildDeviceState {
+  ChildDeviceLoadingState(ChildDeviceState childDeviceState) : super(
+    childId: childDeviceState.childId,
+    childName: childDeviceState.childName,
+    birthDate: childDeviceState.birthDate,
+    gender: childDeviceState.gender,
+    deviceRemoteId: childDeviceState.deviceRemoteId,
+    authorisationCode: childDeviceState.authorisationCode,
+    outdoorTimeToday: childDeviceState.outdoorTimeToday,
+    outdoorTimeWeek: childDeviceState.outdoorTimeWeek,
+    outdoorTimeMonth: childDeviceState.outdoorTimeMonth,
+  );
+}
+
+class ChildDeviceConnectState extends ChildDeviceState {
+  ChildDeviceConnectState(ChildDeviceState childDeviceState, String deviceRemoteId, String authorisationCode) : super(
+    childId: childDeviceState.childId,
+    childName: childDeviceState.childName,
+    birthDate: childDeviceState.birthDate,
+    gender: childDeviceState.gender,
+    deviceRemoteId: deviceRemoteId,
+    authorisationCode: authorisationCode,
+    outdoorTimeToday: childDeviceState.outdoorTimeToday,
+    outdoorTimeWeek: childDeviceState.outdoorTimeWeek,
+    outdoorTimeMonth: childDeviceState.outdoorTimeMonth,
+  );
+}
+
+class ChildDeviceDisconnectState extends ChildDeviceState {
+  ChildDeviceDisconnectState(ChildDeviceState childDeviceState) : super(
+    childId: childDeviceState.childId,
+    childName: childDeviceState.childName,
+    birthDate: childDeviceState.birthDate,
+    gender: childDeviceState.gender,
+    deviceRemoteId: "",
+    authorisationCode: childDeviceState.authorisationCode,
+    outdoorTimeToday: childDeviceState.outdoorTimeToday,
+    outdoorTimeWeek: childDeviceState.outdoorTimeWeek,
+    outdoorTimeMonth: childDeviceState.outdoorTimeMonth,
+  );
+}
+
+class ChildDeviceSyncingState extends ChildDeviceState {
+  final double? progress; // In range [0,1] or null when sync is still starting (e.g. auth)
+
+  ChildDeviceSyncingState(ChildDeviceState childDeviceState, this.progress) : super(
+    childId: childDeviceState.childId,
+    childName: childDeviceState.childName,
+    birthDate: childDeviceState.birthDate,
+    gender: childDeviceState.gender,
+    deviceRemoteId: childDeviceState.deviceRemoteId,
+    authorisationCode: childDeviceState.authorisationCode,
+    outdoorTimeToday: childDeviceState.outdoorTimeToday,
+    outdoorTimeWeek: childDeviceState.outdoorTimeWeek,
+    outdoorTimeMonth: childDeviceState.outdoorTimeMonth,
+  );
+}
+
+class ChildDeviceSyncSuccessState extends ChildDeviceState {
+  ChildDeviceSyncSuccessState(ChildDeviceState childDeviceState) : super(
+    childId: childDeviceState.childId,
+    childName: childDeviceState.childName,
+    birthDate: childDeviceState.birthDate,
+    gender: childDeviceState.gender,
+    deviceRemoteId: childDeviceState.deviceRemoteId,
+    authorisationCode: childDeviceState.authorisationCode,
+    outdoorTimeToday: childDeviceState.outdoorTimeToday,
+    outdoorTimeWeek: childDeviceState.outdoorTimeWeek,
+    outdoorTimeMonth: childDeviceState.outdoorTimeMonth,
+  );
 }

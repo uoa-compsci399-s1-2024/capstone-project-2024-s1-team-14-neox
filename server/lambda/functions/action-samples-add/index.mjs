@@ -8,6 +8,7 @@ import {
 import {
   isMatch,
 } from "date-fns";
+import pg from "pg";
 import {
   CHECK_VIOLATION,
   FOREIGN_KEY_VIOLATION,
@@ -21,6 +22,14 @@ const REQUIRED_FIELDS = [
   "timestamp",
   "uv",
   "light",
+  "accel_x",
+  "accel_y",
+  "accel_z",
+  "col_red",
+  "col_green",
+  "col_blue",
+  "col_clear",
+  "col_temp",
 ];
 // Any samples which cause exceptions upon inserting to DB are handled
 // much slower than successes (because exceptions are expensive).
@@ -164,15 +173,16 @@ export const handler = async (event) => {
     delete logSample.child_id;  // if present
     delete logSample.timestamp;
     console.log(`sample ${i+1}/${samples.length}: adding sample with timestamp "${samples[i].timestamp}": ${JSON.stringify(logSample)}`);
+    const escapedIdentifiersList = REQUIRED_FIELDS.map(f => pg.escapeIdentifier(f)).join(',');
+    const queryFieldNumbers = Array(REQUIRED_FIELDS.length).fill().map((_,i) => 1 + 1+i);
     // Don't need to add BEGIN and COMMIT (plus ROLLBACK) statements because this is atomic.
     try {
       await db.query(
-        "INSERT INTO samples (\"timestamp\",child_id,uv,light) VALUES ($1,$2,$3,$4)",
-        [samples[i].timestamp,
-         childID,
-         samples[i].uv,
-         samples[i].light],
-      );
+        `INSERT INTO samples (child_id,
+                              ${escapedIdentifiersList})
+         VALUES ($1,
+                 ${queryFieldNumbers.map(n => '$' + n).join(',')})`,
+        [childID].concat(REQUIRED_FIELDS.map(f => samples[i][f])));
     } catch (e) {
       if (e.code === UNIQUE_VIOLATION && e.constraint === "samples_pkey") {
         errors.push({
@@ -192,24 +202,19 @@ export const handler = async (event) => {
         console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
         break;
       } else if (e.code === INVALID_TEXT_REPRESENTATION) {
-        const m = e.where.match(/\$(?<param>[0-9])/);
+        const m = e.where.match(/\$(?<param>[0-9]+)/);
         if (!m) {
           console.error("can't parse parameter number from postgresql error");
           throw e;
         }
 
-        let badField;
-        switch (m.groups.param) {
-        case '3':
-          badField = "uv";
-          break;
-        case '4':
-          badField = "light";
-          break;
-        default:
+        // We assume that queryFieldNumbers is a contiguous interval of integers
+        if (!(queryFieldNumbers[0] <= m.groups.param && m.groups.param <= queryFieldNumbers[queryFieldNumbers.length-1])) {
           console.error(`unhandled parameter number ${m.groups.param}`);
           throw e;
         }
+        // Now we map the number from `queryFieldNumbers` to an actual field name
+        const badField = REQUIRED_FIELDS[m.groups.param - queryFieldNumbers[0]];
         errors.push({
           resource: `${resolvedResource}?index=${i}&field=${badField}`,
           status: 400,
@@ -226,6 +231,11 @@ export const handler = async (event) => {
         switch (m.groups.field) {
         case 'light':
         case 'uv':
+        case 'col_red':
+        case 'col_green':
+        case 'col_blue':
+        case 'col_clear':
+        case 'col_temp':
           break;
         default:
           console.error(`invalid field "${m.groups.field}"`);

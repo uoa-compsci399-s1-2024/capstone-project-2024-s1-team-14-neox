@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 import '../../child_home/cubit/all_child_profile_cubit.dart';
 import '../../child_home/cubit/child_device_cubit.dart';
@@ -8,90 +9,84 @@ import 'screen/scan_screen.dart';
 
 class BluetoothPanel extends StatelessWidget {
   const BluetoothPanel({super.key});
-
+  
   @override
   Widget build(BuildContext context) {
-    return BlocListener<BluetoothBloc, BluetoothState>(
+    return BlocListener<ChildDeviceCubit, ChildDeviceState>(
       listener: (context, state) {
-        if (state.status.isConnectSuccess) {
-          // TODO: may need to change the chain of updating deviceRemoteID, currently calling two functions
+        if (state is ChildDeviceConnectState) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Paired device'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.lightBlue,
+          ));
           context.read<AllChildProfileCubit>().updateDeviceRemoteId(
-              childId: context.read<ChildDeviceCubit>().state.childId,
-              deviceRemoteId: state.newDeviceRemoteId);
+              childId: state.childId,
+              deviceRemoteId: state.deviceRemoteId);
+          context.read<AllChildProfileCubit>().updateAuthorisationCode(
+              childId: state.childId,
+              authorisationCode: state.authorisationCode);
 
-          context
-              .read<ChildDeviceCubit>()
-              .onChildDevicePairSuccess(state.newDeviceRemoteId);
+        } else if (state is ChildDeviceErrorState) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(state.errorMessage),
+            duration: const Duration(seconds: 4),
+          ));
+
+        } else if (state is ChildDeviceSyncSuccessState) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Sync complete"),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.lightBlue,
+          ));
+
+        }
+
+        if (state is ChildDeviceSyncingState) {
+          context.loaderOverlay.show();
+          context.loaderOverlay.progress(state.progress);
+        } else {
+          context.loaderOverlay.hide();
         }
       },
       child: BlocBuilder<ChildDeviceCubit, ChildDeviceState>(
         builder: (context, state) {
-          if (state.status.isLoading) {
-            return CircularProgressIndicator();
+          if (state is ChildDeviceLoadingState) {
+            return const CircularProgressIndicator();
           }
-          if (state.status.isUnknown || state.status.isUnpairSuccess) {
-            return Column(
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      // Must use _ for context in builder, otherwise wrong context is looked up
-                      MaterialPageRoute(builder: (_) {
-                        return BlocProvider.value(
-                          value: BlocProvider.of<BluetoothBloc>(context),
-                          child: ScanScreen(
-                              name: context
-                                  .read<ChildDeviceCubit>()
-                                  .state
-                                  .childName),
-                        );
-                      }),
+
+          if (state.deviceRemoteId.isEmpty) {
+            return ElevatedButton(
+              onPressed: () {
+                // Automatically begin scanning
+                BlocProvider.of<BluetoothBloc>(context).add(BluetoothScanStarted());
+
+                Navigator.push(
+                  context,
+                  // Must use _ for context in builder, otherwise wrong context is looked up
+                  MaterialPageRoute(builder: (_) {
+                    return BlocProvider.value(
+                      value: BlocProvider.of<ChildDeviceCubit>(context),
+                      child: BlocProvider.value(
+                        value: BlocProvider.of<BluetoothBloc>(context),
+                        child: ScanScreen(name: state.childName),
+                      ),
                     );
-                  },
-                  child: const Text("Pair device"),
-                ),
-                // ElevatedButton(
-                //   onPressed: () {
-                //     print(context.read<AllChildProfileCubit>().state.profiles);
-                //   },
-                //   child: Text("Test"),
-                // )
-              ],
+                  }),
+                );
+              },
+              child: const Text("Pair device"),
             );
           }
-          return Column(
-            children: [
-              ElevatedButton(
-                onPressed: () =>
-                    context.read<BluetoothBloc>().add(BluetoothSyncPressed(
-                          childId: state.childId,
-                          childName: state.childName,
-                          deviceRemoteId: state.deviceRemoteId ?? "",
-                          authorisationCode: state.authorisationCode ?? "",
-                        )),
-                child: Text("Sync device"),
-              ),
-              ElevatedButton(
-                // Unpair means to remove deviceRemoteId from child repository
-                onPressed: () {
-                  // Disconnect bluetooth
-                  context.read<BluetoothBloc>().add(BluetoothDisconnectPressed(
-                      deviceRemoteId: state.deviceRemoteId ?? ""));
-                  context.read<ChildDeviceCubit>().onChildDeviceUnpairSuccess();
-                  // Update in child repository
-                  context.read<AllChildProfileCubit>().deleteDeviceRemoteId(
-                      childId: context.read<ChildDeviceCubit>().state.childId);
-                },
-                child: Text("Unpair device"),
-              ),
-              // ElevatedButton(
-              //   onPressed: () {
-              //     print(context.read<AllChildProfileCubit>().state.profiles);
-              //   },
-              //   child: Text("Test"),
-              // )
-            ],
+
+          return ElevatedButton(
+            onPressed: () => context.read<ChildDeviceCubit>().onSyncPressed(
+              childName: state.childName,
+              childId: state.childId,
+              deviceRemoteId: state.deviceRemoteId,
+              authorisationCode: state.authorisationCode,
+            ),
+            child: const Text("Sync device"),
           );
         },
       ),

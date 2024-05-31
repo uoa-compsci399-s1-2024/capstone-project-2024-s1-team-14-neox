@@ -18,6 +18,7 @@ const PERSONAL_INFO_FIELDS_CHILD = [
   "given_name",
   "middle_name",
   "nickname",
+  "gender",
 ];
 
 async function setPersonalInfoFields(db, infoResource, childID, fields)

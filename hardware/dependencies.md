@@ -7,3 +7,4 @@
 | Arduino LSM6DS3 | 1.0.3 |
 | Arduino BLE | 1.3.6 |
 | Crypto | 0.4.0 |
+| Adafruit TCS34725 | 1.4.4 |
