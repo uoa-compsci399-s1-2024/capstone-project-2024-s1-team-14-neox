@@ -41,6 +41,7 @@ const REQUIRED_FIELDS = [
 // seen for a given child processed well within the 29s API Gateway
 // timeout AND the 30s lambda timeout we've set.  It was almost 20s.
 const MAX_SAMPLES = 1000;
+const UNAUTH_OR_NO_SUCH_CHILD_MESSAGE = "child ID doesn't exist or user is not authorised to add samples to the child";
 
 export const handler = async (event) => {
   const childID = event.pathParameters.childID;
@@ -54,7 +55,7 @@ export const handler = async (event) => {
       errors: [{
         resource: resolvedResource,
         status: 403,
-        message: `child ID doesn't exist or user is not authorised to view their personal info`,
+        message: UNAUTH_OR_NO_SUCH_CHILD_MESSAGE,
       }]};
     response.statusCode = body.errors[body.errors.length-1].status;
     response.body = JSON.stringify(body);
@@ -217,11 +218,10 @@ export const handler = async (event) => {
         console.error(`index=${i}: ${errors[errors.length-1].message}`);
         continue;
       } else if (e.code === FOREIGN_KEY_VIOLATION && e.constraint === "samples_child_id_fkey") {
-        // FIXME: Handle permissions.
         errors.push({
           resource: resolvedResource,
           status: 403,
-          message: `child ID doesn't exist or user is not authorised to add samples to the child`,
+          message: UNAUTH_OR_NO_SUCH_CHILD_MESSAGE,
         });
         console.error(`index=${i}: ${errors[errors.length-1].message}`);
         break;
