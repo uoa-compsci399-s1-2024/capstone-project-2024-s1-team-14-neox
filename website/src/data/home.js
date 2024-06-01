@@ -176,6 +176,49 @@ function AdminExtraStudyFields({id, token, isAdmin}) {
         return <></>;
     }
 }
+function downloadCSV(data, filename) {
+    const csv = convertToCSV(data);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+function convertToCSV(data) {
+    const header = Object.keys(data[0]).join(',') + '\n';
+    const rows = data.map(row => Object.values(row).join(',')).join('\n');
+    return header + rows;
+  }
+
+async function fetchDataAndDownload(id, token) {
+    const response = await fetch(`${awsExports.API_ENDPOINT}/studies/${id}/samples`, {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+            'Authorization': 'Bearer ' + token.getJwtToken()
+        },
+        credentials: 'include',
+    })
+    const jsondata = await response.json(); 
+    const data = jsondata.data.map(entry => ({
+        tstamp: entry.timestamp,
+        uv: entry.uv,
+        lux: entry.light,
+        x: entry.accel_x,
+        y: entry.accel_y,
+        z: entry.accel_z,
+        red: entry.col_red,
+        green: entry.col_green,
+        blue: entry.col_blue,
+        clear: entry.col_clear,
+        temp: entry.col_temp,
+    }))
+    downloadCSV(data, `${id}.csv`);
+}
 
 function StudyCard({id, token, isAdmin}) {
     const [details, setDetails] = useState(null);
@@ -199,12 +242,13 @@ function StudyCard({id, token, isAdmin}) {
                 <h5><span className="card-titles">Period:</span> {details ? `${details.start_date} - ${details.end_date}` : "(Loading...)"} </h5>
                 <AdminExtraStudyFields id={id} token={token} isAdmin={isAdmin} />
                 <div className="d-table-row gap-4 d-md-flex justify-content-md-end">
-                    <button type="button" className="btn btn-outline-primary">Download CSV</button>
+                    <button type="button" className="btn btn-outline-primary" onClick={() => fetchDataAndDownload(id, token)}>Download CSV</button>
                 </div>
             </Card>
         </div>
     );
 }
+
 
 const Home = ({ isAdmin, showButton }) => {
     const [familyName, setFamilyName] = useState(null);
