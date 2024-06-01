@@ -39,7 +39,7 @@ if [ "$s" = 1 ]; then
 	function ensureNewPassword ()
 	{
 		local subject_name="$1" email="$2" temp_password
-		read -p "enter temp password for $subject_name account from email: " temp_password
+		read -r -p "enter temp password for $subject_name account from email: " temp_password
 		local init_auth_resp="$(aws cognito-idp admin-initiate-auth --client-id "$CLIENTID" --auth-parameters "{\"USERNAME\": \"$email\", \"PASSWORD\": \"$temp_password\"}" --user-pool-id "$POOLID" --auth-flow ADMIN_USER_PASSWORD_AUTH)"
 		if [ "$(echo "$init_auth_resp" | jq -r '.ChallengeName')" = NEW_PASSWORD_REQUIRED ]; then
 			echo "$subject_name: need new password, setting to: $PASSWORD"
