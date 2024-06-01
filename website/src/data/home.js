@@ -233,29 +233,21 @@ function convertToCSV(data) {
   }
 
 async function fetchDataAndDownload(id, token) {
-    const response = await fetch(`${awsExports.API_ENDPOINT}/studies/${id}/samples`, {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-            'Authorization': 'Bearer ' + token.getJwtToken()
-        },
-        credentials: 'include',
-    })
-    const jsondata = await response.json(); 
-    const data = jsondata.data.map(entry => ({
-        tstamp: entry.timestamp,
-        uv: entry.uv,
-        lux: entry.light,
-        x: entry.accel_x,
-        y: entry.accel_y,
-        z: entry.accel_z,
-        red: entry.col_red,
-        green: entry.col_green,
-        blue: entry.col_blue,
-        clear: entry.col_clear,
-        temp: entry.col_temp,
-    }))
-    downloadCSV(data, `${id}.csv`);
+    try {
+        const response = await fetch(`${awsExports.API_ENDPOINT}/studies/${id}/samples`, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Authorization': 'Bearer ' + token.getJwtToken()
+            },
+            credentials: 'include',
+        })
+        const jsondata = await response.json(); 
+        const data = jsondata.data;
+        downloadCSV(data, `${id}.csv`);
+    } catch (error) {
+        console.error("Error fetching data", error)
+    }
 }
 
 function StudyCard({id, token, isAdmin, tick}) {
