@@ -11,19 +11,26 @@ class ChildApiService {
   static const String apiUrl =
       'https://xu31tcdj0e.execute-api.ap-southeast-2.amazonaws.com/dev';
 
-  static void fetchChildrenData(int childId) async {
-    ChildEntity? child = await ChildEntity.queryChildById(childId);
-    String? serverId = child?.serverId;
-
+  static  Future<Map<String, dynamic>> initializeHeader() async{
     final token = await AWSServices().getToken();
     if (token == null) {
       throw Exception('No token found');
     }
 
     final defaultHeaders = {
+      'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
     };
+    return defaultHeaders;
+  }
 
+
+  static void fetchChildrenData(int childId) async {
+    ChildEntity? child = await ChildEntity.queryChildById(childId);
+    String? serverId = child?.serverId;
+
+
+    final defaultHeaders = await initializeHeader();
     Dio dio = Dio();
     try {
       var response = await dio.get('$apiUrl/samples/$serverId',
@@ -45,14 +52,7 @@ class ChildApiService {
   static Future<void> postData(int childId) async {
     Dio dio = Dio();
 
-    final token = await AWSServices().getToken();
-    if (token == null) {
-      throw Exception('No token found');
-    }
-
-    final defaultHeaders = {
-      'Authorization': 'Bearer $token',
-    };
+    final defaultHeaders = await initializeHeader();
 
     var sampleList = await ArduinoDataEntity.queryArduinoDataById(childId);
     var dataList = [];
@@ -103,14 +103,7 @@ class ChildApiService {
   static Future<String> registerChild() async {
     print('Register success');
     Dio dio = Dio();
-    final token = await AWSServices().getToken();
-    if (token == null) {
-      throw Exception('No token found');
-    }
-
-    final defaultHeaders = {
-      'Authorization': 'Bearer $token',
-    };
+    final defaultHeaders = await initializeHeader();
 
     const url = '$apiUrl/children';
     var response =
@@ -124,15 +117,7 @@ class ChildApiService {
   static getStudy(String studyCode) async {
     Dio dio = Dio();
 
-    final token = await AWSServices().getToken();
-    if (token == null) {
-      throw Exception('No token found');
-    }
-
-    final defaultHeaders = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
+    final defaultHeaders = await initializeHeader();
 
     final String url = '$apiUrl/studies/$studyCode/info';
     try {
@@ -160,7 +145,7 @@ class ChildApiService {
 
     if (child?.serverId == '') {
       String serverId = await ChildApiService.registerChild();
-      ChildEntity.updateServerId(childId, serverId);
+      await ChildEntity.updateServerId(childId, serverId);
     }
 
     serverId = child?.serverId;
@@ -168,15 +153,7 @@ class ChildApiService {
     Dio dio = Dio();
     String url = '$apiUrl/children/$serverId/studies/$studyCode';
 
-    final token = await AWSServices().getToken();
-    if (token == null) {
-      throw Exception('No token found');
-    }
-
-    final defaultHeaders = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
+    final defaultHeaders = await initializeHeader();
 
     try {
       var response =
@@ -195,15 +172,7 @@ class ChildApiService {
     Dio dio = Dio();
     String url = '$apiUrl/children/$serverId/studies/$studyCode';
 
-    final token = await AWSServices().getToken();
-    if (token == null) {
-      throw Exception('No token found');
-    }
-
-    final defaultHeaders = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
+    final defaultHeaders = await initializeHeader();
 
     try {
       var response =
@@ -214,28 +183,20 @@ class ChildApiService {
     }
   }
 
-  static getAllStudies() async {
-    StudyEntity.clearStudyTable();
-    final token = await AWSServices().getToken();
-    if (token == null) {
-      throw Exception('No token found');
-    }
-
-    final defaultHeaders = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
-
-    Dio dio = Dio();
-
-    String url = '$apiUrl/studies';
-    var response =
-        await dio.get(url, options: Options(headers: defaultHeaders));
-    print(response.data);
-    var listOfStudies = response.data["data"];
-
-    for (final studyCode in listOfStudies) {
-      await ChildApiService.getStudy(studyCode["id"]);
-    }
-  }
+  // static getAllStudies() async {
+  //   StudyEntity.clearStudyTable();
+  //   final defaultHeaders = await initializeHeader();
+  //
+  //   Dio dio = Dio();
+  //
+  //   String url = '$apiUrl/studies';
+  //   var response =
+  //       await dio.get(url, options: Options(headers: defaultHeaders));
+  //   print(response.data);
+  //   var listOfStudies = response.data["data"];
+  //
+  //   for (final studyCode in listOfStudies) {
+  //     await ChildApiService.getStudy(studyCode["id"]);
+  //   }
+  // }
 }
