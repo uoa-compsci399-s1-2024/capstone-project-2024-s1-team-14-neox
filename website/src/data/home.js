@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Auth, Amplify } from 'aws-amplify';
 import { Card } from '@aws-amplify/ui-react';
 import { awsExports } from "../aws-exports";
+import pLimit from "p-limit";
 
 Amplify.configure({
     Auth: {
@@ -40,36 +41,63 @@ function NonAdminTrailer({isAdmin}) {
     }
 }
 
-function StudyCard({id, token, isAdmin}) {
-    const [details, setDetails] = useState(null);
+const MAX_CONNECTIONS = 5;  // arbitrary
+const _LIMIT = pLimit(MAX_CONNECTIONS);
+
+async function fetchInfo (id, token) {
+    const info = await fetch(`${awsExports.API_ENDPOINT}/studies/${id}/info`, {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+            'Authorization': 'Bearer ' + token.getJwtToken()
+        },
+        credentials: 'include',
+    });
+    const jsoninfo = await info.json();
+    return jsoninfo.data;
+}
+async function fetchParticipants(id, token) {
+    const resp = await fetch(`${awsExports.API_ENDPOINT}/studies/${id}/participants`, {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+            'Authorization': 'Bearer ' + token.getJwtToken()
+        },
+        credentials: 'include',
+    });
+    const json = await resp.json();
+    return json.data;
+}
+
+function AdminExtraStudyFields({id, token, isAdmin}) {
     const [participants, setParticipants] = useState(null);
     useEffect(() => {
-        async function fetchInfo() {
-            const info = await fetch(`${awsExports.API_ENDPOINT}/studies/${id}/info`, {
-                method: 'GET',
-                mode: 'cors',
-                headers: {
-                    'Authorization': 'Bearer ' + token.getJwtToken()
-                },
-                credentials: 'include',
-            });
-            const jsoninfo = await info.json();
-            setDetails(jsoninfo.data);
-            if (isAdmin) {
-                const resp = await fetch(`${awsExports.API_ENDPOINT}/studies/${id}/participants`, {
-                    method: 'GET',
-                    mode: 'cors',
-                    headers: {
-                        'Authorization': 'Bearer ' + token.getJwtToken()
-                    },
-                    credentials: 'include',
-                });
-                setParticipants(resp.data);
+        async function fetchWithToken() {
+            if (isAdmin && token != null) {
+                setParticipants(await _LIMIT(fetchParticipants, id, token));
             }
         }
-        if (token != null) {
-            fetchInfo();
+        fetchWithToken();
+    }, [id]);
+    if (isAdmin) {
+        return (
+            <h5><span className="card-titles bottom">Researchers: </span>{participants ? participants.researchers.length : "(Loading...)"}</h5>
+        );
+    } else {
+        return <></>;
+    }
+}
+
+function StudyCard({id, token, isAdmin}) {
+    const [details, setDetails] = useState(null);
+    // const [participants, setParticipants] = useState(null);
+    useEffect(() => {
+        async function fetchWithToken() {
+            if (token != null) {
+                setDetails(await _LIMIT(fetchInfo, id, token));
+            }
         }
+        fetchWithToken();
     }, [id]);
 
     return (
@@ -80,7 +108,7 @@ function StudyCard({id, token, isAdmin}) {
                 <h3 style={{"textAlign": "center"}}>{details ? details.name : "(Loading...)"}</h3>
                 <h5 style={{"textAlign": "center", "paddingBottom": "2%"}}>{details ? details.description : "(Loading...)"} </h5>
                 <h5><span className="card-titles">Period:</span> {details ? `${details.start_date} - ${details.end_date}` : "(Loading...)"} </h5>
-                {isAdmin ? (<h5><span className="card-titles bottom">Researchers: </span>{participants ? participants.researchers.length : "(Loading...)"}</h5>) : ""}
+                <AdminExtraStudyFields id={id} token={token} isAdmin={isAdmin} />
                 <div className="d-table-row gap-4 d-md-flex justify-content-md-end">
                     <button type="button" className="btn btn-outline-primary">Download CSV</button>
                 </div>
