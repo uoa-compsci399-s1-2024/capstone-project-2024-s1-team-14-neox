@@ -24,7 +24,7 @@ class ChildDeviceRepository {
     List<ChildDeviceModel> models =
         entities.map((child) => ChildDeviceModel.fromEntity(child)).toList();
 
-    StatisticsRepository repo =
+    StatisticsRepository statsRepo =
         StatisticsRepository(sharedPreferences: App.sharedPreferences);
     DateTime now = DateTime.now();
     DateTime today = DateTime(now.year, now.month, now.day);
@@ -121,6 +121,7 @@ class ChildDeviceRepository {
       String childName, List<int> bytes, int childId) async {
     List<ArduinoDataEntity> samples = [];
     DateTime startTime = DateTime.now();
+    print("ARDUINO start $startTime");
     while (bytes.length % bytesPerSample != 0) {
       bytes.removeLast();
     }
@@ -182,9 +183,11 @@ class ChildDeviceRepository {
       ));
     }
     DateTime endTime = DateTime.now();
-    print("Sample length: ${samples.length}");
-    print("time spent $startTime $endTime ${endTime.difference(startTime)}" );
+    print("ARDUINO  Sample length: ${samples.length}");
+    print("ARDUINO time spent $startTime $endTime ${endTime.difference(startTime)}" );
     await ArduinoDataEntity.saveListOfArduinoDataEntity(samples);
+    DateTime done = DateTime.now();
+    print("ARDUINO all done ${done.difference(endTime)}");
   }
 
   int _calculateLux(int r, int g, int b) {
