@@ -91,10 +91,10 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
                       context.read<ChildDeviceCubit>().state.childId);
                   Navigator.pop(innerContext);
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('The profile has been deleted'),
-                    duration: Duration(seconds: 2),
-                    backgroundColor: Colors.lightBlue,
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: const Text('The profile has been deleted'),
+                    duration: const Duration(seconds: 2),
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
                   ));
                 },
                 child: const Text("Delete")),
@@ -187,6 +187,7 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
     ];
 
     List<Widget> body = [
+      const SizedBox(height: 8),
       TextField(
         controller: _nameController,
         keyboardType: TextInputType.text,
@@ -442,7 +443,7 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
             ))),
             onPressed: onAddChildPressed,
             child: const Text(
-              'Add child',
+              'Add',
               style: TextStyle(fontSize: 20),
             ),
           ),
