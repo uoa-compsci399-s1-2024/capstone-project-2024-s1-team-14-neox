@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Auth, Amplify } from 'aws-amplify';
 import { Card } from '@aws-amplify/ui-react';
 import { awsExports } from "../aws-exports";
+import Popup from '../popup';
 
 Amplify.configure({
     Auth: {
@@ -49,6 +50,7 @@ const Home = ({ isAdmin, showButton }) => {
 
     const [studies, setStudies] = useState([]);
     const [idTokenAdmin, setIdTokenAdmin] = useState(null); 
+    //const [tick, setTick] = useState([]);
     
     useEffect(() => {
         const fetchIdTokenAdmin = async () => {
@@ -132,9 +134,76 @@ const Home = ({ isAdmin, showButton }) => {
           }
         };
         fetchStudies();
+    }, [idTokenAdmin])
 
-      }, [idTokenAdmin])
-           
+    
+    // new code starts from here
+    const [researcherId, setResearcherId] = useState("");
+    const [selectedStudyId, setSelectedStudyId] = useState("");
+    const [editError, setEditError] = useState(null); 
+    const [isOpen, setIsOpen] = useState(false);
+    const [isSuccessful, setIsSuccessful] = useState(false);
+
+    const addResearcher = async () => {
+        try {
+            const token = idTokenAdmin; 
+            const response = await fetch(`${awsExports.API_ENDPOINT}/researchers/${researcherId}/studies/${selectedStudyId}`, {
+            method: 'PUT',
+            mode: 'cors',
+            headers: {
+                'Authorization': 'Bearer ' + token.getJwtToken(),
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ researcherId })
+            });
+
+            if (response.ok) {
+                setEditError(null); 
+                console.log(response)
+                } else {
+                setEditError(null);
+                setEditError('Error adding researcher'); 
+            }
+            } catch (error) {
+                setEditError(null);
+                setEditError('Error adding researcher'); 
+                console.log(error)
+            }
+    };
+
+    const removeResearcher = async () => {
+        try {
+            const token = idTokenAdmin; 
+            const response = await fetch(`${awsExports.API_ENDPOINT}/researchers/${researcherId}/studies/${selectedStudyId}`, {
+            method: 'DELETE',
+            mode: 'cors',
+            headers: {
+                'Authorization': 'Bearer ' + token.getJwtToken(),
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ researcherId })
+            });
+
+            if (response.ok) {
+                setEditError(null);
+                console.log(response)
+                } else {
+                setEditError(null);
+                setEditError('Error deleting researcher'); 
+            }
+            } catch (error) {
+                setEditError(null);
+                setEditError('Error deleting researcher');
+                console.log(error)
+                togglePopup();
+            }
+    };
+
+    const togglePopup = () => {
+        setIsOpen(!isOpen);
+    };
 
     return (
         <div class="home-body">
@@ -148,6 +217,34 @@ const Home = ({ isAdmin, showButton }) => {
                     <hr/>
                     <div class="studies">
                         <h3>Current Studies</h3>
+                        <div class="study-card"> 
+                            <Card variation="elevated">
+                                <h3>Manage Researchers</h3> 
+                                {editError && <p style={{ color: 'red' }}>{editError}</p>}  
+                                <p>Study ID <input 
+                                    type="text" 
+                                    value={selectedStudyId} 
+                                    onChange={e => setSelectedStudyId(e.target.value)}
+                                    placeholder="Study ID"
+                                /></p>
+                                <p>Researcher ID <input 
+                                    type="text" 
+                                    value={researcherId} 
+                                    onChange={e => setResearcherId(e.target.value)}
+                                    placeholder="Researcher ID"
+                                /></p>
+
+                                
+                                <div class="d-table-row gap-4 d-md-flex justify-content-md-end">
+                                    <button type="button" class="btn btn-outline-primary" onClick={addResearcher}>
+                                        Add Researcher
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger" onClick={removeResearcher}>
+                                        Remove Researcher
+                                    </button>
+                                </div>
+                            </Card>
+                        </div>
                         <div>
                             {studies.map((study) => (              
                             <div class="study-card" key={study.id}>
@@ -160,7 +257,6 @@ const Home = ({ isAdmin, showButton }) => {
                                     <h5><span class="card-titles bottom">Researchers: </span>{study.id}</h5> 
                                     <div class="d-table-row gap-4 d-md-flex justify-content-md-end">
                                         <button type="button" class="btn btn-outline-primary">Download CSV</button>
-
                                         <Link to="/users" type="button" class="btn btn-outline-primary"
                                         >Manage Researchers</Link>
                                     
@@ -189,7 +285,7 @@ const Home = ({ isAdmin, showButton }) => {
                                     <h5><span class="card-titles bottom">Researchers: </span>{study.id}</h5> 
                                     <div class="d-table-row gap-4 d-md-flex justify-content-md-end">
                                         <button type="button" class="btn btn-outline-primary">Download CSV</button>
-                                    
+
                                     </div>
                                 </Card>
                             </div>
@@ -202,7 +298,19 @@ const Home = ({ isAdmin, showButton }) => {
                     </div>
                 </div> 
                 )}
+                {isOpen && isSuccessful && <Popup
+                content={<>
 
+                </>}
+                handleClose={togglePopup}
+                />}
+
+                {isOpen && !isSuccessful &&<Popup
+                content={<>
+
+                </>}
+                handleClose={togglePopup}
+                />}
             </div>
         )}
 
