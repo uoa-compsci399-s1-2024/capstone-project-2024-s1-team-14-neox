@@ -118,7 +118,7 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            "Add a new child",
+                            "Add new child",
                             style: TextStyle(fontSize: 20),
                           ),
                           IconButton(

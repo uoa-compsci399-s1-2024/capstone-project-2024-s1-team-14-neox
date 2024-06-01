@@ -9,6 +9,7 @@ enum LoginStatus {
 }
 
 extension LoginStatusX on LoginStatus {
+  bool get isInitial => this == LoginStatus.initial;
   bool get isLoading => this == LoginStatus.loading;
   bool get isLoginSuccess => this == LoginStatus.loginSuccess;
   bool get isLogoutSuccess => this == LoginStatus.logoutSuccess;

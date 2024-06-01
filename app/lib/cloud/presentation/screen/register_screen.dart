@@ -254,12 +254,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void register(BuildContext context, String email, String password,
       String givenName, String middleName, String familyName) async {
-    if (await AWSServices().register(context, email, password, givenName, middleName, familyName)) {
-      
+    if (await AWSServices().register(
+        context, email, password, givenName, middleName, familyName)) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => ConfirmationPage(email: email, password: password, loginAction: widget.loginAction),
+          builder: (context) => ConfirmationPage(
+              email: email,
+              password: password,
+              loginAction: widget.loginAction),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Please try again",
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: Colors.grey,
+          duration: Duration(seconds: 2),
         ),
       );
     }
