@@ -40,9 +40,9 @@ function NonAdminTrailer({isAdmin}) {
     }
 }
 
-function StudyCard({id, token}) {
+function StudyCard({id, token, isAdmin}) {
     const [details, setDetails] = useState(null);
-
+    const [participants, setParticipants] = useState(null);
     useEffect(() => {
         async function fetchInfo() {
             const info = await fetch(`${awsExports.API_ENDPOINT}/studies/${id}/info`, {
@@ -55,6 +55,17 @@ function StudyCard({id, token}) {
             });
             const jsoninfo = await info.json();
             setDetails(jsoninfo.data);
+            if (isAdmin) {
+                const resp = await fetch(`${awsExports.API_ENDPOINT}/studies/${id}/participants`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Authorization': 'Bearer ' + token.getJwtToken()
+                    },
+                    credentials: 'include',
+                });
+                setParticipants(resp.data);
+            }
         }
         if (token != null) {
             fetchInfo();
@@ -69,7 +80,7 @@ function StudyCard({id, token}) {
                 <h3 style={{"textAlign": "center"}}>{details ? details.name : "(Loading...)"}</h3>
                 <h5 style={{"textAlign": "center", "paddingBottom": "2%"}}>{details ? details.description : "(Loading...)"} </h5>
                 <h5><span className="card-titles">Period:</span> {details ? `${details.start_date} - ${details.end_date}` : "(Loading...)"} </h5>
-                <h5><span className="card-titles bottom">Researchers: </span>{id}</h5>
+                {isAdmin ? (<h5><span className="card-titles bottom">Researchers: </span>{participants ? participants.researchers.length : "(Loading...)"}</h5>) : ""}
                 <div className="d-table-row gap-4 d-md-flex justify-content-md-end">
                     <button type="button" className="btn btn-outline-primary">Download CSV</button>
                 </div>
@@ -157,7 +168,7 @@ const Home = ({ isAdmin, showButton }) => {
                 <div className="studies">
                     <h3>Current Studies</h3>
                     <div>
-                        {studies.map((id) => <StudyCard key={id} id={id} token={idToken} />)}
+                        {studies.map((id) => <StudyCard key={id} id={id} token={idToken} isAdmin={isAdmin} />)}
                     </div>
                     <NonAdminTrailer isAdmin={isAdmin} />
                 </div>
