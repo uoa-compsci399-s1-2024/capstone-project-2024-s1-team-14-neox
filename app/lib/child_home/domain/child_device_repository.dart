@@ -185,11 +185,11 @@ class ChildDeviceRepository {
       ));
     }
     DateTime endTime = DateTime.now();
-    print("ARDUINO  Sample length: ${samples.length}");
-    print("ARDUINO time spent $startTime $endTime ${endTime.difference(startTime)}" );
+    print("classify  Sample length: ${samples.length}");
+    print("classify time spent $startTime $endTime ${endTime.difference(startTime)}" );
     await ArduinoDataEntity.saveListOfArduinoDataEntity(samples);
     DateTime done = DateTime.now();
-    print("ARDUINO all done ${done.difference(endTime)}");
+    print("classify all done ${done.difference(endTime)}");
   }
 
   int _calculateLux(int r, int g, int b) {
@@ -316,7 +316,10 @@ class ChildDeviceRepository {
     features.add(blueLog / uvLog);
     features.add(lightSqrt / uvSqrt);
     features.add(blueSqrt / uvSqrt);
-    return score(features)[0] > 1.0 ? 1 : 0;
+    List<double> probabilities = score(features);
+    print("Classify $uv, $accelX, $accelY, $accelZ, $red, $green, $blue, $clear, $light, $colTemp");
+    print({"Classify $probabilities"});
+    return probabilities[0] > 1.0 ? 1 : 0;
   }
 
   int _calibrateLux(int raw) {

@@ -270,11 +270,14 @@ void updateValues() {
     {
       uint32_t timestamp;
       ts.readValue(timestamp);
+      Serial.print("The app sent ");
+      Serial.println(timestamp);
       findTSIndex(timestamp, currentSampleBufferIndex);
     }
     if (update.written())
-    {
+    {Serial.print("Update written ");
         samplesToSend -= currentSampleBufferIndex;
+      Serial.println(samplesToSend);
         progress.writeValue(samplesToSend);
         fillBuffers(currentSampleBufferIndex);
         fillCharacteristics();
@@ -336,7 +339,7 @@ static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic chara
     authenticated = true;
   }
 
-  /*Serial.print("Authenticated status ");
+  Serial.print("Authenticated status ");
   Serial.println(authenticated);
 
   auto print = [](uint8_t* arr) {
@@ -350,7 +353,7 @@ static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic chara
   print(authKey);
   print(challenge);
   print(response);
-  print(expected);*/
+  print(expected);
 }
 
 static void onAuthChallengeFromCentral(BLEDevice central, BLECharacteristic characteristic) {
