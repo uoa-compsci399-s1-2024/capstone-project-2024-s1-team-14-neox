@@ -3,6 +3,7 @@ import 'package:capstone_project_2024_s1_team_14_neox/cloud/domain/study_model.d
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/childStudy_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/study_entity.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/server/child_api_service.dart';
 
 class StudyRepository {
 
@@ -30,30 +31,20 @@ Future<List<ParticipatingChildModel>> getChildrenByStudyCode(String studyCode) a
     return children;
   }
 
-  StudyModel fetchStudyFromServer(String studyCode) {
-    return StudyModel(
-        studyCode: studyCode,
-        name: "Atropine for myopia control",
-        description:
-            "This project investigates the mechanisms underlying atropine control of eye growth and myopia. Nightly instillation of atropine is the most successful treatment for inhibiting myopia progression at present. However, the site and mode of atropine’s actions are yet to be understood. We are using immunohistochemical, electrophysiological, and imaging techniques on animal models and humans to probe the mechanisms by which atropine exerts its anti-myopia effects.",
-        startDate: DateTime(2022, 6, 2),
-        endDate: DateTime.now());
+  Future<StudyModel?> fetchStudyFromServer(String studyCode) async {
+    StudyEntity? study = await ChildApiService.getStudy(studyCode);
+    if(study == null){
+      return null;
+    }
+    return StudyModel.fromEntity(study);
   }
 
   Future<List<StudyModel>> joinNewStudy(
       StudyModel study, List<int> childIds) async {
-    await StudyEntity.createStudy(
-      StudyEntity(
-        name: study.name,
-        description: study.description,
-        startDate: study.startDate,
-        endDate: study.endDate,
-        studyCode: study.studyCode,
-      ),
-    );
     String code = study.studyCode;
+    ChildApiService.getStudy(code);
     for (int id in childIds) {
-      ChildStudyAssociationsEntity.saveSingleChildStudy(id, code);
+      ChildApiService.addChildToStudy(id, code);
     }
     return getAllParticipatingStudies();
   }
@@ -67,7 +58,8 @@ Future<List<ParticipatingChildModel>> getChildrenByStudyCode(String studyCode) a
 
   Future<List<StudyModel>> deleteChildFromStudy(
       int childId, String studyCode) async {
-    ChildStudyAssociationsEntity.deleteChildStudy(childId, studyCode);
+    ChildApiService.removeChildFromStudy(childId, studyCode);
+    deleteStudy(studyCode);
     return getAllParticipatingStudies();
   }
   Future<List<StudyModel>> deleteStudy(String studyCode) async {
