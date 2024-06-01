@@ -4,6 +4,7 @@ import { Auth, Amplify } from 'aws-amplify';
 import { Card } from '@aws-amplify/ui-react';
 import { awsExports } from "../aws-exports";
 import pLimit from "p-limit";
+import Popup from '../popup';
 
 Amplify.configure({
     Auth: {
@@ -13,13 +14,101 @@ Amplify.configure({
     }
   });
 
-function AdminHeader({isAdmin}) {
+function AdminHeader({token, isAdmin, togglePopup}) {
+    const [researcherId, setResearcherId] = useState("");
+    const [selectedStudyId, setSelectedStudyId] = useState("");
+    const [editError, setEditError] = useState(null);
+
+    const addResearcher = async () => {
+        try {
+            const response = await fetch(`${awsExports.API_ENDPOINT}/researchers/${researcherId}/studies/${selectedStudyId}`, {
+                method: 'PUT',
+                mode: 'cors',
+                headers: {
+                    'Authorization': 'Bearer ' + token.getJwtToken(),
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ researcherId })
+            });
+
+            if (response.ok) {
+                setEditError(null);
+                console.log(response)
+            } else {
+                setEditError(null);
+                setEditError('Error adding researcher');
+            }
+        } catch (error) {
+            setEditError(null);
+            setEditError('Error adding researcher');
+            console.log(error)
+        }
+    };
+
+    const removeResearcher = async () => {
+        try {
+            const response = await fetch(`${awsExports.API_ENDPOINT}/researchers/${researcherId}/studies/${selectedStudyId}`, {
+                method: 'DELETE',
+                mode: 'cors',
+                headers: {
+                    'Authorization': 'Bearer ' + token.getJwtToken(),
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ researcherId })
+            });
+
+            if (response.ok) {
+                setEditError(null);
+                console.log(response)
+            } else {
+                setEditError(null);
+                setEditError('Error deleting researcher');
+            }
+        } catch (error) {
+            setEditError(null);
+            setEditError('Error deleting researcher');
+            console.log(error)
+            togglePopup();
+        }
+    };
+
+
     if (isAdmin) {
         return (
             <>
                 <h4>Admin</h4>
                 <div className="d-grid">
                     <Link to="/create" className="btn btn-primary">Start a new study</Link>
+                </div>
+
+                <div class="study-card">
+                    <Card variation="elevated">
+                        <h3>Manage Researchers</h3>
+                        {editError && <p style={{ color: 'red' }}>{editError}</p>}
+                        <p>Study ID <input
+                                        type="text"
+                                        value={selectedStudyId}
+                                        onChange={e => setSelectedStudyId(e.target.value)}
+                                        placeholder="Study ID"
+                                    /></p>
+                        <p>Researcher ID <input
+                                             type="text"
+                                             value={researcherId}
+                                             onChange={e => setResearcherId(e.target.value)}
+                                             placeholder="Researcher ID"
+                                         /></p>
+
+                        <div class="d-table-row gap-4 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-outline-primary" onClick={addResearcher}>
+                                Add Researcher
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" onClick={removeResearcher}>
+                                Remove Researcher
+                            </button>
+                        </div>
+                    </Card>
                 </div>
             </>
         );
@@ -187,11 +276,17 @@ const Home = ({ isAdmin, showButton }) => {
         fetchStudies();
       }, [idToken])
 
+    const [isOpen, setIsOpen] = useState(false);
+    const [isSuccessful, setIsSuccessful] = useState(false);
+    const togglePopup = () => {
+        setIsOpen(!isOpen);
+    };
+
     return (
         <div className="home-body">
             <h1>Welcome {familyName}!</h1>
             <div>
-                <AdminHeader isAdmin={isAdmin} />
+                <AdminHeader isAdmin={isAdmin} token={idToken} togglePopup={togglePopup} />
                 <hr/>
                 <div className="studies">
                     <h3>Current Studies</h3>
@@ -200,6 +295,20 @@ const Home = ({ isAdmin, showButton }) => {
                     </div>
                     <NonAdminTrailer isAdmin={isAdmin} />
                 </div>
+
+                {isOpen && isSuccessful && <Popup
+                content={<>
+
+                </>}
+                handleClose={togglePopup}
+                />}
+
+                {isOpen && !isSuccessful &&<Popup
+                content={<>
+
+                </>}
+                handleClose={togglePopup}
+                />}
             </div>
         </div>
     );
