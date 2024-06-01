@@ -247,7 +247,13 @@ fi
 
 echo "registering child for parent1..."
 CHILDID="$(call_api -m POST -t "$IDTOKEN_PARENT1" -u "$API_URL/children" | parse_http_body | jq -r '.data.id')"
+# we create an ID for a child which doesn't exist based on the actual one
+midpoint="$(( ${#CHILDID} / 2 ))"
+half1="$(echo "$CHILDID" | cut -c "1-$midpoint")"
+half2="$(echo "$CHILDID" | cut -c "$(( $midpoint + 1 ))-${#CHILDID}")"
+BADCHILDID="${half2}${half1}"
 echo "childID is $CHILDID"
+echo "badchildID is $BADCHILDID"
 
 if true; then
 echo "TEST: actions whose status code won't change when child/researcher added/removed to/from study"
@@ -369,8 +375,22 @@ done
 fi
 
 echo "clearing samples..."
-sam remote invoke --stack-name "$STACKNAME" FuncMetaClearSamples
-echo ""
+sam remote invoke --stack-name "$STACKNAME" FuncMetaClearSamples >/dev/null 2>&1
+DUPESAMPLE="$("$(git rev-parse --show-toplevel)/server/generateXsamples" 1)"
+DUPESAMPLE_MODIFIED="$("$(git rev-parse --show-toplevel)/server/generateXsamples" 1 | jq -r '.samples[0].col_red |= 123')"
+call_api -m POST -t "$IDTOKEN_PARENT1" -u "$API_URL/samples/$CHILDID" -d "$DUPESAMPLE" \
+aux_test_auth -M "checking if duplicate-timestamp samples are rejected" \
+	      -m POST -t "$IDTOKEN_PARENT1" -u "$API_URL/samples/$CHILDID" -d "$DUPESAMPLE_MODIFIED" \
+	      -D -C ".errors[0].status == 409"
+
+echo "clearing samples..."
+sam remote invoke --stack-name "$STACKNAME" FuncMetaClearSamples >/dev/null 2>&1
+aux_test_auth -M "checking if sending samples to nonexistent child doesn't leak its nonexistence" \
+	      -m POST -t "$IDTOKEN_PARENT1" -u "$API_URL/samples/$BADCHILDID" -d "$("$(git rev-parse --show-toplevel)/server/generateXsamples" 1)" \
+	      -D -C ".errors[0].status == 403"
+
+echo "clearing samples..."
+sam remote invoke --stack-name "$STACKNAME" FuncMetaClearSamples >/dev/null 2>&1
 BADSAMPLES="$("$(git rev-parse --show-toplevel)/server/generateXsamples" 7 |
 		     jq -r '.samples[0].uv |= -1 |
 			    .samples[1].light |= -1 |
@@ -461,7 +481,7 @@ fi
 if true; then
 echo "TEST: study creation and study details..."
 STUDYID="TEST123"
-BADSTUDYID="ABC123"
+BADSTUDYID="BADSTUDYABC123"
 STUDYFIELDS='{"start_date": "2024-01-01", "end_date": "2024-06-01", "name": "Test", "description": "Test description"}'
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
 	# everyone can list studies globally
@@ -662,6 +682,10 @@ call_api -m PATCH -t "$IDTOKEN_PARENT1" -u "$API_URL/children/$CHILDID/info" -d 
 aux_test_body -M "checking if gender and age found in study samples" \
 	      -m GET -t "$IDTOKEN_RESEARCHER1" -u "$API_URL/studies/$STUDYID/samples" \
 	      -D -C "all(.data[]; .gender == \"$newgender\" and .age != null)"
+call_api -m PUT -t "$IDTOKEN_PARENT1" -u "$API_URL/children/$CHILDID/info" -d '{}' >/dev/null
+aux_test_body -M "checking if null gender and null birthdate results in null gender and age in study samples" \
+	      -m GET -t "$IDTOKEN_RESEARCHER1" -u "$API_URL/studies/$STUDYID/samples" \
+	      -D -C "all(.data[]; .gender == null and .age == null)"
 
 echo "clearing samples to prepare for testing the research period..."
 sam remote invoke --stack-name "$STACKNAME" FuncMetaClearSamples
@@ -683,7 +707,6 @@ fi
 
 if true; then
 echo "TEST: removing from study..."
-# TODO: test what happens if delete someone from nonexistent study
 aux_test_auth -M "checking if deleting someone from study which doesn't exist indicates there is no such study" \
 	      -m DELETE -t "$IDTOKEN_ADMIN" -u "$API_URL/researchers/$EMAIL_RESEARCHER2/studies/$BADSTUDYID" \
 	      -D -s 404
@@ -713,24 +736,23 @@ aux_test_auth -M "checking if deleting a researcher from study who isn't actuall
 	      -D -s 403
 fi
 
-if false; then
-echo "test: listing participants in study..."
-for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
-	echo "$user: listing participants in study"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/participants" 2>/dev/null #| head -n1
-	echo ""
-done
-fi
+# NOTE: the following tests require the above participants having been removed from the study
+# We test whether the removals actually work in other parts of API
 
-if false; then
-echo "test: sample fetching..."
+if true; then
+call_api -m DELETE -t "$IDTOKEN_PARENT1" -u "$API_URL/children/$CHILDID/studies/$STUDYID" >/dev/null
+call_api -m DELETE -t "$IDTOKEN_ADMIN" -u "$API_URL/researchers/$EMAIL_RESEARCHER1/studies/$STUDYID" >/dev/null
+echo "TEST: checking if removing someone from study causes changes in auth for other parts of API"
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
-	echo "$user: fetching samples from study"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/studies/$STUDYID/samples" 2>/dev/null #| head -n1
-	echo ""
-
-	echo "$user: fetching samples from child"
-	curl -i -X GET -H"Authorization: Bearer $(eval echo \$"IDTOKEN_${user}")" "$API_URL/samples/$CHILDID" 2>/dev/null #| head -n1
-	echo ""
+	assert_code=403
+	case "$user" in
+		PARENT1) assert_code=200 ;;
+	esac
+	aux_test_auth -M "$user: fetching samples from study" \
+		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/studies/$STUDYID/samples" \
+		      -D -s "$assert_code"
+	aux_test_auth -M "$user: fetching samples from child" \
+		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/samples/$CHILDID" \
+		      -D -s "$assert_code"
 done
 fi
