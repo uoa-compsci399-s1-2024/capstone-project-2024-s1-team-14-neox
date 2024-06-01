@@ -30,18 +30,18 @@ class ChildDeviceRepository {
     DateTime today = DateTime(now.year, now.month, now.day);
 
     for (ChildDeviceModel model in models) {
-      SingleWeekHourlyStatsModel stats =
-          (await repo.getListOfHourlyStats(today, 1, model.childId))[0];
-      model.outdoorTimeToday = stats.dailySum[today];
-      model.outdoorTimeWeek = stats.weeklyMean ~/ 7;
+      // SingleWeekHourlyStatsModel stats = (await repo.getListOfHourlyStats(today, 1, model.childId))[0];
+      // model.outdoorTimeToday = stats.dailySum[today];
+      // model.outdoorTimeWeek = stats.weeklyMean ~/ 7;
 
-      double monthTime = 0;
-      for (int i = 0; i < 4; i++) {
-        monthTime += (await repo.getSingleWeekHourlyStats(
-                today.subtract(Duration(days: 7 * (i + 1))), model.childId))
-            .weeklyMean;
-      }
-      model.outdoorTimeMonth = monthTime ~/ 28;
+      // double monthTime = 0;
+      // for (int i = 0; i < 4; i++) {
+      //   monthTime += (await repo.getSingleWeekHourlyStats(today.subtract(Duration(days: 7 * (i + 1))), model.childId)).weeklyMean;
+      // }
+      // model.outdoorTimeMonth = monthTime ~/ 28;
+      model.outdoorTimeToday = await statsRepo.getOutdoorTimeForPastDays(model.childId, 1);
+      model.outdoorTimeWeek = (await statsRepo.getOutdoorTimeForPastDays(model.childId, 7)) ~/ 7;
+      model.outdoorTimeMonth = (await statsRepo.getOutdoorTimeForPastDays(model.childId, 30)) ~/ 30;
     }
 
     return models;

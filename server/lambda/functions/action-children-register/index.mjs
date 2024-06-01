@@ -2,7 +2,10 @@ import {
   addCorsHeaders,
   connectToDB,
   generateID,
-  TEMP_PARENT_ID,
+  authenticateUser,
+  AUTH_NONE,
+  AUTH_PARENT_ANY,
+  getDBUserIdFromEvent,
 } from "/opt/nodejs/lib.mjs";
 import {
   UNIQUE_VIOLATION,
@@ -12,10 +15,29 @@ let db = await connectToDB();
 
 const MAX_ATTEMPTS = 3;
 export const handler = async (event) => {
+  const auth = await authenticateUser(event, db, AUTH_PARENT_ANY, {});
+  if (auth === AUTH_NONE) {
+    const code = 403;
+    const errResp = {
+      statusCode: code,
+      body: JSON.stringify({
+        errors: [
+          {
+            resource: event.resource,
+            statusCode: code,
+            message: "must be a parent to register a child",
+          }
+        ]
+      }),
+    };
+    addCorsHeaders(errResp);
+    return errResp;
+  }
+
   let attempts = 0;
   let allocated = false;
   let tentativeChildID;
-  const parentID = TEMP_PARENT_ID;
+  const parentID = getDBUserIdFromEvent(event);
   while (attempts < MAX_ATTEMPTS) {
     tentativeChildID = generateID();
     console.log(`attempt ${attempts+1}/${MAX_ATTEMPTS}: trying to allocate ID ${tentativeChildID} to parent with ID ${parentID}`);

@@ -147,7 +147,18 @@ class StatisticsRepository {
     return today.subtract(Duration(days: daysSinceMonday));
   }
 
-  // TODO
+  Future<int> getOutdoorTimeForPastDays(int childId, int daysBack) async {
+    DateTime current = DateTime.now();
+
+    DateTime startDate = DateTime(current.year, current.month, current.day)
+        .subtract(Duration(days: daysBack - 1));
+    startDate = DateTime(startDate.year, startDate.month, startDate.day);
+
+    DateTime endDate =
+        DateTime(current.year, current.month, current.day, 23, 59, 59);
+    return await ArduinoDataEntity.getOutdoorCountForChildByDateRange(
+        startDate, endDate, childId);
+  }
   // Caclulate total minutes per day
   // Calculate total minutes per hour between 00:00 to 24:59
 }

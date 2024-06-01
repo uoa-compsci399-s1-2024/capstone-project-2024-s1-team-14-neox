@@ -1,5 +1,6 @@
 import {
   connectToDB,
+  ID_LEN,
   PERSONAL_INFO_CHILD_GENDER_OPTIONS,
 } from "/opt/nodejs/lib.mjs";
 import pg from "pg";
@@ -11,37 +12,31 @@ const CREATE_TABLES_TEXT = `
 
 DROP TABLE IF EXISTS samples;
 DROP TABLE IF EXISTS children;
-DROP TABLE IF EXISTS parents;
+DROP TABLE IF EXISTS users;
+DROP TYPE IF EXISTS gender;
 
-CREATE TABLE parents (
-       -- id INTEGER NOT NULL PRIMARY KEY,
-       id VARCHAR(50) NOT NULL PRIMARY KEY,
-       -- don't care about parents' birthdate
-       family_name TEXT,
-       given_name TEXT,
-       middle_name TEXT,
-       nickname TEXT,
-       email TEXT
+-- We put all users in one table since a user may be admin AND researcher, derived from Cognito groups
+CREATE TABLE users (
+       id TEXT NOT NULL PRIMARY KEY
 );
 
 CREATE TYPE gender AS ENUM (${PERSONAL_INFO_CHILD_GENDER_OPTIONS.map(pg.escapeLiteral).join(', ')});
 CREATE TABLE children (
-       id VARCHAR(50) NOT NULL PRIMARY KEY,
-       parent_id VARCHAR(50) NOT NULL,
+       id CHAR(${ID_LEN}) NOT NULL PRIMARY KEY,
+       parent_id TEXT NOT NULL,
        birthdate DATE,
        family_name TEXT,
        given_name TEXT,
        middle_name TEXT,
        nickname TEXT,
        gender GENDER,
-       FOREIGN KEY (parent_id) REFERENCES parents (id)
+       FOREIGN KEY (parent_id) REFERENCES users (id)
 );
 
 CREATE TABLE samples (
-       -- id INTEGER NOT NULL PRIMARY KEY,
        -- Use timestamptz alias for TIMESTAMP WITH TIMEZONE because there were syntax errors when I sent the query to the DB in RDS
        "timestamp" TIMESTAMPTZ NOT NULL,
-       child_id VARCHAR(50) NOT NULL,
+       child_id CHAR(${ID_LEN}) NOT NULL,
        uv INTEGER NOT NULL,
        CONSTRAINT uv_range CHECK (uv >= 0),
        light INTEGER NOT NULL,

@@ -15,18 +15,33 @@ class CloudHomeScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => LoginCubit(AuthenticationRepository()),
       child: BlocConsumer<LoginCubit, LoginState>(
+        key: UniqueKey(), // Workaround for updating UI
         listener: (context, state) {
+          if (state.status.isFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  "Please try again",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                backgroundColor: Colors.grey,
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
         },
         builder: (context, state) {
-          if (state.status.isLoading) {
-            return Center(child: const CircularProgressIndicator());
+          if (state.status.isLogoutSuccess || state.status.isFailure) {
+            return const LoginScreen();
           } else if (state.status.isLoginSuccess) {
             return BlocProvider(
               create: (context) => CloudSyncCubit(),
               child: SyncScreen(),
             );
           } else {
-            return const LoginScreen();
+            return Container();
           }
         },
       ),

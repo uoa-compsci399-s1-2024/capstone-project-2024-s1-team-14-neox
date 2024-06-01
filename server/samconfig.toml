@@ -26,7 +26,7 @@ resolve_s3 = true
 s3_prefix = "backend-app-dev"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "UseCase=\"app\" Environment=\"dev\" VpcCIDR=\"10.8.0.0/16\" PrivateSubnet1CIDR=\"10.8.20.0/24\" PrivateSubnet2CIDR=\"10.8.21.0/24\""
+parameter_overrides = "UseCase=\"app\" Environment=\"dev\" VpcCIDR=\"10.8.0.0/16\" PublicSubnet1CIDR=\"10.8.10.0/24\" PublicSubnet2CIDR=\"10.8.11.0/24\" PrivateSubnet1CIDR=\"10.8.20.0/24\" PrivateSubnet2CIDR=\"10.8.21.0/24\""
 
 
 
@@ -37,7 +37,7 @@ resolve_s3 = true
 s3_prefix = "backend-server-dev"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "UseCase=\"server\" Environment=\"dev\" VpcCIDR=\"10.16.0.0/16\" PrivateSubnet1CIDR=\"10.16.20.0/24\" PrivateSubnet2CIDR=\"10.16.21.0/24\""
+parameter_overrides = "UseCase=\"server\" Environment=\"dev\" VpcCIDR=\"10.16.0.0/16\" PublicSubnet1CIDR=\"10.16.10.0/24\" PublicSubnet2CIDR=\"10.16.11.0/24\" PrivateSubnet1CIDR=\"10.16.20.0/24\" PrivateSubnet2CIDR=\"10.16.21.0/24\""
 
 [server-localhost.global.parameters]
 stack_name = "backend-server-dev"
@@ -48,7 +48,7 @@ s3_prefix = "backend-server-dev"
 confirm_changeset = true
 region = "ap-southeast-2"
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "UseCase=\"server\" Environment=\"localhost\" WebsiteStackName=\"frontend\" WebsiteLocalhostPort=\"3000\" VpcCIDR=\"10.16.0.0/16\" PrivateSubnet1CIDR=\"10.16.20.0/24\" PrivateSubnet2CIDR=\"10.16.21.0/24\""
+parameter_overrides = "UseCase=\"server\" Environment=\"localhost\" WebsiteStackName=\"frontend\" WebsiteLocalhostPort=\"3000\" VpcCIDR=\"10.16.0.0/16\" PublicSubnet1CIDR=\"10.16.10.0/24\" PublicSubnet2CIDR=\"10.16.11.0/24\" PrivateSubnet1CIDR=\"10.16.20.0/24\" PrivateSubnet2CIDR=\"10.16.21.0/24\""
 image_repositories = []
 
 
@@ -62,7 +62,7 @@ s3_prefix = "backend-website-dev"
 confirm_changeset = true
 region = "ap-southeast-2"
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "UseCase=\"website\" Environment=\"dev\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.24.0.0/16\" PrivateSubnet1CIDR=\"10.24.20.0/24\" PrivateSubnet2CIDR=\"10.24.21.0/24\""
+parameter_overrides = "UseCase=\"website\" Environment=\"dev\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.24.0.0/16\" PublicSubnet1CIDR=\"10.24.10.0/24\" PublicSubnet2CIDR=\"10.24.11.0/24\" PrivateSubnet1CIDR=\"10.24.20.0/24\" PrivateSubnet2CIDR=\"10.24.21.0/24\""
 image_repositories = []
 
 [website-localhost.global.parameters]
@@ -74,7 +74,7 @@ s3_prefix = "backend-website-dev"
 confirm_changeset = true
 region = "ap-southeast-2"
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "UseCase=\"website\" Environment=\"localhost\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.24.0.0/16\" PrivateSubnet1CIDR=\"10.24.20.0/24\" PrivateSubnet2CIDR=\"10.24.21.0/24\""
+parameter_overrides = "UseCase=\"website\" Environment=\"localhost\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.24.0.0/16\" PublicSubnet1CIDR=\"10.24.10.0/24\" PublicSubnet2CIDR=\"10.24.11.0/24\" PrivateSubnet1CIDR=\"10.24.20.0/24\" PrivateSubnet2CIDR=\"10.24.21.0/24\""
 image_repositories = []
 
 
@@ -90,7 +90,7 @@ s3_prefix_name = "backend-all-dev"
 confirm_changeset = true
 region = "ap-southeast-2"
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "UseCase=\"all\" Environment=\"dev\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.128.0.0/16\" PrivateSubnet1CIDR=\"10.128.20.0/24\" PrivateSubnet2CIDR=\"10.128.21.0/24\""
+parameter_overrides = "UseCase=\"all\" Environment=\"dev\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.128.0.0/16\" PublicSubnet1CIDR=\"10.128.10.0/24\" PublicSubnet2CIDR=\"10.128.11.0/24\" PrivateSubnet1CIDR=\"10.128.20.0/24\" PrivateSubnet2CIDR=\"10.128.21.0/24\""
 image_repositories = []
 
 # BUT localhost website uses same VPC and stack as dev
@@ -103,7 +103,7 @@ s3_prefix_name = "backend-all-dev"
 confirm_changeset = true
 region = "ap-southeast-2"
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "UseCase=\"all\" Environment=\"localhost\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.128.0.0/16\" PrivateSubnet1CIDR=\"10.128.20.0/24\" PrivateSubnet2CIDR=\"10.128.21.0/24\""
+parameter_overrides = "UseCase=\"all\" Environment=\"localhost\" WebsiteStackName=\"frontend\" VpcCIDR=\"10.128.0.0/16\" PublicSubnet1CIDR=\"10.128.10.0/24\" PublicSubnet2CIDR=\"10.128.11.0/24\" PrivateSubnet1CIDR=\"10.128.20.0/24\" PrivateSubnet2CIDR=\"10.128.21.0/24\""
 image_repositories = []
 
 
@@ -116,7 +116,7 @@ resolve_s3 = true
 s3_prefix = "backend-ml-dev"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "UseCase=\"ml\" Environment=\"dev\" VpcCIDR=\"10.150.0.0/16\" PrivateSubnet1CIDR=\"10.150.20.0/24\" PrivateSubnet2CIDR=\"10.150.21.0/24\""
+parameter_overrides = "UseCase=\"ml\" Environment=\"dev\" VpcCIDR=\"10.150.0.0/16\" PublicSubnet1CIDR=\"10.150.10.0/24\" PublicSubnet2CIDR=\"10.150.11.0/24\" PrivateSubnet1CIDR=\"10.150.20.0/24\" PrivateSubnet2CIDR=\"10.150.21.0/24\""
 
 [ml-localhost.global.parameters]
 stack_name = "backend-ml-dev"
@@ -127,5 +127,5 @@ s3_prefix = "backend-ml-dev"
 confirm_changeset = true
 region = "ap-southeast-2"
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "UseCase=\"ml\" Environment=\"localhost\" WebsiteStackName=\"frontend\" WebsiteLocalhostPort=\"3000\" VpcCIDR=\"10.150.0.0/16\" PrivateSubnet1CIDR=\"10.150.20.0/24\" PrivateSubnet2CIDR=\"10.150.21.0/24\""
+parameter_overrides = "UseCase=\"ml\" Environment=\"localhost\" WebsiteStackName=\"frontend\" WebsiteLocalhostPort=\"3000\" VpcCIDR=\"10.150.0.0/16\" PublicSubnet1CIDR=\"10.150.10.0/24\" PublicSubnet2CIDR=\"10.150.11.0/24\" PrivateSubnet1CIDR=\"10.150.20.0/24\" PrivateSubnet2CIDR=\"10.150.21.0/24\""
 image_repositories = []

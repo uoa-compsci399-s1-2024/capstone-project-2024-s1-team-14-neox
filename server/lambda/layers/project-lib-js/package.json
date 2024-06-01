@@ -6,6 +6,7 @@
   "main": "lib.mjs",
   "dependencies": {
     "@aws-sdk/client-cognito-identity": "^3.540.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.569.0",
     "@aws-sdk/client-lambda": "^3.548.0",
     "@aws-sdk/client-secrets-manager": "^3.543.0",
     "date-fns": "^3.6.0",

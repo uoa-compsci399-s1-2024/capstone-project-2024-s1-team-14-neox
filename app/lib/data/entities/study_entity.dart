@@ -16,6 +16,8 @@ class Study extends Table {
   DateTimeColumn get startDate => dateTime()();
 
   DateTimeColumn get endDate => dateTime()();
+
+
 }
 
 class StudyEntity {
@@ -51,10 +53,18 @@ class StudyEntity {
 
   static Future<void> createStudy(StudyEntity study) async {
     AppDb db = AppDb.instance();
-    await db
-        .into(db.study)
-        .insert(study.toCompanion(), mode: InsertMode.insert);
+
+    // Check if a study with the same unique attribute (e.g., name) exists
+    final existingStudy = await (db.select(db.study)
+      ..where((tbl) => tbl.name.equals(study.name)))
+        .getSingleOrNull();
+
+    // Insert only if the study does not already exist
+    if (existingStudy == null) {
+      await db.into(db.study).insert(study.toCompanion(), mode: InsertMode.insert);
+    }
   }
+
 
   ////////////////////////////////////////////////////////////////////////////
   // READ ////////////////////////////////////////////////////////////////////

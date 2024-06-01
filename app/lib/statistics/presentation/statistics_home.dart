@@ -104,7 +104,7 @@ class StatisticsHomeState extends State<StatisticsHome> {
                         .map(
                           (profile) => DropdownMenuItem(
                             value: profile,
-                            child: Text(profile.childName),
+                            child: Text(profile.childName, overflow: TextOverflow.fade,),
                           ),
                         )
                         .toList(),
@@ -156,7 +156,6 @@ class StatisticsHomeState extends State<StatisticsHome> {
                 child: MonthlyPanel(),
               );
             } else {
-              print("state");
               return BlocProvider(
                 key: UniqueKey(), // Workaround for refreshing UI!
                 create: (context) =>

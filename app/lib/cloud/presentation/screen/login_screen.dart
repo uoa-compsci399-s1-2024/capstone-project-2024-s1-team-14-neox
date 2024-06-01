@@ -168,7 +168,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const RegisterScreen()),
+                            builder: (_) {
+                              var login = context.read<LoginCubit>();
+                              return RegisterScreen((email, password) {
+                                login.logInWithEmailAndPassword(email, password);
+                              });
+                            }),
                       );
                     },
                     child: const Text(
