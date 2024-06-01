@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:typed_data';
-
-import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/classifiers/xgboost.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_model.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/main.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/single_week_hourly_stats_model.dart';
@@ -10,8 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/entities/child_entity.dart';
-import 'child_device_model.dart';
-import 'classifiers/xgboost.dart';
+import 'classifiers/random_forest.dart';
 import 'dart:math';
 
 class ChildDeviceRepository {
@@ -122,6 +120,7 @@ class ChildDeviceRepository {
   Future<void> parseAndSaveSamples(
       String childName, List<int> bytes, int childId) async {
     List<ArduinoDataEntity> samples = [];
+    DateTime startTime = DateTime.now();
     while (bytes.length % bytesPerSample != 0) {
       bytes.removeLast();
     }
@@ -182,6 +181,9 @@ class ChildDeviceRepository {
         appClass: appClass,
       ));
     }
+    DateTime endTime = DateTime.now();
+    print("Sample length: ${samples.length}");
+    print("time spent $startTime $endTime ${endTime.difference(startTime)}" );
     await ArduinoDataEntity.saveListOfArduinoDataEntity(samples);
   }
 
@@ -241,7 +243,7 @@ class ChildDeviceRepository {
 
     features.add((accelX + accelY + accelZ).toDouble());
     features.add((pow(accelX, 2) + pow(accelY, 2) + pow(accelZ, 2)).toDouble());
-    features.add(pow(accelX * accelY, 2).toDouble());
+    features.add((accelX * accelY).abs().toDouble());
 
     // rgb vs clear
     features.add(red / (clear + 1));
@@ -283,10 +285,10 @@ class ChildDeviceRepository {
     features.add(blueLog / (greenLog + 1));
 
 // squre root
-    double redSqrt = sqrt(red);
-    double greenSqrt = sqrt(green);
-    double blueSqrt = sqrt(blue);
-    double clearSqrt = sqrt(clear);
+    double redSqrt = sqrt(red + 1);
+    double greenSqrt = sqrt(green + 1);
+    double blueSqrt = sqrt(blue + 1);
+    double clearSqrt = sqrt(clear + 1);
 
     features.add(redSqrt / clearSqrt);
     features.add(greenSqrt / clearSqrt);
@@ -297,12 +299,26 @@ class ChildDeviceRepository {
     features.add(blueSqrt / (greenSqrt + 1));
 
     // uv vs lux
-    features.add(uv / (light + 1));
-    features.add(exp(uv / (light + 1)));
+    double lightLog = log(light + 1);
+    double uvLog = log(uv + 2);
+    double lightSqrt = sqrt(light + 1);
+    double uvSqrt = sqrt(uv + 1);
 
-    return 0;
+    features.add(light / (uv + 1));
+    features.add(blue / (uv + 1));
+    features.add((clear - blue) / (uv + 1));
+    features.add(lightLog / uvLog);
+    features.add(blueLog / uvLog);
+    features.add(lightSqrt / uvSqrt);
+    features.add(blueSqrt / uvSqrt);
+    return score(features)[0] > 1.0 ? 1 : 0;
   }
+
   int _calibrateLux(int raw) {
-    return( -2.290 + 0.8646 * raw + -1.627 * pow(10, -5) * pow(raw, 2) + -4.515 * pow(10, -10) * pow(raw, 3)).toInt();
+    return (-2.290 +
+            0.8646 * raw +
+            -1.627 * pow(10, -5) * pow(raw, 2) +
+            -4.515 * pow(10, -10) * pow(raw, 3))
+        .toInt();
   }
 }
