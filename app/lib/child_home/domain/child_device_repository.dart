@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
 import 'classifiers/xgboost.dart';
+import 'dart:math';
 
 class ChildDeviceRepository {
   static const int bytesPerSample = 20;
@@ -25,18 +26,22 @@ class ChildDeviceRepository {
     List<ChildDeviceModel> models =
         entities.map((child) => ChildDeviceModel.fromEntity(child)).toList();
 
-    StatisticsRepository repo = StatisticsRepository(sharedPreferences: App.sharedPreferences);
+    StatisticsRepository repo =
+        StatisticsRepository(sharedPreferences: App.sharedPreferences);
     DateTime now = DateTime.now();
     DateTime today = DateTime(now.year, now.month, now.day);
 
     for (ChildDeviceModel model in models) {
-      SingleWeekHourlyStatsModel stats = (await repo.getListOfHourlyStats(today, 1, model.childId))[0];
+      SingleWeekHourlyStatsModel stats =
+          (await repo.getListOfHourlyStats(today, 1, model.childId))[0];
       model.outdoorTimeToday = stats.dailySum[today];
       model.outdoorTimeWeek = stats.weeklyMean ~/ 7;
 
       double monthTime = 0;
       for (int i = 0; i < 4; i++) {
-        monthTime += (await repo.getSingleWeekHourlyStats(today.subtract(Duration(days: 7 * (i + 1))), model.childId)).weeklyMean;
+        monthTime += (await repo.getSingleWeekHourlyStats(
+                today.subtract(Duration(days: 7 * (i + 1))), model.childId))
+            .weeklyMean;
       }
       model.outdoorTimeMonth = monthTime ~/ 28;
     }
@@ -60,7 +65,7 @@ class ChildDeviceRepository {
   Future<List<ChildDeviceModel>> deleteChildProfile(int deleteChildId) async {
     await ChildEntity.deleteChild(deleteChildId);
     List<ChildDeviceModel> childProfiles = await fetchChildProfiles();
-    // Set focus child as first child 
+    // Set focus child as first child
     if (childProfiles.isEmpty) {
       await sharedPreferences.remove("focus_id");
     } else {
@@ -148,15 +153,25 @@ class ChildDeviceRepository {
       int light = _calculateLux(red, blue, green);
       int colourTemperature =
           _calculateColourTemperature(red, blue, green, clear);
-
-      int appClass =
-          score([uv, light, accelX, accelY, accelZ])[1] > 0.7 ? 1 : 0;
+      int calibratedLux = _calibrateLux(light);
+      int appClass = _classify(
+        uv,
+        accelX,
+        accelY,
+        accelZ,
+        red,
+        green,
+        blue,
+        clear,
+        colourTemperature,
+        light,
+      );
 
       samples.add(ArduinoDataEntity(
         name: childName,
         childId: childId,
         uv: uv,
-        light: light,
+        light: calibratedLux,
         datetime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
         accel: Int16List.fromList([accelX, accelY, accelZ]),
         red: red,
@@ -204,5 +219,90 @@ class ChildDeviceRepository {
     }
 
     return ((3810 * b2) ~/ r2 + 1391).clamp(0, 0xFFFF);
+  }
+
+  int _classify(int uv, int accelX, int accelY, int accelZ, int red, int green,
+      int blue, int clear, int light, int colTemp) {
+    List<double> features = [];
+    features.addAll([
+      uv.toDouble(),
+      accelX.toDouble(),
+      accelY.toDouble(),
+      accelZ.toDouble(),
+      red.toDouble(),
+      green.toDouble(),
+      blue.toDouble(),
+      clear.toDouble(),
+      light.toDouble(),
+      colTemp.toDouble()
+    ]);
+
+    // acceleration
+
+    features.add((accelX + accelY + accelZ).toDouble());
+    features.add((pow(accelX, 2) + pow(accelY, 2) + pow(accelZ, 2)).toDouble());
+    features.add(pow(accelX * accelY, 2).toDouble());
+
+    // rgb vs clear
+    features.add(red / (clear + 1));
+    features.add(green / (clear + 1));
+    features.add(blue / (clear + 1));
+
+    features.add(red / (green + 1));
+    features.add(blue / (red + 1));
+    features.add(blue / (green + 1));
+
+    features.add((clear - red) / (red + 1));
+    features.add((clear - green) / (red + 1));
+    features.add((clear - blue) / (red + 1));
+
+    features.add((clear - red) / (green + 1));
+    features.add((clear - green) / (green + 1));
+    features.add((clear - blue) / (green + 1));
+
+    features.add((clear - red) / (blue + 1));
+    features.add((clear - green) / (blue + 1));
+    features.add((clear - blue) / (blue + 1));
+
+    features.add((clear - red) / (clear + 1));
+    features.add((clear - green) / (clear + 1));
+    features.add((clear - blue) / (clear + 1));
+
+    // log
+    double redLog = log(red + 1);
+    double greenLog = log(green + 1);
+    double blueLog = log(blue + 1);
+    double clearLog = log(clear + 1);
+
+    features.add(redLog / clearLog);
+    features.add(greenLog / clearLog);
+    features.add(blueLog / clearLog);
+
+    features.add(redLog / (greenLog + 1));
+    features.add(blueLog / (redLog + 1));
+    features.add(blueLog / (greenLog + 1));
+
+// squre root
+    double redSqrt = sqrt(red);
+    double greenSqrt = sqrt(green);
+    double blueSqrt = sqrt(blue);
+    double clearSqrt = sqrt(clear);
+
+    features.add(redSqrt / clearSqrt);
+    features.add(greenSqrt / clearSqrt);
+    features.add(blueSqrt / clearSqrt);
+
+    features.add(redSqrt / (greenSqrt + 1));
+    features.add(blueSqrt / (redSqrt + 1));
+    features.add(blueSqrt / (greenSqrt + 1));
+
+    // uv vs lux
+    features.add(uv / (light + 1));
+    features.add(exp(uv / (light + 1)));
+
+    return 0;
+  }
+  int _calibrateLux(int raw) {
+    return( -2.290 + 0.8646 * raw + -1.627 * pow(10, -5) * pow(raw, 2) + -4.515 * pow(10, -10) * pow(raw, 3)).toInt();
   }
 }
