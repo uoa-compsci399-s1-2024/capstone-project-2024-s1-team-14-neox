@@ -2,9 +2,9 @@
 
 ## Prerequisites
 
-- `aws` CLI.  I (Gabriel) use version 1
+- `aws` CLI (The original developers used version 1)
 - Configured credentials for AWS
-- `sam` CLI.  Download from PyPI or ... (TODO)
+- `sam` CLI (The original developers downloaded it from PyPI)
 
 We will not set up the website here.  See `website/BUILD.md` if you
 want to do that.
@@ -54,7 +54,10 @@ sam remote invoke --config-env <USECASE>-<ENVIRONMENT> FuncMetaSetupDB
 You can also use `FuncMetaSetupDB` to clear the DB.  But to clear only
 the samples, use `FuncMetaClearSamples` which is helpful if there are
 users already set up since resetting all the whole DB would desync the
-DB and Cognito.
+DB and Cognito.  For studies and children, you can use
+`FuncMetaClearStudies` and `FuncMetaClearChildren`, respectively.
+There are currently no API actions to delete specific studies and
+children.
 
 Now initialise the user pool:
 
@@ -70,12 +73,14 @@ sam remote invoke --config-env <USECASE>-<ENVIRONMENT> FuncMetaAdminsRegister --
 ```
 
 Cognito will send a temporary password to that email.  When you first
-log in, Cognito will require you to first set a new password.  (Once
-the website is set up, you will be able to do this there.)
+log in, Cognito will require you to first set a new password.  The
+website will prompt you for this.
 
 You can get the user pool ID (`UserPoolId`) and client ID from the
-template stack outputs.  Use any client ID for now (`AppClientId` or
-`WebClientId`).
+template stack outputs.  Use any client ID when testing in the backend
+(`AppClientId` or `WebClientId`).  We provide different client IDs for
+app and website in case we want to treat app and web clients
+differently in future versions.
 
 To log in:
 
@@ -126,6 +131,12 @@ View all tables with:
 sam remote invoke --config-env <USECASE>-<ENVIRONMENT> FuncMetaReadAllTables
 ```
 
+As the number of users, studies, children, and samples increases, this
+may timeout.  It is easy to create a new lambda to view specific
+tables in the database: just copy the code for this lambda, remove the
+queries to the other tables, and then add a new function to
+`template.yaml`.
+
 ## Debugging lambdas
 
 You can use
@@ -148,8 +159,8 @@ Also, the logs may not update immediately after calling the function.
 If you want to see the latest call to the function but it's not there
 yet, just run the command again.
 
-Alternatively, you open a separate terminal and add the `--tail` flag
-to the call to get logs as they are written.
+Alternatively, you can open a separate terminal and add the `--tail`
+flag to the call to get logs as they are written.
 
 ## Help
 
