@@ -41,6 +41,6 @@ void fillBuffers(uint32_t& currentSampleBufferIndex);
  * Keeps track of the current index in the sample buffer and the amount of data sent so far. If the update characteristic is written to, calls fillBuffers
  * and fillCharacteristics.
  */
-void updateValues();
+void updateValues(uint32_t& currentSampleBufferIndex);
 
 #endif

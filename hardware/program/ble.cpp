@@ -130,9 +130,14 @@ void getBLEAddress(uint8_t* address) {
     address++;
   }
 }
-
+int connection_count = 0;
 void checkConnection() {
+connection_count += 1;
     BLEDevice central = BLE.central();
+    if (connection_count > 100000) {
+    Serial.println("checking connection outside while loop");
+    connection_count = 0;
+    }
     while (central.connected())
     {
         if (connectTime == 0) {
@@ -140,37 +145,60 @@ void checkConnection() {
         }
 
         if (!authenticated && millis() - connectTime >= MAX_UNAUTH_TIME) {
+          Serial.println("disconnect because of max unauth time");
             central.disconnect();
             break;
         }
 
         if (authenticated) {
-            updateValues();
+          // Serial.println("authenticated success");
+            updateValues(currentSampleBufferIndex);
         }
+        // Serial.println("not authenticated");
     }
     currentSampleBufferIndex = 0;
     connectTime = 0;
 }
 
 void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
+  Serial.println("find timestamp entered");
+  uint32_t search_ts = timestamp;
   uint32_t left = 0;
   uint32_t right = eepromGetSampleBufferLength() - 1;
-  while (left <= right) {
-    uint32_t mid = left + (right - left) / 2;
+  Serial.print(left);
+  Serial.print(",");
+  Serial.println(right);
 
+  Serial.print("Starting timestamp");
+  Serial.println(search_ts);
+
+
+  while (left < right) {
+      Serial.print(left);
+  Serial.print(",");
+  Serial.print(right);
+    uint32_t mid = left + (right - left) / 2;
+  Serial.print(",");
+  Serial.println(mid);
     SensorSample sample; 
     eepromReadSample(mid, &sample);
     uint32_t ts = sample.timestamp[3] << 24;
     ts += sample.timestamp[2] << 16;
     ts += sample.timestamp[1] << 8;
     ts += sample.timestamp[0];
-    
-    if (ts == timestamp)
+    Serial.print("ts ");
+    Serial.println(ts);
+    Serial.print("timestamp ");
+    Serial.print(search_ts);
+    Serial.println(mid);
+    if (ts == search_ts)
     {
       currentSampleBufferIndex = mid;
+      Serial.print("in binary esarch timestamp found");
+      Serial.println("ts");
       return;
     }
-    if (ts < timestamp)
+    if (ts < search_ts)
     {
       left = mid + 1;
     }
@@ -179,7 +207,51 @@ void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
       right = mid - 1;
     }
   }
+  Serial.println("return without finding timestamp");
+  currentSampleBufferIndex = 0;
+  return; 
 }
+
+uint32_t UPDATE_VALUES_COUNT = 0;
+void updateValues(uint32_t& currentSampleBufferIndex) {
+    uint32_t samplesToSend = eepromGetSampleBufferLength();
+    if (ts.written())
+    {
+      Serial.print("timestamp written ");
+      uint32_t timestamp;
+      ts.readValue(timestamp);
+      Serial.print("The app sent ");
+      Serial.println(timestamp);
+      if (timestamp == 0) {
+        currentSampleBufferIndex = 0;
+        Serial.println("beginning");
+      } else {
+        findTSIndex(timestamp, currentSampleBufferIndex);
+        Serial.print("for ");
+        Serial.print(timestamp);
+        Serial.print("found ");
+        Serial.println(currentSampleBufferIndex);
+
+      }
+    }
+    if (update.written())
+    {Serial.print("Update written ");
+        samplesToSend -= currentSampleBufferIndex;
+      Serial.println(samplesToSend);
+        progress.writeValue(samplesToSend);
+        fillBuffers(currentSampleBufferIndex);
+        fillCharacteristics();
+        emptyBuffers();
+    } else {
+      if (UPDATE_VALUES_COUNT > 5000) {
+      // Serial.println("update not written");
+      UPDATE_VALUES_COUNT = 0;
+
+      }
+    }
+    UPDATE_VALUES_COUNT += 1;
+}
+
 
 void addSample(byte arr[maxDataPerCharacteristic], uint32_t& index, SensorSample sample) {
     memcpy(&arr[index], &sample, sizeof(SensorSample));
@@ -264,24 +336,6 @@ void fillBuffers(uint32_t& currentSampleBufferIndex) {
     
 }
 
-void updateValues() {
-    uint32_t samplesToSend = eepromGetSampleBufferLength();
-    if (ts.written())
-    {
-      uint32_t timestamp;
-      ts.readValue(timestamp);
-      findTSIndex(timestamp, currentSampleBufferIndex);
-    }
-    if (update.written())
-    {
-        samplesToSend -= currentSampleBufferIndex;
-        progress.writeValue(samplesToSend);
-        fillBuffers(currentSampleBufferIndex);
-        fillCharacteristics();
-        emptyBuffers();
-    }
-}
-
 static void sha256(const uint8_t* data, uint8_t* hash) {
   SHA256 hasher;
   hasher.update(data, 32);
@@ -336,7 +390,7 @@ static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic chara
     authenticated = true;
   }
 
-  /*Serial.print("Authenticated status ");
+  Serial.print("Authenticated status ");
   Serial.println(authenticated);
 
   auto print = [](uint8_t* arr) {
@@ -346,11 +400,14 @@ static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic chara
     }
     Serial.print("\n");
   };
-
+  Serial.println("authkey");
   print(authKey);
+   Serial.println("challenge");
   print(challenge);
+   Serial.println("response");
   print(response);
-  print(expected);*/
+   Serial.println("expected");
+  print(expected);
 }
 
 static void onAuthChallengeFromCentral(BLEDevice central, BLECharacteristic characteristic) {

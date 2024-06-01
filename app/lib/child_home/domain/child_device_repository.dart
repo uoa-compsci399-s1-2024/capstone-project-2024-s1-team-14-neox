@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/classifiers/xgboost.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/classifiers/random_forest.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/main.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/single_week_hourly_stats_model.dart';
@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
-import 'classifiers/xgboost.dart';
+import 'classifiers/random_forest.dart';
 
 class ChildDeviceRepository {
   static const int bytesPerSample = 20;
@@ -119,6 +119,7 @@ class ChildDeviceRepository {
 
   Future<void> parseAndSaveSamples(
       String childName, List<int> bytes, int childId) async {
+        DateTime startTime = DateTime.now();
     List<ArduinoDataEntity> samples = [];
     while (bytes.length % bytesPerSample != 0) {
       bytes.removeLast();
@@ -152,14 +153,13 @@ class ChildDeviceRepository {
       int colourTemperature =
           _calculateColourTemperature(red, blue, green, clear);
 
-      int appClass =
-          score([uv, light, accelX, accelY, accelZ])[1] > 0.7 ? 1 : 0;
+      int appClass = _classify(uv, accelX, accelY, accelZ, red, green, blue, clear,colourTemperature, light);
 
       samples.add(ArduinoDataEntity(
         name: childName,
         childId: childId,
         uv: uv,
-        light: light,
+        light: _calibrateLux(light),
         datetime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
         accel: Int16List.fromList([accelX, accelY, accelZ]),
         red: red,
@@ -170,7 +170,12 @@ class ChildDeviceRepository {
         appClass: appClass,
       ));
     }
+    DateTime endTime = DateTime.now();
+    print("classify  Sample length: ${samples.length}");
+    print("classify time spent $startTime $endTime ${endTime.difference(startTime)}" );
     await ArduinoDataEntity.saveListOfArduinoDataEntity(samples);
+    DateTime done = DateTime.now();
+    print("classify all done ${done.difference(endTime)}");
   }
 
   int _calculateLux(int r, int g, int b) {
@@ -207,5 +212,107 @@ class ChildDeviceRepository {
     }
 
     return ((3810 * b2) ~/ r2 + 1391).clamp(0, 0xFFFF);
+  }
+
+  int _classify(int uv, int accelX, int accelY, int accelZ, int red, int green,
+      int blue, int clear, int colTemp, int light) {
+    List<double> features = [];
+    features.addAll([
+      uv.toDouble(),
+      accelX.toDouble(),
+      accelY.toDouble(),
+      accelZ.toDouble(),
+      red.toDouble(),
+      green.toDouble(),
+      blue.toDouble(),
+      clear.toDouble(),
+      light.toDouble(),
+      colTemp.toDouble()
+    ]);
+
+    // acceleration
+
+    features.add((accelX + accelY + accelZ).toDouble());
+    features.add((pow(accelX, 2) + pow(accelY, 2) + pow(accelZ, 2)).toDouble());
+    features.add((accelX * accelY).abs().toDouble());
+
+    // rgb vs clear
+    features.add(red / (clear + 1));
+    features.add(green / (clear + 1));
+    features.add(blue / (clear + 1));
+
+    features.add(red / (green + 1));
+    features.add(blue / (red + 1));
+    features.add(blue / (green + 1));
+
+    features.add((clear - red) / (red + 1));
+    features.add((clear - green) / (red + 1));
+    features.add((clear - blue) / (red + 1));
+
+    features.add((clear - red) / (green + 1));
+    features.add((clear - green) / (green + 1));
+    features.add((clear - blue) / (green + 1));
+
+    features.add((clear - red) / (blue + 1));
+    features.add((clear - green) / (blue + 1));
+    features.add((clear - blue) / (blue + 1));
+
+    features.add((clear - red) / (clear + 1));
+    features.add((clear - green) / (clear + 1));
+    features.add((clear - blue) / (clear + 1));
+
+    // log
+    double redLog = log(red + 1);
+    double greenLog = log(green + 1);
+    double blueLog = log(blue + 1);
+    double clearLog = log(clear + 1);
+
+    features.add(redLog / clearLog);
+    features.add(greenLog / clearLog);
+    features.add(blueLog / clearLog);
+
+    features.add(redLog / (greenLog + 1));
+    features.add(blueLog / (redLog + 1));
+    features.add(blueLog / (greenLog + 1));
+
+// squre root
+    double redSqrt = sqrt(red + 1);
+    double greenSqrt = sqrt(green + 1);
+    double blueSqrt = sqrt(blue + 1);
+    double clearSqrt = sqrt(clear + 1);
+
+    features.add(redSqrt / clearSqrt);
+    features.add(greenSqrt / clearSqrt);
+    features.add(blueSqrt / clearSqrt);
+
+    features.add(redSqrt / (greenSqrt + 1));
+    features.add(blueSqrt / (redSqrt + 1));
+    features.add(blueSqrt / (greenSqrt + 1));
+
+    // uv vs lux
+    double lightLog = log(light + 1);
+    double uvLog = log(uv + 2);
+    double lightSqrt = sqrt(light + 1);
+    double uvSqrt = sqrt(uv + 1);
+
+    features.add(light / (uv + 1));
+    features.add(blue / (uv + 1));
+    features.add((clear - blue) / (uv + 1));
+    features.add(lightLog / uvLog);
+    features.add(blueLog / uvLog);
+    features.add(lightSqrt / uvSqrt);
+    features.add(blueSqrt / uvSqrt);
+    List<double> probabilities = score(features);
+    print("Classify $uv, $accelX, $accelY, $accelZ, $red, $green, $blue, $clear, $light, $colTemp");
+    print({"Classify $probabilities"});
+    return probabilities[0] > 1.0 ? 1 : 0;
+  }
+
+  int _calibrateLux(int raw) {
+    return (-2.290 +
+            0.8646 * raw +
+            -1.627 * pow(10, -5) * pow(raw, 2) +
+            -4.515 * pow(10, -10) * pow(raw, 3))
+        .toInt();
   }
 }

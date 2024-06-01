@@ -59,6 +59,7 @@ class BluetoothPanel extends StatelessWidget {
           if (state.deviceRemoteId.isEmpty) {
             return ElevatedButton(
               onPressed: () {
+                print("scanning");
                 // Automatically begin scanning
                 BlocProvider.of<BluetoothBloc>(context).add(BluetoothScanStarted());
 
