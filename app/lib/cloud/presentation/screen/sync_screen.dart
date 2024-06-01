@@ -191,6 +191,13 @@ class SyncScreen extends StatelessWidget {
                                 );
                               }),
                             );
+                          } else if (state.status.isFailure) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(state.message),
+                                backgroundColor: Colors.grey,
+                              ),
+                            );
                           }
                         },
                         builder: (context, state) {
