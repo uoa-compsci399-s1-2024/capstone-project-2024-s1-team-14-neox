@@ -31,13 +31,12 @@ Future<List<ParticipatingChildModel>> getChildrenByStudyCode(String studyCode) a
     return children;
   }
 
-  Future<StudyModel> fetchStudyFromServer(String studyCode) async {
+  Future<StudyModel?> fetchStudyFromServer(String studyCode) async {
     StudyEntity? study = await ChildApiService.getStudy(studyCode);
     if(study == null){
-
+      return null;
     }
-    StudyModel? model  = StudyModel.fromEntity(study!);
-    return model;
+    return StudyModel.fromEntity(study);
   }
 
   Future<List<StudyModel>> joinNewStudy(

@@ -114,7 +114,7 @@ class ChildApiService {
     return id;
   }
 
-  static getStudy(String studyCode) async {
+  static Future<StudyEntity?> getStudy(String studyCode) async {
     Dio dio = Dio();
 
     final defaultHeaders = await initializeHeader();
@@ -133,8 +133,10 @@ class ChildApiService {
       }
       StudyEntity study = StudyEntity.fromJson(data, studyCode);
       StudyEntity.createStudy(study);
+      return study;
     } catch (e) {
       print('$e');
+      return null;
     }
   }
 
