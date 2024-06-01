@@ -14,10 +14,11 @@ Amplify.configure({
     }
   });
 
-function AdminHeader({token, isAdmin, togglePopup}) {
+function AdminHeader({token, isAdmin, togglePopup, updateTick }) {
     const [researcherId, setResearcherId] = useState("");
     const [selectedStudyId, setSelectedStudyId] = useState("");
     const [editError, setEditError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
 
     const addResearcher = async () => {
         try {
@@ -31,16 +32,22 @@ function AdminHeader({token, isAdmin, togglePopup}) {
                 credentials: 'include',
                 body: JSON.stringify({ researcherId })
             });
-
+            updateTick();
             if (response.ok) {
+                
                 setEditError(null);
-                console.log(response)
+                setSuccessMessage(null);
+                setSuccessMessage('Successfully added researcher');
+                //console.log(response)
+
             } else {
                 setEditError(null);
+                setSuccessMessage(null);
                 setEditError('Error adding researcher');
             }
         } catch (error) {
             setEditError(null);
+            setSuccessMessage(null);
             setEditError('Error adding researcher');
             console.log(error)
         }
@@ -58,19 +65,23 @@ function AdminHeader({token, isAdmin, togglePopup}) {
                 credentials: 'include',
                 body: JSON.stringify({ researcherId })
             });
-
+            updateTick();
             if (response.ok) {
                 setEditError(null);
-                console.log(response)
+                setSuccessMessage(null);
+                setSuccessMessage('Successfully removed researcher');
+                //console.log(response)
+                
             } else {
                 setEditError(null);
-                setEditError('Error deleting researcher');
+                setSuccessMessage(null);
+                setEditError('Error removing researcher');
             }
         } catch (error) {
             setEditError(null);
-            setEditError('Error deleting researcher');
+            setSuccessMessage(null);
+            setEditError('Error removing researcher');
             console.log(error)
-            togglePopup();
         }
     };
 
@@ -85,15 +96,17 @@ function AdminHeader({token, isAdmin, togglePopup}) {
 
                 <div class="study-card">
                     <Card variation="elevated">
-                        <h3>Manage Researchers</h3>
+                        <h3 className="centered-heading">Manage Researchers</h3>
                         {editError && <p style={{ color: 'red' }}>{editError}</p>}
-                        <p>Study ID <input
+                        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+                        
+                        <p className="card-titles bottom" >Study ID: <input
                                         type="text"
                                         value={selectedStudyId}
                                         onChange={e => setSelectedStudyId(e.target.value)}
                                         placeholder="Study ID"
                                     /></p>
-                        <p>Researcher ID <input
+                        <p className="card-titles bottom">Researcher ID: <input
                                              type="text"
                                              value={researcherId}
                                              onChange={e => setResearcherId(e.target.value)}
@@ -155,11 +168,13 @@ async function fetchParticipants(id, token) {
         credentials: 'include',
     });
     const json = await resp.json();
+    //console.log(json);
     return json.data;
 }
 
-function AdminExtraStudyFields({id, token, isAdmin}) {
+function AdminExtraStudyFields({id, token, isAdmin, tick}) {
     const [participants, setParticipants] = useState(null);
+    const [displayParticipants, setDisplayParticipants] = useState(false);
     useEffect(() => {
         async function fetchWithToken() {
             if (isAdmin && token != null) {
@@ -167,17 +182,39 @@ function AdminExtraStudyFields({id, token, isAdmin}) {
             }
         }
         fetchWithToken();
-    }, [id]);
+    }, [id,tick]);
+
+    const handleToggleDisplay = () => {
+        setDisplayParticipants(!displayParticipants);
+    };
+
     if (isAdmin) {
         return (
-            <h5><span className="card-titles bottom">Researchers: </span>{participants ? participants.researchers.length : "(Loading...)"}</h5>
+            <>
+                {!displayParticipants && (
+                    <h5>
+                        <span className="card-titles bottom">Researchers: </span>
+                        {participants ? participants.researchers.length : "(Loading...)"}
+                    </h5>
+                )}
+                {displayParticipants && participants && (
+                    <h5>
+                        {participants.researchers.map(researcher => (
+                            <div key={researcher.id}>{researcher.id}</div>
+                        ))}
+                    </h5>
+                )}
+                <button type="button" class="btn btn-outline-primary"button onClick={handleToggleDisplay}>
+                    {displayParticipants ? "Hide Researchers" : "Show Researchers"}
+                </button>
+            </>
         );
     } else {
         return <></>;
     }
 }
 
-function StudyCard({id, token, isAdmin}) {
+function StudyCard({id, token, isAdmin, tick}) {
     const [details, setDetails] = useState(null);
     // const [participants, setParticipants] = useState(null);
     useEffect(() => {
@@ -197,17 +234,22 @@ function StudyCard({id, token, isAdmin}) {
                 <h3 style={{"textAlign": "center"}}>{details ? details.name : "(Loading...)"}</h3>
                 <h5 style={{"textAlign": "center", "paddingBottom": "2%"}}>{details ? details.description : "(Loading...)"} </h5>
                 <h5><span className="card-titles">Period:</span> {details ? `${details.start_date} - ${details.end_date}` : "(Loading...)"} </h5>
-                <AdminExtraStudyFields id={id} token={token} isAdmin={isAdmin} />
+                <AdminExtraStudyFields id={id} token={token} isAdmin={isAdmin} tick= {tick}/>
                 <div className="d-table-row gap-4 d-md-flex justify-content-md-end">
+                
                     <button type="button" className="btn btn-outline-primary">Download CSV</button>
                 </div>
+                
             </Card>
         </div>
     );
 }
+//<button type="button" className="btn btn-outline-primary" onClick={() => onViewResearchers(id)}>View Researchers</button>
+
 
 const Home = ({ isAdmin, showButton }) => {
     const [familyName, setFamilyName] = useState(null);
+    const [tick, setTick] = useState(0);
 
     useEffect(() => {
         async function fetchFamilyName() {
@@ -277,38 +319,60 @@ const Home = ({ isAdmin, showButton }) => {
       }, [idToken])
 
     const [isOpen, setIsOpen] = useState(false);
-    const [isSuccessful, setIsSuccessful] = useState(false);
+    const [researchers, setResearchers] = useState([]);
+
     const togglePopup = () => {
         setIsOpen(!isOpen);
+    };
+
+    /*
+    const onViewResearchers = async (studyId) => {
+        try {
+            const participants = await fetchParticipants(studyId, idToken);
+            const researcherNames = participants.researchers.map(researcher => researcher.id);
+            setResearchers(researcherNames);
+            console.log(participants);
+            togglePopup();
+        } catch (error) {
+            console.error('Error fetching researchers:', error);
+        }
+    }
+    */
+
+    const updateTick = () => {
+        setTick(tick + 1);
     };
 
     return (
         <div className="home-body">
             <h1>Welcome {familyName}!</h1>
             <div>
-                <AdminHeader isAdmin={isAdmin} token={idToken} togglePopup={togglePopup} />
+                <AdminHeader isAdmin={isAdmin} token={idToken} togglePopup={togglePopup} updateTick={updateTick}/>
                 <hr/>
                 <div className="studies">
                     <h3>Current Studies</h3>
                     <div>
-                        {studies.map((id) => <StudyCard key={id} id={id} token={idToken} isAdmin={isAdmin} />)}
+                        {studies.map((id) => <StudyCard key={id} id={id} token={idToken} isAdmin={isAdmin} tick={tick}/>)}
                     </div>
                     <NonAdminTrailer isAdmin={isAdmin} />
                 </div>
 
-                {isOpen && isSuccessful && <Popup
-                content={<>
-
-                </>}
-                handleClose={togglePopup}
-                />}
-
-                {isOpen && !isSuccessful &&<Popup
-                content={<>
-
-                </>}
-                handleClose={togglePopup}
-                />}
+                {isOpen && (
+                    <Popup
+                        content={
+                            <>
+                                <h3>Researchers</h3>
+                                <ul>
+                                    {researchers.map((researcher, index) => (
+                                        <li key={index}>{researcher}</li>
+                                    ))}
+                                </ul>
+                                <button className="btn btn-outline-primary" onClick={togglePopup}>Close</button>
+                            </>
+                        }
+                        handleClose={togglePopup}
+                    />
+                )}
             </div>
         </div>
     );
