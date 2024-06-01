@@ -107,9 +107,9 @@ function make_handler(subjectID)
       }
       break;
     case SUBJECT_STUDY:
-      res = await db.query(`SELECT smp.*,
-                                   c.gender,
-                                   extract(year from age(c.birthdate)) AS "age"
+      res = await db.query(`SELECT DISTINCT smp.*,
+                                            c.gender,
+                                            extract(year from age(c.birthdate)) AS "age"
                             FROM samples as smp, study_children as sc, children as c, studies as s
                             WHERE upper(sc.study_id) = upper($1)
                               AND c.id = sc.participant_id AND sc.participant_id = smp.child_id
