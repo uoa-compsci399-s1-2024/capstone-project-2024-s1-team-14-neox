@@ -29,9 +29,9 @@ class StudyCubit extends Cubit<StudyState> {
 
   
 
-  void fetchStudyFromServer(String studyId) {
+  Future<void> fetchStudyFromServer(String studyId) async {
     emit(state.copyWith(status: StudyStatus.loading));
-    StudyModel newStudy = _studyRepository.fetchStudyFromServer(studyId);
+    StudyModel? newStudy = await _studyRepository.fetchStudyFromServer(studyId);
 
     emit(state.copyWith(
       status: StudyStatus.fetchStudySuccess,
