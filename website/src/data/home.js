@@ -213,6 +213,7 @@ function AdminExtraStudyFields({id, token, isAdmin, tick}) {
         return <></>;
     }
 }
+
 function downloadCSV(data, filename) {
     const csv = convertToCSV(data);
     const blob = new Blob([csv], { type: 'text/csv' });
