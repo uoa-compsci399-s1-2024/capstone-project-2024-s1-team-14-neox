@@ -12,6 +12,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
+import 'classifiers/random_forest.dart';
+
 class ChildDeviceRepository {
   static const int bytesPerSample = 20;
   final SharedPreferences sharedPreferences;
@@ -182,12 +184,7 @@ class ChildDeviceRepository {
         appClass: appClass,
       ));
     }
-    DateTime endTime = DateTime.now();
-    // print("classify  Sample length: ${samples.length}");
-    // print("classify time spent $startTime $endTime ${endTime.difference(startTime)}" );
     await ArduinoDataEntity.saveListOfArduinoDataEntity(samples);
-    DateTime done = DateTime.now();
-    // print("classify all done ${done.difference(endTime)}");
   }
 
   int _calculateLux(int r, int g, int b) {

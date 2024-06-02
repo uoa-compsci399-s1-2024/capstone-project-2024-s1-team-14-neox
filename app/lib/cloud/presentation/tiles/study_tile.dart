@@ -98,7 +98,7 @@ class StudyTile extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  StudyInfoTile(study),
+                  StudyInfoTile(study, showCode: true),
                   const Divider(height: 50),
                   BlocProvider(
                     create: (_) =>

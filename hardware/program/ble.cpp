@@ -188,7 +188,6 @@ void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
     }
   }
   currentSampleBufferIndex = 0;
-  // Serial.print("returned without finding");
   return; 
 }
 
@@ -369,11 +368,14 @@ static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic chara
   //   }
   //   Serial.print("\n");
   // };
-
-  print(authKey);
-  print(challenge);
-  print(response);
-  print(expected);
+  // Serial.println("authkey");
+  // print(authKey);
+  //  Serial.println("challenge");
+  // print(challenge);
+  //  Serial.println("response");
+  // print(response);
+  //  Serial.println("expected");
+  // print(expected);
 }
 
 static void onAuthChallengeFromCentral(BLEDevice central, BLECharacteristic characteristic) {
