@@ -8,8 +8,6 @@ import pg from "pg";
 let db = await connectToDB();
 
 const CREATE_TABLES_TEXT = `
--- NOTE: THERE SHOULD BE EXTERNAL AND INTERNAL IDs
-
 DROP TABLE IF EXISTS samples CASCADE;
 DROP TABLE IF EXISTS studies CASCADE;
 DROP TABLE IF EXISTS study_children CASCADE;

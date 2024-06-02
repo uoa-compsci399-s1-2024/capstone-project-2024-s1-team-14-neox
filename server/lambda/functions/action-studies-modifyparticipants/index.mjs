@@ -21,9 +21,6 @@ const SUBJECT_CHILDREN = "children";
 
 const UNAUTH_OR_NO_SUCH_PARTICIPANT_MESSAGE = "not authorised or no such participant";
 
-// const ACTION_ADD = "add";
-// const ACTION_REMOVE = "remove";
-
 function make_handler(subjectID)
 {
   return (async (event) => {
