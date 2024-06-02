@@ -8,6 +8,7 @@ import '../App.css';
 import '@aws-amplify/ui-react/styles.css';
 import { Auth, Amplify, Logger, Hub  } from 'aws-amplify';
 import Popup from '../popup';
+import axios from 'axios';
 
 Amplify.configure({
   Auth: {
@@ -17,116 +18,137 @@ Amplify.configure({
   }
 });
 
-const Users = ({ toggleButton, handleJwtToken }) => {
-  const [jwtToken, setJwtToken] = useState('');
-  const logger = new Logger('Logger', 'INFO');
+const Users = ({ toggleButton, handleJwtToken , jwtToken}) => {
+  const [createdUsers, setCreatedUsers] = useState([]);
   const [isSignedUp, setIsSignedUp] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
   const [newUserEmail, setNewUserEmail] = useState('');
-  const [isSuccessful, setIsSuccessful] = useState('');
+  const [isSuccessful, setIsSuccessful] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [idToken, setIdToken] = useState(null); 
+
   const togglePopup = () => {
     setIsOpen(!isOpen);
-  }
-
+  };
+  
 
   useEffect(() => {
-      fetchJwtToken();
-  }, []);
-  
-  const fetchJwtToken = async () => {
+    const fetchIdToken = async () => {
       try {
-          const currentUser = await Auth.currentAuthenticatedUser();
-          const session = await Auth.currentSession();
-          const token = session.getIdToken().getJwtToken();
-          setJwtToken(token);
-          handleJwtToken(token); // Pass jwtToken back to App.js
-
+        const session = await Auth.currentSession();
+        const token = session.getIdToken();
+        setIdToken(token);
       } catch (error) {
-          console.log('Error fetching JWT token:', error);
+        console.error('Error fetching ID token:', error);
       }
-      };
+    };
 
-    const handleSignUp = async (event) => {
-        event.preventDefault();
-        const formData = new FormData(event.target);
-        const email = formData.get('email');
-        const password = formData.get('password');
-        const firstName = formData.get('given_name');
-        const middleName = formData.get('middle_name');
-        const lastName = formData.get('family_name');
-        const nickname = formData.get('nickname');
-    
-        try {
-          const { user } = await Auth.signUp({
-            username: email,
-            password,
-            attributes: {
-              email,
-              given_name: firstName,
-              middle_name: middleName,
-              family_name: lastName,
-              nickname
-            }
-          });
-          console.log('user:', user);
-          setNewUserEmail(email);
-          setIsSignedUp(true);
-          setIsSuccessful(true);
-          togglePopup();
-        } catch (error) {
-          togglePopup();
-          setIsSuccessful(false);
-          setNewUserEmail(email);
-          setErrorMessage(error.message);
-          console.log('Error signing up:', error);
+    fetchIdToken();
+  }, []);
+
+  useEffect(() => {
+    const fetchResearchers = async () => {
+      try {
+        const response = await axios.get(`${awsExports.API_ENDPOINT}/researchers`, {
+          headers: { Authorization: `Bearer ${idToken.getJwtToken()}` },
+          withCredentials: true,
+        });
+  
+        if (response.data && Array.isArray(response.data.data)) {
+          setCreatedUsers(response.data.data);
+        } else {
+          setCreatedUsers(response.data.data);
         }
-      };
-    
-      if (isSignedUp) {
-        //return <Redirect to="/Home" />;
+      } catch (error) {
+        console.error('Error fetching researchers:', error);
       }
+    };
+
+    if (idToken) {
+      fetchResearchers();
+    }
+  }, [idToken, newUserEmail]);
+  
+  const handleSignUp = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const email = formData.get('email');
+    const firstName = formData.get('given_name');
+    const lastName = formData.get('family_name');
+
+    if (!idToken) {
+      console.error('Missing JWT token for signup');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${awsExports.API_ENDPOINT}/researchers`,
+        {
+          given_name: firstName,
+          family_name: lastName,
+          email,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${idToken.getJwtToken()}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      setNewUserEmail(email);
+      setIsSignedUp(true);
+      setIsSuccessful(true);
+      togglePopup();
+    } catch (error) {
+      togglePopup();
+      setIsSuccessful(false);
+      setErrorMessage(error.message);
+      console.error('Error signing up:', error);
+    }
+  };
+
+    if (isSignedUp) {
+    }
     
       return (
         <div>
-        <form onSubmit={handleSignUp}>
-          <h1>Manage researchers</h1>
-          <br></br>
-          <h2>Create an account</h2>
-          <br></br>
+        <h1 style={{"text-align": "center"}}>Manage researchers</h1>
+        <h2 style={{"text-align": "center"}}>Create an account</h2>
+        <form onSubmit={handleSignUp} class="user-form">
+
           <div className="mb-3">
             <label>Email</label>
             <input type="email" className="form-control" placeholder="Enter email" name="email" required />
           </div>
           <div className="mb-3">
-            <label>Password</label>
-            <input type="password" className="form-control" placeholder="Enter password" name="password" required />
-          </div>
-          <div className="mb-3">
             <label>First name</label>
-            <input type="text" className="form-control" placeholder="" name="given_name" required />
-          </div>
-          <div className="mb-3">
-            <label>Middle name</label>
-            <input type="text" className="form-control" placeholder="" name="middle_name" required/>
+            <input type="text" className="form-control" placeholder="Enter given name" name="given_name" required />
           </div>
           <div className="mb-3">
             <label>Last name</label>
-            <input type="text" className="form-control" placeholder="" name="family_name" required />
-          </div>
-          <div className="mb-3">
-            <label>Nickname</label>
-            <input type="text" className="form-control" placeholder="" name="nickname" required/>
+            <input type="text" className="form-control" placeholder="Enter family name" name="family_name" required />
           </div>
           <div className="d-grid">
             <button type="submit" className="btn btn-primary">Create</button>
           </div>
           {errorMessage && <p className="error-message">{errorMessage}</p>}
+          <br/>
+          <h2 style={{"text-align": "center"}}>Registered researchers</h2>
+          <div className="researchers-list">
+          {createdUsers.map((user) => ( 
+          <div key={user.id} className="card mb-3"> {/* Access user.id directly */}
+            <div className="card-body">
+              <p className="card-text" style={{ textAlign: "center" }}>
+                {user.id} {/* Display the user's ID */}
+              </p>
+            </div>
+          </div>
+          ))}
+          </div>
         </form>
-        <br></br>
-        <h2>Registered researchers</h2>
-        
+
         {isOpen && isSuccessful && <Popup
           content={<>
             <b>Account {newUserEmail} is successfully created!</b>

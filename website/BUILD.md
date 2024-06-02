@@ -2,16 +2,16 @@
 
 ## Prerequisites
 
-- `aws` CLI.  I (Gabriel) use version 1
+- `npm`
+- `aws` CLI.  The devs used version 1, which is available from PyPI
 - Configured credentials for AWS
-- `sam` CLI.  Download from PyPI or ... (TODO)
+- `sam` CLI.  The devs downloaded from PyPI
 
 Before we do anything, we need to first create the S3 buckets for the
-`prod` and `dev` websites.  I've already made them using the
-Cloudformation stack called `frontend`.  Check the Cloudformation
-console on the AWS website.
+`prod` and `dev` websites.
 
-However, if you just want to test on localhost, you can skip this step.
+However, if you just want to test on localhost, you can skip this
+step.
 
 If there is no such Cloudformation stack, run (in this directory):
 
@@ -54,9 +54,28 @@ Value               neox-frontend-app-dev
 
 Have each of these values ready for later.
 
+## Notation: `<USECASE>`
+
+In the following instructions replace `<USECASE>` with the usecase for
+which you are developing.
+
+See `BUILD.md` in the server subsystem directory for more details.
+
+## Notation: `<ENV>`
+
+In the following instructions replace `<ENV>` with the environment for
+which you are developing:
+
+- If you're developing for the developer[^1] website, you would
+  replace `<ENV>` with `dev`.
+- If you're developing for the production[^2] website, you would
+  replace `<ENV>` with `prod`.
+
+See `BUILD.md` in the server subsystem directory for more details.
+
 ## 1. Build an instance of the backend for localhost/dev/prod (needed for CORS)
 
-Go to the `server/` directory.
+Go to the `server/` directory from the project root.
 
 Run
 
@@ -64,12 +83,8 @@ Run
 sam build
 ```
 
-Making sure to replace `ENVIRONMENT` depending on whether you're
-developing on `localhost`, for the `dev` website, or for the `prod`
-website, run this:
-
 ```
-sam deploy --config-env website-ENVIRONMENT
+sam deploy --config-env <USECASE>-<ENV>
 ```
 
 Once the deployment succeeds, you will see the outputs of the
@@ -85,76 +100,74 @@ Description         Base URL of API
 Value               https://nyttfeb9u6.execute-api.ap-southeast-2.amazonaws.com/localhost
 ```
 
-Note down the `Value` field of `APIEndpoint`.  In this example, it is
-`https://nyttfeb9u6.execute-api.ap-southeast-2.amazonaws.com/localhost`.
+If you miss the output or you're following these instructions long
+after deployment, you can also run:
+
+```
+sam list stack-outputs --config-env <USECASE>-<ENV>
+```
+
+Note down the `Value` field of `APIEndpoint`, `UserPoolId`, and
+`WebClientId`.
+
+Back in this directory, install the web app dependencies with:
+
+```
+npm install
+```
 
 ## Develop on localhost
 
-### 2. Start the web app (`npm start`) with the API URL as an environment variable
+Note that the backend must have been built with the `localhost` environment.
 
-Follow the instructions in the link to:
+### 2. Start the web app
 
-- start the development server, and
-- set the `REACT_APP_API_URL` environment variable to have the value of `APIEndpoint`
-
-<https://create-react-app.dev/docs/adding-custom-environment-variables/#adding-temporary-environment-variables-in-your-shell>
+1. Set the corresponding properties in `src/aws-exports.js` from the values you noted earlier
+2. Set `REGION` to the region you see in the user pool ID
+3. Start the development server with `npm start`
 
 ### Done
 
 ## Develop on website hosted on AWS
 
-### 2. Build the web app (`npm run build`) with the API URL as an environment variable
+Note that the backend must have been built with the `dev` environment.
 
-Follow the instructions in the link to:
+### 2. Build the web app
 
-- build the web app, and
-- set the `REACT_APP_API_URL` environment variable to have the value of `APIEndpoint`
-
-Wherever the instructions say to do `npm start`, replace it with `npm run build`.
-
-<https://create-react-app.dev/docs/adding-custom-environment-variables/#adding-temporary-environment-variables-in-your-shell>
+1. Set the corresponding properties in `src/aws-exports.js` from the values you noted earlier
+2. Set `REGION` to the region you see in the user pool ID
+3. Build the web app with `npm run build`
 
 ### 3. Upload compiled web app to AWS and Visit website
-
-#### Notation: `<ENV>`
-
-In the following instructions replace `<ENV>` with the environment for
-which you are developing:
-
-- If you're developing for the developer[^1] website, you would
-  replace `<ENV>` with `dev`.
-- If you're developing for the production[^2] website, you would
-  replace `<ENV>` with `prod`.
-
-FOR NOW: we only support `dev`.
 
 #### Instructions
 
 Run:
 
 ``` shell
-aws s3 sync build/ s3://Website<ENV>S3Name  --delete
+aws s3 sync build/ s3://<USECASE><ENV>S3Name  --delete
 ```
 
-Visit the website at this URL: `Website<ENV>URL`.
+Visit the website at this URL from the stack outputs earlier:
+`<USECASE><ENV>URL`.
 
 #### NOTE
 
-Right now, our S3 buckets are automatically assigned policy statements
-that reject unencrypted HTTP connections.  I have to manually remove
-them every time they're re-applied.  (TODO add instructions for how to
-do this).  Once we figure out a way to serve our static site content,
-we will no longer need to do this.
+Our S3 buckets were automatically assigned policy statements which
+reject unencrypted HTTP connections.  If you also have this issue, you
+will need to disable such rules because S3 static site hosting does
+not provide an HTTPS endpoint.
 
-### 4. Cleanup
+## Cleanup
 
-When you're done, shut down the instances of the backend you used.
+When you're done, you can shut down the instances of the backend you
+used.
 
 In the `server/` directory, run the following command with the same
 value for `--config-env` as when you created the backend instance:
 
 ``` shell
-sam delete --config-env website-ENVIRONMENT
+sam delete --config-env <USECASE>-<ENV>
 ```
 
 Answer `y` (yes) to all of the prompts.
