@@ -379,13 +379,13 @@ sam remote invoke --stack-name "$STACKNAME" FuncMetaClearSamples >/dev/null 2>&1
 DUPESAMPLE="$("$(git rev-parse --show-toplevel)/server/generateXsamples" 1)"
 DUPESAMPLE_MODIFIED="$("$(git rev-parse --show-toplevel)/server/generateXsamples" 1 | jq -r '.samples[0].col_red |= 123')"
 call_api -m POST -t "$IDTOKEN_PARENT1" -u "$API_URL/samples/$CHILDID" -d "$DUPESAMPLE" \
-aux_test_auth -M "checking if duplicate-timestamp samples are rejected" \
+aux_test_body -M "checking if duplicate-timestamp samples are rejected" \
 	      -m POST -t "$IDTOKEN_PARENT1" -u "$API_URL/samples/$CHILDID" -d "$DUPESAMPLE_MODIFIED" \
 	      -D -C ".errors[0].status == 409"
 
 echo "clearing samples..."
 sam remote invoke --stack-name "$STACKNAME" FuncMetaClearSamples >/dev/null 2>&1
-aux_test_auth -M "checking if sending samples to nonexistent child doesn't leak its nonexistence" \
+aux_test_body -M "checking if sending samples to nonexistent child doesn't leak its nonexistence" \
 	      -m POST -t "$IDTOKEN_PARENT1" -u "$API_URL/samples/$BADCHILDID" -d "$("$(git rev-parse --show-toplevel)/server/generateXsamples" 1)" \
 	      -D -C ".errors[0].status == 403"
 
@@ -744,13 +744,14 @@ call_api -m DELETE -t "$IDTOKEN_PARENT1" -u "$API_URL/children/$CHILDID/studies/
 call_api -m DELETE -t "$IDTOKEN_ADMIN" -u "$API_URL/researchers/$EMAIL_RESEARCHER1/studies/$STUDYID" >/dev/null
 echo "TEST: checking if removing someone from study causes changes in auth for other parts of API"
 for user in PARENT1 PARENT2 RESEARCHER1 RESEARCHER2 ADMIN; do
+	aux_test_auth -M "$user: fetching samples from study" \
+		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/studies/$STUDYID/samples" \
+		      -D -s 403
+
 	assert_code=403
 	case "$user" in
 		PARENT1) assert_code=200 ;;
 	esac
-	aux_test_auth -M "$user: fetching samples from study" \
-		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/studies/$STUDYID/samples" \
-		      -D -s "$assert_code"
 	aux_test_auth -M "$user: fetching samples from child" \
 		      -m GET -t "$(eval echo \$"IDTOKEN_${user}")" -u "$API_URL/samples/$CHILDID" \
 		      -D -s "$assert_code"
