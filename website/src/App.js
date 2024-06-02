@@ -1,18 +1,14 @@
-//import logo from './data/neox.svg';
-//import button from './data/button.png';
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import Login from './data/login';
 import Users from './data/users';
-import Popup from './popup';
 import AccessDenied from './data/accessDenied';
 import Home from './data/home';
 import Create from './data/create';
 import Edit from './data/edit'
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import logo from './data/neox.svg';
-
 //Auth related imports
 import { awsExports } from './aws-exports';
 import '@aws-amplify/ui-react/styles.css';
@@ -35,11 +31,6 @@ function App() {
     setShowButton(value !== undefined ? value : !showButton);
   };
 
-  //trigger for popup box
-  const [isOpen, setIsOpen] = useState(false);
-  const togglePopup = () => {
-    setIsOpen(!isOpen);
-  }
   // State to store jwtToken
   const [jwtToken, setJwtToken] = useState(null); 
   const handleJwtToken = (token) => {
@@ -98,7 +89,6 @@ function App() {
       }else{
         handleSignOut();
       }
-      //console.log('token is ', token);
       toggleButton(false);
     } catch (error) {
       console.log('Error fetching JWT token:', error);
