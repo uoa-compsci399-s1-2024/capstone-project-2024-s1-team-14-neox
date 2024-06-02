@@ -1,4 +1,4 @@
-# Neox Sens App 
+# Neox App 
 
 ## Setting Backend Instance of Server on App 
 
