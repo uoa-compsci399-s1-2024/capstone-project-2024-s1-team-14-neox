@@ -7,7 +7,7 @@
 #include "tcs.h"
 
 static const int SERIAL_BAUD_RATE = 9600;
-static const uint32_t POLL_INTERVAL_MS = (uint32_t)60 * 1000; // 1 minute
+static const uint32_t POLL_INTERVAL_MS = (uint32_t)30 * 1000; // 1 minute
 static const uint8_t UV_SENSOR_PIN = A6;
 
 // Read all sensors and save them to the EEPROM

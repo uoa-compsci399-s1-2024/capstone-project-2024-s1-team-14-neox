@@ -338,6 +338,7 @@ static void onConnection(BLEDevice central) {
 }
 
 static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic characteristic) {
+  Serial.println("on auth response from central entered");
   uint8_t response[32];
   authResponseFromCentral.readValue(response, sizeof(response));
 

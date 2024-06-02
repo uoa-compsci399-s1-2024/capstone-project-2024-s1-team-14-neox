@@ -255,13 +255,23 @@ static void resumeAtomicTransaction()
 
 void eepromGetBLEAuthKey(uint8_t* key) {
   eepromRead(authKey, key, 32);
+  Serial.println("getting eeprom aauth key");
+   auto print = [](uint8_t* arr) {
+    for (int i = 0; i < 32; i++) {
+      Serial.print(arr[i]);
+      Serial.print(" ");
+    }
+    Serial.print("\n");
+  };
+
+  print(key);
 
   // If the key is corrupt for whatever reason, perform a factory reset.
   for (int i = 0; i < 32; i++) {
     if ((i < 10 && key[i] == 0) || (i >= 10 && key[i] != 0)) {
       Serial.println("BLE Authentication key is corrupt.");
       eepromFactoryReset(DEFAULT_BLE_AUTH_KEY);
-      break;
+      return;
     }
   }
 }

@@ -196,7 +196,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         }
         break;
       }
-
+ print("Classify find samples");
       // Check if all characteristics are found
       List<BluetoothCharacteristic?> writeCharacteristics = [
         acknowledgement,
@@ -229,11 +229,14 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       }
 
       {
+        
         List<int> challenge = await authChallengeFromPeripheral!.read();
+         print("Classify authenticate them $challenge");
         List<int> response = _solveAuthChallenge(challenge, key);
+         print("Classify authenticate them $response");
         await authResponseFromCentral!.write(response, allowLongWrite: true);
       }
-
+ print("Classify authenticate them");
       // Authenticate them
       {
         await authResponseFromPeripheral!.write(List.generate(32, (_) => 0), allowLongWrite: true);
