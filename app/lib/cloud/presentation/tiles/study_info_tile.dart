@@ -5,8 +5,9 @@ import 'package:intl/intl.dart';
 class StudyInfoTile extends StatelessWidget {
   final StudyModel study;
   final bool flexible;
+  final bool showCode;
 
-  const StudyInfoTile(this.study, {super.key, this.flexible = false});
+  const StudyInfoTile(this.study, {super.key, this.flexible = false, this.showCode = false});
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +24,12 @@ class StudyInfoTile extends StatelessWidget {
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
+        if (showCode)
+          Text(
+            "Study code: ${study.studyCode.toUpperCase()}",
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16),
+          ),
         Text(
           "Running period\n${DateFormat("d MMMM yyyy").format(study.startDate)} ~ ${DateFormat("d MMMM yyyy").format(study.endDate)}",
           textAlign: TextAlign.center,
