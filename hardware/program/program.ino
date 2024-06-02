@@ -53,10 +53,10 @@ static void readSample()
   SensorSample sample = { 0 };
   sample.timestamp = readRTC();
   sample.uv = analogRead(UV_SENSOR_PIN);
-  Serial.print(sample.uv);
-  Serial.print(",");
+  // Serial.print(sample.uv);
+  // Serial.print(",");
   sample.acceleration = readIMU();
   sample.tcsData = readTCS();
-  Serial.println();
+  // Serial.println();
   eepromPushSample(&sample);
 }

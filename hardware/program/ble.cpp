@@ -162,11 +162,11 @@ void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
     SensorSample sample; 
     eepromReadSample(mid, &sample);
 
-    Serial.print(left);
-    Serial.print(", ");
-    Serial.print(mid);
-    Serial.print(", ");
-    Serial.println(right);
+    // Serial.print(left);
+    // Serial.print(", ");
+    // Serial.print(mid);
+    // Serial.print(", ");
+    // Serial.println(right);
     uint32_t ts = sample.timestamp[3] << 24;
     ts += sample.timestamp[2] << 16;
     ts += sample.timestamp[1] << 8;
@@ -188,7 +188,7 @@ void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
     }
   }
   currentSampleBufferIndex = 0;
-  Serial.print("returned without finding");
+  // Serial.print("returned without finding");
   return; 
 }
 
@@ -359,16 +359,16 @@ static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic chara
     authenticated = true;
   }
 
-  Serial.print("Authenticated status ");
-  Serial.println(authenticated);
+  // Serial.print("Authenticated status ");
+  // Serial.println(authenticated);
 
-  auto print = [](uint8_t* arr) {
-    for (int i = 0; i < 32; i++) {
-      Serial.print(arr[i]);
-      Serial.print(" ");
-    }
-    Serial.print("\n");
-  };
+  // auto print = [](uint8_t* arr) {
+  //   for (int i = 0; i < 32; i++) {
+  //     Serial.print(arr[i]);
+  //     Serial.print(" ");
+  //   }
+  //   Serial.print("\n");
+  // };
 
   print(authKey);
   print(challenge);
