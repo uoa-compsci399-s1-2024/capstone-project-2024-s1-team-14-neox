@@ -30,8 +30,8 @@ special uses.
 - website
 - app
 - all (all teams)
-- prod (presentable iteration of project)
-- ml (machine learning)
+- prod (presentable iteration of project) (need to add to `samconfig.toml`)
+- ml (machine learning) (need to add to `samconfig.toml`)
 
 ## Building
 
