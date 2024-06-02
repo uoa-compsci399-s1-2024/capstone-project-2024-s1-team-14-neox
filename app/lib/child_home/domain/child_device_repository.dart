@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_model.dart';
 
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/classifiers/random_forest.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/classifiers/random_forest.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/main.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/single_week_hourly_stats_model.dart';
@@ -11,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/entities/child_entity.dart';
-import 'classifiers/random_forest.dart';
+import 'child_device_model.dart';
 import 'dart:math';
 
 class ChildDeviceRepository {
@@ -121,6 +122,7 @@ class ChildDeviceRepository {
 
   Future<void> parseAndSaveSamples(
       String childName, List<int> bytes, int childId) async {
+        DateTime startTime = DateTime.now();
     List<ArduinoDataEntity> samples = [];
     DateTime startTime = DateTime.now();
     print("ARDUINO start $startTime");
@@ -187,7 +189,12 @@ class ChildDeviceRepository {
     DateTime endTime = DateTime.now();
     print("classify  Sample length: ${samples.length}");
     print("classify time spent $startTime $endTime ${endTime.difference(startTime)}" );
+    DateTime endTime = DateTime.now();
+    print("classify  Sample length: ${samples.length}");
+    print("classify time spent $startTime $endTime ${endTime.difference(startTime)}" );
     await ArduinoDataEntity.saveListOfArduinoDataEntity(samples);
+    DateTime done = DateTime.now();
+    print("classify all done ${done.difference(endTime)}");
     DateTime done = DateTime.now();
     print("classify all done ${done.difference(endTime)}");
   }
@@ -229,7 +236,7 @@ class ChildDeviceRepository {
   }
 
   int _classify(int uv, int accelX, int accelY, int accelZ, int red, int green,
-      int blue, int clear, int light, int colTemp) {
+      int blue, int clear, int colTemp, int light) {
     List<double> features = [];
     features.addAll([
       uv.toDouble(),
