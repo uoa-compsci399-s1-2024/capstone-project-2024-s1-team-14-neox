@@ -113,7 +113,6 @@ const Users = ({ toggleButton, handleJwtToken , jwtToken}) => {
   };
 
     if (isSignedUp) {
-      //return <Redirect to="/Home" />;
     }
     
       return (

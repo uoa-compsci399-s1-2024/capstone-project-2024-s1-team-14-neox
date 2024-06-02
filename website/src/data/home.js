@@ -39,7 +39,6 @@ function AdminHeader({token, isAdmin, togglePopup, updateTick }) {
                 setEditError(null);
                 setSuccessMessage(null);
                 setSuccessMessage('Successfully added researcher');
-                //console.log(response)
 
             } else {
                 setEditError(null);
@@ -71,7 +70,6 @@ function AdminHeader({token, isAdmin, togglePopup, updateTick }) {
                 setEditError(null);
                 setSuccessMessage(null);
                 setSuccessMessage('Successfully removed researcher');
-                //console.log(response)
                 
             } else {
                 setEditError(null);
@@ -169,7 +167,6 @@ async function fetchParticipants(id, token) {
         credentials: 'include',
     });
     const json = await resp.json();
-    //console.log(json);
     return json.data;
 }
 
@@ -255,7 +252,6 @@ async function fetchDataAndDownload(id, token) {
 
 function StudyCard({id, token, isAdmin, tick}) {
     const [details, setDetails] = useState(null);
-    // const [participants, setParticipants] = useState(null);
     useEffect(() => {
         async function fetchWithToken() {
             if (token != null) {
@@ -363,20 +359,6 @@ const Home = ({ isAdmin, showButton }) => {
     const togglePopup = () => {
         setIsOpen(!isOpen);
     };
-
-    /*
-    const onViewResearchers = async (studyId) => {
-        try {
-            const participants = await fetchParticipants(studyId, idToken);
-            const researcherNames = participants.researchers.map(researcher => researcher.id);
-            setResearchers(researcherNames);
-            console.log(participants);
-            togglePopup();
-        } catch (error) {
-            console.error('Error fetching researchers:', error);
-        }
-    }
-    */
 
     const updateTick = () => {
         setTick(tick + 1);
