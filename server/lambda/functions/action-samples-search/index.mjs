@@ -32,6 +32,7 @@ function unauth_message(subjectID)
 function make_handler(subjectID)
 {
   return (async (event) => {
+    console.log(`subjectID: ${subjectID}`);
     const subjectIDName = (() => {
       switch (subjectID) {
       case SUBJECT_CHILD:
