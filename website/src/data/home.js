@@ -205,7 +205,7 @@ function AdminExtraStudyFields({id, token, isAdmin, tick}) {
                         ))}
                     </h5>
                 )}
-                <button type="button" class="btn btn-primary"button onClick={handleToggleDisplay}>
+                <button type="button" class="btn btn-primary btn-sm"button onClick={handleToggleDisplay}>
                     {displayParticipants ? "Hide Researchers" : "Show Researchers"}
                 </button>
                 
@@ -282,7 +282,6 @@ function StudyCard({id, token, isAdmin, tick}) {
         </div>
     );
 }
-//<button type="button" className="btn btn-outline-primary" onClick={() => onViewResearchers(id)}>View Researchers</button>
 
 
 
