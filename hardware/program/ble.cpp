@@ -133,7 +133,6 @@ void getBLEAddress(uint8_t* address) {
 void checkConnection() {
     BLEDevice central = BLE.central();
 
-
     while (central.connected())
     {
         if (connectTime == 0) {
@@ -146,8 +145,6 @@ void checkConnection() {
         if (authenticated) {
 
             updateValues(currentSampleBufferIndex);
-
-            updateValues(currentSampleBufferIndex);
         }
     }
     currentSampleBufferIndex = 0;
@@ -155,7 +152,6 @@ void checkConnection() {
 }
 
 void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
-  uint32_t search_ts = timestamp;
   uint32_t search_ts = timestamp;
   uint32_t left = 0;
   uint32_t right = eepromGetSampleBufferLength() - 1;
@@ -171,18 +167,10 @@ void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
     // Serial.print(mid);
     // Serial.print(", ");
     // Serial.println(right);
-
-    // Serial.print(left);
-    // Serial.print(", ");
-    // Serial.print(mid);
-    // Serial.print(", ");
-    // Serial.println(right);
     uint32_t ts = sample.timestamp[3] << 24;
     ts += sample.timestamp[2] << 16;
     ts += sample.timestamp[1] << 8;
     ts += sample.timestamp[0];
-
-    if (ts == search_ts)
 
     if (ts == search_ts)
     {
@@ -190,7 +178,6 @@ void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
 
       return;
     }
-    if (ts < search_ts)
     if (ts < search_ts)
     {
       left = mid + 1;
@@ -201,7 +188,6 @@ void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
     }
   }
   currentSampleBufferIndex = 0;
-  // Serial.print("returned without finding");
   return; 
 }
 
