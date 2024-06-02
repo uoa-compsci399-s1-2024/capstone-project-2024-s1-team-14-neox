@@ -113,8 +113,8 @@ function App() {
         <div className="App">
           <nav className="navbar navbar-expand-lg navbar-light fixed-top" style={{"border-bottom": "solid", "background-color": "white"}}>            
             <div className="container">
-            {showButton && <Link to={'/'} className="navbar-brand"><img src={logo} alt="NEOX Logo" width="140px" /></Link>}
-            {!showButton && <Link to={'/home'} className="navbar-brand"><img src={logo} alt="NEOX Logo" width="140px" /></Link>}
+            {showButton && <Link to={'/'} className="navbar-brand"><img src={logo} alt="NEOX Logo" width="160px" /></Link>}
+            {!showButton && <Link to={'/home'} className="navbar-brand"><img src={logo} alt="NEOX Logo" width="160px" /></Link>}
                 <ul className="nav">
                   {!showButton && ( <li className="nav-item"> <Link className="nav-link" to={'/home'}>Home</Link></li>)}
                   {showButton &&<li className="nav-item"><Link className="nav-link" to={'/'}>Login</Link></li>}
