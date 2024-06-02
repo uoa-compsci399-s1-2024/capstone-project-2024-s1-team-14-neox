@@ -638,6 +638,7 @@ Resources:
       # EVEN if Environment is dev.
       # Why the difference between Ref output and hardcoding it????
       StageName: dev
+      AlwaysDeploy: true
       Auth:
         DefaultAuthorizer: CognitoAuth
         # Why would you require auth on preflight requests???
