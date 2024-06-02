@@ -15,16 +15,16 @@ const uint32_t maxData = dataPerCharacteristic * 5;
 uint32_t currentSampleBufferIndex = 0;
 
 BLEService sensorSamplesService("ba5c0000-243e-4f78-ac25-69688a1669b4");
-
-#define BLEEncryption 0
+// 
+// #define BLEEncryption 0
 /*
  * Data will be sent 5 BLE characteristics at a time. These characteristics will be updated dynamically (depending on how much data must be sent).
  */
-BLECharacteristic samples_1("42b25f8f-0000-43de-92b8-47891c706106", BLERead | BLEEncryption, maxDataPerCharacteristic);
-BLECharacteristic samples_2("5c5ef115-0001-431d-8c23-52ff6ad1e467", BLERead | BLEEncryption, maxDataPerCharacteristic);
-BLECharacteristic samples_3("1fc0372f-0002-43f3-8cfc-1a5611b88062", BLERead | BLEEncryption, maxDataPerCharacteristic);
-BLECharacteristic samples_4("ff3d9730-0003-4aac-84e2-0861c1d000a6", BLERead | BLEEncryption, maxDataPerCharacteristic);
-BLECharacteristic samples_5("6eea8c3b-0004-4ec0-a842-6ed292e598dd", BLERead | BLEEncryption, maxDataPerCharacteristic);
+BLECharacteristic samples_1("42b25f8f-0000-43de-92b8-47891c706106", BLERead, maxDataPerCharacteristic);
+BLECharacteristic samples_2("5c5ef115-0001-431d-8c23-52ff6ad1e467", BLERead, maxDataPerCharacteristic);
+BLECharacteristic samples_3("1fc0372f-0002-43f3-8cfc-1a5611b88062", BLERead , maxDataPerCharacteristic);
+BLECharacteristic samples_4("ff3d9730-0003-4aac-84e2-0861c1d000a6", BLERead , maxDataPerCharacteristic);
+BLECharacteristic samples_5("6eea8c3b-0004-4ec0-a842-6ed292e598dd", BLERead , maxDataPerCharacteristic);
 
 /*
  *   BLE Characteristic for receiving acknowledgement from app that data has been processed and sample characteristics can be updated
@@ -61,9 +61,9 @@ static bool authenticated = false;
 static uint32_t connectTime = 0;
 
 static BLECharacteristic authChallengeFromPeripheral("9ab7d3df-a7b4-4858-8060-84a9adcf1420", BLERead, 32, true);
-static BLECharacteristic authResponseFromCentral    ("a90aa9a2-b186-4717-bc8d-f169eead75da", BLEWrite | BLEEncryption, 32, true);
-static BLECharacteristic authChallengeFromCentral   ("c03b7267-dcfa-4525-8521-1bc31c08c312", BLEWrite | BLEEncryption, 32, true);
-static BLECharacteristic authResponseFromPeripheral ("750d5d43-96c4-4f5c-8ce1-fdb44a150336", BLERead | BLEWrite | BLEEncryption, 32, true);
+static BLECharacteristic authResponseFromCentral    ("a90aa9a2-b186-4717-bc8d-f169eead75da", BLEWrite , 32, true);
+static BLECharacteristic authChallengeFromCentral   ("c03b7267-dcfa-4525-8521-1bc31c08c312", BLEWrite , 32, true);
+static BLECharacteristic authResponseFromPeripheral ("750d5d43-96c4-4f5c-8ce1-fdb44a150336", BLERead | BLEWrite , 32, true);
 static BLECharacteristic centralAuthenticated       ("776edbca-a020-4d86-a5e8-25eb87e82554", BLERead, 1, true);
 
 static void getBLEAddress(uint8_t* address); // Returns a 6 byte array
@@ -130,23 +130,58 @@ void getBLEAddress(uint8_t* address) {
     address++;
   }
 }
+static uint32_t isConnected = false;
 void checkConnection() {
     BLEDevice central = BLE.central();
-
+    uint32_t startTime = millis();
+    uint32_t currentTime = millis();
+    int print_count = 0;
+    Serial.println("check Connection called again");
     while (central.connected())
-    {
-        if (connectTime == 0) {
-            connectTime = millis();
+    { 
+      print_count += 1;
+      if (print_count > 5000 ) {
+      Serial.println("connectionnnn");
+        Serial.println((currentTime - startTime));
+        print_count = 0;
+      }
+      
+      
+      currentTime = millis();  
+
+      if ((currentTime - startTime) >= 2 * 1000) {
+          Serial.println("Connected");
+          return;
         }
-        if (!authenticated && millis() - connectTime >= MAX_UNAUTH_TIME) {
-            central.disconnect();
-            break;
-        }
-        if (authenticated) {
+
+      if (authenticated) {
+        Serial.println(authenticated);
 
             updateValues(currentSampleBufferIndex);
+      } else {
+        if ((currentTime - startTime) >= MAX_UNAUTH_TIME) {
+          Serial.println("larger than max anauth time");
+          central.disconnect();
+          return;
         }
+      }
+
     }
+    // while (central.connected())
+    // {
+    //   uint32_t currentTime = millis();  
+    //     if (connectTime == 0) {
+    //         connectTime = millis();
+    //     }
+    //     if (!authenticated && millis() - connectTime >= MAX_UNAUTH_TIME) {
+    //         central.disconnect();
+    //         break;
+    //     }
+    //     if (authenticated) {
+
+    //         updateValues(currentSampleBufferIndex);
+    //     }
+    // }
     currentSampleBufferIndex = 0;
     connectTime = 0;
 }
@@ -327,6 +362,9 @@ static void solveAuthChallenge(const uint8_t* challenge, uint8_t* solution) {
 }
 
 static void onConnection(BLEDevice central) {
+  // central = BLE.central();
+
+  Serial.print("on connection entered");
   authenticated = false;
 
   uint8_t falsy = 0;
@@ -353,27 +391,28 @@ static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic chara
     authenticated = true;
   }
 
-  // Serial.print("Authenticated status ");
-  // Serial.println(authenticated);
+  Serial.print("Authenticated status ");
+  Serial.println(authenticated);
 
-  // auto print = [](uint8_t* arr) {
-  //   for (int i = 0; i < 32; i++) {
-  //     Serial.print(arr[i]);
-  //     Serial.print(" ");
-  //   }
-  //   Serial.print("\n");
-  // };
-  // Serial.println("authkey");
-  // print(authKey);
-  //  Serial.println("challenge");
-  // print(challenge);
-  //  Serial.println("response");
-  // print(response);
-  //  Serial.println("expected");
-  // print(expected);
+  auto print = [](uint8_t* arr) {
+    for (int i = 0; i < 32; i++) {
+      Serial.print(arr[i]);
+      Serial.print(" ");
+    }
+    Serial.print("\n");
+  };
+  Serial.println("authkey");
+  print(authKey);
+   Serial.println("challenge");
+  print(challenge);
+   Serial.println("response");
+  print(response);
+   Serial.println("expected");
+  print(expected);
 }
 
 static void onAuthChallengeFromCentral(BLEDevice central, BLECharacteristic characteristic) {
+  Serial.print("on auth challenge entered");
   uint8_t challenge[32];
   authChallengeFromCentral.readValue(challenge, sizeof(challenge));
 
