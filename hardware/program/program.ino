@@ -29,8 +29,10 @@ void setup()
   initializeIMU();
   initializeRTC();
   initializeTCS();
-  //uint8_t key[32] = "verysecure";
-  //eepromFactoryReset(key);
+  // uint8_t key[32] = "verysecure";
+  // uint8_t key[32] = "0123456789";
+  // Serial.print("factory reset pressed");
+  // eepromFactoryReset(key);
 }
 
 void loop()
@@ -51,7 +53,10 @@ static void readSample()
   SensorSample sample = { 0 };
   sample.timestamp = readRTC();
   sample.uv = analogRead(UV_SENSOR_PIN);
+  // Serial.print(sample.uv);
+  // Serial.print(",");
   sample.acceleration = readIMU();
   sample.tcsData = readTCS();
+  // Serial.println();
   eepromPushSample(&sample);
 }

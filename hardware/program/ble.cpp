@@ -130,22 +130,21 @@ void getBLEAddress(uint8_t* address) {
     address++;
   }
 }
-
 void checkConnection() {
     BLEDevice central = BLE.central();
+
     while (central.connected())
     {
         if (connectTime == 0) {
             connectTime = millis();
         }
-
         if (!authenticated && millis() - connectTime >= MAX_UNAUTH_TIME) {
             central.disconnect();
             break;
         }
-
         if (authenticated) {
-            updateValues();
+
+            updateValues(currentSampleBufferIndex);
         }
     }
     currentSampleBufferIndex = 0;
@@ -153,24 +152,27 @@ void checkConnection() {
 }
 
 void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
+  uint32_t search_ts = timestamp;
   uint32_t left = 0;
   uint32_t right = eepromGetSampleBufferLength() - 1;
-  while (left <= right) {
-    uint32_t mid = left + (right - left) / 2;
 
+  while (left < right) {
+
+    uint32_t mid = left + (right - left) / 2;
     SensorSample sample; 
     eepromReadSample(mid, &sample);
     uint32_t ts = sample.timestamp[3] << 24;
     ts += sample.timestamp[2] << 16;
     ts += sample.timestamp[1] << 8;
     ts += sample.timestamp[0];
-    
-    if (ts == timestamp)
+
+    if (ts == search_ts)
     {
       currentSampleBufferIndex = mid;
+
       return;
     }
-    if (ts < timestamp)
+    if (ts < search_ts)
     {
       left = mid + 1;
     }
@@ -179,7 +181,39 @@ void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
       right = mid - 1;
     }
   }
+  currentSampleBufferIndex = 0;
+  return; 
 }
+
+void updateValues(uint32_t& currentSampleBufferIndex) {
+    uint32_t samplesToSend = eepromGetSampleBufferLength();
+    if (ts.written())
+    {
+
+      uint32_t timestamp;
+      ts.readValue(timestamp);
+
+
+      if (timestamp == 0) {
+        currentSampleBufferIndex = 0;
+
+      } else {
+        findTSIndex(timestamp, currentSampleBufferIndex);
+
+
+      }
+    }
+    if (update.written()){
+        samplesToSend -= currentSampleBufferIndex;
+
+        progress.writeValue(samplesToSend);
+        fillBuffers(currentSampleBufferIndex);
+        fillCharacteristics();
+        emptyBuffers();
+      
+    }
+}
+
 
 void addSample(byte arr[maxDataPerCharacteristic], uint32_t& index, SensorSample sample) {
     memcpy(&arr[index], &sample, sizeof(SensorSample));
@@ -264,24 +298,6 @@ void fillBuffers(uint32_t& currentSampleBufferIndex) {
     
 }
 
-void updateValues() {
-    uint32_t samplesToSend = eepromGetSampleBufferLength();
-    if (ts.written())
-    {
-      uint32_t timestamp;
-      ts.readValue(timestamp);
-      findTSIndex(timestamp, currentSampleBufferIndex);
-    }
-    if (update.written())
-    {
-        samplesToSend -= currentSampleBufferIndex;
-        progress.writeValue(samplesToSend);
-        fillBuffers(currentSampleBufferIndex);
-        fillCharacteristics();
-        emptyBuffers();
-    }
-}
-
 static void sha256(const uint8_t* data, uint8_t* hash) {
   SHA256 hasher;
   hasher.update(data, 32);
@@ -336,21 +352,24 @@ static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic chara
     authenticated = true;
   }
 
-  /*Serial.print("Authenticated status ");
-  Serial.println(authenticated);
+  // Serial.print("Authenticated status ");
+  // Serial.println(authenticated);
 
-  auto print = [](uint8_t* arr) {
-    for (int i = 0; i < 32; i++) {
-      Serial.print(arr[i]);
-      Serial.print(" ");
-    }
-    Serial.print("\n");
-  };
-
-  print(authKey);
-  print(challenge);
-  print(response);
-  print(expected);*/
+  // auto print = [](uint8_t* arr) {
+  //   for (int i = 0; i < 32; i++) {
+  //     Serial.print(arr[i]);
+  //     Serial.print(" ");
+  //   }
+  //   Serial.print("\n");
+  // };
+  // Serial.println("authkey");
+  // print(authKey);
+  //  Serial.println("challenge");
+  // print(challenge);
+  //  Serial.println("response");
+  // print(response);
+  //  Serial.println("expected");
+  // print(expected);
 }
 
 static void onAuthChallengeFromCentral(BLEDevice central, BLECharacteristic characteristic) {
