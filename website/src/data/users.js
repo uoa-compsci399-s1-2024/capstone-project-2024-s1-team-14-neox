@@ -20,7 +20,6 @@ Amplify.configure({
 
 const Users = ({ toggleButton, handleJwtToken , jwtToken}) => {
   const [createdUsers, setCreatedUsers] = useState([]);
-  const logger = new Logger('Logger', 'INFO');
   const [isSignedUp, setIsSignedUp] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
@@ -57,10 +56,8 @@ const Users = ({ toggleButton, handleJwtToken , jwtToken}) => {
   
         if (response.data && Array.isArray(response.data.data)) {
           setCreatedUsers(response.data.data);
-          logger.info('Fetched researchers:', response.data.data);
         } else {
           setCreatedUsers(response.data.data);
-          logger.info('Fetched researchers:', response.data.data);
         }
       } catch (error) {
         console.error('Error fetching researchers:', error);
