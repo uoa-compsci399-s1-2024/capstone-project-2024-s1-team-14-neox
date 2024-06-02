@@ -1,1 +1,5 @@
-Directory for webiste related code
+# Website subsystem
+
+## How to build and develop for website
+
+See `BUILD.md`
