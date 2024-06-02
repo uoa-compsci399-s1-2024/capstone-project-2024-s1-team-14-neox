@@ -1,12 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="426px" height="353px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" xmlSpace="preserve" xmlnsSerif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
-    <circle cx="212.654" cy="237.5" r="100" style="fill:none;stroke:black;stroke-width:30px;"/>
-    <path d="M63.367,222.796C63.848,217.868 64.567,213.01 65.513,208.233C67.445,198.481 70.324,189.068 74.049,180.093C81.656,161.768 92.793,145.271 106.609,131.455C133.761,104.303 171.261,87.5 212.654,87.5C254.048,87.5 291.548,104.303 318.7,131.455C332.516,145.271 343.653,161.768 351.26,180.093C354.985,189.068 357.864,198.481 359.796,208.233C360.742,213.01 361.461,217.868 361.942,222.796" style="fill:none;stroke:black;stroke-width:30px;"/>
-    <path d="M212.654,77.5L212.654,15" style="fill:none;stroke:black;stroke-width:30px;"/>
-    <path d="M120.431,110.565L84.34,60.891" style="fill:none;stroke:black;stroke-width:30px;"/>
-    <path d="M304.878,110.565L340.968,60.892" style="fill:none;stroke:black;stroke-width:30px;"/>
-    <path d="M60.485,188.057L15,173.278" style="fill:none;stroke:black;stroke-width:30px;"/>
-    <path d="M307.76,206.598C324.815,259.089 296.046,315.551 243.556,332.606C191.066,349.661 134.604,320.892 117.549,268.402C100.494,215.911 129.263,159.449 181.753,142.394C234.243,125.339 290.705,154.108 307.76,206.598Z" style="fill:none;stroke:black;stroke-width:30px;"/>
-    <path d="M364.824,188.057L410.346,173.266" style="fill:none;stroke:black;stroke-width:30px;"/>
+<svg width="100%" height="100%" viewBox="0 0 458 340" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" xmlSpace="preserve" xmlnsSerif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g transform="matrix(1,0,0,1,-71.257,-60)">
+        <g>
+            <g transform="matrix(1.5,0,0,1.5,-150,-150)">
+                <path d="M200.475,290.198C200.796,286.912 201.275,283.673 201.906,280.488C203.194,273.987 205.113,267.712 207.596,261.729C212.667,249.512 220.092,238.514 229.303,229.303C247.404,211.202 272.404,200 300,200C327.596,200 352.596,211.202 370.697,229.303C379.908,238.514 387.333,249.512 392.404,261.729C394.887,267.712 396.806,273.987 398.094,280.488C398.725,283.673 399.204,286.912 399.525,290.198" style="fill:none;stroke:rgb(0,54,163);stroke-width:13.33px;"/>
+            </g>
+            <g transform="matrix(1.14286,0,0,1,-42.8571,-10)">
+                <path d="M300,150L300,80" style="fill:none;stroke:rgb(0,54,163);stroke-width:18.63px;"/>
+            </g>
+            <g transform="matrix(0.396253,-0.287895,0.44588,0.613701,22.0187,167.379)">
+                <path d="M300,150L300,80" style="fill:none;stroke:rgb(0,54,163);stroke-width:31.32px;"/>
+            </g>
+            <g transform="matrix(0.396253,0.287895,-0.44588,0.613701,340.229,-5.35809)">
+                <path d="M300,150L300,80" style="fill:none;stroke:rgb(0,54,163);stroke-width:31.32px;"/>
+            </g>
+            <g transform="matrix(0.353162,-1.08692,0.951057,0.309017,-100.776,530.281)">
+                <path d="M300,150L300,80" style="fill:none;stroke:rgb(0,54,163);stroke-width:18.63px;"/>
+            </g>
+            <g transform="matrix(0.353162,1.08692,-0.951057,0.309017,488.879,-121.872)">
+                <path d="M300,150L300,80" style="fill:none;stroke:rgb(0,54,163);stroke-width:18.63px;"/>
+            </g>
+        </g>
+        <g>
+            <g transform="matrix(1.15385,0,0,1.15385,-10.7692,-20.7692)">
+                <circle cx="265" cy="265" r="65" style="fill:none;stroke:rgb(0,54,163);stroke-width:17.33px;"/>
+            </g>
+            <g transform="matrix(0.838983,0,0,0.838983,74.1653,63.9995)">
+                <path d="M330,328.97L389.596,388.566" style="fill:none;stroke:rgb(0,54,163);stroke-width:23.84px;"/>
+            </g>
+        </g>
+    </g>
 </svg>
