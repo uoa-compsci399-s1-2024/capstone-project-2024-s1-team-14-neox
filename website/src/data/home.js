@@ -204,7 +204,7 @@ function AdminExtraStudyFields({id, token, isAdmin, tick}) {
                         ))}
                     </h5>
                 )}
-                <button type="button" class="btn btn-outline-primary"button onClick={handleToggleDisplay}>
+                <button type="button" class="btn btn-primary"button onClick={handleToggleDisplay}>
                     {displayParticipants ? "Hide Researchers" : "Show Researchers"}
                 </button>
                 
@@ -272,8 +272,8 @@ function StudyCard({id, token, isAdmin, tick}) {
                 <h5 style={{"textAlign": "center", "paddingBottom": "2%"}}>{details ? details.description : "(Loading...)"} </h5>
                 <h5><span className="card-titles">Period:</span> {details ? `${details.start_date} - ${details.end_date}` : "(Loading...)"} </h5>
                 <AdminExtraStudyFields id={id} token={token} isAdmin={isAdmin} tick= {tick}/>
-                <div className="d-table-row gap-4 d-md-flex justify-content-between">
-                    {isAdmin ? <Link to={`/edit?id=${id}`} params={{ id: {id} }} type="button" class="btn btn-link">Edit</Link> : null}
+                <div className="d-table-row gap-4 d-md-flex justify-content-end">
+                    {isAdmin ? <Link to={`/edit?id=${id}`} params={{ id: {id} }} type="button" class="btn btn-outline-primary">Edit Study</Link> : null}
                     <button type="button" className="btn btn-outline-primary" onClick={() => fetchDataAndDownload(id, token)}>Download CSV</button>
                 </div>
                 

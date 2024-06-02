@@ -138,8 +138,10 @@ function App() {
                 {!showButton && (
                   <Route path="/home" element={<Home isAdmin={isAdmin} showButton={showButton} handleJwtToken={handleJwtToken} />} />
                 )}
+                {!showButton && (
+                  <Route path="/edit" element={<Edit showButton={showButton} isAdmin={isAdmin}/>} />
+                )}
                 <Route path="/accessDenied" element={<AccessDenied/>} />
-                <Route path="/edit" element={<Edit showButton={showButton} />} />
               </Routes>
             </div>
           </div>

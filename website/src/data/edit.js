@@ -2,18 +2,17 @@ import { format } from "date-fns";
 import { DateRangePicker } from 'rsuite';
 import 'rsuite/dist/rsuite.min.css';
 import '@aws-amplify/ui-react/styles.css';
-import { Auth, Amplify, Logger, Hub  } from 'aws-amplify';
+import { Auth } from 'aws-amplify';
 import { awsExports } from '../aws-exports';
 import '../App.css';
 import React, { useState } from 'react';
-import { Link, redirect, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-const Edit = () => {
+const Edit = ({showButton, isAdmin}) => {
     const params = new URLSearchParams(window.location.search)
     const id = params.get("id")
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
-
     const handleDateChange = (date) => {
     if (date === null) {
     setStartDate(null);
@@ -23,7 +22,7 @@ const Edit = () => {
     setEndDate(date[1]);
     }
     };
-    console.log(id);
+
     const navigate = useNavigate()
     const handleSubmit = async (event) => {
         try{
@@ -52,39 +51,46 @@ const Edit = () => {
             console.log("Error editing study", error)
             }
     };
-    return (
-        <div>
-          <h2 style={{"text-align": "center"}}>Edit Study ID {id}</h2>
-          <br></br>
-        <form class="create-form" onSubmit={handleSubmit}>
-          
-          <div className="mb-3">
-            <label>Study Name</label>
-            <input type="text" className="form-control" placeholder="" name="title" required />
-          </div>
-          <div className="mb-3" style={{"height": "30%"}}>
-            <label>Description</label>
-            <input type="text" className="form-control" placeholder="" name="description" required />
-          </div>
-          <div className="mb-3" style={{"text-align": "center"}}>
-          <DateRangePicker
-            placeholder="Set Start and End Dates"
-            format="dd/MM/yyyy"
-            size="lg"
-            onChange={handleDateChange}
-          />
-          </div>
-          <div className="d-grid" style={{"width": "100%"}}>
-            <button type="submit" className="btn btn-primary" onClick={() => handleSubmit}>Submit</button>
-          </div>
-          <br></br>
-          <div className="d-grid" style={{"width": "100%"}}>
-            <Link to="/home" className="btn btn-primary">Back to Home</Link>
-          </div>
-        </form>
+    
+    if (isAdmin) {
 
-        </div>
-);
+        return (
+            <div>
+            <h2 style={{"text-align": "center"}}>Edit Study ID {id}</h2>
+            <br></br>
+            <form class="create-form" onSubmit={handleSubmit}>
+            
+            <div className="mb-3">
+                <label>Study Name</label>
+                <input type="text" className="form-control" placeholder="" name="title" required />
+            </div>
+            <div className="mb-3" style={{"height": "30%"}}>
+                <label>Description</label>
+                <input type="text" className="form-control" placeholder="" name="description" required />
+            </div>
+            <div className="mb-3" style={{"text-align": "center"}}>
+            <DateRangePicker
+                placeholder="Set Start and End Dates"
+                format="dd/MM/yyyy"
+                size="lg"
+                onChange={handleDateChange}
+            />
+            </div>
+            <div className="d-grid" style={{"width": "100%"}}>
+                <button type="submit" className="btn btn-primary" onClick={() => handleSubmit}>Submit</button>
+            </div>
+            <br></br>
+            <div className="d-grid" style={{"width": "100%"}}>
+                <Link to="/home" className="btn btn-primary">Back to Home</Link>
+            </div>
+            </form>
+
+            </div>
+        );
+    }
+    else {
+        return <></>
+    }
 }
 
 export default Edit;
