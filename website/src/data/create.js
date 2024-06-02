@@ -70,7 +70,6 @@ const Create = ({ toggleButton, handleJwtToken }) => {
             const title = formData.get('title');
             const id = formData.get('id');
             const description = formData.get('description');
-            console.log(typeof(format(startDate, "yyyy-MM--dd")))
             const study = await fetch(awsExports.API_ENDPOINT + "/studies/" + id, {
               method: "put",
               mode: "cors",
@@ -92,11 +91,6 @@ const Create = ({ toggleButton, handleJwtToken }) => {
 
           };
 
-          
-        
-          if (isSignedUp) {
-            //return <Redirect to="/Home" />;
-          }
         
           return (
             <div>

@@ -9,6 +9,7 @@ import Popup from './popup';
 import AccessDenied from './data/accessDenied';
 import Home from './data/home';
 import Create from './data/create';
+import Edit from './data/edit'
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import logo from './data/neox.svg';
 
@@ -138,6 +139,7 @@ function App() {
                   <Route path="/home" element={<Home isAdmin={isAdmin} showButton={showButton} handleJwtToken={handleJwtToken} />} />
                 )}
                 <Route path="/accessDenied" element={<AccessDenied/>} />
+                <Route path="/edit" element={<Edit showButton={showButton} />} />
               </Routes>
             </div>
           </div>
