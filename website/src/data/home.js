@@ -249,6 +249,7 @@ async function fetchDataAndDownload(id, token) {
         downloadCSV(data, `${id}.csv`);
     } catch (error) {
         console.error("Error fetching data", error)
+        alert("Study has no data")
     }
 }
 
