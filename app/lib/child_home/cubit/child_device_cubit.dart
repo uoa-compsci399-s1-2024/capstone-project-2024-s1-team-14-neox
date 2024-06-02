@@ -101,7 +101,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     required String authorisationCode
   }) async {
     BluetoothDevice? device;
-    print("BLE on sync pressed");
+    
     try {
       if (FlutterBluePlus.adapterStateNow != BluetoothAdapterState.on) {
         if (Platform.isAndroid) {
@@ -119,7 +119,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       emit(ChildDeviceErrorState(state, "Device not found nearby."));
       return;
     }
-    
+    print("Classify trying to connect");
     try {
       await device.connect(mtu: 23);
     } catch (e) {
@@ -239,14 +239,12 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         await authResponseFromPeripheral!.write(List.generate(32, (_) => 0), allowLongWrite: true);
 
         List<int> challenge = List.generate(32, (index) => Random.secure().nextInt(256));
-        print("BLE autchChallengeFromPeri $challenge");
         await authChallengeFromCentral!.write(challenge, allowLongWrite: true);
 
         List<int> response;
         int attempts = 0;
         while (true) {
           response = await authResponseFromPeripheral.read();
-          print("BLE auth resp from peri $response");
           if (response.any((byte) => byte != 0)) {
             break;
           }
@@ -261,7 +259,6 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
 
         List<int> weAreAuthenticated = await centralAuthenticated!.read();
         if (weAreAuthenticated.isEmpty || weAreAuthenticated[0] == 0) {
-          print("BLE $weAreAuthenticated");
           emit(ChildDeviceErrorState(state, "Failed to authenticate. Check the password and pair again with the correct password."));
           return;
         }

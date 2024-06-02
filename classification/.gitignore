@@ -1,0 +1,4 @@
+.ipynb_checkpoints/
+docker/classification-app/
+local_requirements_before.txt
+local_requirements_after.txt

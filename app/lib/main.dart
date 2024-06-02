@@ -78,7 +78,7 @@ class App extends StatelessWidget {
         if (progress != null) {
           progressText = progress < 1
             ? "Syncing... ${(progress * 100).round()}%"
-            : "Finishing sync...";
+            : "Classifying...";
         }
 
         return Center(

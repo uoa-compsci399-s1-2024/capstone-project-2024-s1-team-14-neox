@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_model.dart';
 
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/classifiers/random_forest.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
@@ -25,7 +26,8 @@ class ChildDeviceRepository {
     List<ChildDeviceModel> models =
         entities.map((child) => ChildDeviceModel.fromEntity(child)).toList();
 
-    StatisticsRepository statsRepo = StatisticsRepository(sharedPreferences: App.sharedPreferences);
+    StatisticsRepository statsRepo =
+        StatisticsRepository(sharedPreferences: App.sharedPreferences);
     DateTime now = DateTime.now();
     DateTime today = DateTime(now.year, now.month, now.day);
 
@@ -63,7 +65,7 @@ class ChildDeviceRepository {
   Future<List<ChildDeviceModel>> deleteChildProfile(int deleteChildId) async {
     await ChildEntity.deleteChild(deleteChildId);
     List<ChildDeviceModel> childProfiles = await fetchChildProfiles();
-    // Set focus child as first child 
+    // Set focus child as first child
     if (childProfiles.isEmpty) {
       await sharedPreferences.remove("focus_id");
     } else {
@@ -121,6 +123,7 @@ class ChildDeviceRepository {
       String childName, List<int> bytes, int childId) async {
         DateTime startTime = DateTime.now();
     List<ArduinoDataEntity> samples = [];
+    print("ARDUINO start $startTime");
     while (bytes.length % bytesPerSample != 0) {
       bytes.removeLast();
     }
@@ -152,14 +155,25 @@ class ChildDeviceRepository {
       int light = _calculateLux(red, blue, green);
       int colourTemperature =
           _calculateColourTemperature(red, blue, green, clear);
-
-      int appClass = _classify(uv, accelX, accelY, accelZ, red, green, blue, clear,colourTemperature, light);
+      int calibratedLux = _calibrateLux(light);
+      int appClass = _classify(
+        uv,
+        accelX,
+        accelY,
+        accelZ,
+        red,
+        green,
+        blue,
+        clear,
+        colourTemperature,
+        light,
+      );
 
       samples.add(ArduinoDataEntity(
         name: childName,
         childId: childId,
         uv: uv,
-        light: _calibrateLux(light),
+        light: calibratedLux,
         datetime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
         accel: Int16List.fromList([accelX, accelY, accelZ]),
         red: red,
@@ -170,12 +184,7 @@ class ChildDeviceRepository {
         appClass: appClass,
       ));
     }
-    DateTime endTime = DateTime.now();
-    print("classify  Sample length: ${samples.length}");
-    print("classify time spent $startTime $endTime ${endTime.difference(startTime)}" );
     await ArduinoDataEntity.saveListOfArduinoDataEntity(samples);
-    DateTime done = DateTime.now();
-    print("classify all done ${done.difference(endTime)}");
   }
 
   int _calculateLux(int r, int g, int b) {
@@ -303,9 +312,8 @@ class ChildDeviceRepository {
     features.add(lightSqrt / uvSqrt);
     features.add(blueSqrt / uvSqrt);
     List<double> probabilities = score(features);
-    print("Classify $uv, $accelX, $accelY, $accelZ, $red, $green, $blue, $clear, $light, $colTemp");
-    print({"Classify $probabilities"});
-    return probabilities[0] > 1.0 ? 1 : 0;
+
+    return probabilities[1] > 0.9999 ? 1 : 0;
   }
 
   int _calibrateLux(int raw) {

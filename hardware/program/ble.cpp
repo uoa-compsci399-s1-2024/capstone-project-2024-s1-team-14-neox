@@ -161,6 +161,12 @@ void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
     uint32_t mid = left + (right - left) / 2;
     SensorSample sample; 
     eepromReadSample(mid, &sample);
+
+    // Serial.print(left);
+    // Serial.print(", ");
+    // Serial.print(mid);
+    // Serial.print(", ");
+    // Serial.println(right);
     uint32_t ts = sample.timestamp[3] << 24;
     ts += sample.timestamp[2] << 16;
     ts += sample.timestamp[1] << 8;
