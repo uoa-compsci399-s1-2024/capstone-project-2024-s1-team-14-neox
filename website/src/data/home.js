@@ -5,6 +5,7 @@ import { Card } from '@aws-amplify/ui-react';
 import { awsExports } from "../aws-exports";
 import pLimit from "p-limit";
 import Popup from '../popup';
+import { format } from "date-fns";
 
 Amplify.configure({
     Auth: {
@@ -270,7 +271,7 @@ function StudyCard({id, token, isAdmin, tick}) {
                 <hr/>
                 <h3 style={{"textAlign": "center"}}>{details ? details.name : "(Loading...)"}</h3>
                 <h5 style={{"textAlign": "center", "paddingBottom": "2%"}}>{details ? details.description : "(Loading...)"} </h5>
-                <h5><span className="card-titles">Period:</span> {details ? `${details.start_date} - ${details.end_date}` : "(Loading...)"} </h5>
+                <h5><span className="card-titles">Period:</span> {details ? `${format(details.start_date, "dd/MM/yyyy")} - ${format(details.end_date, "dd/MM/yyyy")}` : "(Loading...)"} </h5>
                 <AdminExtraStudyFields id={id} token={token} isAdmin={isAdmin} tick= {tick}/>
                 <div className="d-table-row gap-4 d-md-flex justify-content-end">
                     {isAdmin ? <Link to={`/edit?id=${id}`} params={{ id: {id} }} type="button" class="btn btn-outline-primary">Edit Study</Link> : null}
