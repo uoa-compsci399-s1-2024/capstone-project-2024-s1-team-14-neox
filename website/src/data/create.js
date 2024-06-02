@@ -4,10 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 
 //Auth related imports
 import { awsExports } from '../aws-exports';
-import { Authenticator } from '@aws-amplify/ui-react';
 import '../App.css';
 import '@aws-amplify/ui-react/styles.css';
-import { Auth, Amplify, Logger, Hub  } from 'aws-amplify';
+import { Auth, Amplify, Logger  } from 'aws-amplify';
 
 //date range picker
 import { DateRangePicker } from 'rsuite';

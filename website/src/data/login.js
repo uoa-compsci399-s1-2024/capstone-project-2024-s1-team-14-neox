@@ -1,12 +1,12 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import LoginLogo from './loginLogo.svg';
 //Auth related imports
 import { awsExports } from '../aws-exports';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
-import { Auth, Amplify, Logger, Hub  } from 'aws-amplify';
+import { Amplify  } from 'aws-amplify';
 
 
 
