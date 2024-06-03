@@ -80,12 +80,13 @@ class ChildApiService {
 
         final data = {"samples": jsonSamples};
 
-
+        var now = DateTime.now();
         await dio.post(
           url,
           options: Options(headers: defaultHeaders),
           data: data,
         );
+        print("Syncing chunk time taken: ${DateTime.now().difference(now).inMilliseconds}ms");
       }
     } catch (e) {
       print('Error posting data: $e');

@@ -20,6 +20,46 @@ class ChildProfileTile extends StatefulWidget {
 }
 
 class _ChildProfileTileState extends State<ChildProfileTile> {
+  Future<void> _generateLargeData(int childId) async {
+    var startTime = DateTime(2023, 1, 1);
+    var endTime = DateTime.now();
+    int numberOfWeeks = endTime.difference(startTime).inDays ~/ 7;
+    // 0.1 is around 96 mins per day, 0.2 is around 192 mins per day, recommend 0.13
+    double threshold = 0.13;
+    DateTime time = startTime;
+    // For loop to prevent exceeding memory
+    for (int i = 0; i <= numberOfWeeks; i++) {
+      time = time.add(const Duration(days: 7));
+      time = DateTime(time.year, time.month, time.day);
+      print("Creating week for: $time");
+      List<ArduinoDataEntity> randomData =
+          await ArduinoDataEntity.createSampleArduinoDataList(
+              childId,
+              time,
+              time.add(const Duration(days: 7)),
+              threshold);
+      await ArduinoDataEntity.saveListOfArduinoDataEntity(
+          randomData);
+    }
+  }
+  
+  Future<void> _generateSmallData(int childId) async {
+    double threshold = 0.13;
+    DateTime time = DateTime.now().subtract(const Duration(days: 1));
+    
+      time = time.add(const Duration(days: 7));
+      time = DateTime(time.year, time.month, time.day);
+      print("Creating small data for: $time");
+      List<ArduinoDataEntity> randomData =
+          await ArduinoDataEntity.createSampleArduinoDataList(
+              childId,
+              time,
+              time.add(const Duration(days: 1)),
+              threshold);
+      await ArduinoDataEntity.saveListOfArduinoDataEntity(
+          randomData);
+  }
+
   @override
   Widget build(BuildContext context) {
     ChildDeviceState state = context.read<ChildDeviceCubit>().state;
@@ -100,30 +140,13 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
               ),
               if (kDebugMode)
                 ElevatedButton(
-                  onPressed: () async {
-                    // Change start and end times as needed
-                    DateTime startTime = DateTime(2023, 1, 1);
-                    DateTime endTime = DateTime(2024, 5, 22);
-                    int numberOfWeeks = endTime.difference(startTime).inDays ~/ 7;
-                    // 0.1 is around 96 mins per day, 0.2 is around 192 mins per day, recommend 0.13
-                    double threshold = 0.13;
-                    DateTime time = startTime;
-                    // For loop to prevent exceeding memory
-                    for (int i = 0; i <= numberOfWeeks; i++) {
-                      time = time.add(const Duration(days: 7));
-                      time = DateTime(time.year, time.month, time.day);
-                      print("Creating week for: $time");
-                      List<ArduinoDataEntity> randomData =
-                          await ArduinoDataEntity.createSampleArduinoDataList(
-                              state.childId,
-                              time,
-                              time.add(const Duration(days: 7)),
-                              threshold);
-                      await ArduinoDataEntity.saveListOfArduinoDataEntity(
-                          randomData);
-                    }
-                  },
-                  child: const Text("Generate data"),
+                  onPressed: () => _generateLargeData(state.childId),
+                  child: const Text("Generate large data"),
+                ),
+              if (kDebugMode)
+                ElevatedButton(
+                  onPressed: () => _generateSmallData(state.childId),
+                  child: const Text("Generate small data"),
                 ),
               Expanded(
                 child: LayoutBuilder(
