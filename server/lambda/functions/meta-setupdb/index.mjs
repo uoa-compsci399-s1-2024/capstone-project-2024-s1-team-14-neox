@@ -8,12 +8,13 @@ import pg from "pg";
 let db = await connectToDB();
 
 const CREATE_TABLES_TEXT = `
--- NOTE: THERE SHOULD BE EXTERNAL AND INTERNAL IDs
-
-DROP TABLE IF EXISTS samples;
-DROP TABLE IF EXISTS children;
-DROP TABLE IF EXISTS users;
-DROP TYPE IF EXISTS gender;
+DROP TABLE IF EXISTS samples CASCADE;
+DROP TABLE IF EXISTS studies CASCADE;
+DROP TABLE IF EXISTS study_children CASCADE;
+DROP TABLE IF EXISTS study_researchers CASCADE;
+DROP TABLE IF EXISTS children CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TYPE IF EXISTS gender CASCADE;
 
 -- We put all users in one table since a user may be admin AND researcher, derived from Cognito groups
 CREATE TABLE users (
@@ -56,6 +57,31 @@ CREATE TABLE samples (
        CONSTRAINT col_temp_range CHECK (col_temp >= 0),
        PRIMARY KEY (child_id, "timestamp"),
        FOREIGN KEY (child_id) REFERENCES children (id)
+);
+
+CREATE TABLE studies (
+       id TEXT NOT NULL PRIMARY KEY,
+       start_date DATE NOT NULL,
+       end_date DATE NOT NULL,
+       name TEXT,
+       description TEXT,
+       CONSTRAINT date_interval CHECK (start_date <= end_date),
+       -- Ensure all IDs are stored in uppercase
+       CONSTRAINT id_caps CHECK (id = upper(id))
+);
+CREATE TABLE study_children (
+       study_id TEXT NOT NULL,
+       participant_id TEXT NOT NULL,
+       PRIMARY KEY (study_id, participant_id),
+       FOREIGN KEY (study_id) REFERENCES studies (id),
+       FOREIGN KEY (participant_id) REFERENCES children (id)
+);
+CREATE TABLE study_researchers (
+       study_id TEXT NOT NULL,
+       participant_id TEXT NOT NULL,
+       PRIMARY KEY (study_id, participant_id),
+       FOREIGN KEY (study_id) REFERENCES studies (id),
+       FOREIGN KEY (participant_id) REFERENCES users (id)
 );
 `;
 export const handler = async (event) => {

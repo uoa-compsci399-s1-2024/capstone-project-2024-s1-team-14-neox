@@ -106,6 +106,23 @@ Globals:
         GROUPNAME_ADMINS: !Ref AdminsUserGroup
         GROUPNAME_RESEARCHERS: !Ref ResearchersUserGroup
         GROUPNAME_PARENTS: !Ref ParentsUserGroup
+        # Don't need single quotes in the JS
+        CORS_ALLOW_ORIGIN: !If
+          - IsProd
+          - Fn::Sub:
+            - "${Origin}"
+            - Origin: !ImportValue
+                Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-prod-website"
+          - !If
+            - IsDev
+            - Fn::Sub:
+              - "${Origin}"
+              - Origin: !ImportValue
+                  Fn::Sub: "neox-${WebsiteStackName}-${UseCase}-dev-website"
+            - !If
+              - IsLocalhostWebsite
+              - !Sub "http://localhost:${WebsiteLocalhostPort}"
+              - "*"
     VpcConfig:
       SecurityGroupIds:
         - !Ref DBAccessSecurityGroup
@@ -606,6 +623,7 @@ Resources:
     Properties:
       CodeUri: lambda/functions/meta-cognito-postconfirm/
       Handler: index.handler
+      Timeout: 30
       Role: !GetAtt LambdaRole.Arn
       # Can't set trigger for userpool here because of circular dependencies.
   # API Gateway
@@ -620,8 +638,11 @@ Resources:
       # EVEN if Environment is dev.
       # Why the difference between Ref output and hardcoding it????
       StageName: dev
+      AlwaysDeploy: true
       Auth:
         DefaultAuthorizer: CognitoAuth
+        # Why would you require auth on preflight requests???
+        AddDefaultAuthorizerToCorsPreflight: false
         Authorizers:
           CognitoAuth:
             UserPoolArn: !GetAtt UserPool.Arn
@@ -643,7 +664,7 @@ Resources:
               - !Sub "'http://localhost:${WebsiteLocalhostPort}'"
               - "'*'"
         AllowMethods: "'OPTIONS, GET, POST, PUT, PATCH, DELETE'"
-        AllowHeaders: "'Origin, Content-Type, Accept'"
+        AllowHeaders: "'Origin, Content-Type, Accept, Authorization'"
         AllowCredentials: true
       MethodSettings:
         - LoggingLevel: INFO
@@ -674,11 +695,146 @@ Resources:
         - 'arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs'
   # NOTE: the lambdas seem to be automatically integrated via lambda proxy integration
   # Lambda
-  FuncSamplesSearch:
+  FuncStudiesCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-create-get-modify/
+      Handler: index.handler_create
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /studies/{studyID}
+            Method: put
+            RestApiId: !Ref API
+  FuncStudiesInfoFetch:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-create-get-modify/
+      Handler: index.handler_fetch
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /studies/{studyID}/info
+            Method: get
+            RestApiId: !Ref API
+  FuncStudiesInfoModify:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-create-get-modify/
+      Handler: index.handler_modify
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ReplaceEvent:
+          Type: Api
+          Properties:
+            Path: /studies/{studyID}/info
+            Method: put
+            RestApiId: !Ref API
+        PartialUpdateEvent:
+          Type: Api
+          Properties:
+            Path: /studies/{studyID}/info
+            Method: patch
+            RestApiId: !Ref API
+  FuncStudiesResearchersAddRemove:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-modifyparticipants/
+      Handler: index.handler_researchers
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        AddEvent:
+          Type: Api
+          Properties:
+            Path: /researchers/{researcherID}/studies/{studyID}
+            Method: put
+            RestApiId: !Ref API
+        RemoveEvent:
+          Type: Api
+          Properties:
+            Path: /researchers/{researcherID}/studies/{studyID}
+            Method: delete
+            RestApiId: !Ref API
+  FuncStudiesChildrenAddRemove:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-modifyparticipants/
+      Handler: index.handler_children
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        AddEvent:
+          Type: Api
+          Properties:
+            Path: /children/{childID}/studies/{studyID}
+            Method: put
+            RestApiId: !Ref API
+        RemoveEvent:
+          Type: Api
+          Properties:
+            Path: /children/{childID}/studies/{studyID}
+            Method: delete
+            RestApiId: !Ref API
+  FuncStudiesListParticipants:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-listparticipants/
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /studies/{studyID}/participants
+            Method: get
+            RestApiId: !Ref API
+  FuncStudiesSearchGlobally:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-search/
+      Handler: index.handler_global
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /studies
+            Method: get
+            RestApiId: !Ref API
+  FuncStudiesSearchInResearchers:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-search/
+      Handler: index.handler_researchers
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /researchers/{researcherID}/studies
+            Method: get
+            RestApiId: !Ref API
+  FuncStudiesSearchInChildren:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-studies-search/
+      Handler: index.handler_children
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /children/{childID}/studies
+            Method: get
+            RestApiId: !Ref API
+  FuncSamplesSearchInChild:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: lambda/functions/action-samples-search/
-      Handler: index.handler
+      Handler: index.handler_child
       Timeout: 30  # there can be loads of samples on server
       Role: !GetAtt LambdaRole.Arn
       Events:
@@ -686,6 +842,20 @@ Resources:
           Type: Api
           Properties:
             Path: /samples/{childID}
+            Method: get
+            RestApiId: !Ref API
+  FuncSamplesSearchInStudy:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/action-samples-search/
+      Handler: index.handler_study
+      Timeout: 30  # there can be loads of samples on server
+      Role: !GetAtt LambdaRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /studies/{studyID}/samples
             Method: get
             RestApiId: !Ref API
   FuncSamplesAdd:
@@ -765,6 +935,7 @@ Resources:
     Properties:
       CodeUri: lambda/functions/action-researchers-register/
       Handler: index.handler
+      Timeout: 10
       Role: !GetAtt LambdaRole.Arn
       Events:
         ApiEvent:
@@ -831,6 +1002,18 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: lambda/functions/meta-clearsamples/
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
+  FuncMetaClearChildren:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/meta-clearchildren/
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
+  FuncMetaClearStudies:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/meta-clearstudies/
       Handler: index.handler
       Role: !GetAtt LambdaRole.Arn
   FuncMetaReadAllTables:

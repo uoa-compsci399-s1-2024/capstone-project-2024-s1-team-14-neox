@@ -41,6 +41,7 @@ const REQUIRED_FIELDS = [
 // seen for a given child processed well within the 29s API Gateway
 // timeout AND the 30s lambda timeout we've set.  It was almost 20s.
 const MAX_SAMPLES = 1000;
+const UNAUTH_OR_NO_SUCH_CHILD_MESSAGE = "child ID doesn't exist or user is not authorised to add samples to the child";
 
 export const handler = async (event) => {
   const childID = event.pathParameters.childID;
@@ -54,7 +55,7 @@ export const handler = async (event) => {
       errors: [{
         resource: resolvedResource,
         status: 403,
-        message: `child ID doesn't exist or user is not authorised to view their personal info`,
+        message: UNAUTH_OR_NO_SUCH_CHILD_MESSAGE,
       }]};
     response.statusCode = body.errors[body.errors.length-1].status;
     response.body = JSON.stringify(body);
@@ -78,48 +79,52 @@ export const handler = async (event) => {
     reqBody = JSON.parse(event.body);
   } catch (e) {
     console.error(e);
+    const msg = "missing or empty request body";
     maybeEarlyErrorResp.body = JSON.stringify({
       errors: [
         {
           resource: resolvedResource,
           status: 400,
-          message: "missing or empty request body",
+          message: msg,
         }
       ],
     });
     return maybeEarlyErrorResp;
   }
   if (reqBody == null) {
+    const msg = "missing or empty request body";
     maybeEarlyErrorResp.body = JSON.stringify({
       errors: [
         {
           resource: resolvedResource,
           status: 400,
-          message: "missing or empty request body",
+          message: msg,
         }
       ],
     });
     return maybeEarlyErrorResp;
   }
   if (reqBody.samples === undefined) {
+    const msg = "missing `samples` property in request body";
     maybeEarlyErrorResp.body = JSON.stringify({
       errors: [
         {
           resource: resolvedResource,
           status: 400,
-          message: "missing `samples` property in request body",
+          message: msg,
         }
       ],
     });
     return maybeEarlyErrorResp
   }
   if (!Array.isArray(reqBody.samples)) {
+    const msg = "samples property in request body must be an array";
     maybeEarlyErrorResp.body = JSON.stringify({
       errors: [
         {
           resource: resolvedResource,
           status: 400,
-          message: "samples property in request body must be an array",
+          message: msg,
         }
       ]
     });
@@ -128,15 +133,17 @@ export const handler = async (event) => {
   const samples = reqBody.samples;
   console.log(`got ${samples.length} samples`);
   if (samples.length > MAX_SAMPLES) {
+    const msg = "too many samples, try again with less";
     maybeEarlyErrorResp.body = JSON.stringify({
       errors: [
         {
           resource: resolvedResource,
           status: 400,
-          message: "too many samples, try again with less"
+          message: msg,
         }
       ]
     });
+    console.error(msg);
     return maybeEarlyErrorResp;
   }
 
@@ -208,27 +215,26 @@ export const handler = async (event) => {
           status: 409,
           message: `sample timestamp already seen`,
         });
-        console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
+        console.error(`index=${i}: ${errors[errors.length-1].message}`);
         continue;
       } else if (e.code === FOREIGN_KEY_VIOLATION && e.constraint === "samples_child_id_fkey") {
-        // FIXME: Handle permissions.
         errors.push({
           resource: resolvedResource,
           status: 403,
-          message: `child ID doesn't exist or user is not authorised to add samples to the child`,
+          message: UNAUTH_OR_NO_SUCH_CHILD_MESSAGE,
         });
-        console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
+        console.error(`index=${i}: ${errors[errors.length-1].message}`);
         break;
       } else if (e.code === INVALID_TEXT_REPRESENTATION) {
         const m = e.where.match(/\$(?<param>[0-9]+)/);
         if (!m) {
-          console.error("can't parse parameter number from postgresql error");
+          console.error(`index=${i}: INTERNAL ERROR: can't parse parameter number from postgresql error`);
           throw e;
         }
 
         // We assume that queryFieldNumbers is a contiguous interval of integers
         if (!(queryFieldNumbers[0] <= m.groups.param && m.groups.param <= queryFieldNumbers[queryFieldNumbers.length-1])) {
-          console.error(`unhandled parameter number ${m.groups.param}`);
+          console.error(`index=${i}: INTERNAL ERROR: unhandled parameter number ${m.groups.param}`);
           throw e;
         }
         // Now we map the number from `queryFieldNumbers` to an actual field name
@@ -238,12 +244,12 @@ export const handler = async (event) => {
           status: 400,
           message: "failed to parse value",
         });
-        console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
+        console.error(`index=${i}: ${errors[errors.length-1].message}`);
         continue;
       } else if (e.code === CHECK_VIOLATION) {
         const m = e.constraint.match(/(?<field>[a-z_]+)_range/);
         if (!m) {
-          console.error("can't parse field from CHECK_VIOLATION postgresql error");
+          console.error(`index=${i}: INTERNAL ERROR: can't parse field from CHECK_VIOLATION postgresql error`);
           throw e;
         }
         switch (m.groups.field) {
@@ -256,7 +262,7 @@ export const handler = async (event) => {
         case 'col_temp':
           break;
         default:
-          console.error(`invalid field "${m.groups.field}"`);
+          console.error(`index=${i}: INTERNAL ERROR: invalid field "${m.groups.field}"`);
           throw e;
         }
         errors.push({
@@ -264,7 +270,7 @@ export const handler = async (event) => {
           status: 400,
           message: "field value out of range",
         });
-        console.error(`${childID}:index=${i}: ${errors[errors.length-1].message}`);
+        console.error(`index=${i}: ${errors[errors.length-1].message}`);
         continue;
       } else {
         throw e;

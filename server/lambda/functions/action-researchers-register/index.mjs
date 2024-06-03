@@ -51,6 +51,7 @@ export const handler = async (event) => {
   const contentTypeError = validateContentType(event.headers, event.resource);
   if (contentTypeError !== null) {
     maybeEarlyErrorResp.body = JSON.stringify({errors: [contentTypeError]});
+    console.error(contentTypeError.message);
     return maybeEarlyErrorResp;
   }
 
@@ -71,15 +72,17 @@ export const handler = async (event) => {
     return maybeEarlyErrorResp;
   }
   if (reqBody == null) {
+    const msg = "missing or empty request body";
     maybeEarlyErrorResp.body = JSON.stringify({
       errors: [
         {
           resource: event.resource,
           status: 400,
-          message: "missing or empty request body",
+          message: msg,
         }
       ],
     });
+    console.error(msg);
     return maybeEarlyErrorResp;
   }
 
@@ -91,6 +94,7 @@ export const handler = async (event) => {
         status: 400,
         message: `missing field: ${REQUIRED_FIELDS[i]}`,
       });
+      console.error(`${errors[errors.length-1].message}`);
     }
   }
   if (errors.length > 0) {
@@ -98,12 +102,13 @@ export const handler = async (event) => {
     return maybeEarlyErrorResp;
   }
   if (Object.keys(reqBody).length > REQUIRED_FIELDS.length) {
+    const msg = `too many fields, there must only be: ${REQUIRED_FIELDS.join(', ')}`;
     maybeEarlyErrorResp.body = JSON.stringify({
       errors: [
         {
           resource: event.resource,
           status: 400,
-          message: `too many fields, there must only be: ${REQUIRED_FIELDS.join(', ')}`,
+          message: msg,
         }
       ]
     });

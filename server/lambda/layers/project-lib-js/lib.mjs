@@ -66,12 +66,16 @@ export async function connectToDB()
   return db;
 }
 
+// See https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-cors.html#apigateway-enable-cors-proxy
 export function addCorsHeaders(response)
 {
   if (response.headers === undefined) {
     response.headers = {};
   }
-  response.headers["Access-Control-Allow-Origin"] = "*";
+  response.headers["Access-Control-Allow-Origin"] = process.env.CORS_ALLOW_ORIGIN;
+  response.headers["Access-Control-Allow-Methods"] = 'OPTIONS, GET, POST, PUT, PATCH, DELETE';
+  response.headers["Access-Control-Allow-Headers"] = 'Origin, Content-Type, Accept, Authorization';
+  response.headers["Access-Control-Allow-Credentials"] = 'true';
 }
 
 // Based on https://www.rfc-editor.org/rfc/rfc7231#section-3.1.1.1
@@ -184,13 +188,13 @@ export function getCognitoUsernameFromEvent(event)
 export const AUTH_NONE = -1;
 export const AUTH_ALL = 2048;
 export const AUTH_ADMIN = 1;
-export const AUTH_SELF = 2;
+export const AUTH_SELF = 2;  // uses `config.targetUserID`
 export const AUTH_PARENT_ANY = 4;
-export const AUTH_PARENT_OFCHILD = 8;
+export const AUTH_PARENT_OFCHILD = 8;  // uses `config.childID`
 // ...reserved...
 export const AUTH_RESEARCHER_ANY = 64;
-export const AUTH_RESEARCHER_OFSTUDY = 128;
-export const AUTH_RESEARCHER_OFSAMESTUDYASCHILD = 256;
+export const AUTH_RESEARCHER_OFSTUDY = 128;  // uses `config.studyID`
+export const AUTH_RESEARCHER_OFSAMESTUDYASCHILD = 256;  // uses `config.childID`
 // ... any more granular (and one-off) permissions will be implemented by the caller
 
 // config is an object with the props (used only if needed):
@@ -202,6 +206,7 @@ export const AUTH_RESEARCHER_OFSAMESTUDYASCHILD = 256;
 // If none were matched, then `AUTH_NONE` is returned.
 export async function authenticateUser(event, db, flags, config)
 {
+  console.log(`caller: ${getDBUserIdFromEvent(event)}`);
   // NOTE: we compare result of bitwise AND using strict equality
   // (===) since strict equality returns bool rather than a number.
   if ((flags & AUTH_ALL) === AUTH_ALL) {
@@ -251,24 +256,32 @@ export async function authenticateUser(event, db, flags, config)
       return AUTH_RESEARCHER_ANY;
     }
   }
-  // if ((flags & AUTH_RESEARCHER_OFSTUDY) === AUTH_RESEARCHER_OFSTUDY) {
-  //   const researcherID = getDBUserIdFromEvent(event);
-  //   // also uses studyID
-  //   console.log(`checking if researcher is part of study (researcherID: ${researcherID}) (studyID: ${config.studyID})`);
-  //   const child_parentres = await db.query("SELECT parent_id FROM children WHERE id = $1", [config.childID]);
-  //   if (child_parentres.rows.length === 1 && child_parentres.rows[0].parent_id === parentID) {
-  //     return AUTH_RESEARCHER_OFSTUDY;
-  //   }
-  // }
-  // if ((flags & AUTH_RESEARCHER_OFSAMESTUDYASCHILD) === AUTH_RESEARCHER_OFSAMESTUDYASCHILD) {
-  //   const researcherID = getDBUserIdFromEvent(event);
-  //   // also uses studyID
-  //   console.log(`checking if researcher is part of study (researcherID: ${researcherID}) (studyID: ${config.studyID})`);
-  //   const child_parentres = await db.query("SELECT parent_id FROM children WHERE id = $1", [config.childID]);
-  //   if (child_parentres.rows.length === 1 && child_parentres.rows[0].parent_id === parentID) {
-  //     return AUTH_RESEARCHER_OFSAMESTUDYASCHILD;
-  //   }
-  // }
+  if ((flags & AUTH_RESEARCHER_OFSTUDY) === AUTH_RESEARCHER_OFSTUDY) {
+    const researcherID = getDBUserIdFromEvent(event);
+    // also uses studyID
+    console.log(`checking if researcher is part of study (researcherID: ${researcherID}) (studyID: ${config.studyID})`);
+    const res = await db.query(`SELECT * FROM study_researchers
+                                WHERE upper(study_id) = upper($1)
+                                  AND participant_id = $2`,
+                               [config.studyID, researcherID]);
+    if (res.rows.length === 1) {
+      return AUTH_RESEARCHER_OFSTUDY;
+    }
+  }
+  if ((flags & AUTH_RESEARCHER_OFSAMESTUDYASCHILD) === AUTH_RESEARCHER_OFSAMESTUDYASCHILD) {
+    const researcherID = getDBUserIdFromEvent(event);
+    // also uses childID
+    console.log(`checking if the researcher and child have studies in common (researcherID: ${researcherID}) (childID: ${config.childID})`);
+    const commonStudies = await db.query(`SELECT sr.study_id AS id
+                                          FROM study_researchers AS sr, study_children AS sc
+                                          WHERE sr.study_id = sc.study_id
+                                            AND sr.participant_id = $1
+                                            AND sc.participant_id = $2`,
+                                         [researcherID, config.childID]);
+    if (commonStudies.rows.length > 0) {
+      return AUTH_RESEARCHER_OFSAMESTUDYASCHILD;
+    }
+  }
 
   console.log("auth: FAILED");
   return AUTH_NONE;

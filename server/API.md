@@ -1,13 +1,18 @@
 # API for app and web interface
 
-Our API will be RESTful and JSON-based.  It should be forwards- and
-backwards-compatible, so it will include a version number.
+The API is RESTful and JSON-based.
 
-## Note on Rest Principle: HATEOAS
+## Note on future work
 
-Link: <https://restfulapi.net/hateoas/>
+See the `FUTURE WORK` heading for API actions planned for the future.
+`FUTURE WORK` may be written inline within an existing API action
+instead of being placed entirely in the dedicated heading.
 
-This may be overkill.
+## Note on open questions
+
+Inline to some API actions, there are `OPEN QUESTION` markers for
+future work which may or may not be done depending on the answer to
+the question.
 
 ## Supported HTTP Methods in AWS API Gateway
 
@@ -42,8 +47,8 @@ explore how outdoor time relates to the development of myopia AND for
 clinicians to track outdoor time to help their child patients, we
 associate samples with children.
 
-FUTURE: Samples should also declare the type/version of the device on
-which it was recorded.
+FUTURE WORK: Samples should also declare the type/version of the
+device on which it was recorded.
 
 ## Note on sample timestamps
 
@@ -59,7 +64,7 @@ server will reject that sample.
 
 - Can create new children entities on server associated with
   him/herself.
-- Can view and modify their own personal info.
+- FUTURE WORK: Can view and modify their own personal info.
 - Can view and modify their children's personal info.
 - Can view only their own children's sample data.
 - Can send samples associated with their children to the server.
@@ -68,6 +73,8 @@ server will reject that sample.
   specific child).
 - Can add and revoke consent for studies their children are part of
   (by specific child).
+- Can view details of a study.
+- Can view the list of all studies.
 - Can view the list of researchers.
 - Can view the list of admins.
 
@@ -80,8 +87,10 @@ server will reject that sample.
   (inlined as a sample field):
   - age (*not* date of birth)
   - gender
-- Can only VIEW their own personal info (their accounts are made for
-  them).
+- FUTURE WORK: Can only VIEW their own personal info (their accounts
+  are made for them).
+- Can view details of a study.
+- Can view the list of all studies.
 - Can view the list of researchers.
 - Can view the list of admins.
 
@@ -90,13 +99,14 @@ server will reject that sample.
 - Can create researcher accounts.
 - Can delete researcher accounts.
 - Can delete parent accounts.
-- Can view, patch, and replace their own personal information.
-- Can view, patch, and replace a researcher's personal information.
-- Can view, patch, and replace a parent's personal information.
+- FUTURE WORK: Can view, partially-modify ("patch"), and replace their own personal information.
+- FUTURE WORK: Can view, partially-modify ("patch)", and replace a researcher's personal information.
+- FUTURE WORK: Can view, partially-modify ("patch"), and replace a parent's personal information.
 - Can create studies.
-- Can delete studies.
-- Can modify metadata of studies.
-- Can list and search across all studies.
+- FUTURE WORK: Can delete studies.
+- Can view details of a study.
+- Can modify details of studies.
+- Can view the list of all studies.
 - Can view the list of researchers.
 - Can view the list of parents.
 - Can view the list of children.
@@ -106,6 +116,19 @@ server will reject that sample.
 - Can view the list of children, parents, researchers involved in a study.
 - Can *revoke* consent to a given study for a child.
 - Can add and remove access to a given study for a researcher.
+
+### FUTURE WORK: Split admin-researcher role into distinct admin and researcher roles
+
+Currently, when you create an admin account on the backend, they're
+actually created as a user with permissions of both roles.  In other
+words, an "admin" user can do admin actions and also researcher
+actions.
+
+We do this because we require non-admin researchers but the project
+clients will also be participating as researchers so it's easier to
+make them both admin-researchers.  One way to create non-researcher
+admins is to remove them from the `admins` group on the Cognito user
+pool after creating the account.
 
 #### Note on creation
 
@@ -151,7 +174,7 @@ those who need it.
 - `timestamp`: String of ISO8601-formatted datetime with seconds
   resolution and timezone.  If timezone is UTC 0, then it must be
   specified either as `Z` OR an offset of `+00:00`.
-- `uv`: Non-negative integer value of UV exposure (TODO units).
+- `uv`: Non-negative integer value of UV exposure (arbitrary units).
 - `light`: Non-negative integer value of light exposure (lux).
 - `accel_x`: Signed integer value for the `x` component of the
   acceleration experienced by the device.
@@ -181,15 +204,16 @@ https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-att
 
 ### Children
 
-All fields are optional.  Researchers only really want `birthdate`
-since age is a relevant predictor for progression of myopia.
+All fields are optional.  Researchers only really want `gender` and
+`birthdate` since gender and age are relevant predictors for
+progression of myopia.
 
 - `birthdate`
 - `family_name`
 - `given_name`
 - `middle_name`
 - `nickname`
-- `gender`
+- `gender` (`male`, `female`, `other`)
 
 ### Users (ie, everyone except children)
 
@@ -198,13 +222,6 @@ since age is a relevant predictor for progression of myopia.
 - `middle_name`
 - `nickname`
 - `email` (required)
-- `phone_number` ???
-
-## Authentication
-
-First authenticate with Cognito using the Cognito API.  Then add the
-token to the `Authorization` header as `Authorization: Bearer <TOKEN>`
-in every API action.
 
 ## Note on status codes
 
@@ -221,7 +238,8 @@ Example: when the personal info of a user is successfully updated.
 ### 207 Multi-Status: some parts of request succeeded, some failed
 
 Will be used for API actions which we want to process as much as we
-can.
+can.  The parts of the request which failed need to be retried (or
+fixed according to the error).
 
 Example: when sending samples to server.
 
@@ -229,10 +247,11 @@ Example: when sending samples to server.
 
 Client should reauthenticate.
 
-All actions except the login action (to be specified) will require
-authentication.
+All actions require authentication.
 
 ### 403 "Forbidden" (really, it means "Unauthorized"): server knows who client is but request is not allowed
+
+### 409 "Conflict": trying to create something with a duplicate ID or sample timestamp
 
 ### 4XX: client errors
 
@@ -286,7 +305,15 @@ Sign up via the AWS Cognito API.  Other than this and authenticating
 the user, Cognito should never be called.  Use the API actions for
 that.
 
-#### LOW PRIORITY???: We *may* allow registering via Google.
+#### FUTURE WORK: Allow registering (and logging in) via Google, Facebook, and other third-party identity providers.
+
+### Authenticate (Cognito)
+
+#### Flow
+
+1. User gives credentials to AWS Cognito API.
+2. Upon successful authentication, pass the token in each request in
+   the `Authorization` header as `Authorization: Bearer <TOKEN>`.
 
 ### Register researcher account (POST) (`/researchers`)
 
@@ -351,12 +378,12 @@ Output schema:
 }
 ```
 
-### LOW PRIORITY: Search for children (GET) (`/children`)
-
-No filters for now, but any filters in future API specs should go into
-query string.
-
 ### Get/Replace/Update personal info associated with a specific child/parent/researcher (GET/PUT/PATCH) (`/<children OR parents OR researchers>/{ID}/info`)
+
+#### FUTURE WORK: Implement this for parents and researchers
+
+If needed, a user can already view and modify his/her *own* personal
+information using the Cognito API
 
 #### If authorised AND such a child/parent/researcher exists:
 
@@ -395,45 +422,20 @@ If any personal info fields are invalid: return 400 response, where for each inv
 
 No personal info fields will be updated so the client should correct
 the fields listed in the errors when they try again.  For example, if
-the client provided the `birthdate` field for a child but it was in
-the wrong format:
+the client provided the `age` field for a child but it was in the
+wrong format:
 
 ```json
 {
 	"errors": [
 		{
-			"resource": "/children/123456789/info?fieldvalue=birthdate",
+			"resource": "/children/123456789/info?fieldvalue=age",
 			"status": 400,
-			"message": "birthdate must be formatted YYYY-MM-DD",
+			"message": "bad field",
 		}
 	],
 }
 ```
-
-### LOW PRIORITY: Delete a specific parent/researcher account (DELETE) (`/parents/{parentID}` OR `/researchers/{researcherID}`)
-
-#### If authorised AND such an account exists
-
-Server will delete parent/researcher account with the given ID and
-return a 204 response.
-
-#### If not authorised OR no such account
-
-Server will return 403.
-
-#### OPEN QUESTION: FOR PARENTS: Should this delete their children and the data of their children too?
-
-### LOW PRIORITY: Delete child (DELETE) (`/children/{childID}`)
-
-#### If authorised AND such a child exists
-
-Server will delete child with ID `childID` and return a 204 response.
-
-#### If not authorised OR no such child exists
-
-Server will return a 403.
-
-#### OPEN QUESTION: Should all the samples associated with `childID` be deleted too?
 
 ### Register child (POST) (`/children`)
 
@@ -550,29 +552,13 @@ Study IDs are designed to be shared.
 
 Server will return 403.
 
-### Delete a study (DELETE) (`/studies/{studyID}`)
-
-See action to create a study for the format of `studyID`.
-
-#### If authorised AND study exists:
-
-Server will delete study and return 204.
-
-#### If authorised BUT no such study:
-
-Server will return 404.
-
-#### If not authorised:
-
-Server will return 403.
-
 ### Search studies (GET) (`/studies`)
 
 #### Flow
 
 ##### 1. User sends GET request with query parameters for:
 
-- Filter by:
+- (FUTURE WORK) Filter by:
   - start/end date
 
 ##### 2a. If authorised
@@ -624,15 +610,15 @@ each invalid field name/value:
 
 No metadata fields will be updated so the client should correct the
 fields listed in the errors when they try again.  For example, if the
-client provided the `max_date` field but it was in the wrong format:
+client provided the `start_date` field but it was in the wrong format:
 
 ```json
 {
 	"errors": [
 		{
-			"resource": "/studies/EYES24/info?fieldvalue=max_date",
+			"resource": "/studies/EYES24/info?fieldvalue=start_date",
 			"status": 400,
-			"message": "date must have timezone",
+			"message": "research period must be YYYY-MM-DD dates",
 		}
 	],
 }
@@ -673,17 +659,12 @@ Server will return HTTP status 200 with the body:
 }
 ```
 
+Parents aren't technically "participating" in a study since children
+are, but they are provided here for convenience.
+
 #### If not authorised:
 
 Server will return 403.
-
-### Authenticate (Cognito)
-
-#### Flow
-
-1. User gives credentials to AWS Cognito API.
-2. Upon successful authentication, pass the token in each request in
-   the `Authorization` header.
 
 ### Add samples (POST) (`/samples/{childID}`)
 
@@ -717,15 +698,15 @@ If sample sensor fields are invalid: error `status` will be 400 "Bad Request".
 
 ##### 1. User sends GET request with query parameters for:
 
-- Filter by:
+- (FUTURE WORK) Filter by:
   - min/max timestamp
-  - (FUTURE: child device type/version)
+  - child device type/version
 
-- Specify output format:
+- (FUTURE WORK) Specify output format:
   - sensor values
   - list of timestamps only
 
-##### 2a. If authorised and output format is sensor values
+##### 2a. If authorised (FUTURE WORK: and output format is sensor values)
 
 User receives:
 
@@ -738,7 +719,7 @@ User receives:
 }
 ```
 
-##### 2b. If authorised and output format is the list of timestamps only
+##### 2b. FUTURE WORK: If authorised and output format is the list of timestamps only
 
 User receives a list of timestamps:
 
@@ -765,14 +746,12 @@ server (and thereby have their timestamp show up in the output).
 
 Server returns 403.
 
-#### Details
+#### FUTURE WORK: Details
 
-- FOR NOW: filters will be a simple AND, but it could be extended to
-  allow arbitrary nesting of logical expressions (up to a limit).
-  Maybe by having just one query parameter with special syntax like
-  those of search engines.
-- TODO: Maybe the results should be returned in "pages" (AKA
-  "pagination").
+- Filters will be joined by AND, but it could be extended to allow
+  arbitrary nesting of logical expressions (up to a limit).  Maybe by
+  having just one query parameter with special syntax like those of
+  search engines.
 - Automatically sort results by date.
 
 ### Search samples in a given study (GET) (`/studies/{studyID}/samples`)
@@ -795,38 +774,52 @@ the relevant subheading in the notes for sample fields above).
 
 Server will return 404.
 
-## Some rejected approaches
+## FUTURE WORK
 
-### Should individual fields in a user's personal information be identified in the URI?
+### Search for children (GET) (`/children`)
 
-For example, we would read and write `/users/{userID}/email`.
+No filters for now, but any filters in future API specs should go into
+query string.
 
-#### Why not
+### Delete a specific parent/researcher account (DELETE) (`/parents/{parentID}` OR `/researchers/{researcherID}`)
 
-Because it's not elegant and updating specific fields via a JSON
-object as the body of a PATCH request does the same thing and allows
-callers to treat updating multiple fields the same as updating just
-one.
+#### If authorised AND such an account exists
 
-### Should the server automatically register devices if the server receives a sample from a device whose ID it doesn't recognise?
+Server will delete parent/researcher account with the given ID and
+return a 204 response.
 
-So that the app can generate IDs locally and therefore not have to
-coordinate with server.
+#### If not authorised OR no such account
 
-#### Why not
+Server will return 403.
 
-This would be fine, practically speaking, if we used UUIDs but I'd
-rather the server have control of registration (which means control of
-IDs).
+#### OPEN QUESTION: FOR PARENTS: Should this delete their children and the data of their children too?
 
-### Should the `/children/{childID}` resource allow access to samples from the child whose ID is `childID` (say, as `/children/{childID}/samples`)?
+### Delete child (DELETE) (`/children/{childID}`)
 
-I thought it would make for a more intuitive API.
+#### If authorised AND such a child exists
 
-#### Why not
+Server will delete child with ID `childID` and return a 204 response.
 
-We already have the `GET /samples?<QUERY STRING>` action which would
-do the same thing, but more generally.  The caller should just filter
-by device ID.
+#### If not authorised OR no such child exists
+
+Server will return a 403.
+
+#### OPEN QUESTION: Should all the samples associated with `childID` be deleted too?
+
+### Delete a study (DELETE) (`/studies/{studyID}`)
+
+See action to create a study for the format of `studyID`.
+
+#### If authorised AND study exists:
+
+Server will delete study and return 204.
+
+#### If authorised BUT no such study:
+
+Server will return 404.
+
+#### If not authorised:
+
+Server will return 403.
 
 [^1]: maybe because the child uses more than one device
