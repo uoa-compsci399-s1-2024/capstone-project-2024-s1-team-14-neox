@@ -215,14 +215,19 @@ class ChildEntity {
   //////////////////////////////////
 
   static Future<void> syncAllChildData() async {
+    print("synv all vhild data entered in repo");
     List<ChildEntity> noServerIdChildren = await ChildEntity.queryChildNoServerId();
     for (final noServerIdChild in noServerIdChildren) {
+      print("sync trying to create server id for children");
       String generatedServerId = await ChildApiService.registerChild();
       ChildEntity.updateServerId(noServerIdChild.id!, generatedServerId);
     }
     List<ChildEntity> children = await ChildEntity.queryAllChildren();
     for (final child in children) {
-      if (child.serverId == "") {}
+      if (child.serverId == "") {
+          print(" server id is none");
+
+      }
       int? id = child.id;
       ChildApiService.postData(id!);
     }

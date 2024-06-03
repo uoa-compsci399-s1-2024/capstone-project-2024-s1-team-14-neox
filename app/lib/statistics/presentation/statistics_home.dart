@@ -88,8 +88,8 @@ class StatisticsHomeState extends State<StatisticsHome> {
                     isExpanded: true,
                     value: _selectedChildProfile,
                     icon: const Padding(
-                      padding:  EdgeInsets.only(right: 4.0),
-                      child:  Icon(
+                      padding: EdgeInsets.only(right: 4.0),
+                      child: Icon(
                         Icons.keyboard_arrow_down,
                         color: Colors.black,
                       ),
@@ -104,17 +104,23 @@ class StatisticsHomeState extends State<StatisticsHome> {
                         .map(
                           (profile) => DropdownMenuItem(
                             value: profile,
-                            child: Text(profile.childName, overflow: TextOverflow.fade,),
+                            child: Text(
+                              profile.childName,
+                              overflow: TextOverflow.fade,
+                            ),
                           ),
                         )
                         .toList(),
                     onChanged: (value) {
+                       print("child id ${value!.childId}");
                       setState(() {
+                        print("child id ${value!.childId}");
+                        context
+                            .read<StatisticsCubit>()
+                            .onFocusChildChange(value!.childId);
                         _selectedChildProfile = value;
+                       
                       });
-                      context
-                          .read<StatisticsCubit>()
-                          .onFocusChildChange(value!.childId);
                     },
                   ),
                 ),
@@ -145,17 +151,22 @@ class StatisticsHomeState extends State<StatisticsHome> {
                 child: Text("Select a profile to view"),
               );
             }
-
+            print("bloc builder for statistic cubit");
             if (state is OverviewStatisticsState) {
+                  print("inside overiview state; ${state.focusChildId}");
               return BlocProvider(
                 key: UniqueKey(), // Workaround for refreshing UI!
-                create: (context) =>
-                    MonthlyCubit(context.read<StatisticsRepository>())
+                create: (context) {
+                   return MonthlyCubit(context.read<StatisticsRepository>())
                       ..onGetYearDataForChildId(
-                          DateTime.now().year, state.focusChildId!),
+                          DateTime.now().year, state.focusChildId!);
+                  
+                },
                 child: MonthlyPanel(),
               );
             } else {
+            print("else statement builder for statistic cubit");
+              
               return BlocProvider(
                 key: UniqueKey(), // Workaround for refreshing UI!
                 create: (context) =>

@@ -21,7 +21,7 @@ class ChildProfileTile extends StatefulWidget {
 
 class _ChildProfileTileState extends State<ChildProfileTile> {
   Future<void> _generateLargeData(int childId) async {
-    var startTime = DateTime(2023, 1, 1);
+    var startTime = DateTime(2024, 5, 1);
     var endTime = DateTime.now();
     int numberOfWeeks = endTime.difference(startTime).inDays ~/ 7;
     // 0.1 is around 96 mins per day, 0.2 is around 192 mins per day, recommend 0.13
@@ -34,30 +34,34 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
       print("Creating week for: $time");
       List<ArduinoDataEntity> randomData =
           await ArduinoDataEntity.createSampleArduinoDataList(
-              childId,
-              time,
-              time.add(const Duration(days: 7)),
-              threshold);
-      await ArduinoDataEntity.saveListOfArduinoDataEntity(
-          randomData);
+              childId, time, time.add(const Duration(days: 7)), threshold);
+      await ArduinoDataEntity.saveListOfArduinoDataEntity(randomData);
     }
   }
-  
+
   Future<void> _generateSmallData(int childId) async {
     double threshold = 0.13;
     DateTime time = DateTime.now().subtract(const Duration(days: 1));
-    
-      time = time.add(const Duration(days: 7));
-      time = DateTime(time.year, time.month, time.day);
-      print("Creating small data for: $time");
-      List<ArduinoDataEntity> randomData =
-          await ArduinoDataEntity.createSampleArduinoDataList(
-              childId,
-              time,
-              time.add(const Duration(days: 1)),
-              threshold);
-      await ArduinoDataEntity.saveListOfArduinoDataEntity(
-          randomData);
+
+    time = time.add(const Duration(days: 7));
+    time = DateTime(time.year, time.month, time.day);
+    print("Creating small data for: $time");
+    List<ArduinoDataEntity> randomData =
+        await ArduinoDataEntity.createSampleArduinoDataList(
+            childId, time, time.add(const Duration(days: 1)), threshold);
+    await ArduinoDataEntity.saveListOfArduinoDataEntity(randomData);
+  }
+
+  Future<void> _generateDefinedData(
+      int childId, DateTime startTime, DateTime endTime) async {
+    double threshold = 0.13;
+    DateTime startTime = DateTime(2024, 5, 1);
+
+    DateTime endTime = DateTime.now();
+    List<ArduinoDataEntity> randomData =
+        await ArduinoDataEntity.createSampleArduinoDataList(
+            childId, startTime, endTime, threshold);
+    await ArduinoDataEntity.saveListOfArduinoDataEntity(randomData);
   }
 
   @override
@@ -99,7 +103,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                       icon: Icon(Icons.edit),
                     ),
                   ),
-      
+
                   Flexible(
                     child: Text(
                       state.childName,
@@ -107,9 +111,9 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-      
+
                   const SizedBox(width: 10),
-      
+
                   IconButton(
                     onPressed: () {
                       Navigator.push(
@@ -117,12 +121,13 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                         MaterialPageRoute(
                           builder: (_) {
                             return BlocProvider.value(
-                              value:
-                                  BlocProvider.of<AllChildProfileCubit>(context),
+                              value: BlocProvider.of<AllChildProfileCubit>(
+                                  context),
                               child: BlocProvider.value(
-                                value: BlocProvider.of<ChildDeviceCubit>(context),
-                                child:
-                                    const CreateChildProfileScreen(editing: true),
+                                value:
+                                    BlocProvider.of<ChildDeviceCubit>(context),
+                                child: const CreateChildProfileScreen(
+                                    editing: true),
                               ),
                             );
                           },
@@ -147,6 +152,18 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                 ElevatedButton(
                   onPressed: () => _generateSmallData(state.childId),
                   child: const Text("Generate small data"),
+                ),
+              if (kDebugMode)
+                ElevatedButton(
+                  // onPressed: () => _generateDefinedData(
+                  //     state.childId,
+                  //     DateTime.now().subtract(Duration(days: 1)),
+                  //     DateTime.now()),
+                  onPressed: () => _generateDefinedData(
+                      state.childId,
+                      DateTime.now().subtract(Duration(days: 30)),
+                      DateTime.now().subtract(Duration(days: 1))),
+                  child: const Text("Generate defined data"),
                 ),
               Expanded(
                 child: LayoutBuilder(
@@ -179,7 +196,8 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                               context: context,
                               radius: constraints.maxWidth / 4 * 0.8,
                               lineWidth: 10,
-                              percent: (outdoorTimeAvgWeek / target).clamp(0, 1),
+                              percent:
+                                  (outdoorTimeAvgWeek / target).clamp(0, 1),
                               center: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -198,7 +216,8 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                               context: context,
                               radius: constraints.maxWidth / 4 * 0.8,
                               lineWidth: 10,
-                              percent: (outdoorTimeAvgMonth / target).clamp(0, 1),
+                              percent:
+                                  (outdoorTimeAvgMonth / target).clamp(0, 1),
                               center: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [

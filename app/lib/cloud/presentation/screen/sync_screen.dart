@@ -93,7 +93,9 @@ class SyncScreen extends StatelessWidget {
                   //   ),
                   BlocBuilder<CloudSyncCubit, CloudSyncState>(
                     builder: (context, state) {
+                        print("loading state $state");
                       if (state.status.isLoading) {
+                        print("loading state $state");
                         SizedBox(
                           height: 80,
                           child: FilledButton(
@@ -127,6 +129,7 @@ class SyncScreen extends StatelessWidget {
                         );
                       }
               
+                        print("loading state else $state");
                       return SizedBox(
                         height: 80,
                         child: FilledButton(

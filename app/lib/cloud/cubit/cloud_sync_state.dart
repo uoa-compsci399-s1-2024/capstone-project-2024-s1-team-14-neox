@@ -33,6 +33,7 @@ class CloudSyncState extends Equatable {
     String? message,
     DateTime? lastSynced,
   }) {
+    print("in cloud sync state status $status");
     return CloudSyncState(
       status: status ?? this.status,
       progress: progress ?? this.progress,

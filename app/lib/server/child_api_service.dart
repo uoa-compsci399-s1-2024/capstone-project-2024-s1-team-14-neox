@@ -9,7 +9,7 @@ import 'dart:convert';
 
 class ChildApiService {
   static const String apiUrl =
-      'https://xu31tcdj0e.execute-api.ap-southeast-2.amazonaws.com/dev';
+      'https://drgmjpo7eg.execute-api.ap-southeast-2.amazonaws.com/dev';
 
   static  Future<Map<String, dynamic>> initializeHeader() async{
     final token = await AWSServices().getToken();
@@ -69,6 +69,7 @@ class ChildApiService {
     try {
 
       int chunkSize = 1000;
+      print(" syncing chunk");
 
       for (int i = 0; i < dataList.length; i += chunkSize) {
         List chunk = dataList.sublist(

@@ -373,13 +373,14 @@ class ArduinoDataEntity {
       DateTime startTime,
       DateTime endTime,
       double threshold) async {
+        DateTime calledTime = DateTime.now();
     List<ArduinoDataEntity> dataList = [];
     Random random = Random();
     int interval = 1; //Default 1 minute
     for (DateTime time = startTime;
         time.isBefore(endTime);
         time = time.add(Duration(minutes: interval))) {
-      if (time.hour > 5 && time.hour < 22) {
+      if (time.hour > 5 && time.hour < 22 && time.isBefore(calledTime)) {
         // only add if between 6am and 10pm
         final data = ArduinoDataEntity(
           uv: 5,
@@ -397,4 +398,7 @@ class ArduinoDataEntity {
     }
     return dataList;
   }
+
+
+  
 }
