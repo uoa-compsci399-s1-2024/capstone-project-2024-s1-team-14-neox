@@ -204,6 +204,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         }
         break;
       }
+      print("Sync check if all characteristics are found");
 
       // Check if all characteristics are found
       List<BluetoothCharacteristic?> writeCharacteristics = [
@@ -281,6 +282,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       //     return;
       //   }
       // }
+      print("Sync get most recent timestamp");
 
       // Get sample count
       int mostRecentSampleTimestamp =
@@ -291,7 +293,12 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         (mostRecentSampleTimestamp >> 16) & 0xFF,
         (mostRecentSampleTimestamp >> 24) & 0xFF,
       ]);
-      await acknowledgement!.write([1]);
+            print("Sync acknowledgement write");
+
+      await acknowledgement!.write([1]).then((value) {
+              print("Sync acknowledgement write complete");
+
+      },);
       int sampleCount = 0;
       {
         List<int> progressValue = await progress!.read();
