@@ -2,7 +2,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/child_device_model.dart';
 
-import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/classifiers/random_forest.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/child_home/domain/classifiers/light_gbm_small.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/main.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/statistics/domain/single_week_hourly_stats_model.dart';
@@ -12,8 +12,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
-import 'classifiers/random_forest.dart';
-
 class ChildDeviceRepository {
   static const int bytesPerSample = 20;
   final SharedPreferences sharedPreferences;
