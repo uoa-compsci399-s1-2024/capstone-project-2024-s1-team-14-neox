@@ -69,7 +69,6 @@ class ChildApiService {
     try {
 
       int chunkSize = 1000;
-      List<Future<Response>> futures = [];
 
       for (int i = 0; i < dataList.length; i += chunkSize) {
         List chunk = dataList.sublist(
@@ -81,19 +80,13 @@ class ChildApiService {
 
         final data = {"samples": jsonSamples};
 
-
-        futures.add(dio.post(
+        var now = DateTime.now();
+        await dio.post(
           url,
           options: Options(headers: defaultHeaders),
           data: data,
-        ));
-      }
-
-      // Wait for all POST requests to complete
-      List<Response> responses = await Future.wait(futures);
-      for (var response in responses) {
-        print(response.statusCode);
-        print(response.data);
+        );
+        print("Syncing chunk time taken: ${DateTime.now().difference(now).inMilliseconds}ms");
       }
     } catch (e) {
       print('Error posting data: $e');

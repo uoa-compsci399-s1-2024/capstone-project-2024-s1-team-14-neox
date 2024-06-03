@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/services/aws_cognito.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/data/entities/childStudy_entity.dart';
 import 'package:drift/drift.dart';
 import 'arduino_data_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
@@ -192,6 +193,12 @@ class ChildEntity {
     AppDb db = AppDb.instance();
     // Delete the child entity from the database based on its ID
     // print("count of${db.children.id.count(filter: childId > 0)}");
+    
+    var studies = await ChildStudyAssociationsEntity.getChildStudiesByChildId(childId);
+    for(final study in studies){
+      ChildApiService.removeChildFromStudy(childId, study.studyCode); 
+    }
+
     await (db.delete(db.children)..where((tbl) => tbl.id.equals(childId))).go();
   }
 
