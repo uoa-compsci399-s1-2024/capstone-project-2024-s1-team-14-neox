@@ -333,30 +333,34 @@ static void solveAuthChallenge(const uint8_t* challenge, uint8_t* solution) {
 }
 
 static void onConnection(BLEDevice central) {
-  authenticated = false;
+  authenticated = true; // should be false
+  // authenticated = false;
+  Serial.println("on connecetion called");
 
-  uint8_t falsy = 0;
+  // uint8_t falsy = 0; //Should be false
+  uint8_t falsy = 1;
   centralAuthenticated.writeValue(&falsy, sizeof(falsy));
+  Serial.print("skip authentication");
 
-  uint8_t challengeFromPeripheral[32];
-  generateRandom(challengeFromPeripheral);
-  authChallengeFromPeripheral.writeValue(challengeFromPeripheral, sizeof(challengeFromPeripheral));
+//   uint8_t challengeFromPeripheral[32];
+//   generateRandom(challengeFromPeripheral);
+//   authChallengeFromPeripheral.writeValue(challengeFromPeripheral, sizeof(challengeFromPeripheral));
 }
 
 static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic characteristic) {
-  uint8_t response[32];
-  authResponseFromCentral.readValue(response, sizeof(response));
+//   uint8_t response[32];
+//   authResponseFromCentral.readValue(response, sizeof(response));
 
-  uint8_t challenge[32];
-  authChallengeFromPeripheral.readValue(challenge, sizeof(challenge));
+//   uint8_t challenge[32];
+//   authChallengeFromPeripheral.readValue(challenge, sizeof(challenge));
 
-  uint8_t expected[32];
-  solveAuthChallenge(challenge, expected);
-  if (memcmp(response, expected, sizeof(expected)) == 0) {
-    uint8_t truthy = 1;
-    centralAuthenticated.writeValue(&truthy, sizeof(truthy));
-    authenticated = true;
-  }
+//   uint8_t expected[32];
+//   solveAuthChallenge(challenge, expected);
+//   if (memcmp(response, expected, sizeof(expected)) == 0) {
+//     uint8_t truthy = 1;
+//     centralAuthenticated.writeValue(&truthy, sizeof(truthy));
+//     authenticated = true;
+//   }
 
   // Serial.print("Authenticated status ");
   // Serial.println(authenticated);

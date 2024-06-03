@@ -7,7 +7,7 @@
 #include "tcs.h"
 
 static const int SERIAL_BAUD_RATE = 9600;
-static const uint32_t POLL_INTERVAL_MS = (uint32_t)2 * 1000; // 1 minute
+static const uint32_t POLL_INTERVAL_MS = (uint32_t)10 * 1000; // 1 minute
 static const uint8_t UV_SENSOR_PIN = A6;
 
 // Read all sensors and save them to the EEPROM
@@ -21,8 +21,8 @@ void setup()
   digitalWrite(A1, HIGH);
   
   Serial.begin(SERIAL_BAUD_RATE);
-  delay(1000);
-
+  delay(2000);
+Serial.print("setup");
   Wire.begin();
   eepromBegin();
   initializeBLE();
@@ -53,10 +53,10 @@ static void readSample()
   SensorSample sample = { 0 };
   sample.timestamp = readRTC();
   sample.uv = analogRead(UV_SENSOR_PIN);
-  // Serial.print(sample.uv);
-  // Serial.print(",");
+  Serial.print(sample.uv);
+  Serial.print(",");
   sample.acceleration = readIMU();
   sample.tcsData = readTCS();
-  // Serial.println();
+  Serial.println();
   eepromPushSample(&sample);
 }

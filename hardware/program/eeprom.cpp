@@ -258,12 +258,15 @@ void eepromGetBLEAuthKey(uint8_t* key) {
 
   // If the key is corrupt for whatever reason, perform a factory reset.
   for (int i = 0; i < 32; i++) {
+    Serial.print(key[i] );
+    Serial.print(" ");
     if ((i < 10 && key[i] == 0) || (i >= 10 && key[i] != 0)) {
       Serial.println("BLE Authentication key is corrupt.");
       eepromFactoryReset(DEFAULT_BLE_AUTH_KEY);
       break;
     }
   }
+    Serial.println();
 }
 
 void eepromSetBLEAuthKey(const uint8_t* key) {

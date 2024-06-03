@@ -81,7 +81,7 @@ class BluetoothPanel extends StatelessWidget {
           return ElevatedButton(
             onPressed: () {
               // context.read<ChildDeviceCubit>()._generateDefinedData(state.childId, DateTime(2024,05,14), DateTime.now()),
-              Future(() => context.read<ChildDeviceCubit>().onSyncPressedMock(
+              Future(() => context.read<ChildDeviceCubit>().onSyncPressed(
                     childName: state.childName,
                     childId: state.childId,
                     deviceRemoteId: state.deviceRemoteId,
