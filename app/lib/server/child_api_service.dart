@@ -5,7 +5,6 @@ import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/study_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/server/child_data.dart';
 import 'package:dio/dio.dart';
-import 'dart:convert';
 
 class ChildApiService {
   static const String apiUrl =
