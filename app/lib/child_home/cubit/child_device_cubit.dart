@@ -152,6 +152,14 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     const String uuidTimestamp = "f06c06bb-0006-4f4c-b6b4-a146eff5ab15";
     const String uuidProgress = "f06c06bb-0007-4f4c-b6b4-a146eff5ab15";
 
+    
+    final bsSubscription = device.bondState.listen((value) {
+      print("Sync bond state changed$value prev:${device?.prevBondState}");
+    });
+
+// cleanup: cancel subscription when disconnected
+    device.cancelWhenDisconnected(bsSubscription);
+
     try {
       await device.requestConnectionPriority(
           connectionPriorityRequest: ConnectionPriority.high);
@@ -282,8 +290,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         List<int> response;
         int attempts = 0;
         while (true) {
-
-            print("inside while loop ${DateTime.now()}");
+          print("inside while loop ${DateTime.now()}");
           response = await authResponseFromPeripheral.read().then((value) {
             print("Sync auth Resp from Peri then ${DateTime.now()}");
             return value;
