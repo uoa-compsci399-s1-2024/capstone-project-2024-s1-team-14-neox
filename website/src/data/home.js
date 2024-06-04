@@ -243,7 +243,7 @@ async function fetchDataAndDownload(id, token) {
         })
         if (response.status == 403) {
             alert("User is not a participant in this study");
-            throw new Error("Something went wrong");
+            throw new Error("403 Error, participant not in study");
         }
         else if (!response.ok) {
             throw new Error("Something went wrong");
