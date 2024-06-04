@@ -244,7 +244,11 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         List<int> response;
         int attempts = 0;
         while (true) {
-          response = await authResponseFromPeripheral.read();
+          response = await authResponseFromPeripheral.read().then((value) {
+            print("lakdmlkad");
+            return value;
+          });
+          print("laldakd");
           if (response.any((byte) => byte != 0)) {
             break;
           }
