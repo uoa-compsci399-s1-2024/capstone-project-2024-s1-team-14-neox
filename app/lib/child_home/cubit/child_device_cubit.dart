@@ -47,7 +47,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
   }
 
   static List<int> _solveAuthChallenge(List<int> challenge, List<int> key) {
-    if (challenge.length != 32) {
+    if (challenge.length != 16) {
       // If the device sends us an invalid challenge,
       // we might as well send them back an invalid response :P
       return [];
@@ -262,7 +262,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       // Authenticate them
       {
         await authResponseFromPeripheral!
-            .write(List.generate(32, (_) => 0), allowLongWrite: true)
+            .write(List.generate(16, (_) => 0), allowLongWrite: true)
             .then((value) {
           print("Sync auth resp from peri then ${DateTime.now()}");
           return value;
@@ -270,7 +270,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         print("Sync auth resp from peri after ${DateTime.now()}");
 
         List<int> challenge =
-            List.generate(32, (index) => Random.secure().nextInt(256));
+            List.generate(16, (index) => Random.secure().nextInt(256));
         await authChallengeFromCentral!
             .write(challenge, allowLongWrite: true)
             .then((value) {
