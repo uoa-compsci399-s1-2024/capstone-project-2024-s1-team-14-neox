@@ -13,10 +13,10 @@ void initializeTCS() {
 
 TCSData readTCS() {
   TCSData data = { 0 };
-  uint16_t colorTemp, lux;
+  //uint16_t colorTemp, lux;
   tcs.getRawData(&data.red, &data.green, &data.blue, &data.clear);
-  colorTemp = tcs.calculateColorTemperature_dn40(data.red, data.green, data.blue, data.clear); 
-  lux = tcs.calculateLux(data.red, data.green, data.blue);
+  //colorTemp = tcs.calculateColorTemperature_dn40(data.red, data.green, data.blue, data.clear); 
+  //lux = tcs.calculateLux(data.red, data.green, data.blue);
   // Serial.print(data.red);
   // Serial.print(",");
   // Serial.print(data.green);
