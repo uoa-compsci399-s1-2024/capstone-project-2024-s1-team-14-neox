@@ -243,10 +243,15 @@ async function fetchDataAndDownload(id, token) {
         })
         const jsondata = await response.json(); 
         const data = jsondata.data;
-        downloadCSV(data, `${id}.csv`);
+        if (data.length == 0) {
+            alert("Study has no data");
+        }
+        else {
+            downloadCSV(data, `${id}.csv`);
+        }
     } catch (error) {
-        console.error("Error fetching data", error)
-        alert("Study has no data")
+        console.error("Error fetching data", error);
+        alert("User is not a participant in this study");
     }
 }
 

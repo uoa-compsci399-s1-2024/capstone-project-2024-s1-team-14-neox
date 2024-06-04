@@ -116,24 +116,22 @@ function App() {
             </div>
           </nav>
           <div className="auth-wrapper">
-            <div className="auth-inner">
-              <Routes>
-                <Route path="/"  element={<Login toggleButton={toggleButton} handleJwtToken={handleJwtToken} />}/>
-                {!showButton && isAdmin && (
-                  <Route path="/users" element={<Users toggleButton={toggleButton} handleJwtToken={handleJwtToken} />} />
-                )}
-                {!showButton && isAdmin && (
-                  <Route path="/create" element={<Create handleJwtToken={handleJwtToken}/>} />
-                )}
-                {!showButton && (
-                  <Route path="/home" element={<Home isAdmin={isAdmin} showButton={showButton} handleJwtToken={handleJwtToken} />} />
-                )}
-                {!showButton && (
-                  <Route path="/edit" element={<Edit showButton={showButton} isAdmin={isAdmin}/>} />
-                )}
-                <Route path="/accessDenied" element={<AccessDenied/>} />
-              </Routes>
-            </div>
+            <Routes>
+              <Route path="/"  element={<Login toggleButton={toggleButton} handleJwtToken={handleJwtToken} />}/>
+              {!showButton && isAdmin && (
+                <Route path="/users" element={<Users toggleButton={toggleButton} handleJwtToken={handleJwtToken} />} />
+              )}
+              {!showButton && isAdmin && (
+                <Route path="/create" element={<Create handleJwtToken={handleJwtToken}/>} />
+              )}
+              {!showButton && (
+                <Route path="/home" element={<Home isAdmin={isAdmin} showButton={showButton} handleJwtToken={handleJwtToken} />} />
+              )}
+              {!showButton && (
+                <Route path="/edit" element={<Edit showButton={showButton} isAdmin={isAdmin}/>} />
+              )}
+              <Route path="/accessDenied" element={<AccessDenied/>} />
+            </Routes>
           </div>
 
         </div>

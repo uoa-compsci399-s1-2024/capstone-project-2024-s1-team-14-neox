@@ -92,10 +92,10 @@ const Create = ({ toggleButton, handleJwtToken }) => {
 
         
           return (
-            <div>
-              <h2 style={{"text-align": "center"}}>Begin a new study</h2>
+            <div style={{"max-height": "100vh"}}>
+              <h2 style={{"text-align": "center"}}>Create study</h2>
               <br></br>
-            <form class="create-form" onSubmit={handleSubmit}>
+            <form class="create-form" style={{"max-height": "100vh", "min-height": "50vh"}} onSubmit={handleSubmit}>
               
               <div className="mb-3">
                 <label>Study Name</label>
@@ -105,13 +105,14 @@ const Create = ({ toggleButton, handleJwtToken }) => {
                 <label>Study ID</label>
                 <input type="text" className="form-control" placeholder="" name="id" required/>
               </div>
-              <div className="mb-3" style={{"height": "30%"}}>
+              <div className="mb-3" style={{"height": "20vh"}}>
                 <label>Description</label>
-                <input type="text" className="form-control" placeholder="" name="description" required />
+                <textarea type="text" style={{"height": "90%"}} className="form-control" placeholder="" name="description" required />
               </div>
               <div className="mb-3" style={{"text-align": "center"}}>
               <DateRangePicker
                 placeholder="Set Start and End Dates"
+                placement="right"
                 format="dd/MM/yyyy"
                 size="lg"
                 onChange={handleDateChange}
