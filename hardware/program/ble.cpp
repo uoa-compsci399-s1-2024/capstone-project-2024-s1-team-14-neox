@@ -8,6 +8,8 @@
 #include "sensor_sample.h"
 #include "error.h"
 
+#define hashsize 20
+
 const uint32_t MAX_UNAUTH_TIME = 10 * 1000;
 const uint32_t maxDataPerCharacteristic = 512;
 const uint32_t dataPerCharacteristic = maxDataPerCharacteristic / sizeof(SensorSample) * sizeof(SensorSample);
@@ -60,10 +62,10 @@ static uint8_t authKey[32];
 static bool authenticated = false;
 static uint32_t connectTime = 0;
 
-static BLECharacteristic authChallengeFromPeripheral("9ab7d3df-a7b4-4858-8060-84a9adcf1420", BLERead, 32, true);
-static BLECharacteristic authResponseFromCentral    ("a90aa9a2-b186-4717-bc8d-f169eead75da", BLEWrite | BLEEncryption, 32, true);
-static BLECharacteristic authChallengeFromCentral   ("c03b7267-dcfa-4525-8521-1bc31c08c312", BLEWrite | BLEEncryption, 32, true);
-static BLECharacteristic authResponseFromPeripheral ("750d5d43-96c4-4f5c-8ce1-fdb44a150336", BLERead | BLEWrite | BLEEncryption, 32, true);
+static BLECharacteristic authChallengeFromPeripheral("9ab7d3df-a7b4-4858-8060-84a9adcf1420", BLERead, hashsize, true);
+static BLECharacteristic authResponseFromCentral    ("a90aa9a2-b186-4717-bc8d-f169eead75da", BLEWrite | BLEEncryption, hashsize, true);
+static BLECharacteristic authChallengeFromCentral   ("c03b7267-dcfa-4525-8521-1bc31c08c312", BLEWrite | BLEEncryption, hashsize, true);
+static BLECharacteristic authResponseFromPeripheral ("750d5d43-96c4-4f5c-8ce1-fdb44a150336", BLERead | BLEWrite | BLEEncryption, hashsize, true);
 static BLECharacteristic centralAuthenticated       ("776edbca-a020-4d86-a5e8-25eb87e82554", BLERead, 1, true);
 
 static void getBLEAddress(uint8_t* address); // Returns a 6 byte array
@@ -134,7 +136,7 @@ void checkConnection() {
     BLEDevice central = BLE.central();
 
     while (central.connected())
-    {
+    { 
         if (connectTime == 0) {
             connectTime = millis();
         }
@@ -142,7 +144,7 @@ void checkConnection() {
             central.disconnect();
             break;
         }
-        if (authenticated) {
+      if (authenticated) {
 
             updateValues(currentSampleBufferIndex);
         }
@@ -306,8 +308,15 @@ void fillBuffers(uint32_t& currentSampleBufferIndex) {
 
 static void sha256(const uint8_t* data, uint8_t* hash) {
   SHA256 hasher;
-  hasher.update(data, 32);
-  hasher.finalize(hash, 32);
+  uint8_t d[32]{};
+  uint8_t h[32]{};
+  for (int i = 0; i < hashsize; i++)
+    d[i] = data[i];
+  hasher.update(d, 32);
+  hasher.finalize(h, 32);
+
+  for (int i = 0; i < hashsize; i++)
+    hash[i] = h[i];
 }
 
 static void generateRandom(uint8_t* value) {
@@ -325,7 +334,7 @@ static void generateRandom(uint8_t* value) {
 }
 
 static void solveAuthChallenge(const uint8_t* challenge, uint8_t* solution) {
-  uint8_t buffer[32];
+  uint8_t buffer[hashsize];
   for (int i = 0; i < sizeof(buffer); i++) {
     buffer[i] = challenge[i] ^ authKey[i];
   }
@@ -338,19 +347,19 @@ static void onConnection(BLEDevice central) {
   uint8_t falsy = 0;
   centralAuthenticated.writeValue(&falsy, sizeof(falsy));
 
-  uint8_t challengeFromPeripheral[32];
+  uint8_t challengeFromPeripheral[hashsize];
   generateRandom(challengeFromPeripheral);
   authChallengeFromPeripheral.writeValue(challengeFromPeripheral, sizeof(challengeFromPeripheral));
 }
 
 static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic characteristic) {
-  uint8_t response[32];
+  uint8_t response[hashsize];
   authResponseFromCentral.readValue(response, sizeof(response));
 
-  uint8_t challenge[32];
+  uint8_t challenge[hashsize];
   authChallengeFromPeripheral.readValue(challenge, sizeof(challenge));
 
-  uint8_t expected[32];
+  uint8_t expected[hashsize];
   solveAuthChallenge(challenge, expected);
   if (memcmp(response, expected, sizeof(expected)) == 0) {
     uint8_t truthy = 1;
@@ -379,10 +388,10 @@ static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic chara
 }
 
 static void onAuthChallengeFromCentral(BLEDevice central, BLECharacteristic characteristic) {
-  uint8_t challenge[32];
+  uint8_t challenge[hashsize];
   authChallengeFromCentral.readValue(challenge, sizeof(challenge));
 
-  uint8_t response[32];
+  uint8_t response[hashsize];
   solveAuthChallenge(challenge, response);
   authResponseFromPeripheral.writeValue(response, sizeof(response));
 }

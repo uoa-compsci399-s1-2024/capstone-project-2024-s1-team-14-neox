@@ -121,7 +121,6 @@ class ChildDeviceRepository {
       String childName, List<int> bytes, int childId) async {
         DateTime startTime = DateTime.now();
     List<ArduinoDataEntity> samples = [];
-    print("ARDUINO start $startTime");
     while (bytes.length % bytesPerSample != 0) {
       bytes.removeLast();
     }

@@ -13,10 +13,6 @@ part 'child_device_state.dart';
 class ChildDeviceCubit extends Cubit<ChildDeviceState> {
   final ChildDeviceRepository _repo;
 
-  
-
-  
-
   ChildDeviceCubit({
     required ChildDeviceRepository repo,
     required int childId,
@@ -28,21 +24,21 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     required int outdoorTimeToday,
     required int outdoorTimeWeek,
     required int outdoorTimeMonth,
-  }) : 
-    _repo = repo,
-    super(ChildDeviceIdleState(ChildDeviceState(
-      childId: childId,
-      childName: childName,
-      birthDate: birthDate,
-      gender: gender,
-      deviceRemoteId: deviceRemoteId,
-      authorisationCode: authorisationCode,
-      outdoorTimeToday: outdoorTimeToday,
-      outdoorTimeWeek: outdoorTimeWeek,
-      outdoorTimeMonth: outdoorTimeMonth,
-    )));
+  })  : _repo = repo,
+        super(ChildDeviceIdleState(ChildDeviceState(
+          childId: childId,
+          childName: childName,
+          birthDate: birthDate,
+          gender: gender,
+          deviceRemoteId: deviceRemoteId,
+          authorisationCode: authorisationCode,
+          outdoorTimeToday: outdoorTimeToday,
+          outdoorTimeWeek: outdoorTimeWeek,
+          outdoorTimeMonth: outdoorTimeMonth,
+        )));
 
-  void onChildDeviceConnectPressed(String deviceRemoteId, String authorisationCode) {
+  void onChildDeviceConnectPressed(
+      String deviceRemoteId, String authorisationCode) {
     emit(ChildDeviceConnectState(state, deviceRemoteId, authorisationCode));
   }
 
@@ -51,7 +47,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
   }
 
   static List<int> _solveAuthChallenge(List<int> challenge, List<int> key) {
-    if (challenge.length != 32) {
+    if (challenge.length != 20) {
       // If the device sends us an invalid challenge,
       // we might as well send them back an invalid response :P
       return [];
@@ -61,12 +57,17 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     for (int i = 0; i < challenge.length; i++) {
       combined.add(challenge[i] ^ key[i]);
     }
-
-    return sha256.convert(combined).bytes;
+    // Padding to 32 bytes is required, otherwise the solver does not work
+    while (combined.length < 32) {
+      combined.add(0);
+    }
+    return sha256.convert(combined).bytes.sublist(0, 20);
   }
-  
+
   static String _formatRemoteDeviceId(List<int> bytes) {
-    return bytes.map((e) => e.toRadixString(16).toUpperCase().padLeft(2, '0')).join(':');
+    return bytes
+        .map((e) => e.toRadixString(16).toUpperCase().padLeft(2, '0'))
+        .join(':');
   }
 
   Future<BluetoothDevice?> _getBluetoothDevice(String deviceRemoteId) async {
@@ -78,10 +79,14 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       withServices: [Guid("ba5c0000-243e-4f78-ac25-69688a1669b4")],
       timeout: const Duration(seconds: 15),
     );
-    
+
     try {
-      await for (List<ScanResult> scanResults in FlutterBluePlus.scanResults.timeout(const Duration(seconds: 15))) {
-        scanResults.retainWhere((r) => deviceRemoteId == _formatRemoteDeviceId(r.advertisementData.manufacturerData.values.firstOrNull ?? []));
+      await for (List<ScanResult> scanResults
+          in FlutterBluePlus.scanResults.timeout(const Duration(seconds: 15))) {
+        scanResults.retainWhere((r) =>
+            deviceRemoteId ==
+            _formatRemoteDeviceId(
+                r.advertisementData.manufacturerData.values.firstOrNull ?? []));
         if (scanResults.isNotEmpty) {
           return scanResults.first.device;
         }
@@ -94,14 +99,13 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     return null;
   }
 
-  Future<void> onSyncPressed({
-    required String childName,
-    required int childId,
-    required String deviceRemoteId,
-    required String authorisationCode
-  }) async {
+  Future<void> onSyncPressed(
+      {required String childName,
+      required int childId,
+      required String deviceRemoteId,
+      required String authorisationCode}) async {
     BluetoothDevice? device;
-    
+
     try {
       if (FlutterBluePlus.adapterStateNow != BluetoothAdapterState.on) {
         if (Platform.isAndroid) {
@@ -114,12 +118,11 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       emit(ChildDeviceErrorState(state, "Failed to turn on Bluetooth: $e"));
       return;
     }
-    
+
     if (device == null) {
       emit(ChildDeviceErrorState(state, "Device not found nearby."));
       return;
     }
-    print("Classify trying to connect");
     try {
       await device.connect(mtu: 23);
     } catch (e) {
@@ -136,16 +139,22 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       "6eea8c3b-0004-4ec0-a842-6ed292e598dd",
     ];
     const String uuidAcknowledgement = "f06c06bb-0005-4f4c-b6b4-a146eff5ab15";
-    const String uuidAuthChallengeFromPeripheral = "9ab7d3df-a7b4-4858-8060-84a9adcf1420";
-    const String uuidAuthResponseFromCentral = "a90aa9a2-b186-4717-bc8d-f169eead75da";
-    const String uuidAuthChallengeFromCentral = "c03b7267-dcfa-4525-8521-1bc31c08c312";
-    const String uuidAuthResponseFromPeripheral = "750d5d43-96c4-4f5c-8ce1-fdb44a150336";
-    const String uuidCentralAuthenticated = "776edbca-a020-4d86-a5e8-25eb87e82554";
+    const String uuidAuthChallengeFromPeripheral =
+        "9ab7d3df-a7b4-4858-8060-84a9adcf1420";
+    const String uuidAuthResponseFromCentral =
+        "a90aa9a2-b186-4717-bc8d-f169eead75da";
+    const String uuidAuthChallengeFromCentral =
+        "c03b7267-dcfa-4525-8521-1bc31c08c312";
+    const String uuidAuthResponseFromPeripheral =
+        "750d5d43-96c4-4f5c-8ce1-fdb44a150336";
+    const String uuidCentralAuthenticated =
+        "776edbca-a020-4d86-a5e8-25eb87e82554";
     const String uuidTimestamp = "f06c06bb-0006-4f4c-b6b4-a146eff5ab15";
     const String uuidProgress = "f06c06bb-0007-4f4c-b6b4-a146eff5ab15";
-    
+
     try {
-      await device.requestConnectionPriority(connectionPriorityRequest: ConnectionPriority.high);
+      await device.requestConnectionPriority(
+          connectionPriorityRequest: ConnectionPriority.high);
 
       // Find characteristics
       List<BluetoothCharacteristic?> sampleData = [];
@@ -164,7 +173,8 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
           continue;
         }
 
-        for (BluetoothCharacteristic characteristic in service.characteristics) {
+        for (BluetoothCharacteristic characteristic
+            in service.characteristics) {
           String characteristicUuid =
               characteristic.characteristicUuid.toString().toLowerCase();
 
@@ -192,7 +202,6 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
               }
             }
           }
-          
         }
         break;
       }
@@ -212,34 +221,40 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         centralAuthenticated,
         progress,
       ];
-      if (readCharacteristics.any((char) => char == null || !char.properties.read)
-        || writeCharacteristics.any((char) => char == null || !char.properties.write)) {
+      if (readCharacteristics
+              .any((char) => char == null || !char.properties.read) ||
+          writeCharacteristics
+              .any((char) => char == null || !char.properties.write)) {
         emit(ChildDeviceErrorState(state, "Service missing characteristics"));
         return;
       }
 
       // Authenticate us
-      if (authorisationCode.length != 10 || authorisationCode.codeUnits.any((c) => c >= 128)) {
-        emit(ChildDeviceErrorState(state, "Invalid authorisation code format."));
+      if (authorisationCode.length != 10 ||
+          authorisationCode.codeUnits.any((c) => c >= 128)) {
+        emit(
+            ChildDeviceErrorState(state, "Invalid authorisation code format."));
         return;
       }
       List<int> key = [...authorisationCode.codeUnits];
-      while (key.length < 32) {
+      while (key.length < 20) {
         key.add(0);
       }
 
       {
         List<int> challenge = await authChallengeFromPeripheral!.read();
         List<int> response = _solveAuthChallenge(challenge, key);
-        await authResponseFromCentral!.write(response, allowLongWrite: true);
+        await authResponseFromCentral!.write(response, allowLongWrite: false);
       }
 
       // Authenticate them
       {
-        await authResponseFromPeripheral!.write(List.generate(32, (_) => 0), allowLongWrite: true);
+        await authResponseFromPeripheral!
+            .write(List.generate(20, (_) => 0), allowLongWrite: false);
 
-        List<int> challenge = List.generate(32, (index) => Random.secure().nextInt(256));
-        await authChallengeFromCentral!.write(challenge, allowLongWrite: true);
+        List<int> challenge =
+            List.generate(20, (index) => Random.secure().nextInt(256));
+        await authChallengeFromCentral!.write(challenge, allowLongWrite: false);
 
         List<int> response;
         int attempts = 0;
@@ -252,26 +267,30 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
           await Future.delayed(const Duration(seconds: 1));
           attempts++;
           if (attempts >= 10) {
-            emit(ChildDeviceErrorState(state, "Device authentication timed out."));
+            emit(ChildDeviceErrorState(
+                state, "Device authentication timed out."));
             return;
           }
         }
 
         List<int> weAreAuthenticated = await centralAuthenticated!.read();
         if (weAreAuthenticated.isEmpty || weAreAuthenticated[0] == 0) {
-          emit(ChildDeviceErrorState(state, "Failed to authenticate. Check the password and pair again with the correct password."));
+          emit(ChildDeviceErrorState(state,
+              "Failed to authenticate. Check the password and pair again with the correct password."));
           return;
         }
 
         List<int> expectedResponse = _solveAuthChallenge(challenge, key);
         if (!listEquals(response, expectedResponse)) {
-          emit(ChildDeviceErrorState(state, "Failed to authenticate device. Check you are connecting to the right device."));
+          emit(ChildDeviceErrorState(state,
+              "Failed to authenticate device. Check you are connecting to the right device."));
           return;
         }
       }
 
       // Get sample count
-      int mostRecentSampleTimestamp = await _repo.getMostRecentSampleTimestamp(childId);
+      int mostRecentSampleTimestamp =
+          await _repo.getMostRecentSampleTimestamp(childId);
       await timestamp!.write([
         mostRecentSampleTimestamp & 0xFF,
         (mostRecentSampleTimestamp >> 8) & 0xFF,
@@ -293,7 +312,8 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       List<List<int>> values = [];
       emit(ChildDeviceSyncingState(state, 0));
       while (true) {
-        BluetoothCharacteristic sampleCharacteristic = sampleData[sampleCharacteristicIndex]!;
+        BluetoothCharacteristic sampleCharacteristic =
+            sampleData[sampleCharacteristicIndex]!;
         List<int> value = await sampleCharacteristic.read();
 
         sampleCharacteristicIndex++;
@@ -305,14 +325,15 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         if (value.every((byte) => byte == 0)) {
           break;
         }
-        
+
         values.add(value);
 
         while (value.length % ChildDeviceRepository.bytesPerSample != 0) {
           value.removeLast();
         }
         samplesRead += value.length ~/ ChildDeviceRepository.bytesPerSample;
-        emit(ChildDeviceSyncingState(state, (samplesRead / sampleCount).clamp(0, 1)));
+        emit(ChildDeviceSyncingState(
+            state, (samplesRead / sampleCount).clamp(0, 1)));
       }
 
       // Send samples to repository
