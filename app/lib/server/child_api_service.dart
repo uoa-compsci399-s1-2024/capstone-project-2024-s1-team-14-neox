@@ -199,6 +199,53 @@ class ChildApiService {
     }
   }
 
+  static Future<List<String>> getChildren() async {
+    String? email = await AWSServices().getEmail();
+    String uri = Uri.encodeComponent(email!);
+    print(email);
+    Dio dio = Dio();
+    String url = '$apiUrl/parents/$uri/children';
+    final defaultHeaders = await initializeHeader();
+    try{
+
+      var response = await dio.get(url, options: Options(headers: defaultHeaders));
+
+
+      var list = response.data["data"];
+      List<String> datalist = [];
+      for(final id in list){
+        String serverId = id["id"].toString();
+        datalist.add(serverId);
+      }
+
+      return(datalist);
+    }catch(e){
+      return[];
+      print(e);
+    }
+
+  }
+
+  static getChildInfo(String serverId) async {
+    Dio dio = Dio();
+
+    final defaultHeaders = await initializeHeader();
+    String url = '$apiUrl/children/$serverId/info';
+
+    try{
+
+      var response = await dio.get(url, options: Options(headers: defaultHeaders));
+      var data = response.data["data"];
+      DateTime birth = DateTime.parse(data["birthdate"]);
+      print(data);
+      ChildEntity child = ChildEntity(name: data["given_name"], gender: data["gender"], birthDate: birth);
+      return child;
+    }catch(e){
+      print(e);
+    }
+
+  }
+
   // static getAllStudies() async {
   //   StudyEntity.clearStudyTable();
   //   final defaultHeaders = await initializeHeader();

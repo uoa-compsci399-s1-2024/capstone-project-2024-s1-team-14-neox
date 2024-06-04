@@ -1,3 +1,4 @@
+import 'package:capstone_project_2024_s1_team_14_neox/cloud/services/aws_cognito.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/childStudy_entity.dart';
 import 'package:drift/drift.dart';
 import 'arduino_data_entity.dart';
@@ -95,6 +96,8 @@ class ChildEntity {
   ////////////////////////////////////////////////////////////////////////////
   static Future<ChildEntity?> queryChildById(int id) async {
     AppDb db = AppDb.instance();
+
+
     ChildEntity? child = await (db.select(db.children)
           ..where((tbl) => tbl.id.equals(id)))
         .getSingleOrNull();
@@ -225,4 +228,20 @@ class ChildEntity {
       ChildApiService.postData(id!);
     }
   }
+
+  static Future<void> retrieveChildren() async {
+    List<String> serverIdList = await ChildApiService.getChildren();
+
+    for(final id in serverIdList){
+
+      ChildEntity child = await ChildApiService.getChildInfo(id);
+      if(await ChildEntity.queryChildByName(child.name) == null){
+        ChildEntity.saveSingleChildEntity(child);
+      }
+
+    }
+
+
+  }
+
 }
