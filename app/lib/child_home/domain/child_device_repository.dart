@@ -117,7 +117,7 @@ class ChildDeviceRepository {
         .reduce(max);
   }
 
-  Future<void> parseAndSaveSamples(
+  Future<List<int>> parseAndSaveSamples(
       String childName, List<int> bytes, int childId) async {
     int lastTimeStampStored = 0;
     int indoorMins = 0;
@@ -195,7 +195,9 @@ class ChildDeviceRepository {
     await ArduinoDataEntity.saveListOfArduinoDataEntity(samples);
 
     debugPrint("Syncing: $indoorMins mins indoors datetime");
-    debugPrint("Syncinh: $outdoorMins mins outdoors datetime");
+    debugPrint("Syncing: $outdoorMins mins outdoors datetime");
+
+    return [outdoorMins, indoorMins];
   }
 
   int _calculateLux(int r, int g, int b) {
@@ -323,8 +325,8 @@ class ChildDeviceRepository {
     features.add(lightSqrt / uvSqrt);
     features.add(blueSqrt / uvSqrt);
     List<double> probabilities = score(features);
-
-    return probabilities[1] > 0.9999 ? 1 : 0;
+// print("$uv $light $probabilities");
+    return probabilities[1] > 0.50 ? 1 : 0;
   }
 
   int _calibrateLux(int raw) {

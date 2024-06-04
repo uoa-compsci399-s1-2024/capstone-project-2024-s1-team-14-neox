@@ -338,12 +338,17 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
             state, (samplesRead / sampleCount).clamp(0, 1)));
       }
       
+      int outdoorMins = 0;
+      int indoorMins = 0;
       // Send samples to repository
       for (List<int> value in values) {
-        await _repo.parseAndSaveSamples(childName, value, childId);
+        List<int> outdoorIndoorMins =  await _repo.parseAndSaveSamples(childName, value, childId);
+        outdoorMins += outdoorIndoorMins[0];
+        outdoorMins += outdoorIndoorMins[1];
+
       }
 
-      emit(ChildDeviceSyncSuccessState(state));
+      emit(ChildDeviceSyncSuccessState(state, "Outdoor time: $outdoorMins, indoor time: $indoorMins"));
     } catch (e) {
       emit(ChildDeviceErrorState(state, "An error occurred: $e"));
     } finally {
