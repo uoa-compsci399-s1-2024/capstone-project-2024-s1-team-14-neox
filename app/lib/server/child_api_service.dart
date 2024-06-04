@@ -104,7 +104,6 @@ class ChildApiService {
 
     Map<String, dynamic> responseData = response.data;
     String id = responseData['data']['id'];
-    String genderUrl = '$apiUrl/children/$id/info';
     return id;
   }
 
