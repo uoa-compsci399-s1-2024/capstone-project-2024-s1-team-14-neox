@@ -56,7 +56,7 @@ const Edit = ({showButton, isAdmin}) => {
 
         return (
             <div style={{"max-height": "100vh"}}>
-              <h2 style={{"text-align": "center"}}>Edit study</h2>
+              <h2 style={{"text-align": "center"}}>Edit study {id} </h2>
               <br></br>
             <form class="create-form" style={{"max-height": "100vh", "min-height": "50vh"}} onSubmit={handleSubmit}>
               <div className="mb-3">
