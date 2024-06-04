@@ -672,8 +672,6 @@ Resources:
           ResourcePath: '/*'
           HttpMethod: '*'
       TracingEnabled: true
-      # Domain:
-      #   DomainName: api.neox.co.nz
 
   # Set CloudWatch Logs role ARN in account settings.
   APICloudWatchRoleArn:
