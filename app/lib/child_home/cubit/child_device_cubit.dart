@@ -291,6 +291,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       // Get sample count
       int mostRecentSampleTimestamp =
           await _repo.getMostRecentSampleTimestamp(childId);
+          debugPrint("Syncing: most recent timestamp $mostRecentSampleTimestamp");
       await timestamp!.write([
         mostRecentSampleTimestamp & 0xFF,
         (mostRecentSampleTimestamp >> 8) & 0xFF,
@@ -304,6 +305,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         for (int i = 0; i < progressValue.length; i++) {
           sampleCount |= progressValue[i] << (8 * i);
         }
+         debugPrint("Syncing: total count to sync from arduino $sampleCount");
       }
 
       // Read sensor data
@@ -335,7 +337,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         emit(ChildDeviceSyncingState(
             state, (samplesRead / sampleCount).clamp(0, 1)));
       }
-
+      
       // Send samples to repository
       for (List<int> value in values) {
         await _repo.parseAndSaveSamples(childName, value, childId);

@@ -212,8 +212,10 @@ void updateValues(uint32_t& currentSampleBufferIndex) {
       }
     }
     if (update.written()){
+      
         samplesToSend -= currentSampleBufferIndex;
-
+      Serial.print("samples to send ");
+      Serial.println(samplesToSend);
         progress.writeValue(samplesToSend);
         fillBuffers(currentSampleBufferIndex);
         fillCharacteristics();
