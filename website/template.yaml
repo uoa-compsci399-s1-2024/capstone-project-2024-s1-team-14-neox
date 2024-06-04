@@ -48,64 +48,6 @@ Resources:
         ParentStackName: !Ref 'AWS::StackName'
         UseCase: website
         Environment: dev
-  
-  CognitoUserPool:
-    Type: AWS::Cognito::UserPool
-    Properties:
-      UserPoolName: !Sub "${Env}-${CognitoUserPoolName}"
-      AliasAttributes:
-        - email
-      UsernameConfiguration:
-        CaseSensitive: false
-      AutoVerifiedAttributes:
-        - email
-      Policies:
-        PasswordPolicy:
-          MinimumLength: 8
-          RequireLowercase: true
-          RequireNumbers: true
-          RequireUppercase: true
-          RequireSymbols: true
-      Schema:
-         - AttributeDataType: String
-          Mutable: true
-          Name: email
-          Required: true
-          StringAttributeConstraints:
-            MinLength: "1"
-        - AttributeDataType: String
-          Mutable: true
-          Name: given_name
-          Required: true
-          StringAttributeConstraints:
-            MinLength: "1"
-        - AttributeDataType: String
-          Mutable: true
-          Name: family_name
-          Required: true
-          StringAttributeConstraints:
-            MinLength: "1"
-        - AttributeDataType: String
-          Mutable: true
-          Name: middle_name
-          Required: true
-          StringAttributeConstraints:
-            MinLength: "1"
-        - AttributeDataType: String
-          Mutable: true
-          Name: nickname
-          Required: true
-          StringAttributeConstraints:
-            MinLength: "1"
-    WebCognitoUserPoolClient:
-    Type: AWS::Cognito::UserPoolClient
-    Properties:
-      ClientName: !Sub "${Env}-${CognitoWebClientName}"
-      UserPoolId: !Ref CognitoUserPool
-      ExplicitAuthFlows:
-        - ALLOW_USER_SRP_AUTH
-        - ALLOW_REFRESH_TOKEN_AUTH
-      PreventUserExistenceErrors: ENABLED
 
   # App team instances
   AppDevInstance:
