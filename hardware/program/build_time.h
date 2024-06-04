@@ -60,6 +60,6 @@
                                 __TIME_DAYS__*SEC_PER_DAY-SEC_PER_DAY+              \
                                 __TIME_HOURS__*SEC_PER_HOUR+                        \
                                 __TIME_MINUTES__*SEC_PER_MIN+                       \
-                                __TIME_SECONDS__ - (12*60*60))
+                                __TIME_SECONDS__)
 
 #endif

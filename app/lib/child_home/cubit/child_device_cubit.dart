@@ -287,15 +287,10 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
           return;
         }
       }
+
       // Get sample count
       int mostRecentSampleTimestamp =
           await _repo.getMostRecentSampleTimestamp(childId);
-      // int mostRecentSampleTimestamp = 1717537671;
-print("ChildDeviceCubit most recent timestamp $mostRecentSampleTimestamp");
-if (mostRecentSampleTimestamp == 0 ) {
-  // mostRecentSampleTimestamp = 1; // 1717526076
-}
-print("ChildDeviceCubit most recent timestamp $mostRecentSampleTimestamp");
       await timestamp!.write([
         mostRecentSampleTimestamp & 0xFF,
         (mostRecentSampleTimestamp >> 8) & 0xFF,
@@ -309,13 +304,11 @@ print("ChildDeviceCubit most recent timestamp $mostRecentSampleTimestamp");
         for (int i = 0; i < progressValue.length; i++) {
           sampleCount |= progressValue[i] << (8 * i);
         }
-        print("child device cubit sample count from arduino $sampleCount");
       }
 
       // Read sensor data
       int samplesRead = 0;
       int sampleCharacteristicIndex = 0;
-      int stopCount = 0;
       List<List<int>> values = [];
       emit(ChildDeviceSyncingState(state, 0));
       while (true) {
@@ -327,16 +320,10 @@ print("ChildDeviceCubit most recent timestamp $mostRecentSampleTimestamp");
         if (sampleCharacteristicIndex >= sampleData.length) {
           sampleCharacteristicIndex = 0;
           await acknowledgement.write([1]);
-
         }
-// stop if every byte in every characteristic is 0
-        if (value.every((byte) => byte == 0)) {
-          stopCount += 1;
-          print("child device entity stop count $stopCount");
-          if (stopCount > 5){
-            break;
-          }
 
+        if (value.every((byte) => byte == 0)) {
+          break;
         }
 
         values.add(value);
@@ -348,8 +335,7 @@ print("ChildDeviceCubit most recent timestamp $mostRecentSampleTimestamp");
         emit(ChildDeviceSyncingState(
             state, (samplesRead / sampleCount).clamp(0, 1)));
       }
-      print("ChildDeviceCubit samples received ${samplesRead}");
-// last timestamp 1717525948
+
       // Send samples to repository
       for (List<int> value in values) {
         await _repo.parseAndSaveSamples(childName, value, childId);
