@@ -47,18 +47,26 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
   }
 
   static List<int> _solveAuthChallenge(List<int> challenge, List<int> key) {
-    if (challenge.length != 16) {
+    if (challenge.length != 20) {
+      print("Sync length from challenge is ${challenge.length}");
+      // if (challenge.length != 16) {
       // If the device sends us an invalid challenge,
       // we might as well send them back an invalid response :P
       return [];
     }
+    print("Sync after chekcing length is not 20");
 
     List<int> combined = [];
     for (int i = 0; i < challenge.length; i++) {
       combined.add(challenge[i] ^ key[i]);
     }
+    
+    while (combined.length < 32) {
+      combined.add(0);
+    }
+    print("Sync auth challenge solved ${sha256.convert(combined).bytes}");
 
-    return sha256.convert(combined).bytes;
+    return sha256.convert(combined).bytes.sublist(0, 20);
   }
 
   static String _formatRemoteDeviceId(List<int> bytes) {
@@ -152,11 +160,11 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     const String uuidTimestamp = "f06c06bb-0006-4f4c-b6b4-a146eff5ab15";
     const String uuidProgress = "f06c06bb-0007-4f4c-b6b4-a146eff5ab15";
 
-    
     final bsSubscription = device.bondState.listen((value) {
       print("Sync bond state changed$value prev:${device?.prevBondState}");
     });
 
+    print("Sync listening to bonding");
 // cleanup: cancel subscription when disconnected
     device.cancelWhenDisconnected(bsSubscription);
 
@@ -213,6 +221,9 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         }
         break;
       }
+
+      // only read
+
       print("Sync check if all characteristics are found");
 
       // Check if all characteristics are found
@@ -230,6 +241,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         centralAuthenticated,
         progress,
       ];
+
       if (readCharacteristics
               .any((char) => char == null || !char.properties.read) ||
           writeCharacteristics
@@ -237,6 +249,27 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         emit(ChildDeviceErrorState(state, "Service missing characteristics"));
         return;
       }
+      final authChalPeriSubscription =
+          authChallengeFromPeripheral!.onValueReceived.listen((value) {
+        print("Sync auth chall from peri read $value ${DateTime.now()}");
+      });
+      device.cancelWhenDisconnected(authChalPeriSubscription);
+
+      final authRespPeriSubscription =
+          authResponseFromPeripheral!.onValueReceived.listen((value) {
+        print("Sync auth resp from peri read $value ${DateTime.now()}");
+      });
+      device.cancelWhenDisconnected(authRespPeriSubscription);
+      // final authRespPeriSubscription =
+      //     authChallengeFromPeripheral!.onValueReceived.listen((value) {
+      //   print("Sync auth resp from peri read $value ${DateTime.now()}");
+      // });
+      // device.cancelWhenDisconnected(authRespPeriSubscription);
+      // final authRespPeriSubscription =
+      //     authChallengeFromPeripheral!.onValueReceived.listen((value) {
+      //   print("Sync auth resp from peri read $value ${DateTime.now()}");
+      // });
+      // device.cancelWhenDisconnected(authRespPeriSubscription);
 
       // Authenticate us
       if (authorisationCode.length != 10 ||
@@ -246,7 +279,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         return;
       }
       List<int> key = [...authorisationCode.codeUnits];
-      while (key.length < 32) {
+      while (key.length < 20) {
         key.add(0);
       }
       print("Sync begin authentication");
@@ -258,30 +291,40 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         });
         print("Sync auth chall from peri after ${DateTime.now()}");
         List<int> response = _solveAuthChallenge(challenge, key);
+        print("Sync auth chall from peri after ${DateTime.now()}");
+        print("Sync ========");
+        //not syncing from here
+        print("Sync auth respo from cent sending ${response}");
         await authResponseFromCentral!
             .write(response, allowLongWrite: true)
             .then((value) {
+          print("sync writing $response to peripheral");
           print("Sync auth resp from central then ${DateTime.now()}");
           return value;
         });
         print("Sync auth resp from central after ${DateTime.now()}");
       }
+      print("Sync ========");
 
       // Authenticate them
       {
+        List<int> generatedAuthResponseFromPeripheral = List.generate(20, (_) => 0);
         await authResponseFromPeripheral!
-            .write(List.generate(16, (_) => 0), allowLongWrite: true)
+            .write(generatedAuthResponseFromPeripheral, allowLongWrite: true)
             .then((value) {
+              print("Sync auth respo from peripheral ${generatedAuthResponseFromPeripheral}");
           print("Sync auth resp from peri then ${DateTime.now()}");
           return value;
         });
         print("Sync auth resp from peri after ${DateTime.now()}");
 
         List<int> challenge =
-            List.generate(16, (index) => Random.secure().nextInt(256));
+            List.generate(20, (index) => Random.secure().nextInt(256));
+        print("Sync values for auth chall from Central ${challenge}");
         await authChallengeFromCentral!
             .write(challenge, allowLongWrite: true)
             .then((value) {
+              print("Sync auth chall from central ${challenge}");
           print("Sync auth chall from cent then ${DateTime.now()}");
           return value;
         });
@@ -300,6 +343,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
             break;
           }
 
+          print("Sync values for auth chall from Central ${challenge}");
           await Future.delayed(const Duration(seconds: 1));
           attempts++;
           if (attempts >= 10) {
@@ -311,9 +355,10 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
 
         List<int> weAreAuthenticated =
             await centralAuthenticated!.read().then((value) {
-          print("sync cent auth read then");
+          print("sync cent auth read then ${DateTime.now()}");
           return value;
         });
+        print("sync cent auth read after ${DateTime.now()}");
         if (weAreAuthenticated.isEmpty || weAreAuthenticated[0] == 0) {
           emit(ChildDeviceErrorState(state,
               "Failed to authenticate. Check the password and pair again with the correct password."));
@@ -321,11 +366,11 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         }
 
         List<int> expectedResponse = _solveAuthChallenge(challenge, key);
-        if (!listEquals(response, expectedResponse)) {
-          emit(ChildDeviceErrorState(state,
-              "Failed to authenticate device. Check you are connecting to the right device."));
-          return;
-        }
+        // if (!listEquals(response, expectedResponse)) {
+        //   emit(ChildDeviceErrorState(state,
+        //       "Failed to authenticate device. Check you are connecting to the right device."));
+        //   return;
+        //}
       }
       print("Sync get most recent timestamp");
 
@@ -383,7 +428,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         if (value.every((byte) => byte == 0)) {
           break;
         }
-
+    print("Sync velue received {value}");
         values.add(value);
 
         while (value.length % ChildDeviceRepository.bytesPerSample != 0) {
@@ -404,7 +449,11 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       emit(ChildDeviceErrorState(state, "An error occurred: $e"));
     } finally {
       try {
-        await device.disconnect();
+            print("Sync finally clause");
+        await device.disconnect().then((value) {
+          print("sync disconnected finished");
+        });
+            print("Sync finally after");
       } catch (e) {
         // Ignore
       }
