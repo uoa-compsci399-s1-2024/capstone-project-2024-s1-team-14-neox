@@ -104,7 +104,28 @@ class ChildApiService {
 
     Map<String, dynamic> responseData = response.data;
     String id = responseData['data']['id'];
+    String genderUrl = '$apiUrl/children/$id/info';
     return id;
+  }
+
+  static  setChildInfo(int? childId) async{
+    Dio dio = Dio();
+    ChildEntity? child = await ChildEntity.queryChildById(childId!);
+    String? gender = child?.gender;
+    String? date = child?.birthDate.toUtc().toIso8601String().substring(0, 10);
+    String? serverId = child?.serverId;
+    print(date);
+    final data = {"birthdate": date, "gender": gender};
+    String url = '$apiUrl/children/$serverId/info';
+    final defaultHeaders = await initializeHeader();
+    try{
+
+      var response = await dio.patch(url, options: Options(headers: defaultHeaders),data: data );
+      print(response.statusCode);
+    }catch(e){
+      print(e);
+    }
+
   }
 
   static Future<StudyEntity?> getStudy(String studyCode) async {
@@ -141,6 +162,7 @@ class ChildApiService {
     if (child?.serverId == '') {
       String serverId = await ChildApiService.registerChild();
       await ChildEntity.updateServerId(childId, serverId);
+      ChildApiService.setChildInfo(child?.id);
     }
 
     serverId = child?.serverId;

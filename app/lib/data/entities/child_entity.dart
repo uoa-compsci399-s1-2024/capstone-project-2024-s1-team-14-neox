@@ -219,6 +219,7 @@ class ChildEntity {
     for (final noServerIdChild in noServerIdChildren) {
       String generatedServerId = await ChildApiService.registerChild();
       ChildEntity.updateServerId(noServerIdChild.id!, generatedServerId);
+      ChildApiService.setChildInfo(noServerIdChild.id);
     }
     List<ChildEntity> children = await ChildEntity.queryAllChildren();
     for (final child in children) {
