@@ -58,6 +58,7 @@ class AWSServices {
       final refreshToken = session?.getRefreshToken()?.getToken();
       final idToken = session?.getIdToken().jwtToken;
 
+      await storage.write(key: 'email',value: session?.getIdToken().payload["email"]);
       await storage.write(key: 'access_token', value: accessToken);
       await storage.write(key: 'refresh_token', value: refreshToken);
       await storage.write(key: 'id_token', value: idToken);
@@ -121,7 +122,13 @@ class AWSServices {
   }
 
   Future<String?> getToken() async {
+
     return await storage.read(key: 'id_token');
+  }
+
+  Future<String?> getEmail() async {
+
+    return await storage.read(key: 'email');
   }
 
 }

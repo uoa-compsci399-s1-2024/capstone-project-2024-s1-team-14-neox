@@ -5,11 +5,10 @@ import 'package:capstone_project_2024_s1_team_14_neox/data/entities/child_entity
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/study_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/server/child_data.dart';
 import 'package:dio/dio.dart';
-import 'dart:convert';
 
 class ChildApiService {
   static const String apiUrl =
-      'https://xu31tcdj0e.execute-api.ap-southeast-2.amazonaws.com/dev';
+      'https://drgmjpo7eg.execute-api.ap-southeast-2.amazonaws.com/dev';
 
   static  Future<Map<String, dynamic>> initializeHeader() async{
     final token = await AWSServices().getToken();
@@ -107,6 +106,27 @@ class ChildApiService {
     return id;
   }
 
+  static  setChildInfo(int? childId) async{
+    Dio dio = Dio();
+    ChildEntity? child = await ChildEntity.queryChildById(childId!);
+    String? gender = child?.gender;
+    String? date = child?.birthDate.toUtc().toIso8601String().substring(0, 10);
+    String? serverId = child?.serverId;
+    String? name = child?.name;
+    print(date);
+    final data = {"birthdate": date, "gender": gender, "given_name": name};
+    String url = '$apiUrl/children/$serverId/info';
+    final defaultHeaders = await initializeHeader();
+    try{
+
+      var response = await dio.patch(url, options: Options(headers: defaultHeaders),data: data );
+      print(response.statusCode);
+    }catch(e){
+      print(e);
+    }
+
+  }
+
   static Future<StudyEntity?> getStudy(String studyCode) async {
     Dio dio = Dio();
 
@@ -141,6 +161,7 @@ class ChildApiService {
     if (child?.serverId == '') {
       String serverId = await ChildApiService.registerChild();
       await ChildEntity.updateServerId(childId, serverId);
+      ChildApiService.setChildInfo(child?.id);
     }
 
     serverId = child?.serverId;
@@ -176,6 +197,53 @@ class ChildApiService {
     } catch (e) {
       print('$e');
     }
+  }
+
+  static Future<List<String>> getChildren() async {
+    String? email = await AWSServices().getEmail();
+    String uri = Uri.encodeComponent(email!);
+    print(email);
+    Dio dio = Dio();
+    String url = '$apiUrl/parents/$uri/children';
+    final defaultHeaders = await initializeHeader();
+    try{
+
+      var response = await dio.get(url, options: Options(headers: defaultHeaders));
+
+
+      var list = response.data["data"];
+      List<String> datalist = [];
+      for(final id in list){
+        String serverId = id["id"].toString();
+        datalist.add(serverId);
+      }
+
+      return(datalist);
+    }catch(e){
+      return[];
+      print(e);
+    }
+
+  }
+
+  static getChildInfo(String serverId) async {
+    Dio dio = Dio();
+
+    final defaultHeaders = await initializeHeader();
+    String url = '$apiUrl/children/$serverId/info';
+
+    try{
+
+      var response = await dio.get(url, options: Options(headers: defaultHeaders));
+      var data = response.data["data"];
+      DateTime birth = DateTime.parse(data["birthdate"]);
+      print(data);
+      ChildEntity child = ChildEntity(name: data["given_name"], gender: data["gender"], birthDate: birth);
+      return child;
+    }catch(e){
+      print(e);
+    }
+
   }
 
   // static getAllStudies() async {
