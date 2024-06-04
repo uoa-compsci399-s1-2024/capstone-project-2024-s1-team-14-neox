@@ -243,7 +243,10 @@ async function fetchDataAndDownload(id, token) {
         })
         if (response.status == 403) {
             alert("User is not a participant in this study");
-            throw new Error("Something went wrong")
+            throw new Error("Something went wrong");
+        }
+        else if (!response.ok) {
+            throw new Error("Something went wrong");
         }
         const jsondata = await response.json(); 
         const data = jsondata.data;
