@@ -112,8 +112,9 @@ class ChildApiService {
     String? gender = child?.gender;
     String? date = child?.birthDate.toUtc().toIso8601String().substring(0, 10);
     String? serverId = child?.serverId;
+    String? name = child?.name;
     print(date);
-    final data = {"birthdate": date, "gender": gender};
+    final data = {"birthdate": date, "gender": gender, "given_name": name};
     String url = '$apiUrl/children/$serverId/info';
     final defaultHeaders = await initializeHeader();
     try{
