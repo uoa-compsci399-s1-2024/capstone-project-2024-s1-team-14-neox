@@ -241,12 +241,23 @@ async function fetchDataAndDownload(id, token) {
             },
             credentials: 'include',
         })
+        if (response.status == 403) {
+            alert("User is not a participant in this study");
+            throw new Error("403 Error, participant not in study");
+        }
+        else if (!response.ok) {
+            throw new Error("Something went wrong");
+        }
         const jsondata = await response.json(); 
         const data = jsondata.data;
-        downloadCSV(data, `${id}.csv`);
+        if (data.length == 0) {
+            alert("Study has no data");
+        }
+        else {
+            downloadCSV(data, `${id}.csv`);
+        }
     } catch (error) {
-        console.error("Error fetching data", error)
-        alert("Study has no data")
+        console.error("Error fetching data", error);
     }
 }
 

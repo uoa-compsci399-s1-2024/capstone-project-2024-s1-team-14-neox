@@ -1,6 +1,5 @@
 .App {
-  min-width: 100%;
-  max-width: 100%;
+  min-height: 100vh;
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -12,7 +11,8 @@
 }
 
 .Background{
-  height: 100vh;
+  min-height: 100vh;
+  max-height: 200vh;
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -183,15 +183,10 @@ button {
 }
 
 .auth-wrapper {
-  height: 80%;
+  min-height: 50vh;
+  max-height: 200vh;
   width: 100%;
 }
-
-.auth-inner {
-  height: 100%;
-  width: 100%;
-}
-
 .d-grid {
   width: 100%;
   margin-left: auto;
