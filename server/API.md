@@ -177,21 +177,24 @@ those who need it.
 - `uv`: Non-negative integer value of UV exposure (arbitrary units).
 - `light`: Non-negative integer value of light exposure (lux).
 - `accel_x`: Signed integer value for the `x` component of the
-  acceleration experienced by the device.
+  acceleration experienced by the device (units are a multiple of
+  g-force, see embedded docs for details).
 - `accel_y`: Signed integer value for the `y` component of the
-  acceleration experienced by the device.
+  acceleration experienced by the device (units are a multiple of
+  g-force, see embedded docs for details).
 - `accel_z`: Signed integer value for the `z` component of the
-  acceleration experienced by the device.
-- `col_red`: Unsigned byte for the red component of the colour sensed
-  by the device.
-- `col_green`: Unsigned byte for the green component of the colour
-  sensed by the device.
-- `col_blue`: Unsigned byte for the blue component of the colour
-  sensed by the device.
-- `col_clear`: Unsigned integer value for the clear component of the
-  colour sensed by the device.
-- `col_temp`: Unsigned integer value for the temperature of the colour
-  sensed by the device (degrees Kelvin).
+  acceleration experienced by the device (units are a multiple of
+  g-force, see embedded docs for details).
+- `col_red`: Non-negative integer value for the red component of the
+  colour sensed by the device (arbitrary units).
+- `col_green`: Non-negative integer value for the green component of
+  the colour sensed by the device (arbitrary units).
+- `col_blue`: Non-negative integer value for the blue component of the
+  colour sensed by the device (arbitrary units).
+- `col_clear`: Non-negative integer value for the clear component of
+  the colour sensed by the device (arbitrary units).
+- `col_temp`: Non-negative integer value for the temperature of the
+  colour sensed by the device (degrees Kelvin).
 
 ### Additional sample fields when retrieving the samples for a study
 
