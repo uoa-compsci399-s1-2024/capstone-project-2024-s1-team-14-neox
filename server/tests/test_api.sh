@@ -25,11 +25,11 @@ POOLID="$(sam list stack-outputs --output json --stack-name "$STACKNAME" | jq -r
 CLIENTID="$(sam list stack-outputs --output json --stack-name "$STACKNAME" | jq -r '.[] | select(.OutputKey == "AppClientId") | .OutputValue')"
 API_URL="$(sam list stack-outputs --output json --stack-name "$STACKNAME" | jq -r '.[] | select(.OutputKey == "APIEndpoint") | .OutputValue')"
 
-EMAIL_PARENT1="gabriel.lisaca@gmail.com"
-EMAIL_PARENT2="gabriel.lisaca+parent2@gmail.com"
-EMAIL_RESEARCHER1="gabriel.lisaca+researcher1@gmail.com"
-EMAIL_RESEARCHER2="gabriel.lisaca+researcher2@gmail.com"
-EMAIL_ADMIN="gabriel.lisaca+admin@gmail.com"
+EMAIL_PARENT1="parent1@example.com"
+EMAIL_PARENT2="parent2@example.com"
+EMAIL_RESEARCHER1="researcher1@example.com"
+EMAIL_RESEARCHER2="researcher2@example.com"
+EMAIL_ADMIN="admin@example.com"
 
 PASSWORD="Password123!"
 
