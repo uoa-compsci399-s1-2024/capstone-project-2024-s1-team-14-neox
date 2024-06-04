@@ -57,7 +57,8 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     for (int i = 0; i < challenge.length; i++) {
       combined.add(challenge[i] ^ key[i]);
     }
-    while (combined.length < 20) {
+    // Padding to 32 bytes is required, otherwise the solver does not work
+    while (combined.length < 32) {
       combined.add(0);
     }
     return sha256.convert(combined).bytes.sublist(0, 20);
