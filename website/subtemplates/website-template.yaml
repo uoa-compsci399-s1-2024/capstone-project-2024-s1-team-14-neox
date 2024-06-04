@@ -3,13 +3,6 @@ Description: SAM template for one instance of web interface
 Transform: AWS::Serverless-2016-10-31
 
 Parameters:
-  ProjectOrg:
-    Description: "Organisation that runs the website (used for bucket name -> website URL)"
-    Type: String
-    Default: neox
-    MinLength: 1
-    MaxLength: 255
-    AllowedPattern: "^[a-zA-Z][-a-zA-Z0-9]*$"
   ParentStackName:
     Description: "Name of parent stack (used for bucket name -> website URL)"
     Type: String
@@ -50,7 +43,7 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      BucketName: !Sub "${ProjectOrg}-${ParentStackName}-${UseCase}-${Environment}"
+      BucketName: !Sub "neox-${ParentStackName}-${UseCase}-${Environment}"
       WebsiteConfiguration:
         IndexDocument: index.html
         # We're a single-page web app so just use the default error page from AWS.
