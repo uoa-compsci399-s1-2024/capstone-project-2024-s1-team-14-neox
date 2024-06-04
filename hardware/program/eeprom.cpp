@@ -282,7 +282,7 @@ void eepromFactoryReset(const uint8_t* bleAuthKey) {
   Serial.println("Performing factory reset...");
   Serial.print("Setting unix time. ");
   Serial.println(__TIME_UNIX__);
-  bool toggle = true;
+  // bool toggle = true;
   eepromClear();
   eepromSetBLEAuthKey(bleAuthKey);
   eepromSaveRTCTime(__TIME_UNIX__);
