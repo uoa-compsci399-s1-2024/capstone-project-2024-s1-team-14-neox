@@ -9,7 +9,7 @@ import 'screen/scan_screen.dart';
 
 class BluetoothPanel extends StatelessWidget {
   const BluetoothPanel({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<ChildDeviceCubit, ChildDeviceState>(
@@ -21,26 +21,22 @@ class BluetoothPanel extends StatelessWidget {
             backgroundColor: Theme.of(context).colorScheme.secondary,
           ));
           context.read<AllChildProfileCubit>().updateDeviceRemoteId(
-              childId: state.childId,
-              deviceRemoteId: state.deviceRemoteId);
+              childId: state.childId, deviceRemoteId: state.deviceRemoteId);
           context.read<AllChildProfileCubit>().updateAuthorisationCode(
               childId: state.childId,
               authorisationCode: state.authorisationCode);
-
         } else if (state is ChildDeviceErrorState) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.errorMessage),
             duration: const Duration(seconds: 4),
             backgroundColor: Colors.grey,
           ));
-
         } else if (state is ChildDeviceSyncSuccessState) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: const Text("Sync complete"),
             duration: const Duration(seconds: 2),
             backgroundColor: Theme.of(context).colorScheme.secondary,
           ));
-
         }
 
         if (state is ChildDeviceSyncingState) {
@@ -60,7 +56,8 @@ class BluetoothPanel extends StatelessWidget {
             return ElevatedButton(
               onPressed: () {
                 // Automatically begin scanning
-                BlocProvider.of<BluetoothBloc>(context).add(BluetoothScanStarted());
+                BlocProvider.of<BluetoothBloc>(context)
+                    .add(BluetoothScanStarted());
 
                 Navigator.push(
                   context,
@@ -81,12 +78,18 @@ class BluetoothPanel extends StatelessWidget {
           }
 
           return ElevatedButton(
-            onPressed: () => context.read<ChildDeviceCubit>().onSyncPressed(
-              childName: state.childName,
-              childId: state.childId,
-              deviceRemoteId: state.deviceRemoteId,
-              authorisationCode: state.authorisationCode,
-            ),
+            onPressed: () {
+              // context.read<ChildDeviceCubit>()._generateDefinedData(state.childId, DateTime(2024,05,14), DateTime.now()),
+              Future(() => context.read<ChildDeviceCubit>().onSyncPressed(
+                    childName: state.childName,
+                    childId: state.childId,
+                    deviceRemoteId: state.deviceRemoteId,
+                    authorisationCode: state.authorisationCode,
+                  )).then((value) {
+                debugPrint("Bluetooth Panel Refreshing page");
+                context.read<AllChildProfileCubit>().fetchChildProfiles();
+              });
+            },
             child: const Text("Sync device"),
           );
         },
