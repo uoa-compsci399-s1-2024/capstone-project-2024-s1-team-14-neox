@@ -123,7 +123,6 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       emit(ChildDeviceErrorState(state, "Device not found nearby."));
       return;
     }
-    print("Classify trying to connect");
     try {
       await device.connect(mtu: 23);
     } catch (e) {
