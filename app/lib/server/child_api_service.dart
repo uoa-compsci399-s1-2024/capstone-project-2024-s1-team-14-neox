@@ -8,7 +8,7 @@ import 'package:dio/dio.dart';
 
 class ChildApiService {
   static const String apiUrl =
-      'https://xu31tcdj0e.execute-api.ap-southeast-2.amazonaws.com/dev';
+      'http://neox-frontend-all-dev.s3-website-ap-southeast-2.amazonaws.com';
 
   static  Future<Map<String, dynamic>> initializeHeader() async{
     final token = await AWSServices().getToken();
