@@ -158,6 +158,8 @@ void findTSIndex(uint32_t timestamp, uint32_t& currentSampleBufferIndex) {
   uint32_t left = 0;
   uint32_t right = eepromGetSampleBufferLength() - 1;
 
+
+Serial.println(timestamp);
   while (left < right) {
 
     uint32_t mid = left + (right - left) / 2;
@@ -200,7 +202,8 @@ void updateValues(uint32_t& currentSampleBufferIndex) {
 
       uint32_t timestamp;
       ts.readValue(timestamp);
-
+Serial.print("timestamp received");
+Serial.println(timestamp);
 
       if (timestamp == 0) {
         currentSampleBufferIndex = 0;
@@ -212,8 +215,12 @@ void updateValues(uint32_t& currentSampleBufferIndex) {
       }
     }
     if (update.written()){
+      Serial.println ("update written ");
+      Serial.print("samples to send ");
         samplesToSend -= currentSampleBufferIndex;
 
+      Serial.print("samples to send ");
+      Serial.println(samplesToSend);
         progress.writeValue(samplesToSend);
         fillBuffers(currentSampleBufferIndex);
         fillCharacteristics();
@@ -242,6 +249,7 @@ void fillCharacteristics() {
     samples_3.writeValue(buffer_3, maxDataPerCharacteristic);
     samples_4.writeValue(buffer_4, maxDataPerCharacteristic);
     samples_5.writeValue(buffer_5, maxDataPerCharacteristic);
+    Serial.print("characts filled");
 }
 
 void fillBuffers(uint32_t& currentSampleBufferIndex) {
@@ -303,6 +311,8 @@ void fillBuffers(uint32_t& currentSampleBufferIndex) {
     
     eepromUnlockSampleBuffer();
     currentSampleBufferIndex = bufferIndex;
+    Serial.print("buffer set, current sample buffer index");
+    Serial.println(currentSampleBufferIndex);
     
 }
 

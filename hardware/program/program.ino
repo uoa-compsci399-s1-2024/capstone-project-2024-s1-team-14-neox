@@ -7,7 +7,7 @@
 #include "tcs.h"
 
 static const int SERIAL_BAUD_RATE = 9600;
-static const uint32_t POLL_INTERVAL_MS = (uint32_t)60 * 1000; // 1 minute
+static const uint32_t POLL_INTERVAL_MS = (uint32_t)5 * 1000; // 1 minute
 static const uint8_t UV_SENSOR_PIN = A6;
 
 // Read all sensors and save them to the EEPROM
@@ -22,17 +22,19 @@ void setup()
   
   Serial.begin(SERIAL_BAUD_RATE);
   delay(1000);
-
+  Serial.println("setting up");
+  // uint8_t key[32] = "verysecure";
   Wire.begin();
   eepromBegin();
+  // uint8_t key[32] = "0123456789";
+  // Serial.print("factory reset pressed");
+  // eepromFactoryReset(key);
+  delay(2000);
   initializeBLE();
   initializeIMU();
   initializeRTC();
   initializeTCS();
-  // uint8_t key[32] = "verysecure";
-  // uint8_t key[32] = "0123456789";
-  // Serial.print("factory reset pressed");
-  // eepromFactoryReset(key);
+
 }
 
 void loop()

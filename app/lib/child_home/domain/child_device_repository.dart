@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/entities/child_entity.dart';
 import 'child_device_model.dart';
+
 class ChildDeviceRepository {
   static const int bytesPerSample = 20;
   final SharedPreferences sharedPreferences;
@@ -39,9 +40,12 @@ class ChildDeviceRepository {
       //   monthTime += (await repo.getSingleWeekHourlyStats(today.subtract(Duration(days: 7 * (i + 1))), model.childId)).weeklyMean;
       // }
       // model.outdoorTimeMonth = monthTime ~/ 28;
-      model.outdoorTimeToday = await statsRepo.getOutdoorTimeForPastDays(model.childId, 1);
-      model.outdoorTimeWeek = (await statsRepo.getOutdoorTimeForPastDays(model.childId, 7)) ~/ 7;
-      model.outdoorTimeMonth = (await statsRepo.getOutdoorTimeForPastDays(model.childId, 30)) ~/ 30;
+      model.outdoorTimeToday =
+          await statsRepo.getOutdoorTimeForPastDays(model.childId, 1);
+      model.outdoorTimeWeek =
+          (await statsRepo.getOutdoorTimeForPastDays(model.childId, 7)) ~/ 7;
+      model.outdoorTimeMonth =
+          (await statsRepo.getOutdoorTimeForPastDays(model.childId, 30)) ~/ 30;
     }
 
     return models;
@@ -110,8 +114,21 @@ class ChildDeviceRepository {
     List<ArduinoDataEntity> data =
         await ChildEntity.getAllDataForChild(childId);
     if (data.isEmpty) {
+      print("child data is empty");
       return 0;
     }
+    // sort in desecending order
+    data.sort((b, a) => a.datetime.compareTo(b.datetime));
+    //    elems.sort((a, b) => DateTime.parse(b.createdAt).compareTo(DateTime.parse(a.createdAt)));
+    // return elems[0];
+
+    print("last date time sorted ${data[0].datetime}");
+    print(
+        "last date time in epoch ${data[0].datetime.millisecondsSinceEpoch ~/ 1000}");
+
+    // print(data
+    //     .map((e) => e.datetime)
+    //     .reduce(max));
     return data
         .map((e) => e.datetime.millisecondsSinceEpoch ~/ 1000)
         .reduce(max);
@@ -119,15 +136,90 @@ class ChildDeviceRepository {
 
   Future<void> parseAndSaveSamples(
       String childName, List<int> bytes, int childId) async {
-        DateTime startTime = DateTime.now();
+        print("===========\nentered parse and save samples");
+    int lastTimeStampStored = 0;
+    int indoorMins = 0;
+    int outdoorMins = 0;
+// I/flutter ( 3403): 1717526666
+// I/flutter ( 3403): datetime stored in arduino is 2024-06-05 06:44:26.000
+
+/*
+I/flutter (10138): last date time sorted 2024-06-05 06:43:36.000
+I/flutter (10138): last date time in epoch 1717526616
+2
+I/flutter (10138): ChildDeviceCubit most recent timestamp 1717526616
+
+
+received 
+I/flutter (10138): datetime stored in arduino is 2024-06-05 06:45:50.000
+I/flutter (10138): 1717526755
+I/flutter (10138): datetime stored in arduino is 2024-06-05 06:45:55.000
+
+
+1717526740
+
+I/flutter (10138): 1717526829
+I/flutter (10138): datetime stored in arduino is 2024-06-05 06:47:09.000
+
+not storing quickly enough
+
+I/flutter (10138): 1717526979
+I/flutter (10138): datetime stored in arduino is 2024-06-05 06:49:39.000
+
+
+have to wait to be svaed to db
+
+I/flutter (10138): last date time sorted 2024-06-05 06:49:39.000
+I/flutter (10138): last date time in epoch 1717526979
+2
+I/flutter (10138): ChildDeviceCubit most recent timestamp 1717526979
+
+I/flutter (10138): 1717527063
+I/flutter (10138): datetime stored in arduino is 2024-06-05 06:51:03.000
+
+//last date time
+I/flutter (10138): last date time in epoch 1717526983
+2
+I/flutter (10138): ChildDeviceCubit most recent timestamp 171752698
+
+
+
+I/flutter (10138): datetime stored in arduino is 2024-06-05 06:53:57.000
+I/flutter (10138): 1717527242
+I/flutter (10138): datetime stored in arduino is 2024-06-05 06:54:02.000
+
+
+//I/flutter (10138): inside entity date time to store is 2024-06-05 06:53:42.000
+I/flutter (10138): inside entity date time to store is 2024-06-05 06:53:47.000
+
+
+I/flutter (10138): inside entity date time to store is 2024-06-05 07:03:55.000
+I/flutter (10138): inside entity date time to store is 2024-06-05 07:04:00.000
+I/flutter (10138): 25 mins indoors datetime
+I/flutter (10138): 0 mins outdoors datetime
+I/flutter (10138): 1717527845
+I/flutter (10138): datetime stored in arduino is 2024-06-05 07:04:05.000
+I/flutter (10138): 1717527845
+I/flutter (10138): datetime stored in arduino is 2024-06-05 07:04:05.000
+
+
+// last store is not being called!!
+
+
+
+
+*/
+    DateTime startTime = DateTime.now();
     List<ArduinoDataEntity> samples = [];
     while (bytes.length % bytesPerSample != 0) {
       bytes.removeLast();
     }
 
     for (int i = 0; i < bytes.length;) {
+      print("samples length ${samples.length}");
       if (bytes.sublist(i, i + bytesPerSample).every((byte) => byte == 0)) {
-        return;
+        print("returned without saving");
+        break; ///I/flutter (10138): inside entity date time to store is 2024-06-05 07:29:00.000
       }
 
       int readUint16() {
@@ -141,6 +233,8 @@ class ChildDeviceRepository {
           (bytes[i + 2] << 16) |
           (bytes[i + 3] << 24);
       i += 4;
+      lastTimeStampStored = max(lastTimeStampStored, timestamp);
+      print(lastTimeStampStored);
       int uv = readUint16();
       int accelX = readUint16(); // Although values are unsigned here,
       int accelY = readUint16(); // acceleration is converted to signed
@@ -165,23 +259,40 @@ class ChildDeviceRepository {
         colourTemperature,
         light,
       );
-
-      samples.add(ArduinoDataEntity(
-        name: childName,
-        childId: childId,
-        uv: uv,
-        light: calibratedLux,
-        datetime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
-        accel: Int16List.fromList([accelX, accelY, accelZ]),
-        red: red,
-        green: green,
-        blue: blue,
-        clear: clear,
-        colourTemperature: colourTemperature,
-        appClass: appClass,
-      ));
+      if (appClass == 0) {
+        indoorMins += 1;
+      } else {
+        outdoorMins += 1;
+      }
+      print(
+          "datetime stored in arduino is ${DateTime.fromMillisecondsSinceEpoch(timestamp * 1000)}");
+      samples.add(
+        ArduinoDataEntity(
+          name: childName,
+          childId: childId,
+          uv: uv,
+          light: calibratedLux,
+          datetime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
+          accel: Int16List.fromList([accelX, accelY, accelZ]),
+          red: red,
+          green: green,
+          blue: blue,
+          clear: clear,
+          colourTemperature: colourTemperature,
+          appClass: appClass,
+        ),
+      );
+      print("end of for loop");
     }
+    print("samples being saved to db ${samples.length}");
     await ArduinoDataEntity.saveListOfArduinoDataEntity(samples);
+
+    print("$indoorMins mins indoors datetime");
+    print("$outdoorMins mins outdoors datetime");
+    // List<ArduinoDataEntity> allChildData = await ArduinoDataEntity.queryArduinoDataById(childId);
+    // for (ArduinoDataEntity e in allChildData){
+    //   print("${e.datetime} ${e.appClass} ");
+    // }
   }
 
   int _calculateLux(int r, int g, int b) {

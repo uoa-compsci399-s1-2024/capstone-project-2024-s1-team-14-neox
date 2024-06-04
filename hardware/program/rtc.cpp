@@ -12,8 +12,8 @@ void initializeRTC() {
 std::array<uint8_t, 4> readRTC() {
     uint32_t epoch = rtc.getEpoch();
     eepromSaveRTCTime(epoch);
-    //Serial.print(epoch);
-    //Serial.print(",");
+    Serial.print(epoch);
+    Serial.println(", reading sample timestamp");
 
     uint8_t first_bytes = epoch & 0x00ff;
     uint8_t second_bytes = epoch >> 8;

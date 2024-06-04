@@ -109,6 +109,7 @@ class ArduinoDataEntity {
       green: green,
       red: red,
       blue: blue,
+
     );
   }
 
@@ -136,11 +137,16 @@ class ArduinoDataEntity {
   // 1.017 seconds to save 20160 samples
   static Future<void> saveListOfArduinoDataEntity(
       List<ArduinoDataEntity> arduinoDataEntityList) async {
+        print("child arduino data list size ${arduinoDataEntityList.length}");
+        for (ArduinoDataEntity e in arduinoDataEntityList){
+          print("inside entity date time to store is ${e.datetime}");
+        }
     AppDb db = AppDb.instance();
     await db.batch((batch) {
       batch.insertAll(
           db.arduinoDatas, arduinoDataEntityList.map((e) => e.toCompanion()));
     });
+
   }
   ////////////////////////////////////////////////////////////////////////////
   // READ ////////////////////////////////////////////////////////////////////
