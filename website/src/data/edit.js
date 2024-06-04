@@ -55,20 +55,19 @@ const Edit = ({showButton, isAdmin}) => {
     if (isAdmin) {
 
         return (
-            <div>
-            <h2 style={{"text-align": "center"}}>Edit Study ID {id}</h2>
-            <br></br>
-            <form class="create-form" onSubmit={handleSubmit}>
-            
-            <div className="mb-3">
+            <div style={{"max-height": "100vh"}}>
+              <h2 style={{"text-align": "center"}}>Edit study</h2>
+              <br></br>
+            <form class="create-form" style={{"max-height": "100vh", "min-height": "50vh"}} onSubmit={handleSubmit}>
+              <div className="mb-3">
                 <label>Study Name</label>
                 <input type="text" className="form-control" placeholder="" name="title" required />
-            </div>
-            <div className="mb-3" style={{"height": "30%"}}>
+              </div>
+              <div className="mb-3" style={{"height": "20vh"}}>
                 <label>Description</label>
-                <input type="text" className="form-control" placeholder="" name="description" required />
-            </div>
-            <div className="mb-3" style={{"text-align": "center"}}>
+                <textarea type="text" style={{"height": "90%"}} className="form-control" placeholder="" name="description" required />
+              </div>
+              <div className="mb-3" style={{"text-align": "center"}}>
             <DateRangePicker
                 placeholder="Set Start and End Dates"
                 format="dd/MM/yyyy"

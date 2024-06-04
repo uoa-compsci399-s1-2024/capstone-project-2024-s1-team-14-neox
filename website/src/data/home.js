@@ -241,6 +241,10 @@ async function fetchDataAndDownload(id, token) {
             },
             credentials: 'include',
         })
+        if (response.status == 403) {
+            alert("User is not a participant in this study");
+            throw new Error("Something went wrong")
+        }
         const jsondata = await response.json(); 
         const data = jsondata.data;
         if (data.length == 0) {
@@ -251,7 +255,6 @@ async function fetchDataAndDownload(id, token) {
         }
     } catch (error) {
         console.error("Error fetching data", error);
-        alert("User is not a participant in this study");
     }
 }
 
