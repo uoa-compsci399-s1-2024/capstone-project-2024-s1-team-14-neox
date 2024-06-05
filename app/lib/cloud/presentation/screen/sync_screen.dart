@@ -144,8 +144,9 @@ class SyncScreen extends StatelessWidget {
                                       .colorScheme
                                       .secondary
                                       .withOpacity(0.1))),
-                          onPressed: () =>
-                              context.read<CloudSyncCubit>().uploadAllChildData(),
+                          onPressed: () => context
+                              .read<CloudSyncCubit>()
+                              .uploadAllChildData(),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -177,67 +178,84 @@ class SyncScreen extends StatelessWidget {
                     },
                   ),
                   const Divider(height: 60),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Myopia research",
-                        style: TextStyle(
-                          fontSize: 20,
+                  SizedBox(
+                    height: 60,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Myopia research",
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
                         ),
-                      ),
 
-                      BlocConsumer<StudyCubit, StudyState>(
-                        listener: (context, state) {
-                          if (state.status.isFetchStudySuccess) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) {
-                                return RepositoryProvider.value(
-                                  value: context.read<StudyRepository>(),
-                                  child: BlocProvider.value(
-                                    value: BlocProvider.of<StudyCubit>(context),
-                                    child: JoinStudyScreen(
-                                      study: state.newStudy!,
+                        Center(
+                          child: SizedBox(
+                            width: 50,
+                            height: 50,
+                            child: BlocConsumer<StudyCubit, StudyState>(
+                              listener: (context, state) {
+                                if (state.status.isFetchStudySuccess) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (_) {
+                                      return RepositoryProvider.value(
+                                        value: context.read<StudyRepository>(),
+                                        child: BlocProvider.value(
+                                          value: BlocProvider.of<StudyCubit>(
+                                              context),
+                                          child: JoinStudyScreen(
+                                            study: state.newStudy!,
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                  );
+                                } else if (state.status.isFailure) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(state.message),
+                                      backgroundColor: Colors.grey,
                                     ),
-                                  ),
+                                  );
+                                }
+                              },
+                              builder: (context, state) {
+                                if (state.status.isLoading) {
+                                  return const Center(
+                                    child: SizedBox(
+                                      width: 30,
+                                      height: 30,
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                }
+
+                                return IconButton(
+                                  iconSize: 32,
+                                  icon: const Icon(Icons.add),
+                                  onPressed: () => _showStudyCodeInputDialog(
+                                      context, onStudyFetch: (s) {
+                                    context
+                                        .read<StudyCubit>()
+                                        .fetchStudyFromServer(s);
+                                  }),
                                 );
-                              }),
-                            );
-                          } else if (state.status.isFailure) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(state.message),
-                                backgroundColor: Colors.grey,
-                              ),
-                            );
-                          }
-                        },
-                        builder: (context, state) {
-                          if (state.status.isLoading) {
-                            return const CircularProgressIndicator();
-                          }
-                          return IconButton(
-                            iconSize: 32,
-                            icon: const Icon(Icons.add),
-                            onPressed: () => _showStudyCodeInputDialog(context,
-                                onStudyFetch: (s) {
-                              context
-                                  .read<StudyCubit>()
-                                  .fetchStudyFromServer(s);
-                            }),
-                          );
-                        },
-                      ),
-                      // onStudyFetch: (studyCode) => Navigator.push(
-                      // context,
-                      // MaterialPageRoute(builder: (_) {
-                      //   return BlocProvider.value(
-                      //     value: BlocProvider.of<StudyCubit>(context),
-                      //     child: JoinStudyScreen(studyCode: _textFieldController.text.toLowerCase().trim(),),
-                      //   );
-                      // }
-                    ],
+                              },
+                            ),
+                          ),
+                        ),
+                        // onStudyFetch: (studyCode) => Navigator.push(
+                        // context,
+                        // MaterialPageRoute(builder: (_) {
+                        //   return BlocProvider.value(
+                        //     value: BlocProvider.of<StudyCubit>(context),
+                        //     child: JoinStudyScreen(studyCode: _textFieldController.text.toLowerCase().trim(),),
+                        //   );
+                        // }
+                      ],
+                    ),
                   ),
                   BlocBuilder<StudyCubit, StudyState>(
                     builder: (context, state) {

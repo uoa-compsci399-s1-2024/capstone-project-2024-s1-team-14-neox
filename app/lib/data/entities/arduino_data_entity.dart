@@ -519,13 +519,13 @@ class ArduinoDataEntity {
         final data = ArduinoDataEntity(
           uv: 100,
           light: 35000,
-          red: 50000,
-          green: 50000,
-          blue: 60000,
-          clear: 65550,
+          red: 200,
+          green: 200,
+          blue: 200,
+          clear: 200,
           colourTemperature: 0,
           datetime: time,
-          accel: Int16List.fromList([5000, 5000, 5000]),
+          accel: Int16List.fromList([33, 44, 55]),
           serverSynced: 0,
           appClass: 0, // Generates either 0 or 1 randomly
           childId: childId,
