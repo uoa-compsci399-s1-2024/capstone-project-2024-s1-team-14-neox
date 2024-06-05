@@ -3,14 +3,6 @@ Description: SAM template for all instances of web interface
 Transform: AWS::Serverless-2016-10-31
 
 Parameters:
-  ProjectOrg:
-    Description: "Organisation that runs the website (used for bucket name -> website URL)"
-    Type: String
-    Default: neox
-    MinLength: 1
-    MaxLength: 255
-    AllowedPattern: "^[a-zA-Z][-a-zA-Z0-9]*$"
-
   # There is no specific boolean datatype in Cloudformation
   StartAllDevInstance:
     Description: Whether to start a developer website instance for all teams
@@ -43,7 +35,6 @@ Resources:
     Properties:
       TemplateURL: subtemplates/website-template.yaml
       Parameters:
-        ProjectOrg: !Ref ProjectOrg
         ParentStackName: !Ref 'AWS::StackName'
         UseCase: server
         Environment: dev
@@ -54,68 +45,9 @@ Resources:
     Properties:
       TemplateURL: subtemplates/website-template.yaml
       Parameters:
-        ProjectOrg: !Ref ProjectOrg
         ParentStackName: !Ref 'AWS::StackName'
         UseCase: website
         Environment: dev
-  
-  CognitoUserPool:
-    Type: AWS::Cognito::UserPool
-    Properties:
-      UserPoolName: !Sub "${Env}-${CognitoUserPoolName}"
-      AliasAttributes:
-        - email
-      UsernameConfiguration:
-        CaseSensitive: false
-      AutoVerifiedAttributes:
-        - email
-      Policies:
-        PasswordPolicy:
-          MinimumLength: 8
-          RequireLowercase: true
-          RequireNumbers: true
-          RequireUppercase: true
-          RequireSymbols: true
-      Schema:
-         - AttributeDataType: String
-          Mutable: true
-          Name: email
-          Required: true
-          StringAttributeConstraints:
-            MinLength: "1"
-        - AttributeDataType: String
-          Mutable: true
-          Name: given_name
-          Required: true
-          StringAttributeConstraints:
-            MinLength: "1"
-        - AttributeDataType: String
-          Mutable: true
-          Name: family_name
-          Required: true
-          StringAttributeConstraints:
-            MinLength: "1"
-        - AttributeDataType: String
-          Mutable: true
-          Name: middle_name
-          Required: true
-          StringAttributeConstraints:
-            MinLength: "1"
-        - AttributeDataType: String
-          Mutable: true
-          Name: nickname
-          Required: true
-          StringAttributeConstraints:
-            MinLength: "1"
-    WebCognitoUserPoolClient:
-    Type: AWS::Cognito::UserPoolClient
-    Properties:
-      ClientName: !Sub "${Env}-${CognitoWebClientName}"
-      UserPoolId: !Ref CognitoUserPool
-      ExplicitAuthFlows:
-        - ALLOW_USER_SRP_AUTH
-        - ALLOW_REFRESH_TOKEN_AUTH
-      PreventUserExistenceErrors: ENABLED
 
   # App team instances
   AppDevInstance:
@@ -123,7 +55,6 @@ Resources:
     Properties:
       TemplateURL: subtemplates/website-template.yaml
       Parameters:
-        ProjectOrg: !Ref ProjectOrg
         ParentStackName: !Ref 'AWS::StackName'
         UseCase: app
         Environment: dev
@@ -134,7 +65,6 @@ Resources:
     Properties:
       TemplateURL: subtemplates/website-template.yaml
       Parameters:
-        ProjectOrg: !Ref ProjectOrg
         ParentStackName: !Ref 'AWS::StackName'
         UseCase: all
         Environment: dev
@@ -144,7 +74,6 @@ Resources:
     Properties:
       TemplateURL: subtemplates/website-template.yaml
       Parameters:
-        ProjectOrg: !Ref ProjectOrg
         ParentStackName: !Ref 'AWS::StackName'
         UseCase: ml
         Environment: dev
@@ -155,7 +84,6 @@ Resources:
     Properties:
       TemplateURL: subtemplates/website-template.yaml
       Parameters:
-        ProjectOrg: !Ref ProjectOrg
         ParentStackName: !Ref 'AWS::StackName'
         UseCase: prod
         Environment: prod
@@ -164,57 +92,57 @@ Outputs:
   ServerDevS3Name:
     Value: !GetAtt ServerDevInstance.Outputs.WebsiteBucketS3Name
     Export:
-      Name: !Sub "${ProjectOrg}-${AWS::StackName}-server-dev-bucket"
+      Name: !Sub "neox-${AWS::StackName}-server-dev-bucket"
   ServerDevURL:
     Value: !GetAtt ServerDevInstance.Outputs.WebsiteURL
     Export:
-      Name: !Sub "${ProjectOrg}-${AWS::StackName}-server-dev-website"
+      Name: !Sub "neox-${AWS::StackName}-server-dev-website"
 
   WebsiteDevS3Name:
     Value: !GetAtt WebsiteDevInstance.Outputs.WebsiteBucketS3Name
     Export:
-      Name: !Sub "${ProjectOrg}-${AWS::StackName}-website-dev-bucket"
+      Name: !Sub "neox-${AWS::StackName}-website-dev-bucket"
   WebsiteDevURL:
     Value: !GetAtt WebsiteDevInstance.Outputs.WebsiteURL
     Export:
-      Name: !Sub "${ProjectOrg}-${AWS::StackName}-website-dev-website"
+      Name: !Sub "neox-${AWS::StackName}-website-dev-website"
 
   AppDevS3Name:
     Value: !GetAtt AppDevInstance.Outputs.WebsiteBucketS3Name
     Export:
-      Name: !Sub "${ProjectOrg}-${AWS::StackName}-app-dev-bucket"
+      Name: !Sub "neox-${AWS::StackName}-app-dev-bucket"
   AppDevURL:
     Value: !GetAtt AppDevInstance.Outputs.WebsiteURL
     Export:
-      Name: !Sub "${ProjectOrg}-${AWS::StackName}-app-dev-website"
+      Name: !Sub "neox-${AWS::StackName}-app-dev-website"
 
   AllDevS3Name:
     Condition: ShouldStartAllDevInstance
     Value: !GetAtt AllDevInstance.Outputs.WebsiteBucketS3Name
     Export:
-      Name: !Sub "${ProjectOrg}-${AWS::StackName}-all-dev-bucket"
+      Name: !Sub "neox-${AWS::StackName}-all-dev-bucket"
   AllDevURL:
     Condition: ShouldStartAllDevInstance
     Value: !GetAtt AllDevInstance.Outputs.WebsiteURL
     Export:
-      Name: !Sub "${ProjectOrg}-${AWS::StackName}-all-dev-website"
+      Name: !Sub "neox-${AWS::StackName}-all-dev-website"
 
   MlDevS3Name:
     Value: !GetAtt MlDevInstance.Outputs.WebsiteBucketS3Name
     Export:
-      Name: !Sub "${ProjectOrg}-${AWS::StackName}-ml-dev-bucket"
+      Name: !Sub "neox-${AWS::StackName}-ml-dev-bucket"
   MlDevURL:
     Value: !GetAtt MlDevInstance.Outputs.WebsiteURL
     Export:
-      Name: !Sub "${ProjectOrg}-${AWS::StackName}-ml-dev-website"
+      Name: !Sub "neox-${AWS::StackName}-ml-dev-website"
 
   ProdS3Name:
     Condition: ShouldStartProdInstance
     Value: !GetAtt ProdInstance.Outputs.WebsiteBucketS3Name
     Export:
-      Name: !Sub "${ProjectOrg}-${AWS::StackName}-prod-prod-bucket"
+      Name: !Sub "neox-${AWS::StackName}-prod-prod-bucket"
   ProdURL:
     Condition: ShouldStartProdInstance
     Value: !GetAtt ProdInstance.Outputs.WebsiteURL
     Export:
-      Name: !Sub "${ProjectOrg}-${AWS::StackName}-prod-prod-website"
+      Name: !Sub "neox-${AWS::StackName}-prod-prod-website"

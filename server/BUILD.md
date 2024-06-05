@@ -6,13 +6,21 @@
 - Configured credentials for AWS
 - `sam` CLI (The original developers downloaded it from PyPI)
 
-We will not set up the website here.  See `website/BUILD.md` if you
-want to do that.
+We will not set up the website here.  If you intend to do
+non-localhost development on the website, you will first need to set
+up the stack for the S3 buckets used in the S3 static site hosting.
+See `website/BUILD.md` if you want to do that.
+
+The provided build config in `samconfig.toml` assumes the website's
+stack name is `frontend`.  Change the value of the `WebsiteStackName`
+stack parameter if you use a different name.
 
 ## Configuration
 
 We have multiple "usecases" for the backend, each of which will be
 launched in separate CloudFormation stacks and VPCs.
+
+### Environments
 
 Within each "usecase", we have "environments" which split into
 development environments (`dev` and `localhost`) which share a stack
@@ -20,6 +28,15 @@ and VPC and the production environment (`prod`) which is separate from
 the development environments.
 
 We only support `dev` and `localhost` for now.
+
+This is specified by the `Environment` stack parameter.
+
+If you *don't* use `localhost`, you will need to first set up the
+website SAM stack.
+
+If you use `localhost` and you need to use a localhost port different
+from 3000, you will need to set the `WebsiteLocalhostPort` stack
+parameter.
 
 ### Usecases
 
@@ -32,6 +49,19 @@ special uses.
 - all (all teams)
 - prod (presentable iteration of project) (need to add to `samconfig.toml`)
 - ml (machine learning) (need to add to `samconfig.toml`)
+
+This is specified by the `UseCase` stack parameter.
+
+## Stack name
+
+The name of the stack corresponding to each combination of usecase and
+environment follows the pattern: `backend-<UseCase>-<ENV'>` where
+`ENV'` is `prod` if the `Environment` stack parameter is `prod` and
+`dev` if `Environment` refers to a development environment (as defined
+above).
+
+You can change the pattern by updating the relevant entries in
+`samconfig.toml`.
 
 ## Building
 
@@ -81,6 +111,11 @@ template stack outputs.  Use any client ID when testing in the backend
 (`AppClientId` or `WebClientId`).  We provide different client IDs for
 app and website in case we want to treat app and web clients
 differently in future versions.
+
+If you accidentally run this step before initialising the database and
+the user pool, delete the admin account from the Cognito user pool on
+the AWS web console.  Then run the previous steps in the order they
+are given.
 
 To log in:
 
