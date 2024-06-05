@@ -80,7 +80,7 @@ class _CreateChildProfileScreenState extends State<CreateChildProfileScreen> {
         builder: (innerContext) => AlertDialog(
           title: const Text("Delete profile"),
           content: const Text(
-              "Are you sure you want to delete this profile?\nAll associated data will be deleted and cannot be recovered."),
+              "Are you sure you want to delete this profile? All associated data will be deleted and cannot be recovered."),
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(innerContext),

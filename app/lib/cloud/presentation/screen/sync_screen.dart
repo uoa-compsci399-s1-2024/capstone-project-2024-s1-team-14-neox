@@ -94,7 +94,7 @@ class SyncScreen extends StatelessWidget {
                   BlocBuilder<CloudSyncCubit, CloudSyncState>(
                     builder: (context, state) {
                       if (state.status.isLoading) {
-                        SizedBox(
+                        return SizedBox(
                           height: 80,
                           child: FilledButton(
                             style: ButtonStyle(
@@ -111,7 +111,8 @@ class SyncScreen extends StatelessWidget {
                                         .withOpacity(0.1))),
                             onPressed: null,
                             child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
                                   Text(
                                     'Syncing...',
@@ -126,7 +127,7 @@ class SyncScreen extends StatelessWidget {
                           ),
                         );
                       }
-              
+
                       return SizedBox(
                         height: 80,
                         child: FilledButton(
@@ -142,8 +143,9 @@ class SyncScreen extends StatelessWidget {
                                       .colorScheme
                                       .secondary
                                       .withOpacity(0.1))),
-                          onPressed: () =>
-                              context.read<CloudSyncCubit>().syncAllChildData(),
+                          onPressed: () => context
+                              .read<CloudSyncCubit>()
+                              .uploadAllChildData(),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -151,7 +153,8 @@ class SyncScreen extends StatelessWidget {
                                 'Sync to cloud',
                                 style: TextStyle(
                                     fontSize: 20,
-                                    color: Theme.of(context).colorScheme.primary),
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
                               ),
                               Icon(Icons.cloud_upload,
                                   size: 40,
@@ -162,67 +165,96 @@ class SyncScreen extends StatelessWidget {
                       );
                     },
                   ),
-              
+                  BlocBuilder<CloudSyncCubit, CloudSyncState>(
+                    builder: (context, state) {
+                      return ElevatedButton(
+                          onPressed: () => context
+                              .read<CloudSyncCubit>()
+                              .retrieveChildrenNotInDB(),
+                          child: Text(
+                            "getting children",
+                          ));
+                    },
+                  ),
                   const Divider(height: 60),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Myopia research",
-                        style: TextStyle(
-                          fontSize: 20,
+                  SizedBox(
+                    height: 60,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Myopia research",
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
                         ),
-                      ),
-              
-                      BlocConsumer<StudyCubit, StudyState>(
-                        listener: (context, state) {
-                          if (state.status.isFetchStudySuccess) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) {
-                                return RepositoryProvider.value(
-                                  value: context.read<StudyRepository>(),
-                                  child: BlocProvider.value(
-                                    value: BlocProvider.of<StudyCubit>(context),
-                                    child: JoinStudyScreen(
-                                      study: state.newStudy!,
+
+                        Center(
+                          child: SizedBox(
+                            width: 50,
+                            height: 50,
+                            child: BlocConsumer<StudyCubit, StudyState>(
+                              listener: (context, state) {
+                                if (state.status.isFetchStudySuccess) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (_) {
+                                      return RepositoryProvider.value(
+                                        value: context.read<StudyRepository>(),
+                                        child: BlocProvider.value(
+                                          value: BlocProvider.of<StudyCubit>(
+                                              context),
+                                          child: JoinStudyScreen(
+                                            study: state.newStudy!,
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                  );
+                                } else if (state.status.isFailure) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(state.message),
+                                      backgroundColor: Colors.grey,
                                     ),
-                                  ),
+                                  );
+                                }
+                              },
+                              builder: (context, state) {
+                                if (state.status.isLoading) {
+                                  return const Center(
+                                    child: SizedBox(
+                                      width: 30,
+                                      height: 30,
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                }
+
+                                return IconButton(
+                                  iconSize: 32,
+                                  icon: const Icon(Icons.add),
+                                  onPressed: () => _showStudyCodeInputDialog(
+                                      context, onStudyFetch: (s) {
+                                    context
+                                        .read<StudyCubit>()
+                                        .fetchStudyFromServer(s);
+                                  }),
                                 );
-                              }),
-                            );
-                          } else if (state.status.isFailure) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(state.message),
-                                backgroundColor: Colors.grey,
-                              ),
-                            );
-                          }
-                        },
-                        builder: (context, state) {
-                          if (state.status.isLoading) {
-                            return const CircularProgressIndicator();
-                          }
-                          return IconButton(
-                            iconSize: 32,
-                            icon: const Icon(Icons.add),
-                            onPressed: () => _showStudyCodeInputDialog(context,
-                                onStudyFetch: (s) {
-                              context.read<StudyCubit>().fetchStudyFromServer(s);
-                            }),
-                          );
-                        },
-                      ),
-                      // onStudyFetch: (studyCode) => Navigator.push(
-                      // context,
-                      // MaterialPageRoute(builder: (_) {
-                      //   return BlocProvider.value(
-                      //     value: BlocProvider.of<StudyCubit>(context),
-                      //     child: JoinStudyScreen(studyCode: _textFieldController.text.toLowerCase().trim(),),
-                      //   );
-                      // }
-                    ],
+                              },
+                            ),
+                          ),
+                        ),
+                        // onStudyFetch: (studyCode) => Navigator.push(
+                        // context,
+                        // MaterialPageRoute(builder: (_) {
+                        //   return BlocProvider.value(
+                        //     value: BlocProvider.of<StudyCubit>(context),
+                        //     child: JoinStudyScreen(studyCode: _textFieldController.text.toLowerCase().trim(),),
+                        //   );
+                        // }
+                      ],
+                    ),
                   ),
                   BlocBuilder<StudyCubit, StudyState>(
                     builder: (context, state) {
@@ -242,7 +274,8 @@ class SyncScreen extends StatelessWidget {
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
                                     "You are not participating in any studies.",
@@ -270,7 +303,8 @@ class SyncScreen extends StatelessWidget {
                                           ),
                                         ),
                                       ),
-                                      onPressed: () => _showStudyCodeInputDialog(
+                                      onPressed: () =>
+                                          _showStudyCodeInputDialog(
                                         context,
                                         onStudyFetch: (s) {
                                           context
@@ -290,7 +324,7 @@ class SyncScreen extends StatelessWidget {
                           ),
                         );
                       }
-              
+
                       return ListView(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),

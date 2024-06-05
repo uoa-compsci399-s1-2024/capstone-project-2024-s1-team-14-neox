@@ -1,15 +1,17 @@
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:capstone_project_2024_s1_team_14_neox/data/classifiers/light_gbm_small.dart';
 
 import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as material;
 
 import '../../server/child_data.dart';
 
 @UseRowClass(ArduinoDataEntity)
 class ArduinoDatas extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  // IntColumn get id => integer().autoIncrement()();
 
   IntColumn get childId =>
       integer().customConstraint('REFERENCES children(id) ON DELETE CASCADE')();
@@ -26,7 +28,7 @@ class ArduinoDatas extends Table {
 
   IntColumn get accelZ => integer()();
 
-  IntColumn get serverClass => integer()();
+  IntColumn get serverSynced => integer()();
 
   IntColumn get appClass => integer()();
 
@@ -41,7 +43,7 @@ class ArduinoDatas extends Table {
   IntColumn get colourTemperature => integer()();
 
   @override
-  Set<Column> get primaryKey => {id};
+  Set<Column> get primaryKey => {childId, datetime};
 }
 
 class ArduinoDataEntity {
@@ -50,9 +52,9 @@ class ArduinoDataEntity {
   int? light;
   DateTime datetime;
   Int16List? accel;
-  int? id;
+  // int? id;
   int childId;
-  int serverClass;
+  int serverSynced;
   int appClass;
   int red;
   int green;
@@ -61,14 +63,13 @@ class ArduinoDataEntity {
   int colourTemperature;
 
   ArduinoDataEntity(
-      {this.id,
-      this.name,
+      {this.name,
       this.uv,
       this.light,
       required this.datetime,
       this.accel,
       this.appClass = -1,
-      this.serverClass = -1,
+      this.serverSynced = 0,
       this.green = 0,
       this.blue = 0,
       this.red = 0,
@@ -85,7 +86,7 @@ class ArduinoDataEntity {
       accelY: Value(accel?[1] ?? -1),
       accelZ: Value(accel?[2] ?? -1),
       appClass: Value(appClass),
-      serverClass: Value(serverClass),
+      serverSynced: Value(serverSynced),
       red: Value(red),
       blue: Value(blue),
       green: Value(green),
@@ -119,9 +120,9 @@ class ArduinoDataEntity {
   static Future<void> saveSingleArduinoDataEntity(
       ArduinoDataEntity arduinoDataEntity) async {
     AppDb db = AppDb.instance();
-    await db
-        .into(db.arduinoDatas)
-        .insertOnConflictUpdate(arduinoDataEntity.toCompanion());
+    await db.into(db.arduinoDatas).insertOnConflictUpdate(
+          arduinoDataEntity.toCompanion(),
+        );
   }
   // 104 seconds to save 20160 samples
   // static Future<void> saveListOfArduinoDataEntity(
@@ -134,14 +135,47 @@ class ArduinoDataEntity {
 
   // Batch to speed up insertion
   // 1.017 seconds to save 20160 samples
-  static Future<void> saveListOfArduinoDataEntity(
+  static Future<List<int>> saveListOfArduinoDataEntity(
       List<ArduinoDataEntity> arduinoDataEntityList) async {
+    debugPrint("Classifying data samples, length: ${arduinoDataEntityList.length}");
+
+    int outdoorMins = 0;
+    int indoorMins = 0;
+
+    for (ArduinoDataEntity sample in arduinoDataEntityList) {
+      int appClass = ArduinoDataEntity.classifyArduinoDataEntity(sample);
+      if (appClass == 0) {
+        indoorMins += 1;
+      } else {
+        outdoorMins += 1;
+      }
+
+      sample.appClass = appClass;
+    }
+
     AppDb db = AppDb.instance();
+
     await db.batch((batch) {
-      batch.insertAll(
+      batch.insertAllOnConflictUpdate(
           db.arduinoDatas, arduinoDataEntityList.map((e) => e.toCompanion()));
     });
+    debugPrint("$outdoorMins outdoors, $indoorMins indoors");
+    return [outdoorMins, indoorMins];
   }
+
+  // batch for updating local if timestamp exists
+  // static Future<void> saveListOfArduinoDataEntity(
+  //     List<ArduinoDataEntity> arduinoDataEntityList) async {
+  //   AppDb db = AppDb.instance();
+
+  //   await db.batch((batch) {
+  //     for (ArduinoDataEntity e in arduinoDataEntityList) {
+  //       batch.insert(db.arduinoDatas, e.toCompanion(),
+  //           onConflict: DoUpdate((old) => e.toCompanion(),
+  //               target: [db.arduinoDatas.childId, db.arduinoDatas.datetime]));
+  //     }
+  //   });
+  // }
   ////////////////////////////////////////////////////////////////////////////
   // READ ////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
@@ -210,17 +244,11 @@ class ArduinoDataEntity {
   // UPDATE //////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
 
-  static Future<void> updateAppClass(int id, int appClass) async {
-    final db = AppDb.instance();
-    await (db.update(db.arduinoDatas)..where((tbl) => tbl.id.equals(id)))
-        .write(ArduinoDatasCompanion(appClass: Value(appClass)));
-  }
-
-  static Future<void> updateServerClass(int id, int serverClass) async {
-    final db = AppDb.instance();
-    await (db.update(db.arduinoDatas)..where((tbl) => tbl.id.equals(id)))
-        .write(ArduinoDatasCompanion(serverClass: Value(serverClass)));
-  }
+  // static Future<void> updateAppClass(int id, int appClass) async {
+  //   final db = AppDb.instance();
+  //   await (db.update(db.arduinoDatas)..where((tbl) => tbl.id.equals(id)))
+  //       .write(ArduinoDatasCompanion(appClass: Value(appClass)));
+  // }
 
   ////////////////////////////////////////////////////////////////////////////
   // GRAPHS //////////////////////////////////////////////////////////////////
@@ -364,6 +392,114 @@ class ArduinoDataEntity {
     return hourlyStats;
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  // CLASSIFICATION //////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
+
+  static int classifyArduinoDataEntity(ArduinoDataEntity sample) {
+    int uv = sample.uv ?? 1;
+
+    int accelX = sample.accel![0];
+    int accelY = sample.accel![1];
+    int accelZ = sample.accel![2];
+    int red = sample.red;
+    int green = sample.green;
+    int blue = sample.blue;
+    int clear = sample.clear;
+    int colourTemperature = sample.colourTemperature;
+    int light = sample.light ?? 1;
+
+    List<double> features = [];
+    features.addAll([
+      uv.toDouble(),
+      accelX.toDouble(),
+      accelY.toDouble(),
+      accelZ.toDouble(),
+      red.toDouble(),
+      green.toDouble(),
+      blue.toDouble(),
+      clear.toDouble(),
+      colourTemperature.toDouble(),
+      light.toDouble(),
+    ]);
+
+    // acceleration
+
+    features.add((accelX + accelY + accelZ).toDouble());
+    features.add((pow(accelX, 2) + pow(accelY, 2) + pow(accelZ, 2)).toDouble());
+    features.add((accelX * accelY).abs().toDouble());
+
+    // rgb vs clear
+    features.add(red / (clear + 1));
+    features.add(green / (clear + 1));
+    features.add(blue / (clear + 1));
+
+    features.add(red / (green + 1));
+    features.add(blue / (red + 1));
+    features.add(blue / (green + 1));
+
+    features.add((clear - red) / (red + 1));
+    features.add((clear - green) / (red + 1));
+    features.add((clear - blue) / (red + 1));
+
+    features.add((clear - red) / (green + 1));
+    features.add((clear - green) / (green + 1));
+    features.add((clear - blue) / (green + 1));
+
+    features.add((clear - red) / (blue + 1));
+    features.add((clear - green) / (blue + 1));
+    features.add((clear - blue) / (blue + 1));
+
+    features.add((clear - red) / (clear + 1));
+    features.add((clear - green) / (clear + 1));
+    features.add((clear - blue) / (clear + 1));
+
+    // log
+    double redLog = log(red + 1);
+    double greenLog = log(green + 1);
+    double blueLog = log(blue + 1);
+    double clearLog = log(clear + 1);
+
+    features.add(redLog / clearLog);
+    features.add(greenLog / clearLog);
+    features.add(blueLog / clearLog);
+
+    features.add(redLog / (greenLog + 1));
+    features.add(blueLog / (redLog + 1));
+    features.add(blueLog / (greenLog + 1));
+
+// squre root
+    double redSqrt = sqrt(red + 1);
+    double greenSqrt = sqrt(green + 1);
+    double blueSqrt = sqrt(blue + 1);
+    double clearSqrt = sqrt(clear + 1);
+
+    features.add(redSqrt / clearSqrt);
+    features.add(greenSqrt / clearSqrt);
+    features.add(blueSqrt / clearSqrt);
+
+    features.add(redSqrt / (greenSqrt + 1));
+    features.add(blueSqrt / (redSqrt + 1));
+    features.add(blueSqrt / (greenSqrt + 1));
+
+    // uv vs lux
+    double lightLog = log(light + 1);
+    double uvLog = log(uv + 2);
+    double lightSqrt = sqrt(light + 1);
+    double uvSqrt = sqrt(uv + 1);
+
+    features.add(light / (uv + 1));
+    features.add(blue / (uv + 1));
+    features.add((clear - blue) / (uv + 1));
+    features.add(lightLog / uvLog);
+    features.add(blueLog / uvLog);
+    features.add(lightSqrt / uvSqrt);
+    features.add(blueSqrt / uvSqrt);
+    List<double> probabilities = score(features);
+// print("$uv $light $probabilities");
+    return probabilities[1] > 0.50 ? 1 : 0;
+  }
+
 ///////////////////////////////////////////////////////////////////
 // FOR TESTING PURPOSE DELETE LATER //////////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -382,14 +518,17 @@ class ArduinoDataEntity {
       if (time.hour > 5 && time.hour < 22) {
         // only add if between 6am and 10pm
         final data = ArduinoDataEntity(
-          uv: 5,
-          light: 100,
+          uv: 100,
+          light: 35000,
+          red: 200,
+          green: 200,
+          blue: 200,
+          clear: 200,
+          colourTemperature: 0,
           datetime: time,
-          accel: Int16List.fromList([1, 2, 3]),
-          serverClass: 1,
-          appClass: random.nextDouble() > threshold
-              ? 0
-              : 1, // Generates either 0 or 1 randomly
+          accel: Int16List.fromList([33, 44, 55]),
+          serverSynced: 0,
+          appClass: 0, // Generates either 0 or 1 randomly
           childId: childId,
         );
         dataList.add(data);

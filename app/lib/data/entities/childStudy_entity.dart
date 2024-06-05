@@ -90,6 +90,13 @@ class ChildStudyAssociationsEntity {
         .go();
   }
 
+    static Future<void> removeAllChildrenFromStudy(String studyCode) async {
+    final db = AppDb.instance();
+    await (db.delete(db.childStudy)
+      ..where((tbl) => tbl.studyCode.equals(studyCode)))
+        .go();
+  }
+
 }
 
 

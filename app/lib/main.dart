@@ -2,6 +2,8 @@
 // import 'package:capstone_project_2024_s1_team_14_neox/analysis/bloc/analysis_result_bloc.dart';
 import 'dart:core';
 
+import 'package:capstone_project_2024_s1_team_14_neox/cloud/cubit/login_cubit.dart';
+import 'package:capstone_project_2024_s1_team_14_neox/cloud/domain/authentication_repository.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/login_screen.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/presentation/screen/sync_screen.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/cloud/services/aws_cognito.dart';
@@ -26,6 +28,7 @@ import 'package:flutter/services.dart';
 // Import bottom navigation screens
 import 'child_home/domain/child_device_repository.dart';
 import 'child_home/presentation/child_profile_home.dart';
+import 'cloud/cubit/cloud_sync_cubit.dart';
 import 'cloud/presentation/cloud_home.dart';
 
 
@@ -121,6 +124,12 @@ class App extends StatelessWidget {
            BlocProvider(
             create: (context) => AllChildProfileCubit(context.read<ChildDeviceRepository>()),
           ),
+           BlocProvider(
+            create: (context) => CloudSyncCubit(),
+          ),
+          //  BlocProvider(
+          //   create: (context) => LoginCubit(AuthenticationRepository()),
+          // ),
         ],
         // Creates MaterialApp
         child: MaterialApp(

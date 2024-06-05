@@ -142,7 +142,7 @@ class StatisticsHomeState extends State<StatisticsHome> {
               builder: (context, state) {
             if (state.focusChildId == null) {
               return const Center(
-                child: Text("Select a profile to view"),
+                child: Text("Select a profile to view statistics"),
               );
             }
 
@@ -153,7 +153,7 @@ class StatisticsHomeState extends State<StatisticsHome> {
                     MonthlyCubit(context.read<StatisticsRepository>())
                       ..onGetYearDataForChildId(
                           DateTime.now().year, state.focusChildId!),
-                child: MonthlyPanel(),
+                child: const MonthlyPanel(),
               );
             } else {
               return BlocProvider(

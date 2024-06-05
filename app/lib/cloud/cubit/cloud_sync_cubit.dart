@@ -9,19 +9,22 @@ part 'cloud_sync_state.dart';
 class CloudSyncCubit extends Cubit<CloudSyncState> {
   CloudSyncCubit() : super(const CloudSyncState());
 
-  Future<void> syncAllChildData() async {
+  Future<void> uploadAllChildData() async {
     emit(state.copyWith(status: CloudSyncStatus.loading));
-    try {
-      await ChildEntity.syncAllChildData();
-    } on Exception catch (e) {
-      emit(state.copyWith(
-        status: CloudSyncStatus.failure,
-        message: e.toString(),
-      ));
-    }
-    emit(state.copyWith(
-      status: CloudSyncStatus.success,
-      lastSynced: DateTime.now(),
-    ));
+
+    await ChildEntity.uploadAllChildData().then(
+      (value) async {
+        await ChildEntity.downloadAllChildData();
+        emit(state.copyWith(status: CloudSyncStatus.success));
+        return value;
+      },
+    );
+  }
+
+  Future<void> retrieveChildrenNotInDB() async {
+    print("entered retrieveing children");
+
+    await ChildEntity.retrieveChildrenInServer();
+    print("done with retrieveing children");
   }
 }

@@ -17,8 +17,10 @@ class StudyTile extends StatelessWidget {
     return Column(
       children: [
         const Text(
-          "Participants",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          "Manage participants",
+          style: TextStyle(
+            fontSize: 20,
+          ),
         ),
         if (state.allChildren.isEmpty) ...const [
           Text(
@@ -45,13 +47,19 @@ class StudyTile extends StatelessWidget {
                             .read<ParticipantsCubit>()
                             .deleteChildFromStudy(
                                 child.childId, study.studyCode),
-                        icon: const Icon(Icons.remove))
+                        icon: const Icon(
+                          Icons.person_remove,
+                          color: Colors.red,
+                        ))
                     : IconButton(
                         iconSize: 32,
                         onPressed: () => context
                             .read<ParticipantsCubit>()
                             .addChildToStudy(child.childId, study.studyCode),
-                        icon: const Icon(Icons.add)),
+                        icon: const Icon(
+                          Icons.person_add_alt_1,
+                        ),
+                      ),
               ],
             ))
       ],

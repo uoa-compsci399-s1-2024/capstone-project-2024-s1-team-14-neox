@@ -97,7 +97,6 @@ class ChildEntity {
   static Future<ChildEntity?> queryChildById(int id) async {
     AppDb db = AppDb.instance();
 
-
     ChildEntity? child = await (db.select(db.children)
           ..where((tbl) => tbl.id.equals(id)))
         .getSingleOrNull();
@@ -115,6 +114,14 @@ class ChildEntity {
     AppDb db = AppDb.instance();
     ChildEntity? childEntity = await (db.select(db.children)
           ..where((tbl) => tbl.name.equals(name)))
+        .getSingleOrNull();
+    return childEntity;
+  }
+
+  static Future<ChildEntity?> queryChildByServerId(String serverId) async {
+    AppDb db = AppDb.instance();
+    ChildEntity? childEntity = await (db.select(db.children)
+          ..where((tbl) => tbl.serverId.equals(serverId)))
         .getSingleOrNull();
     return childEntity;
   }
@@ -193,10 +200,11 @@ class ChildEntity {
     AppDb db = AppDb.instance();
     // Delete the child entity from the database based on its ID
     // print("count of${db.children.id.count(filter: childId > 0)}");
-    
-    var studies = await ChildStudyAssociationsEntity.getChildStudiesByChildId(childId);
-    for(final study in studies){
-      ChildApiService.removeChildFromStudy(childId, study.studyCode); 
+
+    var studies =
+        await ChildStudyAssociationsEntity.getChildStudiesByChildId(childId);
+    for (final study in studies) {
+      ChildApiService.removeChildFromStudy(childId, study.studyCode);
     }
 
     await (db.delete(db.children)..where((tbl) => tbl.id.equals(childId))).go();
@@ -214,34 +222,48 @@ class ChildEntity {
   ///           CLOUD            ///
   //////////////////////////////////
 
-  static Future<void> syncAllChildData() async {
-    List<ChildEntity> noServerIdChildren = await ChildEntity.queryChildNoServerId();
+  static Future<void> uploadAllChildData() async {
+    List<ChildEntity> noServerIdChildren =
+        await ChildEntity.queryChildNoServerId();
+    // Register child in server if no serverId is not found
     for (final noServerIdChild in noServerIdChildren) {
       String generatedServerId = await ChildApiService.registerChild();
-      ChildEntity.updateServerId(noServerIdChild.id!, generatedServerId);
-      ChildApiService.setChildInfo(noServerIdChild.id);
+      await ChildEntity.updateServerId(noServerIdChild.id!, generatedServerId);
+      await ChildApiService.setChildInfo(noServerIdChild.id);
     }
+
     List<ChildEntity> children = await ChildEntity.queryAllChildren();
+
     for (final child in children) {
+      // update child details in case it changes
+      await ChildApiService.setChildInfo(child.id);
+
       if (child.serverId == "") {}
       int? id = child.id;
-      ChildApiService.postData(id!);
+      await ChildApiService.postData(id!);
     }
   }
 
-  static Future<void> retrieveChildren() async {
+  static Future<void> downloadAllChildData() async {
+// Create profiles for children not in local db
+    await ChildEntity.retrieveChildrenInServer();
+
+    List<ChildEntity> childrenInDb = await ChildEntity.queryAllChildren();
+    for (ChildEntity child in childrenInDb) {
+      await ChildApiService.fetchChildrenData(child.id!);
+    }
+  }
+
+  static Future<void> retrieveChildrenInServer() async {
     List<String> serverIdList = await ChildApiService.getChildren();
-
-    for(final id in serverIdList){
-
-      ChildEntity child = await ChildApiService.getChildInfo(id);
-      if(await ChildEntity.queryChildByName(child.name) == null){
-        ChildEntity.saveSingleChildEntity(child);
+    for (final String id in serverIdList) {
+      ChildEntity? child = await ChildApiService.getChildInfo(id);
+      if (child != null) {
+        // Depends on the server id of the child
+        if (await ChildEntity.queryChildByServerId(id) == null) {
+          ChildEntity.saveSingleChildEntity(child);
+        }
       }
-
     }
-
-
   }
-
 }
