@@ -33,7 +33,7 @@ class BluetoothPanel extends StatelessWidget {
           ));
         } else if (state is ChildDeviceSyncSuccessState) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text("Sync complete | ${state.message}"),
+            content: const Text("Sync complete"),
             duration: const Duration(seconds: 2),
             backgroundColor: Theme.of(context).colorScheme.secondary,
           ));
