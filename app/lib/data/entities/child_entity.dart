@@ -238,17 +238,20 @@ class ChildEntity {
     }
   }
 
-  static Future<void> retrieveChildren() async {
+  static Future<void> retrieveChildrenInServer() async {
     List<String> serverIdList = await ChildApiService.getChildren();
     print("entere retrive children serverIdlist $serverIdList");
     for (final String id in serverIdList) {
       print("for each id $id");
-      ChildEntity child = await ChildApiService.getChildInfo(id);
+      ChildEntity? child = await ChildApiService.getChildInfo(id);
       print("can get child entity $child");
-      if (await ChildEntity.queryChildByServerId(id) == null) {
-        print("save single child");
-        ChildEntity.saveSingleChildEntity(child);
-        print("child entity retrieve child complete $child.name");
+      if (child != null) {
+        // Depends on the server id of the child
+        if (await ChildEntity.queryChildByServerId(id) == null) {
+          print("save single child");
+          ChildEntity.saveSingleChildEntity(child);
+          print("child entity retrieve child complete $child.name");
+        }
       }
     }
   }
