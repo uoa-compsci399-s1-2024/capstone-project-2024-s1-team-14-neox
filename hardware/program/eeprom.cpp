@@ -71,7 +71,6 @@ void eepromBegin()
   sampleBuffer.bufferAddress = eepromAllocate(SAMPLE_BUFFER_MAX_SIZE_BYTES);
   sampleBuffer.tail = eepromAllocateUint32();
   sampleBuffer.len = eepromAllocateUint32();
-  sampleBuffer.cachedLen = eepromReadUint32(sampleBuffer.len);
   sampleBuffer.locked = false;
   tempSampleBuffer.len = 0;
   
@@ -79,6 +78,8 @@ void eepromBegin()
   rtcTime = eepromAllocateUint32();
 
   resumeAtomicTransaction();
+
+  sampleBuffer.cachedLen = eepromReadUint32(sampleBuffer.len);
 }
 
 void eepromWrite(EEPROMAddress address, const uint8_t* buffer, uint32_t len)
