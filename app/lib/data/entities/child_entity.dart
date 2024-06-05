@@ -225,14 +225,22 @@ class ChildEntity {
   static Future<void> syncAllChildData() async {
     List<ChildEntity> noServerIdChildren =
         await ChildEntity.queryChildNoServerId();
+    // Register child in server if no serverId is not found
     for (final noServerIdChild in noServerIdChildren) {
       String generatedServerId = await ChildApiService.registerChild();
       ChildEntity.updateServerId(noServerIdChild.id!, generatedServerId);
       ChildApiService.setChildInfo(noServerIdChild.id);
     }
+
     List<ChildEntity> children = await ChildEntity.queryAllChildren();
+    
     for (final child in children) {
-      if (child.serverId == "") {}
+      // update child details in case it changes
+      ChildApiService.setChildInfo(child.id);
+
+      if (child.serverId == "") {
+
+      }
       int? id = child.id;
       ChildApiService.postData(id!);
     }

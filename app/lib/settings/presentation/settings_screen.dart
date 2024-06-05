@@ -85,7 +85,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return AlertDialog(
           title: const Text("Delete all data"),
           content: const Text(
-              "Are you sure you want to delete all data? This action cannot be undone."),
+              "Are you sure you want to delete all data? This action cannot be undone. Please sync to Neox Cloud to retrieve data."),
           actions: [
             ElevatedButton(
               onPressed: () => Navigator.pop(innerContext),

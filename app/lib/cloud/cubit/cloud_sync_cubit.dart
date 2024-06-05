@@ -14,16 +14,16 @@ class CloudSyncCubit extends Cubit<CloudSyncState> {
     try {
 
       // Send server updated versions of the profile
-
-
+List<ChildEntity> childrenInDb = await ChildEntity.queryAllChildren();
+for (ChildEntity child in childrenInDb) {
+  
+      // Register unregistered children to cloud, and POST all local data to cloud
+      await ChildEntity.syncAllChildData();
+      print("SYNC: saved all data to cloud");
+}
       // Create child profiles not in local db
       await ChildEntity.retrieveChildrenInServer();
          print("SYNC: retrieve all children in cloud");
-      // Register unregistered children in cloud, and POST all local data to cloud
-      await ChildEntity.syncAllChildData();
-      print("SYNC: saved all data to cloud");
-
-
 
       // Download data from server
     } on Exception catch (e) {

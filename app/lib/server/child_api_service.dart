@@ -224,33 +224,26 @@ class ChildApiService {
   }
 
   static Future<ChildEntity?> getChildInfo(String serverId) async {
-    print("entered get child info");
     Dio dio = Dio();
 
     final defaultHeaders = await initializeHeader();
     String url = '$apiUrl/children/$serverId/info';
 
     try {
-      print("trying to get response in url $url");
       var response = await dio
           .get(url, options: Options(headers: defaultHeaders))
           .then((value) {
-        print("future complete");
         return value;
       });
-      print("succeeded to get response in url $url");
       var data = response.data["data"];
-      print("data received $data");
       if (data["birthdate"] != null &&
           data["given_name"] != null &&
           data["gender"] != null) {
         DateTime birth = DateTime.parse(data["birthdate"]);
         String name = data["given_name"];
         String gender = data["gender"];
-        print("birth date $birth, $gender, $name");
         ChildEntity child =
             ChildEntity(name: name, gender: gender, birthDate: birth, serverId: serverId);
-        print("Created child entity $child");
         return child;
       } else {
         print("child was null");
