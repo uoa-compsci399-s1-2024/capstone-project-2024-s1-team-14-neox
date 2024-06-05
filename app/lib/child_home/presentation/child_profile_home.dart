@@ -9,7 +9,7 @@ import 'screens/create_child_profile_screen.dart';
 import 'tiles/child_profile_tile.dart';
 
 class ChildHomeScreen extends StatefulWidget {
-  const ChildHomeScreen({super.key});
+  const  ChildHomeScreen({super.key});
 
   @override
   State<ChildHomeScreen> createState() => ChildHomeScreenState();
@@ -35,11 +35,7 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
         Size screenSize = MediaQuery.sizeOf(context);
     double screenWidth = screenSize.width;
     double screenHeight = screenSize.height;
-    return SingleChildScrollView(
-      child: SizedBox(
-        height: screenHeight * 0.88,
-        width: screenWidth,
-        child: Scaffold(
+    return Scaffold(
           appBar: AppBar(
             title: const Text("Home"),
           ),
@@ -192,8 +188,6 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
           //   ),
           //   child: const Icon(Icons.add),
           // ),
-        ),
-      ),
-    );
+        );
   }
 }
