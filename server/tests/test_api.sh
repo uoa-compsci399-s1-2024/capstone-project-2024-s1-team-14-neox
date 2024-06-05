@@ -25,11 +25,11 @@ POOLID="$(sam list stack-outputs --output json --stack-name "$STACKNAME" | jq -r
 CLIENTID="$(sam list stack-outputs --output json --stack-name "$STACKNAME" | jq -r '.[] | select(.OutputKey == "AppClientId") | .OutputValue')"
 API_URL="$(sam list stack-outputs --output json --stack-name "$STACKNAME" | jq -r '.[] | select(.OutputKey == "APIEndpoint") | .OutputValue')"
 
-EMAIL_PARENT1="gabriel.lisaca@gmail.com"
-EMAIL_PARENT2="gabriel.lisaca+parent2@gmail.com"
-EMAIL_RESEARCHER1="gabriel.lisaca+researcher1@gmail.com"
-EMAIL_RESEARCHER2="gabriel.lisaca+researcher2@gmail.com"
-EMAIL_ADMIN="gabriel.lisaca+admin@gmail.com"
+EMAIL_PARENT1="parent1@example.com"
+EMAIL_PARENT2="parent2@example.com"
+EMAIL_RESEARCHER1="researcher1@example.com"
+EMAIL_RESEARCHER2="researcher2@example.com"
+EMAIL_ADMIN="admin@example.com"
 
 PASSWORD="Password123!"
 
@@ -394,9 +394,9 @@ sam remote invoke --stack-name "$STACKNAME" FuncMetaClearSamples >/dev/null 2>&1
 BADSAMPLES="$("$(git rev-parse --show-toplevel)/server/generateXsamples" 7 |
 		     jq -r '.samples[0].uv |= -1 |
 			    .samples[1].light |= -1 |
-			    .samples[2].col_red |= 256 |
-			    .samples[3].col_green |= 256 |
-			    .samples[4].col_blue |= 256 |
+			    .samples[2].col_red |= -1 |
+			    .samples[3].col_green |= -1 |
+			    .samples[4].col_blue |= -1 |
 			    .samples[5].col_clear |= -1 |
 			    .samples[6].col_temp |= -1')"
 aux_test_body -M "checking if out-of-range field values are rejected" \

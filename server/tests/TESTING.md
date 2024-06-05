@@ -9,6 +9,9 @@ script which has the following prerequisites:
 - `jq` for working with JSON (used by tests on the response body)
 - `git` CLI
 
+Also set the SAM stack name in the script by changing the `STACKNAME`
+variable.
+
 You can run `tests/test_api.sh -h` for usage information:
 
 ```
