@@ -43,9 +43,9 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
 
   Future<void> _generateSmallData(int childId) async {
     double threshold = 0.13;
-    DateTime time = DateTime.now().subtract(const Duration(days: 1));
+    DateTime time = DateTime.now().subtract(const Duration(days: 5));
 
-    time = time.add(const Duration(days: 7));
+    time = time.add(const Duration(days: 2));
     time = DateTime(time.year, time.month, time.day);
     print("Creating small data for: $time");
     List<ArduinoDataEntity> randomData =

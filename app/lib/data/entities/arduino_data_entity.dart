@@ -158,7 +158,7 @@ class ArduinoDataEntity {
       batch.insertAllOnConflictUpdate(
           db.arduinoDatas, arduinoDataEntityList.map((e) => e.toCompanion()));
     });
-
+    print("$outdoorMins mins outdoors, $indoorMins indoors");
     return [outdoorMins, indoorMins];
   }
 
@@ -517,14 +517,17 @@ class ArduinoDataEntity {
       if (time.hour > 5 && time.hour < 22) {
         // only add if between 6am and 10pm
         final data = ArduinoDataEntity(
-          uv: 5,
-          light: 100,
+          uv: 100,
+          light: 35000,
+          red: 50000,
+          green: 50000,
+          blue: 60000,
+          clear: 65550,
+          colourTemperature: 0,
           datetime: time,
-          accel: Int16List.fromList([1, 2, 3]),
+          accel: Int16List.fromList([5000, 5000, 5000]),
           serverSynced: 0,
-          appClass: random.nextDouble() > threshold
-              ? 0
-              : 1, // Generates either 0 or 1 randomly
+          appClass: 0, // Generates either 0 or 1 randomly
           childId: childId,
         );
         dataList.add(data);

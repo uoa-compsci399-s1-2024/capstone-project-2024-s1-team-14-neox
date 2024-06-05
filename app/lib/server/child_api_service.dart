@@ -23,7 +23,7 @@ class ChildApiService {
     return defaultHeaders;
   }
 
-  static void fetchChildrenData(int childId) async {
+  static Future<void> fetchChildrenData(int childId) async {
     ChildEntity? child = await ChildEntity.queryChildById(childId);
     String? serverId = child?.serverId;
 
@@ -40,7 +40,7 @@ class ChildApiService {
         dataList.add(arduinoDataEntity);
       }
       ArduinoDataEntity.saveListOfArduinoDataEntity(dataList);
-      print("samples retrieved ${dataList.length}");
+      print("samples retrieved child ${child!.name}  serverId $serverId ${dataList.length}");
     } catch (e) {
       print(e);
     }

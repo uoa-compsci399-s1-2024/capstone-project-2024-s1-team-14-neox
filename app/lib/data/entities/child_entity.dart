@@ -240,7 +240,9 @@ class ChildEntity {
 
       if (child.serverId == "") {}
       int? id = child.id;
-      ChildApiService.postData(id!);
+      ChildApiService.postData(id!).then(
+        (value) => print("post data complete"),
+      );
     }
   }
 
@@ -250,7 +252,9 @@ class ChildEntity {
 
     List<ChildEntity> childrenInDb = await ChildEntity.queryAllChildren();
     for (ChildEntity child in childrenInDb) {
-      ChildApiService.fetchChildrenData(child.id!);
+      ChildApiService.fetchChildrenData(child.id!).then(
+        (value) => print("download all data complete"),
+      );
     }
   }
 
