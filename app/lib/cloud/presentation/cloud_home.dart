@@ -36,10 +36,7 @@ class CloudHomeScreen extends StatelessWidget {
           if (state.status.isLogoutSuccess || state.status.isFailure) {
             return const LoginScreen();
           } else if (state.status.isLoginSuccess) {
-            return BlocProvider(
-              create: (context) => CloudSyncCubit(),
-              child: SyncScreen(),
-            );
+            return SyncScreen();
           } else {
             return Container();
           }
