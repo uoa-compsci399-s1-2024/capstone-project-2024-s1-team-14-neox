@@ -160,15 +160,15 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                 child: const BluetoothPanel(),
               ),
               if (kDebugMode)
-                // ElevatedButton(
-                //   onPressed: () => _generateLargeData(state.childId),
-                //   child: const Text("Generate large data"),
-                // ),
+                ElevatedButton(
+                  onPressed: () => _generateLargeData(state.childId),
+                  child: const Text("Generate large data"),
+                ),
               if (kDebugMode)
-                // ElevatedButton(
-                //   onPressed: () => _generateSmallData(state.childId),
-                //   child: const Text("Generate small data"),
-                // ),
+                ElevatedButton(
+                  onPressed: () => _generateSmallData(state.childId),
+                  child: const Text("Generate small data"),
+                ),
               Expanded(
                 child: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
