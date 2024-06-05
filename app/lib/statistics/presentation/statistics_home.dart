@@ -153,7 +153,7 @@ class StatisticsHomeState extends State<StatisticsHome> {
                     MonthlyCubit(context.read<StatisticsRepository>())
                       ..onGetYearDataForChildId(
                           DateTime.now().year, state.focusChildId!),
-                child: MonthlyPanel(),
+                child: const MonthlyPanel(),
               );
             } else {
               return BlocProvider(

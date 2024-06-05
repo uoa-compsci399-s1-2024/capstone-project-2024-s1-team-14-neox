@@ -63,6 +63,14 @@ class ChildHomeScreenState extends State<ChildHomeScreen> {
                   ),
                 );
               }
+              if (state.status.isDeleteSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                  ),
+                );
+              }
               if (state.status.isFailure) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
