@@ -6,6 +6,10 @@ static RTCZero rtc;
 
 void initializeRTC() {
     rtc.begin();
+    loadRTCTime();
+}
+
+void loadRTCTime() {
     rtc.setEpoch(eepromLoadRTCTime());
 }
 

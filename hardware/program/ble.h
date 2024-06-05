@@ -43,4 +43,9 @@ void fillBuffers(uint32_t& currentSampleBufferIndex);
  */
 void updateValues(uint32_t& currentSampleBufferIndex);
 
+/*
+ * Reload the BLE authentication key from EEPROM. This is only needed if the key has changed since initialisation.
+ */
+void loadBLEAuthKey();
+
 #endif

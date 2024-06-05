@@ -85,7 +85,7 @@ void initializeBLE() {
         showError(ERROR_BLE_BEGIN);
     }
 
-    eepromGetBLEAuthKey(authKey);
+    loadBLEAuthKey();
 
     authResponseFromCentral.setEventHandler(BLEWritten, onAuthResponseFromCentral);
     authChallengeFromCentral.setEventHandler(BLEWritten, onAuthChallengeFromCentral);
@@ -114,6 +114,10 @@ void initializeBLE() {
     
     BLE.addService(sensorSamplesService);
     BLE.advertise();
+}
+
+void loadBLEAuthKey() {
+  eepromGetBLEAuthKey(authKey);
 }
 
 void getBLEAddress(uint8_t* address) {

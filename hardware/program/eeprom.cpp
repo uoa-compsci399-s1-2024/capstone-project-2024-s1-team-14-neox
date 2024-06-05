@@ -3,7 +3,8 @@
 #include "eeprom.h"
 #include "build_time.h"
 #include "error.h"
-
+#include "rtc.h"
+#include "ble.h"
 
 static const uint32_t EEPROM_SIZE_KBIT = 256;
 static const uint32_t EEPROM_SIZE_BYTES = EEPROM_SIZE_KBIT * 1024 / 8;
@@ -280,7 +281,12 @@ uint32_t eepromLoadRTCTime() {
 void eepromFactoryReset(const uint8_t* bleAuthKey) {
   Serial.println("Performing factory reset...");
   eepromClear();
+
   eepromSetBLEAuthKey(bleAuthKey);
+  loadBLEAuthKey();
+
   eepromSaveRTCTime(__TIME_UNIX__);
+  loadRTCTime();
+
   Serial.println("Factory reset complete.");
 }
