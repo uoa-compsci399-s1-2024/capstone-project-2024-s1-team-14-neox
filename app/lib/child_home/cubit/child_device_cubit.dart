@@ -344,8 +344,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
       for (List<int> value in values) {
         List<int> outdoorIndoorMins =  await _repo.parseAndSaveSamples(childName, value, childId);
         outdoorMins += outdoorIndoorMins[0];
-        outdoorMins += outdoorIndoorMins[1];
-
+        indoorMins += outdoorIndoorMins[1];
       }
 
       emit(ChildDeviceSyncSuccessState(state, "Outdoor time: $outdoorMins, indoor time: $indoorMins"));
