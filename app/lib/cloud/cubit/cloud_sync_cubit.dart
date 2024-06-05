@@ -11,25 +11,14 @@ class CloudSyncCubit extends Cubit<CloudSyncState> {
 
   Future<void> uploadAllChildData() async {
     emit(state.copyWith(status: CloudSyncStatus.loading));
-    try {
-      // Register unregistered children to cloud, and POST all local data to cloud
-      await ChildEntity.uploadAllChildData().then(
-        (value) => ChildEntity.downloadAllChildData().then((value) => {
-              emit(
-                state.copyWith(
-                  status: CloudSyncStatus.success,
-                  lastSynced: DateTime.now(),
-                ),
-              )
-            }),
-      );
 
-    } on Exception catch (e) {
-      emit(state.copyWith(
-        status: CloudSyncStatus.failure,
-        message: e.toString(),
-      ));
-    }
+    await ChildEntity.uploadAllChildData().then(
+      (value) async {
+        await ChildEntity.downloadAllChildData();
+        emit(state.copyWith(status: CloudSyncStatus.success));
+        return value;
+      },
+    );
   }
 
   Future<void> retrieveChildrenNotInDB() async {

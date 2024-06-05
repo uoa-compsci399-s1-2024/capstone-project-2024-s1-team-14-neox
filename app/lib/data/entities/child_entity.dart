@@ -228,19 +228,19 @@ class ChildEntity {
     // Register child in server if no serverId is not found
     for (final noServerIdChild in noServerIdChildren) {
       String generatedServerId = await ChildApiService.registerChild();
-      ChildEntity.updateServerId(noServerIdChild.id!, generatedServerId);
-      ChildApiService.setChildInfo(noServerIdChild.id);
+      await ChildEntity.updateServerId(noServerIdChild.id!, generatedServerId);
+      await ChildApiService.setChildInfo(noServerIdChild.id);
     }
 
     List<ChildEntity> children = await ChildEntity.queryAllChildren();
 
     for (final child in children) {
       // update child details in case it changes
-      ChildApiService.setChildInfo(child.id);
+      await ChildApiService.setChildInfo(child.id);
 
       if (child.serverId == "") {}
       int? id = child.id;
-      ChildApiService.postData(id!).then(
+      await ChildApiService.postData(id!).then(
         (value) => print("post data complete"),
       );
     }
@@ -252,7 +252,7 @@ class ChildEntity {
 
     List<ChildEntity> childrenInDb = await ChildEntity.queryAllChildren();
     for (ChildEntity child in childrenInDb) {
-      ChildApiService.fetchChildrenData(child.id!).then(
+      await ChildApiService.fetchChildrenData(child.id!).then(
         (value) => print("download all data complete"),
       );
     }

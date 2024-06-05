@@ -39,7 +39,7 @@ class ChildApiService {
         ArduinoDataEntity arduinoDataEntity = sample.toArduinoData(childId);
         dataList.add(arduinoDataEntity);
       }
-      ArduinoDataEntity.saveListOfArduinoDataEntity(dataList);
+      await ArduinoDataEntity.saveListOfArduinoDataEntity(dataList);
       print("samples retrieved child ${child!.name}  serverId $serverId ${dataList.length}");
     } catch (e) {
       print(e);
@@ -105,7 +105,7 @@ class ChildApiService {
     return id;
   }
 
-  static setChildInfo(int? childId) async {
+  static Future<void> setChildInfo(int? childId) async {
     Dio dio = Dio();
     ChildEntity? child = await ChildEntity.queryChildById(childId!);
     String? gender = child?.gender;

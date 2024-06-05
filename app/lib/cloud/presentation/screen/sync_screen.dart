@@ -93,8 +93,9 @@ class SyncScreen extends StatelessWidget {
                   //   ),
                   BlocBuilder<CloudSyncCubit, CloudSyncState>(
                     builder: (context, state) {
+                      print("CLOUD State has changed $state");
                       if (state.status.isLoading) {
-                        SizedBox(
+                        return SizedBox(
                           height: 80,
                           child: FilledButton(
                             style: ButtonStyle(
