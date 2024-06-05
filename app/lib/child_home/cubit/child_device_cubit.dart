@@ -120,7 +120,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
     }
 
     if (device == null) {
-      emit(ChildDeviceErrorState(state, "Device not found nearby."));
+      emit(ChildDeviceErrorState(state, "Device not found nearby. Try restarting Neox Sens."));
       return;
     }
     try {

@@ -40,7 +40,6 @@ class ChildApiService {
         dataList.add(arduinoDataEntity);
       }
       await ArduinoDataEntity.saveListOfArduinoDataEntity(dataList);
-      print("samples retrieved child ${child!.name}  serverId $serverId ${dataList.length}");
     } catch (e) {
       print(e);
     }
@@ -215,7 +214,6 @@ class ChildApiService {
         datalist.add(serverId);
       }
 
-      print("done with datalist for children $datalist");
       return (datalist);
     } catch (e) {
       print(e);

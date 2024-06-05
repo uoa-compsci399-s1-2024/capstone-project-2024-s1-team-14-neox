@@ -240,9 +240,7 @@ class ChildEntity {
 
       if (child.serverId == "") {}
       int? id = child.id;
-      await ChildApiService.postData(id!).then(
-        (value) => print("post data complete"),
-      );
+      await ChildApiService.postData(id!);
     }
   }
 
@@ -252,25 +250,18 @@ class ChildEntity {
 
     List<ChildEntity> childrenInDb = await ChildEntity.queryAllChildren();
     for (ChildEntity child in childrenInDb) {
-      await ChildApiService.fetchChildrenData(child.id!).then(
-        (value) => print("download all data complete"),
-      );
+      await ChildApiService.fetchChildrenData(child.id!);
     }
   }
 
   static Future<void> retrieveChildrenInServer() async {
     List<String> serverIdList = await ChildApiService.getChildren();
-    print("entere retrive children serverIdlist $serverIdList");
     for (final String id in serverIdList) {
-      print("for each id $id");
       ChildEntity? child = await ChildApiService.getChildInfo(id);
-      print("can get child entity $child");
       if (child != null) {
         // Depends on the server id of the child
         if (await ChildEntity.queryChildByServerId(id) == null) {
-          print("save single child");
           ChildEntity.saveSingleChildEntity(child);
-          print("child entity retrieve child complete $child.name");
         }
       }
     }

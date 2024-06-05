@@ -4,6 +4,7 @@ import 'package:capstone_project_2024_s1_team_14_neox/data/classifiers/light_gbm
 
 import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as material;
 
 import '../../server/child_data.dart';
@@ -136,7 +137,7 @@ class ArduinoDataEntity {
   // 1.017 seconds to save 20160 samples
   static Future<List<int>> saveListOfArduinoDataEntity(
       List<ArduinoDataEntity> arduinoDataEntityList) async {
-    print("Classifying ${arduinoDataEntityList.length}");
+    debugPrint("Classifying data samples, length: ${arduinoDataEntityList.length}");
 
     int outdoorMins = 0;
     int indoorMins = 0;
@@ -158,7 +159,7 @@ class ArduinoDataEntity {
       batch.insertAllOnConflictUpdate(
           db.arduinoDatas, arduinoDataEntityList.map((e) => e.toCompanion()));
     });
-    print("$outdoorMins mins outdoors, $indoorMins indoors");
+    debugPrint("$outdoorMins outdoors, $indoorMins indoors");
     return [outdoorMins, indoorMins];
   }
 

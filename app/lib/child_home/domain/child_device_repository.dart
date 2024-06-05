@@ -175,7 +175,7 @@ class ChildDeviceRepository {
     List<int> outdoorIndoorMins =
         await ArduinoDataEntity.saveListOfArduinoDataEntity(samples);
 
-    debugPrint("Syncing: ${outdoorIndoorMins[0]}mins outdoors datetime");
+    debugPrint("Syncing: ${outdoorIndoorMins[0]} mins outdoors datetime");
     debugPrint("Syncing: ${outdoorIndoorMins[1]} mins indoors datetime");
 
     return outdoorIndoorMins;
