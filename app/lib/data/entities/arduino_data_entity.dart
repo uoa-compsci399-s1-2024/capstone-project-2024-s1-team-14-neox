@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:capstone_project_2024_s1_team_14_neox/data/classifiers/light_gbm_small.dart';
 
 import 'package:capstone_project_2024_s1_team_14_neox/data/dB/database.dart';
 import 'package:drift/drift.dart';
@@ -133,14 +134,32 @@ class ArduinoDataEntity {
 
   // Batch to speed up insertion
   // 1.017 seconds to save 20160 samples
-  static Future<void> saveListOfArduinoDataEntity(
+  static Future<List<int>> saveListOfArduinoDataEntity(
       List<ArduinoDataEntity> arduinoDataEntityList) async {
+    print("Classifying ${arduinoDataEntityList.length}");
+
+    int outdoorMins = 0;
+    int indoorMins = 0;
+
+    for (ArduinoDataEntity sample in arduinoDataEntityList) {
+      int appClass = ArduinoDataEntity.classifyArduinoDataEntity(sample);
+      if (appClass == 0) {
+        indoorMins += 1;
+      } else {
+        outdoorMins += 1;
+      }
+
+      sample.appClass = appClass;
+    }
+
     AppDb db = AppDb.instance();
 
     await db.batch((batch) {
       batch.insertAllOnConflictUpdate(
           db.arduinoDatas, arduinoDataEntityList.map((e) => e.toCompanion()));
     });
+
+    return [outdoorMins, indoorMins];
   }
 
   // batch for updating local if timestamp exists
@@ -228,12 +247,6 @@ class ArduinoDataEntity {
   //   final db = AppDb.instance();
   //   await (db.update(db.arduinoDatas)..where((tbl) => tbl.id.equals(id)))
   //       .write(ArduinoDatasCompanion(appClass: Value(appClass)));
-  // }
-
-  // static Future<void> updateserverSynced(int id, int serverSynced) async {
-  //   final db = AppDb.instance();
-  //   await (db.update(db.arduinoDatas)..where((tbl) => tbl.id.equals(id)))
-  //       .write(ArduinoDatasCompanion(serverSynced: Value(serverSynced)));
   // }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -376,6 +389,114 @@ class ArduinoDataEntity {
               1;
     }
     return hourlyStats;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  // CLASSIFICATION //////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
+
+  static int classifyArduinoDataEntity(ArduinoDataEntity sample) {
+    int uv = sample.uv ?? 1;
+
+    int accelX = sample.accel![0];
+    int accelY = sample.accel![1];
+    int accelZ = sample.accel![2];
+    int red = sample.red;
+    int green = sample.green;
+    int blue = sample.blue;
+    int clear = sample.clear;
+    int colourTemperature = sample.colourTemperature;
+    int light = sample.light ?? 1;
+
+    List<double> features = [];
+    features.addAll([
+      uv.toDouble(),
+      accelX.toDouble(),
+      accelY.toDouble(),
+      accelZ.toDouble(),
+      red.toDouble(),
+      green.toDouble(),
+      blue.toDouble(),
+      clear.toDouble(),
+      colourTemperature.toDouble(),
+      light.toDouble(),
+    ]);
+
+    // acceleration
+
+    features.add((accelX + accelY + accelZ).toDouble());
+    features.add((pow(accelX, 2) + pow(accelY, 2) + pow(accelZ, 2)).toDouble());
+    features.add((accelX * accelY).abs().toDouble());
+
+    // rgb vs clear
+    features.add(red / (clear + 1));
+    features.add(green / (clear + 1));
+    features.add(blue / (clear + 1));
+
+    features.add(red / (green + 1));
+    features.add(blue / (red + 1));
+    features.add(blue / (green + 1));
+
+    features.add((clear - red) / (red + 1));
+    features.add((clear - green) / (red + 1));
+    features.add((clear - blue) / (red + 1));
+
+    features.add((clear - red) / (green + 1));
+    features.add((clear - green) / (green + 1));
+    features.add((clear - blue) / (green + 1));
+
+    features.add((clear - red) / (blue + 1));
+    features.add((clear - green) / (blue + 1));
+    features.add((clear - blue) / (blue + 1));
+
+    features.add((clear - red) / (clear + 1));
+    features.add((clear - green) / (clear + 1));
+    features.add((clear - blue) / (clear + 1));
+
+    // log
+    double redLog = log(red + 1);
+    double greenLog = log(green + 1);
+    double blueLog = log(blue + 1);
+    double clearLog = log(clear + 1);
+
+    features.add(redLog / clearLog);
+    features.add(greenLog / clearLog);
+    features.add(blueLog / clearLog);
+
+    features.add(redLog / (greenLog + 1));
+    features.add(blueLog / (redLog + 1));
+    features.add(blueLog / (greenLog + 1));
+
+// squre root
+    double redSqrt = sqrt(red + 1);
+    double greenSqrt = sqrt(green + 1);
+    double blueSqrt = sqrt(blue + 1);
+    double clearSqrt = sqrt(clear + 1);
+
+    features.add(redSqrt / clearSqrt);
+    features.add(greenSqrt / clearSqrt);
+    features.add(blueSqrt / clearSqrt);
+
+    features.add(redSqrt / (greenSqrt + 1));
+    features.add(blueSqrt / (redSqrt + 1));
+    features.add(blueSqrt / (greenSqrt + 1));
+
+    // uv vs lux
+    double lightLog = log(light + 1);
+    double uvLog = log(uv + 2);
+    double lightSqrt = sqrt(light + 1);
+    double uvSqrt = sqrt(uv + 1);
+
+    features.add(light / (uv + 1));
+    features.add(blue / (uv + 1));
+    features.add((clear - blue) / (uv + 1));
+    features.add(lightLog / uvLog);
+    features.add(blueLog / uvLog);
+    features.add(lightSqrt / uvSqrt);
+    features.add(blueSqrt / uvSqrt);
+    List<double> probabilities = score(features);
+// print("$uv $light $probabilities");
+    return probabilities[1] > 0.50 ? 1 : 0;
   }
 
 ///////////////////////////////////////////////////////////////////
