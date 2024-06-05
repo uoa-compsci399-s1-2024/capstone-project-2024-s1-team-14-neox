@@ -78,8 +78,6 @@ void eepromBegin()
   authKey = eepromAllocate(32);
   rtcTime = eepromAllocateUint32();
 
-  // If the Arduino locks up, try temporarily removing this call
-  // to resumeAtomicTransaction. It may be trying to resume garbage.
   resumeAtomicTransaction();
 }
 
