@@ -13,6 +13,10 @@ static const uint8_t UV_SENSOR_PIN = A6;
 // Read all sensors and save them to the EEPROM
 static void readSample();
 
+extern "C" void HardFault_Handler() {
+  Serial.println("crashed");
+}
+
 void setup()
 {
   pinMode(A0, OUTPUT);

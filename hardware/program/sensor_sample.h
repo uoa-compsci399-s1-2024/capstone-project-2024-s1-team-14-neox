@@ -10,7 +10,7 @@
  * To convert this value to a voltage, see
  * https://www.arduino.cc/reference/en/language/functions/analog-io/analogread/
  * 
- * Acceleration is in (0x7fff/4)*g units.
+ * Acceleration is in (9.8 * 4 / 0x7fff) ms^-2 units.
  */
 
 struct SensorSample {

@@ -8,6 +8,7 @@
 #include "sensor_sample.h"
 #include "error.h"
 
+// Use 20 instead of 32 to ensure that messages fit in one packet
 #define hashsize 20
 
 const uint32_t MAX_UNAUTH_TIME = 10 * 1000;
@@ -18,7 +19,9 @@ uint32_t currentSampleBufferIndex = 0;
 
 BLEService sensorSamplesService("ba5c0000-243e-4f78-ac25-69688a1669b4");
 
+// Disable encryption for now because it seems buggy
 #define BLEEncryption 0
+
 /*
  * Data will be sent 5 BLE characteristics at a time. These characteristics will be updated dynamically (depending on how much data must be sent).
  */
@@ -69,8 +72,8 @@ static BLECharacteristic authResponseFromPeripheral ("750d5d43-96c4-4f5c-8ce1-fd
 static BLECharacteristic centralAuthenticated       ("776edbca-a020-4d86-a5e8-25eb87e82554", BLERead, 1, true);
 
 static void getBLEAddress(uint8_t* address); // Returns a 6 byte array
-static void sha256(const uint8_t* value, uint8_t* hash); // Takes and returns a 32 byte array
-static void generateRandom(uint8_t* value); // Returns 32 byte array
+static void sha256(const uint8_t* value, uint8_t* hash); // Takes and returns a hashsize length byte array
+static void generateRandom(uint8_t* value); // Returns hashsize length byte array
 static void solveAuthChallenge(const uint8_t* challenge, uint8_t* solution);
 static void onConnection(BLEDevice central);
 static void onAuthResponseFromCentral(BLEDevice central, BLECharacteristic characteristic);
@@ -82,7 +85,7 @@ void initializeBLE() {
         showError(ERROR_BLE_BEGIN);
     }
 
-    eepromGetBLEAuthKey(authKey);
+    loadBLEAuthKey();
 
     authResponseFromCentral.setEventHandler(BLEWritten, onAuthResponseFromCentral);
     authChallengeFromCentral.setEventHandler(BLEWritten, onAuthChallengeFromCentral);
@@ -111,6 +114,10 @@ void initializeBLE() {
     
     BLE.addService(sensorSamplesService);
     BLE.advertise();
+}
+
+void loadBLEAuthKey() {
+  eepromGetBLEAuthKey(authKey);
 }
 
 void getBLEAddress(uint8_t* address) {
