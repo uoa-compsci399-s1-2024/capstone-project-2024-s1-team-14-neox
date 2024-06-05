@@ -10,7 +10,7 @@ class ChildApiService {
   static const String apiUrl =
       'https://drgmjpo7eg.execute-api.ap-southeast-2.amazonaws.com/dev';
 
-  static  Future<Map<String, dynamic>> initializeHeader() async{
+  static Future<Map<String, dynamic>> initializeHeader() async {
     final token = await AWSServices().getToken();
     if (token == null) {
       throw Exception('No token found');
@@ -23,11 +23,9 @@ class ChildApiService {
     return defaultHeaders;
   }
 
-
   static void fetchChildrenData(int childId) async {
     ChildEntity? child = await ChildEntity.queryChildById(childId);
     String? serverId = child?.serverId;
-
 
     final defaultHeaders = await initializeHeader();
     Dio dio = Dio();
@@ -66,7 +64,6 @@ class ChildApiService {
     final url = '$apiUrl/samples/$serverId';
 
     try {
-
       int chunkSize = 1000;
 
       for (int i = 0; i < dataList.length; i += chunkSize) {
@@ -75,7 +72,8 @@ class ChildApiService {
           i + chunkSize > dataList.length ? dataList.length : i + chunkSize,
         );
 
-        List jsonSamples = chunk.map((childData) => childData.toJson()).toList();
+        List jsonSamples =
+            chunk.map((childData) => childData.toJson()).toList();
 
         final data = {"samples": jsonSamples};
 
@@ -85,7 +83,8 @@ class ChildApiService {
           options: Options(headers: defaultHeaders),
           data: data,
         );
-        print("Syncing chunk time taken: ${DateTime.now().difference(now).inMilliseconds}ms");
+        print(
+            "Syncing chunk time taken: ${DateTime.now().difference(now).inMilliseconds}ms");
       }
     } catch (e) {
       print('Error posting data: $e');
@@ -106,7 +105,7 @@ class ChildApiService {
     return id;
   }
 
-  static  setChildInfo(int? childId) async{
+  static setChildInfo(int? childId) async {
     Dio dio = Dio();
     ChildEntity? child = await ChildEntity.queryChildById(childId!);
     String? gender = child?.gender;
@@ -117,14 +116,13 @@ class ChildApiService {
     final data = {"birthdate": date, "gender": gender, "given_name": name};
     String url = '$apiUrl/children/$serverId/info';
     final defaultHeaders = await initializeHeader();
-    try{
-
-      var response = await dio.patch(url, options: Options(headers: defaultHeaders),data: data );
+    try {
+      var response = await dio.patch(url,
+          options: Options(headers: defaultHeaders), data: data);
       print(response.statusCode);
-    }catch(e){
+    } catch (e) {
       print(e);
     }
-
   }
 
   static Future<StudyEntity?> getStudy(String studyCode) async {
@@ -206,44 +204,44 @@ class ChildApiService {
     Dio dio = Dio();
     String url = '$apiUrl/parents/$uri/children';
     final defaultHeaders = await initializeHeader();
-    try{
-
-      var response = await dio.get(url, options: Options(headers: defaultHeaders));
-
+    try {
+      var response =
+          await dio.get(url, options: Options(headers: defaultHeaders));
 
       var list = response.data["data"];
       List<String> datalist = [];
-      for(final id in list){
+      for (final id in list) {
         String serverId = id["id"].toString();
         datalist.add(serverId);
       }
 
-      return(datalist);
-    }catch(e){
-      return[];
+      print("done with datalist for children $datalist");
+      return (datalist);
+    } catch (e) {
       print(e);
+      return [];
     }
-
   }
 
   static getChildInfo(String serverId) async {
+    print("entered get child info");
     Dio dio = Dio();
 
     final defaultHeaders = await initializeHeader();
     String url = '$apiUrl/children/$serverId/info';
 
-    try{
-
-      var response = await dio.get(url, options: Options(headers: defaultHeaders));
+    try {
+      var response =
+          await dio.get(url, options: Options(headers: defaultHeaders));
       var data = response.data["data"];
       DateTime birth = DateTime.parse(data["birthdate"]);
       print(data);
-      ChildEntity child = ChildEntity(name: data["given_name"], gender: data["gender"], birthDate: birth);
+      ChildEntity child = ChildEntity(
+          name: data["given_name"], gender: data["gender"], birthDate: birth);
       return child;
-    }catch(e){
+    } catch (e) {
       print(e);
     }
-
   }
 
   // static getAllStudies() async {

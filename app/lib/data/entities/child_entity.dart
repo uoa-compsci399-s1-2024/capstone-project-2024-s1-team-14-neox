@@ -97,7 +97,6 @@ class ChildEntity {
   static Future<ChildEntity?> queryChildById(int id) async {
     AppDb db = AppDb.instance();
 
-
     ChildEntity? child = await (db.select(db.children)
           ..where((tbl) => tbl.id.equals(id)))
         .getSingleOrNull();
@@ -118,7 +117,8 @@ class ChildEntity {
         .getSingleOrNull();
     return childEntity;
   }
-    static Future<ChildEntity?> queryChildByServerId(String serverId) async {
+
+  static Future<ChildEntity?> queryChildByServerId(String serverId) async {
     AppDb db = AppDb.instance();
     ChildEntity? childEntity = await (db.select(db.children)
           ..where((tbl) => tbl.serverId.equals(serverId)))
@@ -200,10 +200,11 @@ class ChildEntity {
     AppDb db = AppDb.instance();
     // Delete the child entity from the database based on its ID
     // print("count of${db.children.id.count(filter: childId > 0)}");
-    
-    var studies = await ChildStudyAssociationsEntity.getChildStudiesByChildId(childId);
-    for(final study in studies){
-      ChildApiService.removeChildFromStudy(childId, study.studyCode); 
+
+    var studies =
+        await ChildStudyAssociationsEntity.getChildStudiesByChildId(childId);
+    for (final study in studies) {
+      ChildApiService.removeChildFromStudy(childId, study.studyCode);
     }
 
     await (db.delete(db.children)..where((tbl) => tbl.id.equals(childId))).go();
@@ -222,7 +223,8 @@ class ChildEntity {
   //////////////////////////////////
 
   static Future<void> syncAllChildData() async {
-    List<ChildEntity> noServerIdChildren = await ChildEntity.queryChildNoServerId();
+    List<ChildEntity> noServerIdChildren =
+        await ChildEntity.queryChildNoServerId();
     for (final noServerIdChild in noServerIdChildren) {
       String generatedServerId = await ChildApiService.registerChild();
       ChildEntity.updateServerId(noServerIdChild.id!, generatedServerId);
@@ -238,18 +240,16 @@ class ChildEntity {
 
   static Future<void> retrieveChildren() async {
     List<String> serverIdList = await ChildApiService.getChildren();
-
-    for(final id in serverIdList){
-
+    print("entere retrive children serverIdlist $serverIdList");
+    for (final String id in serverIdList) {
+      print("for each id $id");
       ChildEntity child = await ChildApiService.getChildInfo(id);
-      if(await ChildEntity.queryChildByServerId(id) == null){
+      print("can get child entity $child");
+      if (await ChildEntity.queryChildByServerId(id) == null) {
+        print("save single child");
         ChildEntity.saveSingleChildEntity(child);
         print("child entity retrieve child complete $child.name");
       }
-
     }
-
-
   }
-
 }

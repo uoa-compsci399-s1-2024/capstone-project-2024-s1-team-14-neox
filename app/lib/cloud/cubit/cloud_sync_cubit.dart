@@ -26,6 +26,8 @@ class CloudSyncCubit extends Cubit<CloudSyncState> {
   }
 
   Future<void> retrieveChildrenNotInDB() async {
+    print("entered retrieveing children");
+
     await ChildEntity.retrieveChildren();
     print("done with retrieveing children");
 
