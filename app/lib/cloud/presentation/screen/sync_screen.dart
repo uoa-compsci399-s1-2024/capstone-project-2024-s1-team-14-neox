@@ -165,17 +165,6 @@ class SyncScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  BlocBuilder<CloudSyncCubit, CloudSyncState>(
-                    builder: (context, state) {
-                      return ElevatedButton(
-                          onPressed: () => context
-                              .read<CloudSyncCubit>()
-                              .retrieveChildrenNotInDB(),
-                          child: Text(
-                            "getting children",
-                          ));
-                    },
-                  ),
                   const Divider(height: 60),
                   SizedBox(
                     height: 60,
