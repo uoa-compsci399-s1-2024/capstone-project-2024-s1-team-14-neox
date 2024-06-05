@@ -111,7 +111,8 @@ class SyncScreen extends StatelessWidget {
                                         .withOpacity(0.1))),
                             onPressed: null,
                             child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
                                   Text(
                                     'Syncing...',
@@ -126,7 +127,7 @@ class SyncScreen extends StatelessWidget {
                           ),
                         );
                       }
-              
+
                       return SizedBox(
                         height: 80,
                         child: FilledButton(
@@ -151,7 +152,8 @@ class SyncScreen extends StatelessWidget {
                                 'Sync to cloud',
                                 style: TextStyle(
                                     fontSize: 20,
-                                    color: Theme.of(context).colorScheme.primary),
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
                               ),
                               Icon(Icons.cloud_upload,
                                   size: 40,
@@ -162,7 +164,17 @@ class SyncScreen extends StatelessWidget {
                       );
                     },
                   ),
-              
+                  BlocBuilder<CloudSyncCubit, CloudSyncState>(
+                    builder: (context, state) {
+                      return ElevatedButton(
+                          onPressed: () => context
+                              .read<CloudSyncCubit>()
+                              .retrieveChildrenNotInDB(),
+                          child: Text(
+                            "getting children",
+                          ));
+                    },
+                  ),
                   const Divider(height: 60),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -173,7 +185,7 @@ class SyncScreen extends StatelessWidget {
                           fontSize: 20,
                         ),
                       ),
-              
+
                       BlocConsumer<StudyCubit, StudyState>(
                         listener: (context, state) {
                           if (state.status.isFetchStudySuccess) {
@@ -209,7 +221,9 @@ class SyncScreen extends StatelessWidget {
                             icon: const Icon(Icons.add),
                             onPressed: () => _showStudyCodeInputDialog(context,
                                 onStudyFetch: (s) {
-                              context.read<StudyCubit>().fetchStudyFromServer(s);
+                              context
+                                  .read<StudyCubit>()
+                                  .fetchStudyFromServer(s);
                             }),
                           );
                         },
@@ -242,7 +256,8 @@ class SyncScreen extends StatelessWidget {
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
                                     "You are not participating in any studies.",
@@ -270,7 +285,8 @@ class SyncScreen extends StatelessWidget {
                                           ),
                                         ),
                                       ),
-                                      onPressed: () => _showStudyCodeInputDialog(
+                                      onPressed: () =>
+                                          _showStudyCodeInputDialog(
                                         context,
                                         onStudyFetch: (s) {
                                           context
@@ -290,7 +306,7 @@ class SyncScreen extends StatelessWidget {
                           ),
                         );
                       }
-              
+
                       return ListView(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),

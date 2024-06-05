@@ -118,6 +118,13 @@ class ChildEntity {
         .getSingleOrNull();
     return childEntity;
   }
+    static Future<ChildEntity?> queryChildByServerId(String serverId) async {
+    AppDb db = AppDb.instance();
+    ChildEntity? childEntity = await (db.select(db.children)
+          ..where((tbl) => tbl.serverId.equals(serverId)))
+        .getSingleOrNull();
+    return childEntity;
+  }
 
   static Future<ChildEntity?> queryChildByDeviceRemoteId(
       String deviceRemoteId) async {
@@ -235,8 +242,9 @@ class ChildEntity {
     for(final id in serverIdList){
 
       ChildEntity child = await ChildApiService.getChildInfo(id);
-      if(await ChildEntity.queryChildByName(child.name) == null){
+      if(await ChildEntity.queryChildByServerId(id) == null){
         ChildEntity.saveSingleChildEntity(child);
+        print("child entity retrieve child complete $child.name");
       }
 
     }
