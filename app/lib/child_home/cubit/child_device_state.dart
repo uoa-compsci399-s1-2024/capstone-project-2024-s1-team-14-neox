@@ -113,7 +113,8 @@ class ChildDeviceSyncingState extends ChildDeviceState {
 }
 
 class ChildDeviceSyncSuccessState extends ChildDeviceState {
-  ChildDeviceSyncSuccessState(ChildDeviceState childDeviceState) : super(
+    final String message;
+  ChildDeviceSyncSuccessState(ChildDeviceState childDeviceState, this.message) : super(
     childId: childDeviceState.childId,
     childName: childDeviceState.childName,
     birthDate: childDeviceState.birthDate,

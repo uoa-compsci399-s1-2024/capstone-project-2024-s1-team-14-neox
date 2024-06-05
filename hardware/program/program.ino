@@ -29,14 +29,14 @@ void setup()
 
   Wire.begin();
   eepromBegin();
-  initializeBLE();
-  initializeIMU();
-  initializeRTC();
-  initializeTCS();
   // uint8_t key[32] = "verysecure";
   // uint8_t key[32] = "0123456789";
   // Serial.print("factory reset pressed");
   // eepromFactoryReset(key);
+  initializeBLE();
+  initializeIMU();
+  initializeRTC();
+  initializeTCS();
 }
 
 void loop()

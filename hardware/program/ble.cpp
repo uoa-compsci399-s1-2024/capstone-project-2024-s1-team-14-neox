@@ -219,8 +219,8 @@ void updateValues(uint32_t& currentSampleBufferIndex) {
       }
     }
     if (update.written()){
+      
         samplesToSend -= currentSampleBufferIndex;
-
         progress.writeValue(samplesToSend);
         fillBuffers(currentSampleBufferIndex);
         fillCharacteristics();
