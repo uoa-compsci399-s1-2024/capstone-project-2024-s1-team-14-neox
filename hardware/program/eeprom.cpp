@@ -3,7 +3,8 @@
 #include "eeprom.h"
 #include "build_time.h"
 #include "error.h"
-
+#include "rtc.h"
+#include "ble.h"
 
 static const uint32_t EEPROM_SIZE_KBIT = 256;
 static const uint32_t EEPROM_SIZE_BYTES = EEPROM_SIZE_KBIT * 1024 / 8;
@@ -71,16 +72,15 @@ void eepromBegin()
   sampleBuffer.bufferAddress = eepromAllocate(SAMPLE_BUFFER_MAX_SIZE_BYTES);
   sampleBuffer.tail = eepromAllocateUint32();
   sampleBuffer.len = eepromAllocateUint32();
-  sampleBuffer.cachedLen = eepromReadUint32(sampleBuffer.len);
   sampleBuffer.locked = false;
   tempSampleBuffer.len = 0;
   
   authKey = eepromAllocate(32);
   rtcTime = eepromAllocateUint32();
 
-  // If the Arduino locks up, try temporarily removing this call
-  // to resumeAtomicTransaction. It may be trying to resume garbage.
   resumeAtomicTransaction();
+
+  sampleBuffer.cachedLen = eepromReadUint32(sampleBuffer.len);
 }
 
 void eepromWrite(EEPROMAddress address, const uint8_t* buffer, uint32_t len)
@@ -281,7 +281,12 @@ uint32_t eepromLoadRTCTime() {
 void eepromFactoryReset(const uint8_t* bleAuthKey) {
   Serial.println("Performing factory reset...");
   eepromClear();
+
   eepromSetBLEAuthKey(bleAuthKey);
+  loadBLEAuthKey();
+
   eepromSaveRTCTime(__TIME_UNIX__);
+  loadRTCTime();
+
   Serial.println("Factory reset complete.");
 }
