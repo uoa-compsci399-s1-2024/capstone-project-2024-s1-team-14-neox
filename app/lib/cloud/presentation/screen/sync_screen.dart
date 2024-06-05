@@ -144,7 +144,7 @@ class SyncScreen extends StatelessWidget {
                                       .secondary
                                       .withOpacity(0.1))),
                           onPressed: () =>
-                              context.read<CloudSyncCubit>().syncAllChildData(),
+                              context.read<CloudSyncCubit>().uploadAllChildData(),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [

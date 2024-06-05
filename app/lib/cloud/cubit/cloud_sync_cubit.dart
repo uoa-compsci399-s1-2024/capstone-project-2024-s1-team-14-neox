@@ -9,21 +9,16 @@ part 'cloud_sync_state.dart';
 class CloudSyncCubit extends Cubit<CloudSyncState> {
   CloudSyncCubit() : super(const CloudSyncState());
 
-  Future<void> syncAllChildData() async {
+  Future<void> uploadAllChildData() async {
     emit(state.copyWith(status: CloudSyncStatus.loading));
     try {
       // Register unregistered children to cloud, and POST all local data to cloud
-      await ChildEntity.syncAllChildData();
-      
-      // Create child profiles not in local db
-      await ChildEntity.retrieveChildrenInServer();
-
+      await ChildEntity.uploadAllChildData();
+    
       // Download data from server
-      List<ChildEntity> childrenInDb = await ChildEntity.queryAllChildren();
-
-      for (ChildEntity child in childrenInDb) {
-        
-      }
+      await ChildEntity.downloadAllChildData();
+  
+  
     } on Exception catch (e) {
       emit(state.copyWith(
         status: CloudSyncStatus.failure,

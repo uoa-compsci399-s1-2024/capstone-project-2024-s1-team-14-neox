@@ -222,7 +222,7 @@ class ChildEntity {
   ///           CLOUD            ///
   //////////////////////////////////
 
-  static Future<void> syncAllChildData() async {
+  static Future<void> uploadAllChildData() async {
     List<ChildEntity> noServerIdChildren =
         await ChildEntity.queryChildNoServerId();
     // Register child in server if no serverId is not found
@@ -233,16 +233,24 @@ class ChildEntity {
     }
 
     List<ChildEntity> children = await ChildEntity.queryAllChildren();
-    
+
     for (final child in children) {
       // update child details in case it changes
       ChildApiService.setChildInfo(child.id);
 
-      if (child.serverId == "") {
-
-      }
+      if (child.serverId == "") {}
       int? id = child.id;
       ChildApiService.postData(id!);
+    }
+  }
+
+  static Future<void> downloadAllChildData() async {
+// Create profiles for children not in local db
+    await ChildEntity.retrieveChildrenInServer();
+
+    List<ChildEntity> childrenInDb = await ChildEntity.queryAllChildren();
+    for (ChildEntity child in childrenInDb) {
+      ChildApiService.fetchChildrenData(child.id!);
     }
   }
 
