@@ -40,7 +40,7 @@ class ChildApiService {
         dataList.add(arduinoDataEntity);
       }
       ArduinoDataEntity.saveListOfArduinoDataEntity(dataList);
-      print("samples retrieved");
+      print("samples retrieved ${dataList.length}");
     } catch (e) {
       print(e);
     }

@@ -12,20 +12,18 @@ class CloudSyncCubit extends Cubit<CloudSyncState> {
   Future<void> syncAllChildData() async {
     emit(state.copyWith(status: CloudSyncStatus.loading));
     try {
-
-      // Send server updated versions of the profile
-List<ChildEntity> childrenInDb = await ChildEntity.queryAllChildren();
-for (ChildEntity child in childrenInDb) {
-  
       // Register unregistered children to cloud, and POST all local data to cloud
       await ChildEntity.syncAllChildData();
-      print("SYNC: saved all data to cloud");
-}
+      
       // Create child profiles not in local db
       await ChildEntity.retrieveChildrenInServer();
-         print("SYNC: retrieve all children in cloud");
 
       // Download data from server
+      List<ChildEntity> childrenInDb = await ChildEntity.queryAllChildren();
+
+      for (ChildEntity child in childrenInDb) {
+        
+      }
     } on Exception catch (e) {
       emit(state.copyWith(
         status: CloudSyncStatus.failure,
@@ -43,6 +41,5 @@ for (ChildEntity child in childrenInDb) {
 
     await ChildEntity.retrieveChildrenInServer();
     print("done with retrieveing children");
-
   }
 }

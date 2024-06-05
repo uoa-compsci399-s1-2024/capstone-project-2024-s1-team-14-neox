@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:capstone_project_2024_s1_team_14_neox/child_home/presentation/screens/create_child_profile_screen.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/data/entities/arduino_data_entity.dart';
 import 'package:capstone_project_2024_s1_team_14_neox/main.dart';
@@ -34,30 +36,48 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
       print("Creating week for: $time");
       List<ArduinoDataEntity> randomData =
           await ArduinoDataEntity.createSampleArduinoDataList(
-              childId,
-              time,
-              time.add(const Duration(days: 7)),
-              threshold);
-      await ArduinoDataEntity.saveListOfArduinoDataEntity(
-          randomData);
+              childId, time, time.add(const Duration(days: 7)), threshold);
+      await ArduinoDataEntity.saveListOfArduinoDataEntity(randomData);
     }
   }
-  
+
   Future<void> _generateSmallData(int childId) async {
     double threshold = 0.13;
     DateTime time = DateTime.now().subtract(const Duration(days: 1));
-    
-      time = time.add(const Duration(days: 7));
-      time = DateTime(time.year, time.month, time.day);
-      print("Creating small data for: $time");
-      List<ArduinoDataEntity> randomData =
-          await ArduinoDataEntity.createSampleArduinoDataList(
-              childId,
-              time,
-              time.add(const Duration(days: 1)),
-              threshold);
-      await ArduinoDataEntity.saveListOfArduinoDataEntity(
-          randomData);
+
+    time = time.add(const Duration(days: 7));
+    time = DateTime(time.year, time.month, time.day);
+    print("Creating small data for: $time");
+    List<ArduinoDataEntity> randomData =
+        await ArduinoDataEntity.createSampleArduinoDataList(
+            childId, time, time.add(const Duration(days: 1)), threshold);
+    await ArduinoDataEntity.saveListOfArduinoDataEntity(randomData);
+  }
+
+  Future<void> _generateTenData(int childId) async {
+    double threshold = 0.13;
+    DateTime time = DateTime(2024, 05, 06);
+
+    List<ArduinoDataEntity> randomData = [];
+    int num = 100;
+    for (int i = 0; i < 10; i++) {
+      num += 1;
+      randomData.add(
+        ArduinoDataEntity(
+          uv: num,
+          light: num,
+          datetime: time.add(Duration(days: 1)).add(Duration(hours:i)),
+          accel: Int16List.fromList([num, num, num]),
+          serverSynced: 0,
+          appClass: 0, // Generates either 0 or 1 randomly
+          childId: childId,
+        ),
+      );
+    }
+
+    print(randomData.length);
+    print("Creating Ten data for: $time");
+    await ArduinoDataEntity.saveListOfArduinoDataEntity(randomData);
   }
 
   @override
@@ -99,7 +119,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                       icon: Icon(Icons.edit),
                     ),
                   ),
-      
+
                   Flexible(
                     child: Text(
                       state.childName,
@@ -107,9 +127,9 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-      
+
                   const SizedBox(width: 10),
-      
+
                   IconButton(
                     onPressed: () {
                       Navigator.push(
@@ -117,12 +137,13 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                         MaterialPageRoute(
                           builder: (_) {
                             return BlocProvider.value(
-                              value:
-                                  BlocProvider.of<AllChildProfileCubit>(context),
+                              value: BlocProvider.of<AllChildProfileCubit>(
+                                  context),
                               child: BlocProvider.value(
-                                value: BlocProvider.of<ChildDeviceCubit>(context),
-                                child:
-                                    const CreateChildProfileScreen(editing: true),
+                                value:
+                                    BlocProvider.of<ChildDeviceCubit>(context),
+                                child: const CreateChildProfileScreen(
+                                    editing: true),
                               ),
                             );
                           },
@@ -179,7 +200,8 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                               context: context,
                               radius: constraints.maxWidth / 4 * 0.8,
                               lineWidth: 10,
-                              percent: (outdoorTimeAvgWeek / target).clamp(0, 1),
+                              percent:
+                                  (outdoorTimeAvgWeek / target).clamp(0, 1),
                               center: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -198,7 +220,8 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
                               context: context,
                               radius: constraints.maxWidth / 4 * 0.8,
                               lineWidth: 10,
-                              percent: (outdoorTimeAvgMonth / target).clamp(0, 1),
+                              percent:
+                                  (outdoorTimeAvgMonth / target).clamp(0, 1),
                               center: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [

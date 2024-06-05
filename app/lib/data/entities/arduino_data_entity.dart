@@ -9,7 +9,7 @@ import '../../server/child_data.dart';
 
 @UseRowClass(ArduinoDataEntity)
 class ArduinoDatas extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  // IntColumn get id => integer().autoIncrement()();
 
   IntColumn get childId =>
       integer().customConstraint('REFERENCES children(id) ON DELETE CASCADE')();
@@ -26,7 +26,7 @@ class ArduinoDatas extends Table {
 
   IntColumn get accelZ => integer()();
 
-  IntColumn get serverClass => integer()();
+  IntColumn get serverSynced => integer()();
 
   IntColumn get appClass => integer()();
 
@@ -41,7 +41,7 @@ class ArduinoDatas extends Table {
   IntColumn get colourTemperature => integer()();
 
   @override
-  Set<Column> get primaryKey => {id};
+  Set<Column> get primaryKey => {childId, datetime};
 }
 
 class ArduinoDataEntity {
@@ -50,9 +50,9 @@ class ArduinoDataEntity {
   int? light;
   DateTime datetime;
   Int16List? accel;
-  int? id;
+  // int? id;
   int childId;
-  int serverClass;
+  int serverSynced;
   int appClass;
   int red;
   int green;
@@ -61,14 +61,13 @@ class ArduinoDataEntity {
   int colourTemperature;
 
   ArduinoDataEntity(
-      {this.id,
-      this.name,
+      {this.name,
       this.uv,
       this.light,
       required this.datetime,
       this.accel,
       this.appClass = -1,
-      this.serverClass = -1,
+      this.serverSynced = 0,
       this.green = 0,
       this.blue = 0,
       this.red = 0,
@@ -85,7 +84,7 @@ class ArduinoDataEntity {
       accelY: Value(accel?[1] ?? -1),
       accelZ: Value(accel?[2] ?? -1),
       appClass: Value(appClass),
-      serverClass: Value(serverClass),
+      serverSynced: Value(serverSynced),
       red: Value(red),
       blue: Value(blue),
       green: Value(green),
@@ -119,9 +118,9 @@ class ArduinoDataEntity {
   static Future<void> saveSingleArduinoDataEntity(
       ArduinoDataEntity arduinoDataEntity) async {
     AppDb db = AppDb.instance();
-    await db
-        .into(db.arduinoDatas)
-        .insertOnConflictUpdate(arduinoDataEntity.toCompanion());
+    await db.into(db.arduinoDatas).insertOnConflictUpdate(
+          arduinoDataEntity.toCompanion(),
+        );
   }
   // 104 seconds to save 20160 samples
   // static Future<void> saveListOfArduinoDataEntity(
@@ -137,11 +136,26 @@ class ArduinoDataEntity {
   static Future<void> saveListOfArduinoDataEntity(
       List<ArduinoDataEntity> arduinoDataEntityList) async {
     AppDb db = AppDb.instance();
+
     await db.batch((batch) {
-      batch.insertAll(
+      batch.insertAllOnConflictUpdate(
           db.arduinoDatas, arduinoDataEntityList.map((e) => e.toCompanion()));
     });
   }
+
+  // batch for updating local if timestamp exists
+  // static Future<void> saveListOfArduinoDataEntity(
+  //     List<ArduinoDataEntity> arduinoDataEntityList) async {
+  //   AppDb db = AppDb.instance();
+
+  //   await db.batch((batch) {
+  //     for (ArduinoDataEntity e in arduinoDataEntityList) {
+  //       batch.insert(db.arduinoDatas, e.toCompanion(),
+  //           onConflict: DoUpdate((old) => e.toCompanion(),
+  //               target: [db.arduinoDatas.childId, db.arduinoDatas.datetime]));
+  //     }
+  //   });
+  // }
   ////////////////////////////////////////////////////////////////////////////
   // READ ////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
@@ -210,17 +224,17 @@ class ArduinoDataEntity {
   // UPDATE //////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
 
-  static Future<void> updateAppClass(int id, int appClass) async {
-    final db = AppDb.instance();
-    await (db.update(db.arduinoDatas)..where((tbl) => tbl.id.equals(id)))
-        .write(ArduinoDatasCompanion(appClass: Value(appClass)));
-  }
+  // static Future<void> updateAppClass(int id, int appClass) async {
+  //   final db = AppDb.instance();
+  //   await (db.update(db.arduinoDatas)..where((tbl) => tbl.id.equals(id)))
+  //       .write(ArduinoDatasCompanion(appClass: Value(appClass)));
+  // }
 
-  static Future<void> updateServerClass(int id, int serverClass) async {
-    final db = AppDb.instance();
-    await (db.update(db.arduinoDatas)..where((tbl) => tbl.id.equals(id)))
-        .write(ArduinoDatasCompanion(serverClass: Value(serverClass)));
-  }
+  // static Future<void> updateserverSynced(int id, int serverSynced) async {
+  //   final db = AppDb.instance();
+  //   await (db.update(db.arduinoDatas)..where((tbl) => tbl.id.equals(id)))
+  //       .write(ArduinoDatasCompanion(serverSynced: Value(serverSynced)));
+  // }
 
   ////////////////////////////////////////////////////////////////////////////
   // GRAPHS //////////////////////////////////////////////////////////////////
@@ -386,7 +400,7 @@ class ArduinoDataEntity {
           light: 100,
           datetime: time,
           accel: Int16List.fromList([1, 2, 3]),
-          serverClass: 1,
+          serverSynced: 0,
           appClass: random.nextDouble() > threshold
               ? 0
               : 1, // Generates either 0 or 1 randomly
