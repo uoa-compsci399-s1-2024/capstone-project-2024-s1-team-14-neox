@@ -347,7 +347,7 @@ class ChildDeviceCubit extends Cubit<ChildDeviceState> {
         indoorMins += outdoorIndoorMins[1];
       }
 
-      emit(ChildDeviceSyncSuccessState(state, "Outdoor time: $outdoorMins, indoor time: $indoorMins"));
+      emit(ChildDeviceSyncSuccessState(state, "Spent $outdoorMins minute{$outdoorMins == 1 ? '' : 's'} outdoors and $indoorMins minute{$indoorMins == 1 ? '' : 's'} indoors."));
     } catch (e) {
       emit(ChildDeviceErrorState(state, "An error occurred: $e"));
     } finally {

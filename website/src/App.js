@@ -8,7 +8,7 @@ import Home from './data/home';
 import Create from './data/create';
 import Edit from './data/edit'
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
-import logo from './data/neox.svg';
+import logo from './data/headerLogo.svg';
 //Auth related imports
 import { awsExports } from './aws-exports';
 import '@aws-amplify/ui-react/styles.css';
