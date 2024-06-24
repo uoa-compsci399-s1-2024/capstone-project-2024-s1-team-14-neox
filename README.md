@@ -63,9 +63,9 @@ Setup
 - Install AWS CLI tool (devs used version 1 which is available from PyPI)
 - Configured AWS credentials (via config file or aws configure sso for AWS cli v2)
 - Cognito tokens should be *ID* token, NOT
-- Access token
-- JWT token
-- Any other token
+  - Access token
+  - JWT token
+  - Any other token
 
 More details in `server/BUILD.md` and `server/API.md`.
 

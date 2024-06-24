@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import LoginLogo from './loginLogo.svg';
+import LoginLogo from './loginLogoNew.svg';
 //Auth related imports
 import { awsExports } from '../aws-exports';
 import { Authenticator } from '@aws-amplify/ui-react';
@@ -24,11 +24,9 @@ const Login = ({ toggleButton, handleJwtToken }) => {
       <div>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <div style={{ textAlign: 'center' }}>
-          <img src={LoginLogo} alt="NEOX Logo" width="300px" style={{ paddingBottom: "30px" }} />
-              <br></br>
+          <img src={LoginLogo} alt="NEOX Logo" width="250px" style={{ paddingBottom: "30px",  paddingTop: "60px" }} />
               <h1 style={{ margin: '0', padding: '0' }}>Welcome to Neox Labs</h1>
-              <br></br>
-              <h2 style={{ margin: '0', padding: '0' }}>Log in to continue</h2>
+              <h4 style={{ margin: '0', padding: '0' }}>Log in to continue</h4>
               <br></br>
           </div>
         </div>
