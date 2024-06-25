@@ -23,16 +23,15 @@ void setup()
   pinMode(A1, OUTPUT);
   digitalWrite(A0, LOW);
   digitalWrite(A1, HIGH);
+  pinMode(2, INPUT_PULLUP);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
   
   Serial.begin(SERIAL_BAUD_RATE);
   delay(1000);
 
   Wire.begin();
   eepromBegin();
-  // uint8_t key[32] = "verysecure";
-  // uint8_t key[32] = "0123456789";
-  // Serial.print("factory reset pressed");
-  // eepromFactoryReset(key);
   initializeBLE();
   initializeIMU();
   initializeRTC();
@@ -50,6 +49,13 @@ void loop()
     readSample();
   }
   checkConnection();
+
+  if (digitalRead(2) == LOW) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    uint8_t key[32] = "0123456789";
+    eepromFactoryReset(key);
+    setup();
+  }
 }
 
 static void readSample()
