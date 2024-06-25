@@ -37,7 +37,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
       List<ArduinoDataEntity> randomData =
           await ArduinoDataEntity.createSampleArduinoDataList(
               childId, time, time.add(const Duration(days: 7)), threshold);
-      await ArduinoDataEntity.saveListOfArduinoDataEntity(randomData);
+      await ArduinoDataEntity.saveListOfArduinoDataEntity(randomData, classify: false);
     }
   }
 
@@ -51,7 +51,7 @@ class _ChildProfileTileState extends State<ChildProfileTile> {
     List<ArduinoDataEntity> randomData =
         await ArduinoDataEntity.createSampleArduinoDataList(
             childId, time, time.add(const Duration(days: 1)), threshold);
-    await ArduinoDataEntity.saveListOfArduinoDataEntity(randomData);
+    await ArduinoDataEntity.saveListOfArduinoDataEntity(randomData, classify: false);
   }
 
   Future<void> _generateTenData(int childId) async {
