@@ -6,6 +6,10 @@
 #include "ble.h"
 #include "tcs.h"
 
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+
 static const int SERIAL_BAUD_RATE = 9600;
 static const uint32_t POLL_INTERVAL_MS = (uint32_t)60 * 1000; // 1 minute
 static const uint8_t UV_SENSOR_PIN = A6;
@@ -23,9 +27,15 @@ void setup()
   pinMode(A1, OUTPUT);
   digitalWrite(A0, LOW);
   digitalWrite(A1, HIGH);
+  pinMode(2, INPUT_PULLUP);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
   
   Serial.begin(SERIAL_BAUD_RATE);
   delay(1000);
+  
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.setTextColor(SSD1306_WHITE);
 
   Wire.begin();
   eepromBegin();
@@ -37,6 +47,9 @@ void setup()
   initializeIMU();
   initializeRTC();
   initializeTCS();
+  
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.setTextColor(SSD1306_WHITE);
 }
 
 void loop()
@@ -50,6 +63,28 @@ void loop()
     readSample();
   }
   checkConnection();
+
+  if (digitalRead(2) == LOW) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    uint8_t key[32] = "0123456789";
+    eepromFactoryReset(key);
+    setup();
+  }
+
+  auto uv = analogRead(UV_SENSOR_PIN);
+  auto acceleration = readIMU();
+  auto tcsData = readTCS();
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.print("  UV: "); display.println(uv);
+  display.print("   R: "); display.println(tcsData.red);
+  display.print("   G: "); display.println(tcsData.green);
+  display.print("   B: "); display.println(tcsData.blue);
+  display.print("   C: "); display.println(tcsData.clear);
+  display.print("ACCX: "); display.println(acceleration.x);
+  display.print("ACCY: "); display.println(acceleration.y);
+  display.print("ACCZ: "); display.println(acceleration.z);
+  display.display();
 }
 
 static void readSample()

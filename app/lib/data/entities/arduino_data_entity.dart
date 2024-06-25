@@ -136,23 +136,23 @@ class ArduinoDataEntity {
   // Batch to speed up insertion
   // 1.017 seconds to save 20160 samples
   static Future<List<int>> saveListOfArduinoDataEntity(
-      List<ArduinoDataEntity> arduinoDataEntityList) async {
+      List<ArduinoDataEntity> arduinoDataEntityList, {bool classify=true}) async {
     debugPrint("Classifying data samples, length: ${arduinoDataEntityList.length}");
 
     int outdoorMins = 0;
     int indoorMins = 0;
 
     for (ArduinoDataEntity sample in arduinoDataEntityList) {
-      int appClass = ArduinoDataEntity.classifyArduinoDataEntity(sample);
-      if (appClass == 0) {
+      if (classify) {
+          sample.appClass = ArduinoDataEntity.classifyArduinoDataEntity(sample);
+      }
+      if (sample.appClass == 0) {
         indoorMins += 1;
       } else {
         outdoorMins += 1;
       }
-
-      sample.appClass = appClass;
     }
-
+    
     AppDb db = AppDb.instance();
 
     await db.batch((batch) {
@@ -528,7 +528,7 @@ class ArduinoDataEntity {
           datetime: time,
           accel: Int16List.fromList([33, 44, 55]),
           serverSynced: 0,
-          appClass: 0, // Generates either 0 or 1 randomly
+          appClass: random.nextDouble() > threshold ? 0 : 1,
           childId: childId,
         );
         dataList.add(data);
